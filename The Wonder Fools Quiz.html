@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦸 كويز الحمقى الخارقون - The WONDERfools</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #0f141a 0%, #000 100%);
+  }
+
+  .quiz-box {
+    background: rgba(15,15,15,0.98); border: 2px solid #f5c542;
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 30px rgba(245,197,66,0.3); position: relative;
+  }
+  h1 { text-align: center; color: #f5c542; text-shadow: 0 0 15px #f5c542; margin-bottom: 15px; font-size: 30px; }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #f5c542; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #f5c542; color: #000; border: 2px solid #fff;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #fff; color: #000; box-shadow: 0 0 20px #f5c542; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #f5c542; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #f5c542; }
+  .timer { text-align: center; font-size: 18px; color: #f5c542; margin-bottom: 15px; font-weight: 700; }
+  
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #f5c542; box-shadow: 0 0 20px rgba(245,197,66,0.3);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #2d2418; border-color: #f5c542; transform: translateX(-5px); }
+  .option.correct { background: #1a5c2a; border-color: #4caf50; }
+  .option.wrong { background: #5c2a2a; border-color: #f44336; }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #f5c542;
+    color: #000; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #fff; color: #000; box-shadow: 0 0 15px #f5c542; }
+  #score { margin-top: 15px; font-size: 15px; color: #f5c542; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>🦸 كويز الحمقى الخارقون 🦸</h1>
+    <div class="start-content">
+      <h2>مدينة هايسونغ 1999</h2>
+      <p>20 سؤال عن أحداث مسلسل The WONDERfools<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكتشف السر؟</p>
+      <button class="start-btn" onclick="startQuiz()">🦸 ابدأ</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>🦸 كويز الحمقى الخارقون 🦸</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 20</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+function generatePoster(title, subtitle) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#0f141a"/>
+    <circle cx="250" cy="125" r="80" fill="#f5c542" opacity="0.2"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#f5c542" font-family="Cairo, sans-serif" font-weight="900" font-size="35" filter="drop-shadow(0 0 10px #f5c542)">${title}</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
+    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#f5c542" stroke-width="4"/>
+  </svg>
+  `;
+}
+
+const questions = [
+  { q: "في بداية المسلسل، إيه اللي كان بيخلي تشاي ني تعمل خطة اختطاف وهمية؟", options: ["عشان تجيب فلوس للسفر", "عشان تشتهر", "عشان تنتقم من حد", "عشان تهرب من البيت"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE BEGINNING" },
+  { q: "تشاي ني وصحابها اكتشفوا إن عندهم قوى خارقة بعد ما وقعوا فين؟", options: ["في نهر ملوث", "في حفرة", "في بيت مهجور", "في المدرسة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE INCIDENT" },
+  { q: "إيه نوع القوة الخارقة اللي ظهرت عند تشاي ني؟", options: ["الانتقال الآني (Teleportation)", "الطيران", "قراءة الأفكار", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
+  { q: "لي أون جونغ (الموظف الحكومي) كان بيدور على إيه في مدينة هايسونغ؟", options: ["لغز اختفاءات غامضة", "كنز مدفون", "شغل جديد", "بيت للبيع"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE MYSTERY" },
+  { q: "إيه القوة الخارقة اللي كانت عند أون جونغ من الأصل؟", options: ["التحريك الذهني (Telekinesis)", "القوة الجسدية", "الشفاء", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
+  { q: "مين العالم الشرير اللي كان بيدير تجارب سرية على الأطفال؟", options: ["ها وون دو", "لي أون جونغ", "تشاي ني", "سون كيونغ هون"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE VILLAIN" },
+  { q: "إيه اسم المنظمة/الكنيسة اللي كانت واجهة للتجارب السرية؟", options: ["كنيسة الخلاص الأبدي", "معبد هايسونغ", "مشروع الأمل", "جمعية الأبطال"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE CULT" },
+  { q: "إيه اللي كان بيميز \"طفل القلب الأبدي\" في التجارب؟", options: ["قلبه كان بيشفيه من الموت", "كان بيطير", "كان بيقرأ الأفكار", "كان بيختفي"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE CHILD" },
+  { q: "إيه اللي حصل لطفل القلب الأبدي في النهاية؟", options: ["قلبه اتزرع لتشاي ني", "اتبنى", "هرب", "فضل عايش"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE TRUTH" },
+  { q: "مين اللي كان بيدعم تجارب ها وون دو بالفلوس من غير ما يعرف الحقيقة؟", options: ["جدة تشاي ني", "أم أون جونغ", "الحكومة", "الكنيسة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE SECRET" },
+  { q: "إيه اللي كان بيخلي قوة تشاي ني تشتغل؟", options: ["دقات قلبها ومشاعرها", "الضوء", "الماء", "الظلام"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RULE" },
+  { q: "إيه نوع قوة سون كيونغ هون (صاحب تشاي ني)؟", options: ["جسمه مرن جداً", "القوة الجسدية", "الطيران", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
+  { q: "إيه نوع قوة كانغ رو بين (صاحب تشاي ني التاني)؟", options: ["القوة الجسدية الخارقة", "الانتقال الآني", "التحريك الذهني", "الشفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
+  { q: "إيه الخطة الكبيرة بتاعة ها وون دو في نهاية المسلسل؟", options: ["نشر مواد سامة في المدينة", "تدمير الكنيسة", "خطف تشاي ني", "حرق المدينة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE PLAN" },
+  { q: "مين اللي ساعد تشاي ني إنها توصل للمنطاد اللي فيه المواد السامة؟", options: ["رو بين (بقوته الجسدية)", "أون جونغ", "كيونغ هون", "جدتها"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RESCUE" },
+  { q: "إيه اللي عملته تشاي ني عشان تنقذ المدينة من الانفجار؟", options: ["نقلت المنطاد بعيد عن المدينة", "طفت بيه", "فجرته في السما", "اختفيت بيه"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE SACRIFICE" },
+  { q: "بعد الانفجار، الناس افتكروا إن تشاي ني ماتت. بعد كام يوم رجعت؟", options: ["49 يوم", "10 أيام", "سنة", "شهر"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RETURN" },
+  { q: "إيه اللي كان بيميز نهاية المسلسل (آخر مشهد)؟", options: ["ها وون دو فتح عينه (احتمال جزء تاني)", "كل الأبطال ماتوا", "المدينة اتدمرت", "تشاي ني سافرت"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE ENDING" },
+  { q: "إيه الرسالة الأساسية للمسلسل؟", options: ["الأبطال مش لازم يكونوا كاملين عشان ينقذوا العالم", "القوة هي كل حاجة", "الانتقام هو الحل", "السفر هو النهاية"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE MESSAGE" },
+  { q: "إيه اللي بيميز The WONDERfools عن مسلسلات الأبطال الخارقين التانية؟", options: ["القوى غير كاملة وبتعمل مشاكل", "الأبطال محترفين", "مفيش شرير", "الأكشن قليل"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE STORY" }
+];
+
+const TOTAL_TIME = 20;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+// صوت تكة خفيفة
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClick() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#f5c542';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+    playClick();
+  } else {
+    el.classList.add('wrong');
+    playClick();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#f5c542; font-size:36px;">انتهى الكويز! 🦸</h2>
+    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#f5c542; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
