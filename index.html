@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 مركز الكويزات - Quiz Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; padding: 40px 20px;
+    background: radial-gradient(circle at center, #1a1015 0%, #000 100%);
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  h1 {
+    font-size: 40px; color: #fff; margin-bottom: 10px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    text-align: center;
+  }
+  
+  p.subtitle { color: #aaa; font-size: 18px; margin-bottom: 40px; text-align: center; }
+
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
+  }
+
+  .quiz-card {
+    background: rgba(20,20,20,0.9);
+    border: 2px solid #333;
+    border-radius: 15px;
+    padding: 20px;
+    text-decoration: none;
+    color: #fff;
+    text-align: center;
+    transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    height: 150px;
+  }
+
+  /* تأثيرات ألوان مختلفة لكل كارت */
+  .card-horror:hover { border-color: #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.4); transform: translateY(-5px); }
+  .card-kdrama:hover { border-color: #d48cba; box-shadow: 0 0 20px rgba(212,140,186,0.4); transform: translateY(-5px); }
+  .card-action:hover { border-color: #7ba8d4; box-shadow: 0 0 20px rgba(123,168,212,0.4); transform: translateY(-5px); }
+  .card-mystery:hover { border-color: #b17edb; box-shadow: 0 0 20px rgba(177,126,219,0.4); transform: translateY(-5px); }
+
+  .quiz-card h2 { font-size: 22px; margin-bottom: 10px; }
+  .quiz-card span { font-size: 30px; }
+
+</style>
+</head>
+<body>
+
+  <h1>🎬 مكتبة الكويزات 🎬</h1>
+  <p class="subtitle">اختر الكويز اللي عايز تلعبه</p>
+
+  <div class="grid-container">
+    
+    <!-- كويزات الرعب -->
+    <a href="Conjuring Quiz.html" class="quiz-card card-horror">
+      <span>👻</span>
+      <h2>The Conjuring</h2>
+    </a>
+
+    <a href="FNAF Quiz.html" class="quiz-card card-horror">
+      <span>👾</span>
+      <h2>FNAF</h2>
+    </a>
+
+    <a href="The Nun Quiz.html" class="quiz-card card-horror">
+      <span>✝️</span>
+      <h2>The Nun</h2>
+    </a>
+
+    <a href="Annabelle Quiz.html" class="quiz-card card-horror">
+      <span>🎃</span>
+      <h2>Annabelle</h2>
+    </a>
+
+    <a href="Train to Busan Quiz.html" class="quiz-card card-horror">
+      <span>🚄</span>
+      <h2>Train to Busan</h2>
+    </a>
+
+    <a href="Squid Game Quiz.html" class="quiz-card card-horror">
+      <span>🦑</span>
+      <h2>Squid Game</h2>
+    </a>
+
+    <!-- كويزات الدراما الكورية -->
+    <a href="Family By Choice Quiz.html" class="quiz-card card-kdrama">
+      <span>🏡</span>
+      <h2>Family By Choice</h2>
+    </a>
+
+    <a href="True Beauty Quiz.html" class="quiz-card card-kdrama">
+      <span>✨</span>
+      <h2>True Beauty</h2>
+    </a>
+
+    <a href="Dream To You Quiz.html" class="quiz-card card-kdrama">
+      <span>🎬</span>
+      <h2>Dream To You</h2>
+    </a>
+
+    <a href="Why Her Quiz.html" class="quiz-card card-kdrama">
+      <span>⚖️</span>
+      <h2>Why Her?</h2>
+    </a>
+
+    <a href="The Wonder Fools Quiz.html" class="quiz-card card-action">
+      <span>🦸</span>
+      <h2>The WONDERfools</h2>
+    </a>
+
+    <a href="Wednesday Quiz.html" class="quiz-card card-mystery">
+      <span>🖤</span>
+      <h2>Wednesday</h2>
+    </a>
+
+  </div>
+
+</body>
+</html>
