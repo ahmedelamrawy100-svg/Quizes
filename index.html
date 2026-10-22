@@ -3,125 +3,484 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 مركز الكويزات - Quiz Hub</title>
+<title>🎬 منصة الكويزات - Quiz Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333;
+  }
+  body.light-mode {
+    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; padding: 40px 20px;
-    background: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-    display: flex; flex-direction: column; align-items: center;
-  }
-
-  h1 {
-    font-size: 40px; color: #fff; margin-bottom: 10px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    text-align: center;
+    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color);
+    font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px;
+    display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s;
   }
   
-  p.subtitle { color: #aaa; font-size: 18px; margin-bottom: 40px; text-align: center; }
-
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px; width: 100%; max-width: 1000px;
+  /* الشريط العلوي */
+  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+  .control-btn {
+    background: #333; color: #fff; border: 2px solid #555; border-radius: 8px; padding: 8px 15px;
+    cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 16px; transition: 0.3s;
   }
+  body.light-mode .control-btn { background: #fff; color: #111; border-color: #aaa; }
+  .control-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
+  .user-greeting { font-size: 18px; font-weight: bold; color: #ffd700; display: flex; align-items: center; }
 
+  /* شاشة إدخال الاسم */
+  #nameScreen {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 80vh; text-align: center; width: 100%; max-width: 500px;
+  }
+  #nameScreen h1 { font-size: 40px; margin-bottom: 20px; color: #ff0000; text-shadow: 0 0 20px #ff0000; }
+  .name-input-container { display: flex; gap: 10px; width: 100%; }
+  #playerNameInput {
+    flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #555;
+    background: #111; color: #fff; font-family: 'Cairo'; font-size: 18px; outline: none;
+  }
+  #startBtn {
+    padding: 15px 30px; background: #ff0000; color: #fff; border: none; border-radius: 10px;
+    font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
+  }
+  #startBtn:hover { background: #cc0000; box-shadow: 0 0 15px #ff0000; }
+
+  /* محتوى الموقع الأساسي */
+  #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
+
+  h1.main-title { font-size: 40px; margin-bottom: 10px; text-align: center; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+  p.subtitle { color: var(--subtitle-color); font-size: 18px; margin-bottom: 20px; text-align: center; }
+
+  /* شريط البحث */
+  .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
+  #searchInput {
+    flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border);
+    background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px;
+    outline: none; transition: 0.3s;
+  }
+  #searchInput:focus { border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+  .ai-btn {
+    background: #ff0000; color: #fff; border: none; border-radius: 25px; padding: 0 20px;
+    font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s;
+  }
+  .ai-btn:hover { background: #cc0000; }
+
+  /* التبويبات */
+  .tabs-container { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
+  .tab-btn {
+    background: transparent; color: var(--text-color); border: 2px solid var(--card-border);
+    border-radius: 25px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-weight: 700; font-size: 16px; transition: 0.3s;
+  }
+  .tab-btn.active, .tab-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
+
+  /* شبكة الكروت */
+  .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
   .quiz-card {
-    background: rgba(20,20,20,0.9);
-    border: 2px solid #333;
-    border-radius: 15px;
-    padding: 20px;
-    text-decoration: none;
-    color: #fff;
-    text-align: center;
-    transition: 0.3s;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    height: 150px;
+    background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px;
+    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
   }
+  .quiz-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
+  }
+  .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; text-shadow: 0 0 10px #000; width: 100%; padding: 10px; }
 
-  /* تأثيرات ألوان مختلفة لكل كارت */
-  .card-horror:hover { border-color: #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.4); transform: translateY(-5px); }
-  .card-kdrama:hover { border-color: #d48cba; box-shadow: 0 0 20px rgba(212,140,186,0.4); transform: translateY(-5px); }
-  .card-action:hover { border-color: #7ba8d4; box-shadow: 0 0 20px rgba(123,168,212,0.4); transform: translateY(-5px); }
-  .card-mystery:hover { border-color: #b17edb; box-shadow: 0 0 20px rgba(177,126,219,0.4); transform: translateY(-5px); }
+  .card-horror:hover { border-color: #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); transform: translateY(-5px); }
+  .card-kdrama:hover { border-color: #d48cba; box-shadow: 0 0 20px rgba(212,140,186,0.6); transform: translateY(-5px); }
+  .card-action:hover { border-color: #7ba8d4; box-shadow: 0 0 20px rgba(123,168,212,0.6); transform: translateY(-5px); }
+  .card-mystery:hover { border-color: #b17edb; box-shadow: 0 0 20px rgba(177,126,219,0.6); transform: translateY(-5px); }
+  
+  .hidden { display: none !important; }
 
-  .quiz-card h2 { font-size: 22px; margin-bottom: 10px; }
-  .quiz-card span { font-size: 30px; }
-
+  /* نافذة الشات (AI) */
+  .chat-modal {
+    display: none; position: fixed; bottom: 20px; right: 20px; width: 380px; height: 550px;
+    background: #111; border: 2px solid #ff0000; border-radius: 15px; z-index: 1000;
+    box-shadow: 0 0 30px rgba(255,0,0,0.5); flex-direction: column;
+  }
+  body.light-mode .chat-modal { background: #fff; color: #111; }
+  .chat-header {
+    background: #ff0000; color: #fff; padding: 15px; border-radius: 13px 13px 0 0;
+    display: flex; justify-content: space-between; align-items: center; font-weight: bold;
+  }
+  .close-chat { cursor: pointer; font-size: 20px; }
+  .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .msg { padding: 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+  .msg.bot { background: #222; align-self: flex-start; }
+  .msg.user { background: #ff0000; color: #fff; align-self: flex-end; }
+  .chat-input-container { display: flex; padding: 10px; border-top: 1px solid #333; }
+  .chat-input-container input {
+    flex: 1; padding: 10px; border-radius: 5px 0 0 5px; border: 1px solid #333; background: #222; color: #fff; outline: none;
+  }
+  .chat-input-container button {
+    padding: 10px 15px; background: #ff0000; color: #fff; border: none; border-radius: 0 5px 5px 0; cursor: pointer;
+  }
 </style>
 </head>
 <body>
 
-  <h1>🎬 مكتبة الكويزات 🎬</h1>
-  <p class="subtitle">اختر الكويز اللي عايز تلعبه</p>
-
-  <div class="grid-container">
-    
-    <!-- كويزات الرعب -->
-    <a href="Conjuring Quiz.html" class="quiz-card card-horror">
-      <span>👻</span>
-      <h2>The Conjuring</h2>
-    </a>
-
-    <a href="FNAF Quiz.html" class="quiz-card card-horror">
-      <span>👾</span>
-      <h2>FNAF</h2>
-    </a>
-
-    <a href="The Nun Quiz.html" class="quiz-card card-horror">
-      <span>✝️</span>
-      <h2>The Nun</h2>
-    </a>
-
-    <a href="Annabelle Quiz.html" class="quiz-card card-horror">
-      <span>🎃</span>
-      <h2>Annabelle</h2>
-    </a>
-
-    <a href="Train to Busan Quiz.html" class="quiz-card card-horror">
-      <span>🚄</span>
-      <h2>Train to Busan</h2>
-    </a>
-
-    <a href="Squid Game Quiz.html" class="quiz-card card-horror">
-      <span>🦑</span>
-      <h2>Squid Game</h2>
-    </a>
-
-    <!-- كويزات الدراما الكورية -->
-    <a href="Family By Choice Quiz.html" class="quiz-card card-kdrama">
-      <span>🏡</span>
-      <h2>Family By Choice</h2>
-    </a>
-
-    <a href="True Beauty Quiz.html" class="quiz-card card-kdrama">
-      <span>✨</span>
-      <h2>True Beauty</h2>
-    </a>
-
-    <a href="Dream To You Quiz.html" class="quiz-card card-kdrama">
-      <span>🎬</span>
-      <h2>Dream To You</h2>
-    </a>
-
-    <a href="Why Her Quiz.html" class="quiz-card card-kdrama">
-      <span>⚖️</span>
-      <h2>Why Her?</h2>
-    </a>
-
-    <a href="The Wonder Fools Quiz.html" class="quiz-card card-action">
-      <span>🦸</span>
-      <h2>The WONDERfools</h2>
-    </a>
-
-    <a href="Wednesday Quiz.html" class="quiz-card card-mystery">
-      <span>🖤</span>
-      <h2>Wednesday</h2>
-    </a>
-
+  <!-- شاشة إدخال الاسم -->
+  <div id="nameScreen">
+    <h1>🎬 أهلاً بيك</h1>
+    <p style="margin-bottom: 20px; color: #aaa;">اكتب اسمك عشان نبدأ التحدي!</p>
+    <div class="name-input-container">
+      <input type="text" id="playerNameInput" placeholder="اسمك هنا..." onkeypress="handleNameEnter(event)">
+      <button id="startBtn" onclick="saveName()">دخول</button>
+    </div>
   </div>
+
+  <!-- الموقع الأساسي -->
+  <div id="mainContent">
+    
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+      <div class="controls">
+        <span class="user-greeting" id="userGreeting">👤 اللاعب</span>
+        <button class="control-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light</button>
+        <button class="control-btn" onclick="toggleLanguage()">EN / AR</button>
+      </div>
+      <div class="controls">
+        <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;">🚪 خروج</button>
+      </div>
+    </div>
+
+    <h1 class="main-title" id="title-text">🎬 مكتبة الكويزات 🎬</h1>
+    <p class="subtitle" id="subtitle-text">اختر الكويز اللي عايز تلعبه</p>
+
+    <!-- البحث والمساعد -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="ابحث عن كويز..." onkeyup="searchQuizzes()">
+      <button class="ai-btn" onclick="toggleChat()">🤖 مساعد</button>
+    </div>
+
+    <!-- التبويبات -->
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="filterCards('all', this)" data-ar="الكل" data-en="All">الكل</button>
+      <button class="tab-btn" onclick="filterCards('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+      <button class="tab-btn" onclick="filterCards('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+      <button class="tab-btn" onclick="filterCards('action', this)" data-ar="أكشن وإثارة 💥" data-en="Action 💥">أكشن وإثارة 💥</button>
+      <button class="tab-btn" onclick="filterCards('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+    </div>
+
+    <!-- الكروت -->
+    <div class="grid-container" id="cards-container">
+      <a href="Conjuring Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title" data-ar="The Conjuring" data-en="The Conjuring">The Conjuring</h2></a>
+      <a href="FNAF Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title" data-ar="FNAF" data-en="FNAF">FNAF</h2></a>
+      <a href="The Nun Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title" data-ar="The Nun" data-en="The Nun">The Nun</h2></a>
+      <a href="Annabelle Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title" data-ar="Annabelle" data-en="Annabelle">Annabelle</h2></a>
+      <a href="Train to Busan Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/Train to Busan.jpg');"><h2 class="card-title" data-ar="Train to Busan" data-en="Train to Busan">Train to Busan</h2></a>
+      
+      <a href="Squid Game Quiz.html" class="quiz-card card-action" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title" data-ar="Squid Game" data-en="Squid Game">Squid Game</h2></a>
+      <a href="The Wonder Fools Quiz.html" class="quiz-card card-action" data-category="action" style="background-image: url('pic/The Wonder Fools.jpeg');"><h2 class="card-title" data-ar="The WONDERfools" data-en="The WONDERfools">The WONDERfools</h2></a>
+
+      <a href="Family By Choice Quiz.html" class="quiz-card card-kdrama" data-category="kdrama" style="background-image: url('pic/Family By Choice.avif');"><h2 class="card-title" data-ar="Family By Choice" data-en="Family By Choice">Family By Choice</h2></a>
+      <a href="True Beauty Quiz.html" class="quiz-card card-kdrama" data-category="kdrama" style="background-image: url('pic/True Beauty.jpg');"><h2 class="card-title" data-ar="True Beauty" data-en="True Beauty">True Beauty</h2></a>
+      <a href="Dream To You Quiz.html" class="quiz-card card-kdrama" data-category="kdrama" style="background-image: url('pic/Dream To You.jpeg');"><h2 class="card-title" data-ar="Dream To You" data-en="Dream To You">Dream To You</h2></a>
+      <a href="Why Her Quiz.html" class="quiz-card card-kdrama" data-category="kdrama" style="background-image: url('pic/Why Her.jpg');"><h2 class="card-title" data-ar="Why Her?" data-en="Why Her?">Why Her?</h2></a>
+
+      <a href="Wednesday Quiz.html" class="quiz-card card-mystery" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title" data-ar="Wednesday" data-en="Wednesday">Wednesday</h2></a>
+    </div>
+  </div>
+
+  <!-- نافذة الشات (AI) -->
+  <div class="chat-modal" id="chatModal">
+    <div class="chat-header">
+      <span>🤖 مساعد الكويزات</span>
+      <span class="close-chat" onclick="toggleChat()">×</span>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg bot" id="welcomeMsg">أهلاً بيك! أنا مساعدك الذكي. اسألني عن أي فيلم أو مسلسل موجود في الموقع، أو عن تفاصيل الكويزات!</div>
+    </div>
+    <div class="chat-input-container">
+      <input type="text" id="chatInput" placeholder="اسأل عن أي حاجة..." onkeypress="handleChatEnter(event)">
+      <button onclick="sendMessage()">إرسال</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. نظام الاسم (بدل تسجيل الدخول)
+    // ==========================================
+    const playerNameInput = document.getElementById('playerNameInput');
+    let currentUser = localStorage.getItem('loggedInUser') || '';
+
+    function handleNameEnter(e) { if (e.key === 'Enter') saveName(); }
+
+    function saveName() {
+      const name = playerNameInput.value.trim();
+      if (name.length < 2) { alert('اكتب اسمك صح'); return; }
+      localStorage.setItem('loggedInUser', name);
+      currentUser = name;
+      showMainContent();
+    }
+
+    function logoutUser() {
+      localStorage.removeItem('loggedInUser');
+      currentUser = '';
+      document.getElementById('nameScreen').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'none';
+    }
+
+    function showMainContent() {
+      document.getElementById('nameScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'flex';
+      document.getElementById('userGreeting').innerText = `👤 ${currentUser}`;
+    }
+
+    // ==========================================
+    // 2. البحث والتصنيفات
+    // ==========================================
+    function searchQuizzes() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.quiz-card');
+      cards.forEach(card => {
+        const title = card.querySelector('.card-title').innerText.toLowerCase();
+        if (title.includes(query)) { card.classList.remove('hidden'); } 
+        else { card.classList.add('hidden'); }
+      });
+    }
+
+    function filterCards(category, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cards = document.querySelectorAll('.quiz-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) { card.classList.remove('hidden'); } 
+        else { card.classList.add('hidden'); }
+      });
+    }
+
+    // ==========================================
+    // 3. المساعد الذكي (قاعدة البيانات المحلية)
+    // ==========================================
+    const database = {
+      "conjuring": {
+        keywords: ["conjuring", "كونجورينج", "الكونجورينج"],
+        story_ar: "فيلم رعب أمريكي مبني على قصة حقيقية للمحققين إيد ولورين وارن. القصة بتدور حول عيلة بيرون اللي بتنتقل لبيت قديم وبيتعرضوا لهجمات من روح شريرة اسمها باثشيبة.",
+        story_en: "An American horror film based on the true story of paranormal investigators Ed and Lorraine Warren. The story follows the Perron family who move into an old house and are haunted by a malevolent spirit named Bathsheba.",
+        quiz_ar: "كويز The Conjuring فيه 3 أجزاء (2013, 2016, 2021). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Conjuring quiz has 3 parts (2013, 2016, 2021). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "fnaf": {
+        keywords: ["fnaf", "فايف نايتس", "فريدى", "فريدي"],
+        story_ar: "فيلم رعب مبني على سلسلة ألعاب شهيرة. القصة بتدور حول مايك شميدت اللي بيشتغل حارس ليلي في مطعم فريدي فازبير، ويكتشف إن الدمى بقت مسكونة بأرواح أطفال مفقودين.",
+        story_en: "A horror film based on a popular game series. The story follows Mike Schmidt, a night guard at Freddy Fazbear's Pizza, who discovers the animatronics are possessed by the spirits of missing children.",
+        quiz_ar: "كويز FNAF فيه جزئين (الفيلم الأول 2023، والفيلم التاني 2025). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The FNAF quiz has 2 parts (Movie 1 in 2023, Movie 2 in 2025). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "nun": {
+        keywords: ["nun", "الناس", "راهبة", "الراهبة", "نن", "ذا نن"],
+        story_ar: "فيلم رعب بيركز على شخصية فالاك (الراهبة الشريرة). القصة بتحصل في دير في رومانيا، لما راهبة شابة وكاهن بيحققوا في انتحار راهبة غامض.",
+        story_en: "A horror film focusing on the character Valak (the evil nun). The story takes place in a Romanian abbey, where a young nun and a priest investigate a mysterious suicide.",
+        quiz_ar: "كويز The Nun فيه جزئين (2018 و 2023). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Nun quiz has 2 parts (2018 and 2023). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "annabelle": {
+        keywords: ["annabelle", "انابيل", "أنابيل"],
+        story_ar: "سلسلة أفلام رعب بتدور حول دمية مسكونة. الجزء الأول بيحكي عن أصل الدمية، والتاني عن صانع الدمى، والتالت بيحصل في بيت عيلة وارن.",
+        story_en: "A horror film series about a haunted doll. The first part tells the origin of the doll, the second about the dollmaker, and the third takes place at the Warrens' house.",
+        quiz_ar: "كويز أنابيل فيه 3 أجزاء (2014, 2017, 2019). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Annabelle quiz has 3 parts (2014, 2017, 2019). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "busan": {
+        keywords: ["busan", "بوسان", "قطار"],
+        story_ar: "فيلم رعب كوري جنوبي عن تفشي فيروس زومبي في قطار متجه من سيول لبوسان. البطل بيحاول ينقذ بنته وسط فوضى الزومبي.",
+        story_en: "A South Korean horror film about a zombie virus outbreak on a train from Seoul to Busan. The protagonist tries to save his daughter amidst the zombie chaos.",
+        quiz_ar: "كويز Train to Busan فيه جزئين (2016 و 2020). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Train to Busan quiz has 2 parts (2016 and 2020). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "squid": {
+        keywords: ["squid", "سكويد", "حبار", "الحبار", "لعبة الحبار"],
+        story_ar: "مسلسل كوري جنوبي عن لعبة بقاء قاتلة. مئات اللاعبين اللي عندهم ديون بيشاركوا في ألعاب أطفال بس بخسارة قاتلة.",
+        story_en: "A South Korean series about a deadly survival game. Hundreds of players in debt participate in children's games with deadly consequences.",
+        quiz_ar: "كويز Squid Game فيه 3 أجزاء (2021, 2024, 2025). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Squid Game quiz has 3 parts (2021, 2024, 2025). Each part has 15 questions, and the comprehensive quiz has 20."
+      },
+      "family": {
+        keywords: ["family", "عيلة", "بالاختيار", "عيلة بالاختيار"],
+        story_ar: "مسلسل كوري عن تلاتة اتربوا مع بعض كأنهم عيلة، وبعد سنين بيرجعوا يتقابلوا تاني.",
+        story_en: "A Korean series about three people who grew up together as a family, reuniting years later.",
+        quiz_ar: "كويز Family By Choice فيه 20 سؤال شاملين عن أحداث المسلسل.",
+        quiz_en: "The Family By Choice quiz has 20 comprehensive questions about the series' events."
+      },
+      "beauty": {
+        keywords: ["beauty", "true beauty", "جمال", "الجمال"],
+        story_ar: "مسلسل كوري عن بنت بتعاني من التنمر بسبب شكلها، وبتتعلم المكياج عشان تغير شكلها.",
+        story_en: "A Korean series about a girl who suffers from bullying due to her appearance and learns makeup to change her look.",
+        quiz_ar: "كويز True Beauty فيه 20 سؤال شاملين عن أحداث المسلسل.",
+        quiz_en: "The True Beauty quiz has 20 comprehensive questions about the series' events."
+      },
+      "dream": {
+        keywords: ["dream", "دريم", "حلم", "احلام"],
+        story_ar: "مسلسل كوري عن تحقيق الأحلام والمواجهة بين الماضي والحاضر.",
+        story_en: "A Korean series about pursuing dreams and confronting the past and present.",
+        quiz_ar: "كويز Dream To You فيه 20 سؤال شاملين.",
+        quiz_en: "The Dream To You quiz has 20 comprehensive questions."
+      },
+      "why her": {
+        keywords: ["why her", "لماذا هي", "واي هير"],
+        story_ar: "مسلسل كوري قانوني عن محامية ناجحة بتتعرض لغدر، وبتحاول تنتقم وتكشف الفساد مع طالب جامعي بيساعدها.",
+        story_en: "A Korean legal series about a successful lawyer who is betrayed and tries to get revenge and expose corruption with the help of a university student.",
+        quiz_ar: "كويز Why Her? فيه 20 سؤال شاملين عن أحداث المسلسل.",
+        quiz_en: "The Why Her? quiz has 20 comprehensive questions about the series' events."
+      },
+      "wonder": {
+        keywords: ["wonder", "wonderfools", "واندر"],
+        story_ar: "مسلسل كوري عن مجموعة أبطال خارقين غير كاملين في التسعينات، بيحاولوا يحلوا مشاكل المدينة.",
+        story_en: "A Korean series about a group of imperfect superheroes in the 90s trying to solve the city's problems.",
+        quiz_ar: "كويز The WONDERfools فيه 20 سؤال شاملين.",
+        quiz_en: "The WONDERfools quiz has 20 comprehensive questions."
+      },
+      "wednesday": {
+        keywords: ["wednesday", "وينزداي", "وينزداى"],
+        story_ar: "مسلسل أمريكي عن وينزداي آدامز، البنت الغامضة اللي بتتنقل لأكاديمية نيفرمور وبتستخدم قدرتها على رؤية المستقبل عشان تحل جرائم قتل غامضة.",
+        story_en: "An American series about Wednesday Addams, a mysterious girl who transfers to Nevermore Academy and uses her psychic visions to solve mysterious murders.",
+        quiz_ar: "كويز Wednesday فيه جزئين (2022 و 2025). كل جزء فيه 15 سؤال، والشامل فيه 20 سؤال.",
+        quiz_en: "The Wednesday quiz has 2 parts (2022 and 2025). Each part has 15 questions, and the comprehensive quiz has 20."
+      }
+    };
+
+    function toggleChat() {
+      const modal = document.getElementById('chatModal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function handleChatEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, 'user');
+      input.value = '';
+
+      const lowerText = text.toLowerCase();
+      const isEnglish = localStorage.getItem('lang') === 'en';
+
+      if (lowerText.includes('اهلا') || lowerText.includes('أهلاً') || lowerText.includes('hi') || lowerText.includes('hello') || lowerText.includes('ازيك')) {
+        setTimeout(() => { 
+          addMessage(isEnglish ? "Hello! Ask me about any movie, series, or quiz details on the site." : "أهلاً بيك! اسألني عن أي فيلم أو مسلسل أو تفاصيل كويز موجود في الموقع.", 'bot'); 
+        }, 500);
+        return;
+      }
+
+      setTimeout(() => {
+        let reply = "";
+        let foundItem = null;
+        let isQuizQuestion = false;
+
+        if (lowerText.includes('كويز') || lowerText.includes('كويزات') || lowerText.includes('أسئلة') || lowerText.includes('اسئلة') || lowerText.includes('quiz') || lowerText.includes('questions')) {
+          isQuizQuestion = true;
+        }
+
+        for (let key in database) {
+          for (let keyword of database[key].keywords) {
+            if (lowerText.includes(keyword)) {
+              foundItem = database[key];
+              break;
+            }
+          }
+          if (foundItem) break;
+        }
+
+        if (foundItem) {
+          if (isQuizQuestion) {
+            reply = isEnglish ? foundItem.quiz_en : foundItem.quiz_ar;
+          } else {
+            reply = isEnglish ? foundItem.story_en : foundItem.story_ar;
+          }
+        } else {
+          reply = isEnglish 
+            ? "Sorry, this work is not available on our site. The site has quizzes for: The Conjuring, FNAF, The Nun, Annabelle, Train to Busan, Squid Game, Family By Choice, True Beauty, Dream To You, Why Her?, The WONDERfools, Wednesday." 
+            : "معلش، العمل ده مش موجود عندنا في الموقع. الموقع فيه كويزات عن: The Conjuring, FNAF, The Nun, Annabelle, Train to Busan, Squid Game, Family By Choice, True Beauty, Dream To You, Why Her?, The WONDERfools, Wednesday.";
+        }
+
+        addMessage(reply, 'bot');
+      }, 800);
+    }
+
+    function addMessage(text, sender) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = `msg ${sender}`;
+      div.innerText = text;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ==========================================
+    // 4. الوضع الليلي والترجمة
+    // ==========================================
+    function toggleTheme() {
+      const body = document.body;
+      const btn = document.getElementById('themeBtn');
+      body.classList.toggle('light-mode');
+      if (body.classList.contains('light-mode')) { btn.innerText = '🌙 Dark'; localStorage.setItem('theme', 'light'); } 
+      else { btn.innerText = '☀️ Light'; localStorage.setItem('theme', 'dark'); }
+    }
+
+    let currentLang = localStorage.getItem('lang') || 'ar';
+    function applyLanguage(lang) {
+      const body = document.body;
+      const title = document.getElementById('title-text');
+      const subtitle = document.getElementById('subtitle-text');
+      const cards = document.querySelectorAll('.card-title');
+      const tabs = document.querySelectorAll('.tab-btn');
+      const searchInput = document.getElementById('searchInput');
+      const welcomeMsg = document.getElementById('welcomeMsg');
+      const chatInput = document.getElementById('chatInput');
+
+      if (lang === 'en') {
+        body.dir = 'ltr';
+        title.innerText = '🎬 Quiz Library 🎬';
+        subtitle.innerText = 'Choose the quiz you want to play';
+        searchInput.placeholder = 'Search for a quiz...';
+        welcomeMsg.innerText = "Hello! Ask me about any movie, series, or quiz details on the site.";
+        chatInput.placeholder = "Ask in Arabic or English...";
+        cards.forEach(card => card.innerText = card.getAttribute('data-en'));
+        tabs.forEach(tab => tab.innerText = tab.getAttribute('data-en'));
+      } else {
+        body.dir = 'rtl';
+        title.innerText = '🎬 مكتبة الكويزات 🎬';
+        subtitle.innerText = 'اختر الكويز اللي عايز تلعبه';
+        searchInput.placeholder = 'ابحث عن كويز...';
+        welcomeMsg.innerText = "أهلاً بيك! تقدر تسألني بالعربي أو الإنجليزي عن أي فيلم أو مسلسل أو تفاصيل كويز!";
+        chatInput.placeholder = "اسأل بالعربي أو الإنجليزي...";
+        cards.forEach(card => card.innerText = card.getAttribute('data-ar'));
+        tabs.forEach(tab => tab.innerText = tab.getAttribute('data-ar'));
+      }
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage(currentLang);
+    }
+
+    // التشغيل الأولي
+    window.onload = () => {
+      if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('themeBtn').innerText = '🌙 Dark';
+      }
+      applyLanguage(currentLang);
+
+      if (currentUser) {
+        playerNameInput.value = currentUser;
+        showMainContent();
+      } else {
+        document.getElementById('nameScreen').style.display = 'flex';
+      }
+    };
+  </script>
 
 </body>
 </html>
