@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚖️ كويز لماذا هي؟ - Why Her?</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #1a1510 0%, #000 100%);
+  }
+
+  .quiz-box {
+    background: rgba(15,15,15,0.98); border: 2px solid #a88c5a;
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 30px rgba(168,140,90,0.4); position: relative;
+  }
+  h1 { text-align: center; color: #d4b87a; text-shadow: 0 0 15px #a88c5a; margin-bottom: 15px; font-size: 30px; }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #d4b87a; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #a88c5a; color: #fff; border: 2px solid #d4b87a;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #d4b87a; color: #000; box-shadow: 0 0 20px #a88c5a; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #d4b87a; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #a88c5a; }
+  .timer { text-align: center; font-size: 18px; color: #d4b87a; margin-bottom: 15px; font-weight: 700; }
+  
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #a88c5a; box-shadow: 0 0 20px rgba(168,140,90,0.4);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #2d2418; border-color: #d4b87a; transform: translateX(-5px); }
+  .option.correct { background: #1a5c2a; border-color: #4caf50; }
+  .option.wrong { background: #5c2a2a; border-color: #f44336; }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #a88c5a;
+    color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #d4b87a; color: #000; box-shadow: 0 0 15px #a88c5a; }
+  #score { margin-top: 15px; font-size: 15px; color: #d4b87a; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>⚖️ كويز لماذا هي؟ ⚖️</h1>
+    <div class="start-content">
+      <h2>القانون والانتقام</h2>
+      <p>20 سؤال عن أحداث مسلسل Why Her?<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكشف الحقيقة؟</p>
+      <button class="start-btn" onclick="startQuiz()">⚖️ ابدأ</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>⚖️ كويز لماذا هي؟ ⚖️</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 20</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+function generatePoster(title, subtitle) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#1a1510"/>
+    <circle cx="250" cy="125" r="80" fill="#a88c5a" opacity="0.3"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#d4b87a" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #a88c5a)">${title}</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
+    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#a88c5a" stroke-width="4"/>
+  </svg>
+  `;
+}
+
+const questions = [
+  { q: "في بداية المسلسل، البطلة (Oh Soo-jae) بتشتغل إيه؟", options: ["محامية في شركة كبيرة", "قاضية", "صحفية", "أستاذة"], answer: 0, title: "WHY HER?", subtitle: "THE BEGINNING" },
+  { q: "إيه اللي بيحصل لـ Soo-jae عشان تغير حياتها؟", options: ["بتحل قضية كبيرة", "بتتعرض لغدر من زميلها", "بتترقى", "بتسيب الشغل"], answer: 1, title: "WHY HER?", subtitle: "THE CHANGE" },
+  { q: "Soo-jae بتقابل مين في الجامعة بعد ما تسيب الشغل؟", options: ["طالب بيحبها", "صديق قديم", "محامي تاني", "مديرها"], answer: 0, title: "WHY HER?", subtitle: "THE MEETING" },
+  { q: "الطالب اللي بتقابله Soo-jae إيه اللي بيميزه؟", options: ["ذكي جداً وبيحبها", "غني", "مشاغب", "رياضي"], answer: 0, title: "WHY HER?", subtitle: "THE STUDENT" },
+  { q: "Soo-jae بتقرر تعمل إيه في الجامعة؟", options: ["تدرس القانون", "تشتغل محامية", "تساعد طلاب", "تنتقم"], answer: 0, title: "WHY HER?", subtitle: "THE DECISION" },
+  { q: "إيه اللي بيحاول الطالب (Gong Chan) يعمله عشان يساعد Soo-jae؟", options: ["يدور على الحقيقة", "يهرب معاها", "يسيب الجامعة", "يتجوزها"], answer: 0, title: "WHY HER?", subtitle: "THE HELP" },
+  { q: "إيه القضية الأساسية اللي Soo-jae بتحقق فيها؟", options: ["قضية فساد", "قضية قتل", "قضية سرقة", "قضية نصب"], answer: 0, title: "WHY HER?", subtitle: "THE CASE" },
+  { q: "الشرير الرئيسي في المسلسل بيدير إيه؟", options: ["شركة قانونية", "شركة تجارية", "مستشفى", "جامعة"], answer: 1, title: "WHY HER?", subtitle: "THE VILLAIN" },
+  { q: "Soo-jae بتتعاون مع مين عشان تكشف الفساد؟", options: ["الطالب Gong Chan", "صديقتها", "الشرطة", "المحامي التاني"], answer: 0, title: "WHY HER?", subtitle: "THE ALLIANCE" },
+  { q: "إيه العلاقة اللي بتتطور بين Soo-jae وGong Chan؟", options: ["صداقة", "حب", "خناقة", "منافسة"], answer: 1, title: "WHY HER?", subtitle: "THE LOVE" },
+  { q: "Soo-jae بتعرف إيه عن ماضيها؟", options: ["إنها كانت فقيرة", "إنها كانت غنية", "إنها كانت يتيمة", "إنها كانت مشهورة"], answer: 0, title: "WHY HER?", subtitle: "THE PAST" },
+  { q: "الطالب Gong Chan إيه سر عيلته؟", options: ["عيلته غنية", "عيلته لها علاقة بالفساد", "عيلته مشهورة", "عيلته فقيرة"], answer: 1, title: "WHY HER?", subtitle: "THE SECRET" },
+  { q: "إيه اللي بيخلي Soo-jae تقرر تواجه الشرير؟", options: ["عشان تنتقم", "عشان تحمي Gong Chan", "عشان تبقى مشهورة", "عشان الفلوس"], answer: 1, title: "WHY HER?", subtitle: "THE MOTIVE" },
+  { q: "في نهاية المسلسل، إيه اللي بيحصل للشرير؟", options: ["بيتهرب", "بيتم القبض عليه", "بيموت", "بيختفي"], answer: 1, title: "WHY HER?", subtitle: "THE END" },
+  { q: "إيه اللي بتتعلمه Soo-jae في النهاية؟", options: ["إن القانون مش كافي", "إن الحب والعدالة هو الحل", "إن الفلوس هي كل حاجة", "إن الانتقام هو الحل"], answer: 1, title: "WHY HER?", subtitle: "THE LESSON" },
+  { q: "إيه اللي بيميز مسلسل Why Her? عن باقي المسلسلات القانونية؟", options: ["الرومانسية", "الغموض", "القضايا المعقدة", "كل الإجابات صح"], answer: 3, title: "WHY HER?", subtitle: "THE STORY" },
+  { q: "مين اللي كان بيساعد Soo-jae في تحقيقاتها؟", options: ["صديقها المحامي", "الطالب Gong Chan", "الشرطة", "كل الإجابات صح"], answer: 1, title: "WHY HER?", subtitle: "THE HELP" },
+  { q: "إيه اللي كان بيمنع Soo-jae من الوصول للحقيقة؟", options: ["الفساد", "الخوف", "الفلوس", "كل الإجابات صح"], answer: 3, title: "WHY HER?", subtitle: "THE OBSTACLE" },
+  { q: "في النهاية، Soo-jae قررت تعمل إيه؟", options: ["تسيب القانون", "تساعد الناس", "تسافر", "تتجوز"], answer: 1, title: "WHY HER?", subtitle: "THE DECISION" },
+  { q: "إيه اللي بيميز العلاقة بين Soo-jae وGong Chan؟", options: ["فارق السن", "الصداقة", "الحب", "كل الإجابات صح"], answer: 3, title: "WHY HER?", subtitle: "THE RELATIONSHIP" }
+];
+
+const TOTAL_TIME = 20;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+// صوت تكة خفيفة
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClick() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#d4b87a';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+    playClick();
+  } else {
+    el.classList.add('wrong');
+    playClick();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#d4b87a; font-size:36px;">انتهى الكويز! ⚖️</h2>
+    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
