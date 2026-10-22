@@ -6,174 +6,197 @@
 <title>🐻 كويز فايف نايتس - FNAF</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* زرار الرجوع */
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
+    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #1a0a0a 0%, #000 100%);
+  body { background: #0a0505; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; flex-direction: column; }
+  
+  h1 { text-align: center; color: #ff3333; text-shadow: 0 0 15px #8b0000; margin-bottom: 10px; font-size: 40px; }
+  p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
+
+  /* ستايل الكروت */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
   }
 
-  .quiz-box {
-    background: rgba(15,15,15,0.98); border: 2px solid #8b0000;
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 30px rgba(139,0,0,0.5); position: relative;
+  .quiz-card {
+    background-color: #111; border: 2px solid #333; border-radius: 15px;
+    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
+    cursor: pointer;
   }
-  h1 { text-align: center; color: #ff3333; text-shadow: 0 0 15px #8b0000; margin-bottom: 15px; font-size: 30px; }
-  
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #ff3333; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #8b0000; color: #fff; border: 2px solid #ff3333;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
+  .quiz-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
   }
-  .start-btn:hover { background: #ff3333; color: #000; box-shadow: 0 0 20px #8b0000; }
-  
+  .quiz-card h2 {
+    position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
+    text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
+  }
+  .quiz-card:hover { border-color: #ff3333; transform: translateY(-5px); box-shadow: 0 0 20px rgba(255,0,0,0.6); }
+
+  /* شاشة اللعب */
+  .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(15,15,15,0.98); border: 2px solid #8b0000; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(139,0,0,0.6); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #ff3333; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #8b0000; }
+  .progress-bar { background: #ff3333; height: 100%; width: 0%; transition: width 0.5s; }
   .timer { text-align: center; font-size: 18px; color: #ff3333; margin-bottom: 15px; font-weight: 700; }
-  
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.5);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
   .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
-  .option:hover:not(.disabled) { background: #2d1a1a; border-color: #ff3333; transform: translateX(-5px); }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
+  .option:hover:not(.disabled) { background: #2d1a1a; border-color: #ff3333; }
   .option.correct { background: #1a5c2a; border-color: #4caf50; }
   .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #8b0000;
-    color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
-  #next:hover { background: #ff3333; color: #000; box-shadow: 0 0 15px #8b0000; }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #8b0000; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
+  #next:hover { background: #ff3333; }
   #score { margin-top: 15px; font-size: 15px; color: #ff3333; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1>🐻 كويز فايف نايتس 🐻</h1>
-    <div class="start-content">
-      <h2>مرحباً بك في Freddy Fazbear's Pizza</h2>
-      <p>20 سؤال عن أحداث وقصة Five Nights at Freddy's<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تصمد لـ 5 ليالي؟</p>
-      <button class="start-btn" onclick="startQuiz()">🐻 ابدأ الليلة الأولى</button>
-    </div>
-  </div>
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-  <div id="quizScreen" style="display:none;">
-    <h1>🐻 كويز فايف نايتس 🐻</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 20</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title">🐻 كويز فايف نايتس 🐻</h1>
+  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+
+  <div class="grid-container">
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/FNAF 1.jpeg');">
+      <h2>الفيلم الأول (2023)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/FNAF 2.jpeg');">
+      <h2>الفيلم التاني (2025)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/FNAF.jpg');">
+      <h2>الشامل (20 سؤال)</h2>
+    </div>
   </div>
 </div>
 
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px;">🐻 كويز فايف نايتس 🐻</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
 <script>
-function generatePoster(title, subtitle) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#0a0a0a"/>
-    <circle cx="250" cy="125" r="80" fill="#8b0000" opacity="0.3"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#ff3333" font-family="Cairo, sans-serif" font-weight="900" font-size="35" filter="drop-shadow(0 0 10px #8b0000)">${title}</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
-    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#8b0000" stroke-width="4"/>
-  </svg>
-  `;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let highestScore = 0;
+let currentSaveKey = '';
+
+const quizData = {
+  part1: [ // 15 سؤال خاصين بالفيلم الأول 2023
+    { q_ar: "في فيلم FNAF، إيه اللي بيخلي (Mike) يقبل شغل حارس ليلي في المطعم؟", q_en: "In the FNAF movie, what makes Mike accept the night guard job?", options_ar: ["عشان الفلوس", "عشان يهرب من حاجة", "عشان ياخد أخته", "عشان يعرف سر المكان"], options_en: ["For money", "To escape something", "To take his sister", "To know the place's secret"], answer: 0 },
+    { q_ar: "مين اللي بيشتغل مع Mike في المطعم كحارسة؟", q_en: "Who works with Mike at the restaurant as a guard?", options_ar: ["شرطي", "امرأة اسمها Vanessa", "صاحبه", "مفيش حد"], options_en: ["A cop", "A woman named Vanessa", "His friend", "No one"], answer: 1 },
+    { q_ar: "الدمى في المطعم بيتحركوا إمتى؟", q_en: "When do the animatronics move?", options_ar: ["في الصبح", "في الليل", "وقت الغدا", "عمرهم ما بيتحركوا"], options_en: ["In the morning", "At night", "At lunch", "They never move"], answer: 1 },
+    { q_ar: "مين الدمية الرئيسية اللي بتطارد Mike؟", q_en: "Which main animatronic haunts Mike?", options_ar: ["Bonnie", "Chica", "Freddy Fazbear", "Foxy"], options_en: ["Bonnie", "Chica", "Freddy Fazbear", "Foxy"], answer: 2 },
+    { q_ar: "إيه سر الدمى في القصة؟", q_en: "What's the secret of the animatronics in the story?", options_ar: ["أطفال مفقودين", "روبوتات عادية", "أشباح", "تجارب علمية"], options_en: ["Missing children", "Normal robots", "Ghosts", "Scientific experiments"], answer: 0 },
+    { q_ar: "مين الشرير الحقيقي وراء كل اللي بيحصل في المطعم؟", q_en: "Who is the real villain behind everything in the restaurant?", options_ar: ["صاحب المطعم", "William Afton", "الشرطة", "الدمى نفسها"], options_en: ["The restaurant owner", "William Afton", "The police", "The animatronics themselves"], answer: 1 },
+    { q_ar: "أخت Mike الصغيرة إيه اللي بيحصلها؟", q_en: "What happens to Mike's little sister?", options_ar: ["بتتحول لدمية", "بتختفي", "بتحب المطعم", "بتشتغل هناك"], options_en: ["She transforms into a doll", "She disappears", "She loves the restaurant", "She works there"], answer: 0 },
+    { q_ar: "إيه اللي بيحاول Mike يعمله عشان يحمي أخته؟", q_en: "What does Mike try to do to protect his sister?", options_ar: ["يسيب البيت", "يخبيها في المطعم", "يفضل صاحي في الليل", "يبلغ الشرطة"], options_en: ["Leave the house", "Hide her in the restaurant", "Stay awake at night", "Call the police"], answer: 2 },
+    { q_ar: "الدمية (Golden Freddy) بتظهر لمين؟", q_en: "Who does Golden Freddy appear to?", options_ar: ["Mike", "Vanessa", "أخت Mike", "كل الناس"], options_en: ["Mike", "Vanessa", "Mike's sister", "Everyone"], answer: 2 },
+    { q_ar: "إيه اللي بيميز الدمية (Foxy)؟", q_en: "What characterizes Foxy?", options_ar: ["بيجري بسرعة", "بيطير", "بيتكلم", "بيختفي"], options_en: ["He runs fast", "He flies", "He talks", "He disappears"], answer: 0 },
+    { q_ar: "في النهاية، إيه اللي بيحصل لـ Mike؟", q_en: "At the end, what happens to Mike?", options_ar: ["بيموت", "بيهرب", "بيكتشف إنه كان جزء من اللعبة", "بيسيب المطعم"], options_en: ["He dies", "He escapes", "He discovers he was part of the game", "He leaves the restaurant"], answer: 2 },
+    { q_ar: "إيه اللي بيحصل للدمى في نهاية الفيلم؟", q_en: "What happens to the animatronics at the end of the film?", options_ar: ["بيدمروا", "بيهربوا", "بيتحرروا من الأرواح", "بيفضلوا يطاردوا"], options_en: ["They are destroyed", "They escape", "They are freed from the spirits", "They keep haunting"], answer: 2 },
+    { q_ar: "إيه اللي بيميز مطعم Freddy's في القصة؟", q_en: "What characterizes Freddy's in the story?", options_ar: ["إنه مطعم أطفال مسكون", "إنه مهجور", "إنه مشهور", "إنه مكان سري"], options_en: ["It's a haunted kids' restaurant", "It's abandoned", "It's famous", "It's a secret place"], answer: 0 },
+    { q_ar: "مين اللي كان بيدير المطعم قبل ما يتقفل؟", q_en: "Who managed the restaurant before it closed?", options_ar: ["William Afton", "Mike", "Vanessa", "الشرطة"], options_en: ["William Afton", "Mike", "Vanessa", "The police"], answer: 0 },
+    { q_ar: "إيه اللي بيميز شخصية Vanessa؟", q_en: "What characterizes Vanessa's character?", options_ar: ["شرطية", "عندها سر كبير", "حارسة عادية", "بتكره الدمى"], options_en: ["A cop", "She has a big secret", "A normal guard", "She hates the animatronics"], answer: 1 }
+  ],
+  part2: [ // 15 سؤال خاصين بالفيلم التاني 2025
+    { q_ar: "فيلم FNAF 2 (2025) أحداثه بتحصل بعد كام سنة من الجزء الأول؟", q_en: "How many years after the first movie does FNAF 2 (2025) take place?", options_ar: ["سنة واحدة", "سنتين", "3 سنين", "5 سنين"], options_en: ["One year", "Two years", "Three years", "Five years"], answer: 0 },
+    { q_ar: "إيه اسم المهرجان اللي المدينة عملته بسبب أسطورة مطعم فريدي؟", q_en: "What is the name of the festival the town holds due to the Freddy's legend?", options_ar: ["Fazfest", "Freddy Fest", "Pizza Fest", "Horror Fest"], options_en: ["Fazfest", "Freddy Fest", "Pizza Fest", "Horror Fest"], answer: 0 },
+    { q_ar: "مين الشرير الجديد اللي بيوقظ الدمى (Toy Animatronics) في الفيلم؟", q_en: "Who is the new villain that awakens the Toy Animatronics in the movie?", options_ar: ["The Marionette (العرائس)", "Springtrap", "Circus Baby", "Golden Freddy"], options_en: ["The Marionette", "Springtrap", "Circus Baby", "Golden Freddy"], answer: 0 },
+    { q_ar: "الروح الشريرة اللي جوه الـ Marionette بترتبط بمين؟", q_en: "Whose spirit is inside the Marionette?", options_ar: ["Charlotte (بنت هنري)", "Elizabeth Afton", "Abby", "Vanessa"], options_en: ["Charlotte (Henry's daughter)", "Elizabeth Afton", "Abby", "Vanessa"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل لـ Abby (أخت Mike) في الفيلم؟", q_en: "What happens to Abby (Mike's sister) in the movie?", options_ar: ["بتتخطف", "بيتملكها الـ Marionette", "بتهرب", "بتتحول لدمية"], options_en: ["She gets kidnapped", "She gets possessed by the Marionette", "She runs away", "She turns into an animatronic"], answer: 1 },
+    { q_ar: "مين اللي بيظهر في الفيلم كأخ لـ Vanessa (الشرير الحقيقي)؟", q_en: "Who appears in the movie as Vanessa's brother?", options_ar: ["Michael Afton", "Mike Schmidt", "Henry Emily", "William Afton"], options_en: ["Michael Afton", "Mike Schmidt", "Henry Emily", "William Afton"], answer: 0 },
+    { q_ar: "في نهاية الفيلم، مين اللي بيتملك جسد Vanessa؟", q_en: "At the end of the movie, who possesses Vanessa's body?", options_ar: ["The Marionette (Charlotte)", "William Afton", "Circus Baby", "The Toy Animatronics"], options_en: ["The Marionette (Charlotte)", "William Afton", "Circus Baby", "The Toy Animatronics"], answer: 0 },
+    { q_ar: "مين اللي بيساعد Mike في الفيلم عن طريق رسالة صوتية؟", q_en: "Who helps Mike in the movie via a voice message?", options_ar: ["Henry Emily", "William Afton", "Vanessa", "Michael Afton"], options_en: ["Henry Emily", "William Afton", "Vanessa", "Michael Afton"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل لـ William Afton في مشهد منتصف النهاية (Mid-Credits)؟", q_en: "What happens to William Afton in the mid-credits scene?", options_ar: ["بيرجع للحياة كـ Springtrap", "بيموت", "بيهرب", "بيتحبس"], options_en: ["He returns to life as Springtrap", "He dies", "He escapes", "He gets imprisoned"], answer: 0 },
+    { q_ar: "مين اللي بيدخل المطعم القديم في مشهد منتصف النهاية ويشوف William؟", q_en: "Who enters the old restaurant in the mid-credits scene and sees William?", options_ar: ["3 شباب", "الشرطة", "Mike", "Vanessa"], options_en: ["Three young men", "The police", "Mike", "Vanessa"], answer: 0 },
+    { q_ar: "الدمى الأصلية (Originals) بتظهر في النهاية عشان تعمل إيه؟", q_en: "What do the original animatronics appear to do at the end?", options_ar: ["تحمي Mike وAbby", "تقتلهم", "تهرب", "تتحطم"], options_en: ["Protect Mike and Abby", "Kill them", "Escape", "Get destroyed"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل للدمى الأصلية بعد ما بتحمي Mike وAbby؟", q_en: "What happens to the original animatronics after they protect Mike and Abby?", options_ar: ["بتتحطم والأرواح بترتاح", "بتهرب", "بتفضل عايشة", "بتتحول لـ Toy Animatronics"], options_en: ["They get destroyed and the spirits rest", "They escape", "They stay alive", "They turn into Toy Animatronics"], answer: 0 },
+    { q_ar: "مين اللي بيظهر في حلم Vanessa كدمية جديدة؟", q_en: "Who appears in Vanessa's dream as a new animatronic?", options_ar: ["Circus Baby", "Springtrap", "The Marionette", "Toy Freddy"], options_en: ["Circus Baby", "Springtrap", "The Marionette", "Toy Freddy"], answer: 0 },
+    { q_ar: "إيه اللي بيقوله Henry في الرسالة الصوتية لـ Mike؟", q_en: "What does Henry say in the voice message to Mike?", options_ar: ["إن الـ Marionette جاية وراه", "إنه لازم يهرب", "إن William مات", "إن Abby في خطر"], options_en: ["That the Marionette is coming after him", "That he needs to run", "That William is dead", "That Abby is in danger"], answer: 0 },
+    { q_ar: "فيلم FNAF 2 (2025) بينتهي بإيه؟", q_en: "How does FNAF 2 (2025) end?", options_ar: ["Vanessa بتتحول لـ Marionette", "Mike بيموت", "Abby بتتحول لدمية", "William بيكسب"], options_en: ["Vanessa transforms into the Marionette", "Mike dies", "Abby turns into an animatronic", "William wins"], answer: 0 }
+  ],
+  comprehensive: [ // 20 سؤال خاصين بالشامل
+    { q_ar: "إيه الشيء المشترك بين الفيلم الأول والتاني؟", q_en: "What's the common thing between the first and second movie?", options_ar: ["الدمى المسكونة", "الأطفال المفقودين", "William Afton", "كل الإجابات صح"], options_en: ["Haunted animatronics", "Missing children", "William Afton", "All answers are correct"], answer: 3 },
+    { q_ar: "مين اللي بيلعب دور الحارس في الفيلم الأول؟", q_en: "Who plays the night guard in the first movie?", options_ar: ["Mike", "William", "Henry", "Vanessa"], options_en: ["Mike", "William", "Henry", "Vanessa"], answer: 0 },
+    { q_ar: "إيه اللي بيربط الأرواح بالدمى؟", q_en: "What connects the spirits to the animatronics?", options_ar: ["الخوف", "الغضب", "الانتقام", "الحب"], options_en: ["Fear", "Anger", "Revenge", "Love"], answer: 2 },
+    { q_ar: "مين اللي بيساعد Mike يفهم سر المطعم في الفيلم الأول؟", q_en: "Who helps Mike understand the restaurant's secret in the first movie?", options_ar: ["Vanessa", "William", "Henry", "الشرطة"], options_en: ["Vanessa", "William", "Henry", "The police"], answer: 0 },
+    { q_ar: "إيه اللي بيخلي الدمى تهاجم أي حد؟", q_en: "What makes the animatronics attack anyone?", options_ar: ["الصوت", "الحركة", "الخوف", "الظلام"], options_en: ["Sound", "Movement", "Fear", "Darkness"], answer: 1 },
+    { q_ar: "في الفيلم التاني، مين اللي بيوقظ الدمى الجديدة؟", q_en: "In the second movie, who awakens the new animatronics?", options_ar: ["The Marionette", "William Afton", "Henry Emily", "Mike"], options_en: ["The Marionette", "William Afton", "Henry Emily", "Mike"], answer: 0 },
+    { q_ar: "إيه اللي بيجمع كل قصص FNAF؟", q_en: "What brings all FNAF stories together?", options_ar: ["William Afton", "الدمى", "المطعم", "الحراس"], options_en: ["William Afton", "The animatronics", "The restaurant", "The guards"], answer: 0 },
+    { q_ar: "مين اللي بيدفع التمن في النهاية؟", q_en: "Who pays the price at the end?", options_ar: ["William Afton", "Mike", "Vanessa", "الشرطة"], options_en: ["William Afton", "Mike", "Vanessa", "The police"], answer: 0 },
+    { q_ar: "إيه اللي بيميز (Golden Freddy) في الفيلم؟", q_en: "What characterizes Golden Freddy in the movie?", options_ar: ["إنه شبح", "إنه دمية عادية", "إنه بطل", "إنه مش موجود"], options_en: ["He's a ghost", "He's a normal animatronic", "He's a hero", "He doesn't exist"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل للروح بعد ما بتنتقم؟", q_en: "What happens to the spirit after it gets revenge?", options_ar: ["بترتاح", "بتفضل تاكمل", "بتختفي", "بتتحول"], options_en: ["It rests", "It keeps going", "It disappears", "It transforms"], answer: 0 },
+    { q_ar: "إيه اللي بيربط أجزاء الفيلم ببعضها؟", q_en: "What connects the movie's parts together?", options_ar: ["قصة William Afton", "الدمى", "المطعم", "الأطفال"], options_en: ["William Afton's story", "The animatronics", "The restaurant", "The children"], answer: 0 },
+    { q_ar: "في الفيلم التاني، إيه اللي بيحاول Mike يكتشفه؟", q_en: "In the second movie, what does Mike try to discover?", options_ar: ["سر الدمى", "مكان المطعم", "اسمه", "عيلته"], options_en: ["The animatronics' secret", "The restaurant's location", "His name", "His family"], answer: 0 },
+    { q_ar: "إيه اللي بيميز الدمية (Foxy) في الفيلم؟", q_en: "What characterizes Foxy in the movie?", options_ar: ["بيجري بسرعة", "بيطير", "بيتكلم", "بيختفي"], options_en: ["He runs fast", "He flies", "He talks", "He disappears"], answer: 0 },
+    { q_ar: "في الفيلم التاني، مين اللي بيساعد Mike عن طريق رسالة صوتية؟", q_en: "In the second movie, who helps Mike via a voice message?", options_ar: ["Henry Emily", "William Afton", "Vanessa", "Michael Afton"], options_en: ["Henry Emily", "William Afton", "Vanessa", "Michael Afton"], answer: 0 },
+    { q_ar: "إيه اللي بيجمع كل أرواح الأطفال؟", q_en: "What gathers all the children's spirits?", options_ar: ["الدمى", "المطعم", "الشرير", "الحراس"], options_en: ["The animatronics", "The restaurant", "The villain", "The guards"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل لـ (William Afton) في الفيلم التاني؟", q_en: "What happens to William Afton in the second movie?", options_ar: ["بيتحبس", "بيموت", "بيتحول لـ Springtrap", "بيهرب"], options_en: ["He gets trapped", "He dies", "He turns into Springtrap", "He escapes"], answer: 2 },
+    { q_ar: "إيه الرسالة الأساسية لفيلم FNAF؟", q_en: "What's the main message of the FNAF movie?", options_ar: ["الانتقام", "الخوف", "الأرواح عايزة ترتاح", "الفلوس"], options_en: ["Revenge", "Fear", "Spirits want to rest", "Money"], answer: 2 },
+    { q_ar: "مين اللي بيساعد الأرواح ترتاح في الفيلم الأول؟", q_en: "Who helps the spirits rest in the first movie?", options_ar: ["Mike", "Vanessa", "William", "Henry"], options_en: ["Mike", "Vanessa", "William", "Henry"], answer: 0 },
+    { q_ar: "إيه اللي بيميز أجواء FNAF؟", q_en: "What characterizes FNAF's atmosphere?", options_ar: ["رعب نفسي", "كوميديا", "أكشن", "رومانسية"], options_en: ["Psychological horror", "Comedy", "Action", "Romance"], answer: 0 },
+    { q_ar: "إيه اللي بيميز نهاية الفيلم التاني (2025)؟", q_en: "What characterizes the ending of the second movie (2025)?", options_ar: ["Vanessa بتتحول لدمية", "William بيرجع", "Abby بتموت", "Mike بيكتشف الحقيقة"], options_en: ["Vanessa transforms into an animatronic", "William returns", "Abby dies", "Mike discovers the truth"], answer: 0 }
+  ]
+};
+
+const translations = {
+  ar: { title: "🐻 كويز فايف نايتس 🐻", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🐻", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "🐻 FNAF Quiz 🐻", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🐻", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
+
+let currentQuestions = [];
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
 }
 
-const questions = [
-  { q: "في فيلم FNAF، إيه اللي بيخلي (Mike) يقبل شغل حارس ليلي في المطعم؟", options: ["عشان الفلوس", "عشان يهرب من حاجة", "عشان ياخد أخته", "عشان يعرف سر المكان"], answer: 1, title: "FNAF", subtitle: "THE BEGINNING" },
-  { q: "مين اللي بيشتغل مع Mike في المطعم كحارس؟", options: ["شرطي", "امرأة اسمها Vanessa", "صاحبه", "مفيش حد"], answer: 1, title: "FNAF", subtitle: "THE PARTNER" },
-  { q: "الدمى في المطعم بيتحركوا إمتى؟", options: ["في الصبح", "في الليل", "وقت الغدا", "عمرهم ما بيتحركوا"], answer: 1, title: "FNAF", subtitle: "THE RULE" },
-  { q: "مين الدمية الرئيسية اللي بتطارد Mike في الليل؟", options: ["Bonnie", "Chica", "Freddy Fazbear", "Foxy"], answer: 2, title: "FNAF", subtitle: "THE BEAR" },
-  { q: "إيه سر الدمى في القصة؟", options: ["أطفال مفقودين", "روبوتات عادية", "أشباح", "تجارب علمية"], answer: 0, title: "FNAF", subtitle: "THE SECRET" },
-  { q: "مين الشرير الحقيقي وراء كل اللي بيحصل في المطعم؟", options: ["صاحب المطعم", "William Afton", "الشرطة", "الدمى نفسها"], answer: 1, title: "FNAF", subtitle: "THE VILLAIN" },
-  { q: "أخت Mike إيه اللي بيحصلها؟", options: ["بتتحول لدمية", "بتختفي", "بتحب المطعم", "بتشتغل هناك"], answer: 0, title: "FNAF", subtitle: "THE SISTER" },
-  { q: "إيه اللي بيحاول Mike يعمله عشان يحمي أخته؟", options: ["يسيب البيت", "يخبيها في المطعم", "يفضل صاحي في الليل", "يبلغ الشرطة"], answer: 2, title: "FNAF", subtitle: "THE PROTECTION" },
-  { q: "الدمية (Golden Freddy) بتظهر لمين؟", options: ["Mike", "Vanessa", "أخت Mike", "كل الناس"], answer: 2, title: "FNAF", subtitle: "GOLDEN FREDDY" },
-  { q: "إيه اللي بيميز الدمية (Foxy) عن باقي الدمى؟", options: ["بيجري بسرعة", "بيطير", "بيتكلم", "بيختفي"], answer: 0, title: "FNAF", subtitle: "FOXY" },
-  { q: "في النهاية، إيه اللي بيحصل لـ Mike؟", options: ["بيموت", "بيهرب", "بيكتشف إنه كان جزء من اللعبة", "بيسيب المطعم"], answer: 2, title: "FNAF", subtitle: "THE END" },
-  { q: "إيه اللي بيحصل للدمى في نهاية الفيلم؟", options: ["بيدمروا", "بيهربوا", "بيتحرروا من الأرواح", "بيفضلوا يطاردوا"], answer: 2, title: "FNAF", subtitle: "THE FREEDOM" },
-  { q: "إيه اللي بيميز مطعم Freddy's في القصة؟", options: ["إنه مطعم أطفال", "إنه مسكون", "إنه مهجور", "إنه مشهور"], answer: 0, title: "FNAF", subtitle: "THE PLACE" },
-  { q: "مين اللي كان بيدير المطعم قبل ما يتقفل؟", options: ["William Afton", "Mike", "Vanessa", "الشرطة"], answer: 0, title: "FNAF", subtitle: "THE OWNER" },
-  { q: "إيه اللي بيميز شخصية Vanessa؟", options: ["شرطية", "حارسة", "عندها سر", "كل الإجابات صح"], answer: 2, title: "FNAF", subtitle: "VANESSA" },
-  { q: "إيه اللي بيميز الدمية (Chica) عن غيرها؟", options: ["دجاجة", "أرنب", "ثعلب", "دب"], answer: 0, title: "FNAF", subtitle: "CHICA" },
-  { q: "إيه اللي بيميز الدمية (Bonnie) عن غيرها؟", options: ["دجاجة", "أرنب", "ثعلب", "دب"], answer: 1, title: "FNAF", subtitle: "BONNIE" },
-  { q: "الدمية (Freddy Fazbear) بيميزه إيه؟", options: ["دب", "أرنب", "ثعلب", "دجاجة"], answer: 0, title: "FNAF", subtitle: "FREDDY" },
-  { q: "إيه اللي بيحصل لـ William Afton في النهاية؟", options: ["بيهرب", "بيتم القبض عليه", "بيتحول لدمية", "بيموت"], answer: 2, title: "FNAF", subtitle: "WILLIAM" },
-  { q: "إيه الرسالة الأساسية لفيلم FNAF؟", options: ["الانتقام", "الخوف", "إن الأرواح عايزة تتحرر", "الفلوس"], answer: 2, title: "FNAF", subtitle: "THE MESSAGE" }
-];
+function startGame(part) {
+  if (part === 'part1') { currentQuestions = [...quizData.part1]; currentSaveKey = 'fnaf_part1_HighScore'; }
+  else if (part === 'part2') { currentQuestions = [...quizData.part2]; currentSaveKey = 'fnaf_part2_HighScore'; }
+  else { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'fnaf_all_HighScore'; }
 
-const TOTAL_TIME = 20;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
 
-// صوت تكة خفيفة
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playClick() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-}
-
-function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
   const optEl = document.getElementById('options');
   optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
     const div = document.createElement('div');
     div.className = 'option';
@@ -181,11 +204,9 @@ function loadQuestion() {
     div.onclick = () => checkAnswer(opt.isCorrect, div);
     optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
@@ -194,16 +215,15 @@ function loadQuestion() {
 function updateTimer() {
   const timerEl = document.getElementById('timer');
   timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#ff3333';
-  
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current];
+      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -213,45 +233,39 @@ function updateTimer() {
 function checkAnswer(isCorrect, el) {
   if (answered) return;
   answered = true; clearInterval(timerInterval);
-  
+  const q = currentQuestions[current];
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   const allOpts = document.querySelectorAll('.option');
   allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-    playClick();
-  } else {
-    el.classList.add('wrong');
-    playClick();
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
 function nextQuestion() {
   current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
 }
 
 function showFinal() {
   clearInterval(timerInterval);
   document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang];
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#ff3333; font-size:36px;">انتهى الكويز! 🐻</h2>
-    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+    <h2 style="color:#ff3333; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
 }
+
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
