@@ -3,230 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦑 كويز لعبة الحبار</title>
+<title>🦑 كويز لعبة الحبار - Squid Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* زرار الرجوع */
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
+    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #0a1a0a 0%, #000 100%);
-    transition: background 0.2s;
+  body { background: #050505; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; flex-direction: column; }
+  
+  h1 { text-align: center; color: #ff0066; text-shadow: 0 0 15px #ff0066; margin-bottom: 10px; font-size: 40px; }
+  p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
+
+  /* ستايل الكروت */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
   }
 
-  /* تأثير الدم */
-  .blood-overlay {
-    position: fixed; inset: 0; pointer-events: none; z-index: 999;
-    box-shadow: inset 0 0 150px rgba(255,0,100,0.8); /* لون وردي فاقع */
-    opacity: 0; transition: opacity 0.2s;
+  .quiz-card {
+    background-color: #111; border: 2px solid #333; border-radius: 15px;
+    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
+    cursor: pointer;
   }
-  .blood-overlay.active { opacity: 1; }
+  .quiz-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
+  }
+  .quiz-card h2 {
+    position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
+    text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
+  }
+  .quiz-card:hover { border-color: #ff0066; transform: translateY(-5px); box-shadow: 0 0 20px rgba(255,0,102,0.6); }
 
-  .quiz-box {
-    background: rgba(10,10,10,0.95); border: 2px solid #ff0066; /* وردي */
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 50px rgba(255,0,102,0.6); position: relative;
-  }
-  h1 { text-align: center; color: #ff0066; text-shadow: 0 0 20px #ff0066; margin-bottom: 15px; font-size: 30px; animation: titlePulse 3s infinite; }
-  @keyframes titlePulse { 0%, 100% { text-shadow: 0 0 20px #ff0066; } 50% { text-shadow: 0 0 40px #ff0066; } }
-  
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #ff0066; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #ff0066; color: #fff; border: 2px solid #ff3388;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
-  }
-  .start-btn:hover { background: #ff3388; box-shadow: 0 0 20px #ff0066; }
-  
+  /* شاشة اللعب */
+  .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(10,10,10,0.98); border: 2px solid #ff0066; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(255,0,102,0.4); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #ff0066; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #ff0066; }
+  .progress-bar { background: #ff0066; height: 100%; width: 0%; transition: width 0.5s; }
   .timer { text-align: center; font-size: 18px; color: #00ffcc; margin-bottom: 15px; font-weight: 700; }
-  
-  /* تأثير رجفة الشاشة */
-  .shake {
-    animation: shakeScreen 0.5s cubic-bezier(.36,.07,.19,.97) both;
-  }
-  @keyframes shakeScreen {
-    10%, 90% { transform: translate3d(-2px, 0, 0); }
-    20%, 80% { transform: translate3d(4px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-    40%, 60% { transform: translate3d(8px, 0, 0); }
-  }
-
-  /* البوستر */
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #ff0066; box-shadow: 0 0 20px rgba(255,0,102,0.6);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
-  .question { font-size: 22px; margin-bottom: 20px; color: #fff; line-height: 1.6; text-shadow: 0 0 10px rgba(255,0,102,0.5); }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
-  .option:hover:not(.disabled) { background: #ff0066; border-color: #ff3388; transform: translateX(-5px); color: #fff;}
-  .option.correct { background: #006400; border-color: #00ff00; }
-  .option.wrong { background: #ff0066; border-color: #ff0000; animation: shake 0.5s; color: #fff;}
-  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #ff0066;
-    color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
-  #next:hover { background: #ff3388; box-shadow: 0 0 15px #ff0066; }
+  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
+  .option:hover:not(.disabled) { background: #2d1a27; border-color: #ff0066; }
+  .option.correct { background: #1a5c2a; border-color: #4caf50; }
+  .option.wrong { background: #5c2a2a; border-color: #f44336; }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #ff0066; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
+  #next:hover { background: #ff3388; }
   #score { margin-top: 15px; font-size: 15px; color: #00ffcc; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="blood-overlay" id="bloodOverlay"></div>
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1>🦑 كويز لعبة الحبار 🦑</h1>
-    <div class="start-content">
-      <h2>⚠️ اللعبة هتبدأ ⚠️</h2>
-      <p>20 سؤال عن أحداث المواسم الـ 3<br><strong>لديك 15 ثانية لكل سؤال</strong><br>هل تقدر تعدي اللعبة وتكسب؟</p>
-      <button class="start-btn" onclick="startQuiz()">🎬 ابدأ اللعب (وشغل الصوت)</button>
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title">🦑 كويز لعبة الحبار 🦑</h1>
+  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+
+  <div class="grid-container">
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Squid Game 1.jpeg');">
+      <h2>الجزء الأول (2021)</h2>
     </div>
-  </div>
-
-  <div id="quizScreen" style="display:none;">
-    <h1>🦑 كويز لعبة الحبار 🦑</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 15</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Squid Game 2.jpg');">
+      <h2>الجزء التاني (2024)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part3')" style="background-image: url('pic/Squid Game 3.jpg');">
+      <h2>الجزء الثالث (2025)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Squid Game.jpg');">
+      <h2>الشامل (20 سؤال)</h2>
+    </div>
   </div>
 </div>
 
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px;">🦑 كويز لعبة الحبار 🦑</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
 <script>
-// دالة رسم بوستر اللعبة
-function generatePoster(seasonName) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#050a05"/>
-    <circle cx="250" cy="125" r="90" fill="#ff0066" opacity="0.15"/>
-    <circle cx="250" cy="125" r="90" fill="none" stroke="#00ffcc" stroke-width="4" opacity="0.5"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#ff0066" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #ff0066)">SQUID GAME</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#00ffcc" font-family="Cairo, sans-serif" font-weight="bold" font-size="25" opacity="0.9">${seasonName}</text>
-    <path d="M 0 250 Q 250 180 500 250" fill="#ff0066" opacity="0.4"/>
-  </svg>
-  `;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let highestScore = 0;
+let currentSaveKey = '';
+
+const quizData = {
+  part1: [ 
+    { q_ar: "في الجزء الأول، إيه اللعبة الأولى اللي بيلعبوها في الساحة؟", q_en: "In Part 1, what is the first game they play in the arena?", options_ar: ["شد الحبل", "الحجلة", "إشارة الضوء الأخضر والأحمر", "البلي"], options_en: ["Tug of War", "Hopscotch", "Red Light, Green Light", "Marbles"], answer: 2 },
+    { q_ar: "المتسابقين بيعرفوا إنهم بيخسروا في اللعبة الأولى إزاي؟", q_en: "How do the players know they lose in the first game?", options_ar: ["بالصياح", "بإشارة حمراء", "بإنهم بيقعوا ويموتوا", "بيخرجوا من اللعبة"], options_en: ["By shouting", "By a red signal", "By falling and dying", "They leave the game"], answer: 2 },
+    { q_ar: "إيه الحلوى اللي بيحاولوا يطلعوها بالابرة في لعبة البسكويت؟", q_en: "What candy shape do they try to carve out with a needle in the honeycomb game?", options_ar: ["مثلث", "دائرة", "نجمة", "شكل حيوان"], options_en: ["Triangle", "Circle", "Star", "Animal shape"], answer: 3 },
+    { q_ar: "في لعبة شد الحبل، إيه اللي بيحصل للفريق الخسران؟", q_en: "In Tug of War, what happens to the losing team?", options_ar: ["بينزلوا في الهاوية", "بيتموتوا بالرصاص", "بيتسجنوا", "بيخرجوا برا"], options_en: ["They fall into the pit", "They get shot", "They get imprisoned", "They leave"], answer: 0 },
+    { q_ar: "لعبة الليل (وقت النوم) بتخلي المتسابقين يعملوا إيه؟", q_en: "What does the night game make the players do?", options_ar: ["يناموا بهدوء", "يتخانقوا ويقتلوا بعض", "يهربوا", "يلعبوا ألعاب تانية"], options_en: ["Sleep peacefully", "Fight and kill each other", "Escape", "Play other games"], answer: 1 },
+    { q_ar: "في لعبة الكراسي الموسيقية، إيه اللي بيحصل لما الموسيقى تقف؟", q_en: "In Musical Chairs, what happens when the music stops?", options_ar: ["الكل بيقعد", "اللي مابيلاقيش كرسي بيموت", "بيغنوا", "بيستخبوا"], options_en: ["Everyone sits", "Whoever doesn't find a chair dies", "They sing", "They hide"], answer: 1 },
+    { q_ar: "اللعبة الأخيرة في الجزء الأول كانت إيه؟", q_en: "What was the final game in Part 1?", options_ar: ["شد الحبل", "لعبة الحبار (Squid Game)", "البلي", "الحجلة"], options_en: ["Tug of War", "Squid Game", "Marbles", "Hopscotch"], answer: 1 },
+    { q_ar: "الشرير اللي كان بيدير اللعبة (الرجل العجوز) كان بيعمل إيه عشان يخدعهم؟", q_en: "What did the old man (the mastermind) do to deceive them?", options_ar: ["بيساعدهم", "بيداري إنه عنده ورم في المخ", "بيصورهم", "بيتكلم معاهم"], options_en: ["He helped them", "He hid that he had a brain tumor", "He filmed them", "He talked to them"], answer: 1 },
+    { q_ar: "البطل (سيونغ جي هون) بيشتغل إيه قبل اللعبة؟", q_en: "What did the protagonist (Seong Gi-hun) do before the game?", options_ar: ["سواق", "مدير", "عاطل ومقامر", "شرطي"], options_en: ["Driver", "Manager", "Unemployed gambler", "Cop"], answer: 2 },
+    { q_ar: "إيه اللي بيخلي البطل يدخل اللعبة؟", q_en: "What makes the protagonist enter the game?", options_ar: ["الفقر والديون", "حب المغامرة", "الانتقام", "صداقته"], options_en: ["Poverty and debt", "Love of adventure", "Revenge", "Friendship"], answer: 0 },
+    { q_ar: "في لعبة البلي (Marbles)، إيه اللي بيحصل للخاسر؟", q_en: "In the Marbles game, what happens to the loser?", options_ar: ["بيخرج", "بيقتل نفسه", "بيتموت على إيد شريكه", "بيتسجن"], options_en: ["He leaves", "He kills himself", "He gets killed by his partner", "He gets imprisoned"], answer: 2 },
+    { q_ar: "المتسابق رقم 001 (العجوز) بيموت إمتى؟", q_en: "When does Player 001 (the old man) die?", options_ar: ["في اللعبة الأولى", "في اللعبة الأخيرة", "بعد اللعبة", "بيموتش"], options_en: ["In the first game", "In the final game", "After the game", "He doesn't die"], answer: 2 },
+    { q_ar: "مين اللي فاز في النهاية في الجزء الأول؟", q_en: "Who won at the end of Part 1?", options_ar: ["سيونغ جي هون (البطل)", "العجوز", "الشرير", "صاحبه"], options_en: ["Seong Gi-hun (the protagonist)", "The old man", "The villain", "His friend"], answer: 0 },
+    { q_ar: "إيه اللي بيعمله البطل بالفلوس في النهاية؟", q_en: "What does the protagonist do with the money at the end?", options_ar: ["بيشتري بيت", "بيسافر", "بيحاول يوقف اللعبة", "بيوزعها"], options_en: ["He buys a house", "He travels", "He tries to stop the game", "He gives it away"], answer: 2 },
+    { q_ar: "في نهاية الجزء الأول، البطل بيرجع فين؟", q_en: "At the end of Part 1, where does the protagonist return?", options_ar: ["البيت", "المطار", "بيت اللعبة تاني", "المستشفى"], options_en: ["Home", "The airport", "The game arena again", "The hospital"], answer: 2 }
+  ],
+  part2: [ 
+    { q_ar: "في بداية الجزء الثاني، البطل (سيونغ جي هون) بيرجع فين؟", q_en: "At the start of Part 2, where does the protagonist (Seong Gi-hun) return?", options_ar: ["البيت", "المطار", "بيت اللعبة تاني", "المستشفى"], options_en: ["Home", "The airport", "The game arena again", "The hospital"], answer: 2 },
+    { q_ar: "البطل بيحاول يعمل إيه في الجزء التاني؟", q_en: "What does the protagonist try to do in Part 2?", options_ar: ["يهرب", "يوقف اللعبة من جواها", "يكسب الفلوس", "ينتقم"], options_en: ["Escape", "Stop the game from the inside", "Win the money", "Get revenge"], answer: 1 },
+    { q_ar: "إيه اللعبة الجديدة اللي بيلعبوها في الجزء التاني (لعبة الأطفال)؟", q_en: "What new game do they play in Part 2 (a children's game)?", options_ar: ["الحجلة", "شد الحبل", "لعبة الألوان (Five Stones)", "البلي"], options_en: ["Hopscotch", "Tug of War", "Five Stones", "Marbles"], answer: 2 },
+    { q_ar: "الجزء التاني كام عدد المتسابقين اللي بيدخلوا اللعبة؟", q_en: "How many players enter the game in Part 2?", options_ar: ["456", "100", "300", "999"], options_en: ["456", "100", "300", "999"], answer: 0 },
+    { q_ar: "في الجزء التاني، إيه اللي بيحصل بين المتسابقين في لعبة شد الحبل الجديدة؟", q_en: "In Part 2, what happens between players in the new Tug of War game?", options_ar: ["بيتحدوا بعض", "بيتحدوا بعض ويقتلوا بعض", "بيحاولوا ينقذوا بعض", "بيغشوا"], options_en: ["They challenge each other", "They challenge and kill each other", "They try to save each other", "They cheat"], answer: 2 },
+    { q_ar: "إيه اللي بيكتشفه البطل عن اللعبة في الجزء التاني؟", q_en: "What does the protagonist discover about the game in Part 2?", options_ar: ["إن اللعبة معمولة للفقراء بس", "إن اللعبة بيديرها فاسدين", "إن اللعبة بتتصور", "إنها حقيقية"], options_en: ["It's only for the poor", "It's run by corrupt people", "It's being filmed", "It's real"], answer: 0 },
+    { q_ar: "الجزء التاني بينتهي بإيه؟", q_en: "How does Part 2 end?", options_ar: ["البطل بيكسب", "البطل بيموت", "البطل بيتصاب وبيتفجر", "البطل بيهرب"], options_en: ["The protagonist wins", "The protagonist dies", "The protagonist gets injured and blown up", "The protagonist escapes"], answer: 2 },
+    { q_ar: "في الجزء التاني، إيه اللي بيحاول البطل يكتشفه عن المنظمين؟", q_en: "In Part 2, what does the protagonist try to discover about the organizers?", options_ar: ["أسمائهم", "مكانهم", "طريقة إيقافهم", "كل الإجابات صح"], options_en: ["Their names", "Their location", "How to stop them", "All answers are correct"], answer: 2 },
+    { q_ar: "مين اللي بيظهر في الجزء التاني كشخصية جديدة بتساعد البطل؟", q_en: "Who appears in Part 2 as a new character helping the protagonist?", options_ar: ["محقق", "شرطي", "جندي", "طبيب"], options_en: ["A detective", "A cop", "A soldier", "A doctor"], answer: 0 },
+    { q_ar: "المحقق في الجزء التاني بيحاول يعمل إيه؟", q_en: "What does the detective in Part 2 try to do?", options_ar: ["يساعد البطل", "يكشف اللعبة", "يوقف المنظمين", "كل الإجابات صح"], options_en: ["Help the protagonist", "Expose the game", "Stop the organizers", "All answers are correct"], answer: 3 },
+    { q_ar: "الجزء التاني بيكشف عن إيه بخصوص عيلة البطل؟", q_en: "What does Part 2 reveal about the protagonist's family?", options_ar: ["عيلته غنية", "عيلته مشهورة", "عيلته ليها علاقة باللعبة", "عيلته ماتت"], options_en: ["His family is rich", "His family is famous", "His family is connected to the game", "His family is dead"], answer: 2 },
+    { q_ar: "إيه اللي بيحصل للمنظمين في نهاية الجزء التاني؟", q_en: "What happens to the organizers at the end of Part 2?", options_ar: ["بيهربوا", "بيتحبسوا", "بيتم كشفهم", "بيموتوا"], options_en: ["They escape", "They get imprisoned", "They get exposed", "They die"], answer: 2 },
+    { q_ar: "الجزء التاني بيكشف إن اللعبة بدأت إمتى؟", q_en: "Part 2 reveals when the game started?", options_ar: ["سنة 1980", "سنة 1990", "سنة 2000", "سنة 2010"], options_en: ["1980", "1990", "2000", "2010"], answer: 0 },
+    { q_ar: "في نهاية الجزء التاني، إيه اللي بيقرره البطل؟", q_en: "At the end of Part 2, what does the protagonist decide?", options_ar: ["يهرب", "يكمل اللعبة", "يوقف اللعبة نهائياً", "يسيب البلد"], options_en: ["To escape", "To continue the game", "To stop the game permanently", "To leave the country"], answer: 2 },
+    { q_ar: "إيه الرسالة الأساسية للجزء التاني؟", q_en: "What is the main message of Part 2?", options_ar: ["الفقر هو المشكلة", "الانتقام هو الحل", "اللعبة مش هتخلص غير لما حد يوقفها", "الفلوس هي كل حاجة"], options_en: ["Poverty is the problem", "Revenge is the answer", "The game won't end until someone stops it", "Money is everything"], answer: 2 }
+  ],
+  part3: [ 
+    { q_ar: "في الجزء الثالث، إيه اللي بيحصل لصديق البطل (جونغ باي) في نهاية الجزء التاني؟", q_en: "In Part 3, what happened to the protagonist's friend (Jung-bae) at the end of Part 2?", options_ar: ["بيتحبس", "بيتم قتله على إيد الرجل المقنع", "بيهرب", "بيختفي"], options_en: ["He gets imprisoned", "He gets killed by the Front Man", "He escapes", "He disappears"], answer: 1 },
+    { q_ar: "إيه اللي بيحاول البطل (جي هون) يعمله في الجزء الثالث؟", q_en: "What does the protagonist (Gi-hun) try to do in Part 3?", options_ar: ["يهرب من الجزيرة", "ينتقم لصديقه ويوقف اللعبة", "يكسب الفلوس", "يساعد المنظمين"], options_en: ["Escape the island", "Avenge his friend and stop the game", "Win the money", "Help the organizers"], answer: 1 },
+    { q_ar: "إيه اللعبة الجديدة اللي بتظهر في الجزء الثالث (Gumball)؟", q_en: "What new game appears in Part 3 (Gumball)?", options_ar: ["لعبة بتقسم اللاعبين لفريقين", "لعبة شد الحبل", "لعبة البلي", "لعبة الحجلة"], options_en: ["A game that divides players into two teams", "Tug of War", "Marbles", "Hopscotch"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل للاعب (داي هو) في الجزء الثالث؟", q_en: "What happens to Player (Dae-ho) in Part 3?", options_ar: ["بيكسب", "بيتم قتله على إيد البطل", "بيهرب", "بيتحبس"], options_en: ["He wins", "He gets killed by the protagonist", "He escapes", "He gets imprisoned"], answer: 1 },
+    { q_ar: "اللاعبة الحامل (جون هي) إيه اللي بيحصلها في الجزء الثالث؟", q_en: "What happens to the pregnant player (Jun-hee) in Part 3?", options_ar: ["بتموت", "بتهرب", "بتخلف وبتدخل الطفل اللعبة", "بتتحبس"], options_en: ["She dies", "She escapes", "She gives birth and the baby enters the game", "She gets imprisoned"], answer: 2 },
+    { q_ar: "مين اللي بيفوز في النهاية في الجزء الثالث؟", q_en: "Who wins at the end of Part 3?", options_ar: ["جي هون (البطل)", "الرجل المقنع", "طفل جون هي (اللاعب 222)", "داي هو"], options_en: ["Gi-hun (the protagonist)", "The Front Man", "Jun-hee's baby (Player 222)", "Dae-ho"], answer: 2 },
+    { q_ar: "إيه اللي بيختاره جي هون في النهاية؟", q_en: "What does Gi-hun choose at the end?", options_ar: ["يكسب الفلوس", "يضحي بنفسه عشان ينقذ الطفل", "يهرب", "ينضم للمنظمين"], options_en: ["Win the money", "Sacrifice himself to save the baby", "Escape", "Join the organizers"], answer: 1 },
+    { q_ar: "مين اللي بينقذ طفل جون هي بعد موت جي هون؟", q_en: "Who saves Jun-hee's baby after Gi-hun's death?", options_ar: ["الرجل المقنع (إن هو)", "المحقق جون هو", "الشرطة", "اللاعبين"], options_en: ["The Front Man (In-ho)", "Detective Jun-ho", "The police", "The players"], answer: 0 },
+    { q_ar: "إيه اللي بيعمله الرجل المقنع بفلوس جي هون في النهاية؟", q_en: "What does the Front Man do with Gi-hun's money at the end?", options_ar: ["بياخدها لنفسه", "بيوزعها على اللاعبين", "بيوديها لبنت جي هون", "بيحرقها"], options_en: ["He takes it for himself", "He distributes it to the players", "He gives it to Gi-hun's daughter", "He burns it"], answer: 2 },
+    { q_ar: "في مشهد النهاية، مين اللي بيظهر كموظف توظيف جديد للعبة؟", q_en: "In the final scene, who appears as a new recruiter for the game?", options_ar: ["ممثل تاني", "كاتي بلانشيت", "لي جونغ جاي", "جونغ هو يون"], options_en: ["Another actor", "Cate Blanchett", "Lee Jung-jae", "Jung Ho-yeon"], answer: 1 },
+    { q_ar: "إيه اللي بيقوله جي هون قبل ما يموت؟", q_en: "What does Gi-hun say before he dies?", options_ar: ["أنا آسف", "احنا مش خيول.. احنا بشر", "اللعبة هتخلص", "أنا هربت"], options_en: ["I'm sorry", "We are not horses.. we are humans", "The game will end", "I escaped"], answer: 1 },
+    { q_ar: "إيه اللي بيميز نهاية الجزء الثالث؟", q_en: "What characterizes the ending of Part 3?", options_ar: ["نهاية سعيدة", "نهاية مفتوحة", "نهاية حزينة وتضحية", "نهاية كوميدية"], options_en: ["Happy ending", "Open ending", "Sad ending with sacrifice", "Comedic ending"], answer: 2 },
+    { q_ar: "الجزء الثالث بيكشف عن إيه بخصوص الرجل المقنع؟", q_en: "What does Part 3 reveal about the Front Man?", options_ar: ["إنه شرير بالكامل", "إنه لسه عنده جزء إنساني", "إنه بيكره اللعبة", "إنه عايز يهرب"], options_en: ["He's completely evil", "He still has a human side", "He hates the game", "He wants to escape"], answer: 1 },
+    { q_ar: "إيه اللي بيحصل للمحقق جون هو في نهاية الجزء الثالث؟", q_en: "What happens to Detective Jun-ho at the end of Part 3?", options_ar: ["بيموت", "بيواجه أخوه", "بيهرب", "بيتحبس"], options_en: ["He dies", "He confronts his brother", "He escapes", "He gets imprisoned"], answer: 1 },
+    { q_ar: "إيه الرسالة الأساسية للجزء الثالث؟", q_en: "What is the main message of Part 3?", options_ar: ["التضحية من أجل الآخرين", "الانتقام", "الفقر", "الخوف"], options_en: ["Sacrifice for others", "Revenge", "Poverty", "Fear"], answer: 0 }
+  ],
+  comprehensive: [ 
+    { q_ar: "إيه الشيء المشترك بين الأجزاء التلاتة؟", q_en: "What's the common thing between all three parts?", options_ar: ["البطل (سيونغ جي هون)", "اللعبة", "المنظمين", "كل الإجابات صح"], options_en: ["The protagonist (Seong Gi-hun)", "The game", "The organizers", "All answers are correct"], answer: 3 },
+    { q_ar: "مين اللي بيلعب دور البطل في المسلسل؟", q_en: "Who plays the protagonist in the series?", options_ar: ["لي جونغ جاي", "بارك هاي سو", "وي ها جون", "جونغ هو يون"], options_en: ["Lee Jung-jae", "Park Hae-soo", "Wi Ha-joon", "Jung Ho-yeon"], answer: 0 },
+    { q_ar: "إيه اللي بيربط المتسابقين ببعض؟", q_en: "What connects the players together?", options_ar: ["الفقر والديون", "اللعبة", "الخوف", "الحب"], options_en: ["Poverty and debt", "The game", "Fear", "Love"], answer: 0 },
+    { q_ar: "إيه اللي بيخلي اللعبة تستمر؟", q_en: "What keeps the game going?", options_ar: ["الفلوس", "المنظمين", "الفقر", "الخوف"], options_en: ["Money", "The organizers", "Poverty", "Fear"], answer: 1 },
+    { q_ar: "المتسابق رقم 001 (العجوز) إيه اللي بيميزه؟", q_en: "What characterizes Player 001 (the old man)?", options_ar: ["إنه غني", "إنه بيساعد", "إنه بيموت", "إنه هو اللي بيدير اللعبة"], options_en: ["He's rich", "He helps", "He dies", "He is the one running the game"], answer: 3 },
+    { q_ar: "في الجزء الأول، إيه اللي بيخلي البطل يكسب؟", q_en: "In Part 1, what makes the protagonist win?", options_ar: ["الحظ", "ذكاءه", "مساعدته للآخرين", "الخيانة"], options_en: ["Luck", "His intelligence", "Helping others", "Betrayal"], answer: 2 },
+    { q_ar: "إيه اللي بيحصل للبطل في نهاية الجزء التاني؟", q_en: "What happens to the protagonist at the end of Part 2?", options_ar: ["بيكسب", "بيموت", "بيتصاب", "بيهرب"], options_en: ["He wins", "He dies", "He gets injured", "He escapes"], answer: 2 },
+    { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["الفلوس هي كل حاجة", "الخوف هو القوة", "الظلم الاجتماعي والفقر", "الحب هو الحل"], options_en: ["Money is everything", "Fear is power", "Social injustice and poverty", "Love is the answer"], answer: 2 },
+    { q_ar: "في الجزء التاني، مين اللي بيحاول يكشف اللعبة؟", q_en: "In Part 2, who tries to expose the game?", options_ar: ["البطل", "المحقق", "المنظمين", "الشرطة"], options_en: ["The protagonist", "The detective", "The organizers", "The police"], answer: 1 },
+    { q_ar: "إيه اللي بيميز المتسابقين في اللعبة؟", q_en: "What characterizes the players in the game?", options_ar: ["الفقر", "الغنى", "الشهرة", "الذكاء"], options_en: ["Poverty", "Wealth", "Fame", "Intelligence"], answer: 0 },
+    { q_ar: "أنهي جزء كان أكتر توتراً؟", q_en: "Which part was more intense?", options_ar: ["الجزء الأول", "الجزء التاني", "الاتنين", "مفيش توتر"], options_en: ["Part 1", "Part 2", "Both", "No intensity"], answer: 2 },
+    { q_ar: "اللعبة الأخيرة في الجزء الأول كانت إيه؟", q_en: "What was the final game in Part 1?", options_ar: ["الحجلة", "البلي", "لعبة الحبار", "شد الحبل"], options_en: ["Hopscotch", "Marbles", "Squid Game", "Tug of War"], answer: 2 },
+    { q_ar: "إيه اللي بيحصل للفائز في اللعبة؟", q_en: "What happens to the winner of the game?", options_ar: ["بياخد الفلوس", "بيتحول لمنظم", "بيتم قتله", "بيختفي"], options_en: ["They get the money", "They become an organizer", "They get killed", "They disappear"], answer: 0 },
+    { q_ar: "في الجزء التاني، إيه اللي بيكشفه البطل عن اللعبة؟", q_en: "In Part 2, what does the protagonist discover about the game?", options_ar: ["إن اللعبة قديمة", "إن اللعبة لسه شغالة", "إن اللعبة بتتصور", "إن اللعبة للفقراء بس"], options_en: ["The game is old", "The game is still running", "The game is being filmed", "The game is only for the poor"], answer: 1 },
+    { q_ar: "إيه اللي بيخلي المنظمين يختاروا المتسابقين؟", q_en: "What makes the organizers choose the players?", options_ar: ["الفقر والديون", "الذكاء", "القوة", "الحظ"], options_en: ["Poverty and debt", "Intelligence", "Strength", "Luck"], answer: 0 },
+    { q_ar: "إيه اللي بيميز نهاية الجزء التاني؟", q_en: "What characterizes the ending of Part 2?", options_ar: ["نهاية مفتوحة", "نهاية سعيدة", "نهاية حزينة", "نهاية غير متوقعة"], options_en: ["Open ending", "Happy ending", "Sad ending", "Unpredictable ending"], answer: 0 },
+    { q_ar: "في المسلسل، إيه اللي بيربط الأجزاء ببعضها؟", q_en: "In the series, what connects the parts together?", options_ar: ["البطل", "اللعبة", "المنظمين", "كل الإجابات صح"], options_en: ["The protagonist", "The game", "The organizers", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيميز المسلسل عن غيره؟", q_en: "What distinguishes the series from others?", options_ar: ["فكرة اللعبة والمجتمع", "الجرافيك", "الصوت", "السرعة"], options_en: ["The game concept and society", "Graphics", "Sound", "Speed"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل للبطل في نهاية الجزء الثالث؟", q_en: "What happens to the protagonist at the end of Part 3?", options_ar: ["بيكسب", "بيضحي بنفسه", "بيهرب", "بيتحبس"], options_en: ["He wins", "He sacrifices himself", "He escapes", "He gets imprisoned"], answer: 1 },
+    { q_ar: "مين اللي بيفوز في النهاية في المسلسل؟", q_en: "Who wins at the end of the series?", options_ar: ["جي هون", "الرجل المقنع", "طفل جون هي", "المحقق"], options_en: ["Gi-hun", "The Front Man", "Jun-hee's baby", "The detective"], answer: 2 }
+  ]
+};
+
+const translations = {
+  ar: { title: "🦑 كويز لعبة الحبار 🦑", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهت اللعبة! 🦑", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "🦑 Squid Game Quiz 🦑", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Game Over! 🦑", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
+
+let currentQuestions = [];
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
 }
 
-// أسئلة أحداث (مفيش أسماء ممثلين أو مخرجين)
-const questions = [
-  // الموسم الأول (الجزء 1)
-  { q: "في بداية الموسم الأول، إيه اللعبة الأولى اللي بيلعبوها في الساحة؟", options: ["شد الحبل", "الحجلة", "إشارة الضوء الأخضر والأحمر", "البلي"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "المتسابقين بيعرفوا إنهم بيخسروا في اللعبة الأولى إزاي؟", options: ["بالصياح", "بإشارة حمراء", "بإنهم بيقعوا ويموتوا", "بيخرجوا من اللعبة"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "إيه الحلوى اللي بيحاولوا يطلعوها بالابرة في لعبة البسكويت؟", options: ["مثلث", "دائرة", "نجمة", "شكل حيوان"], answer: 3, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "في لعبة شد الحبل، إيه اللي بيحصل للفريق الخسران؟", options: ["بينزلوا في الهاوية", "بيتموتوا بالرصاص", "بيتسجنوا", "بيخرجوا برا"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "لعبة الليل (وقت النوم) بتخلي المتسابقين يعملوا إيه؟", options: ["يناموا بهدوء", "يتخانقوا ويقتلوا بعض", "يهربوا", "يلعبوا ألعاب تانية"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "في لعبة الكراسي الموسيقية، إيه اللي بيحصل لما الموسيقى تقف؟", options: ["الكل بيقعد", "اللي مابيلاقيش كرسي بيموت", "بيغنوا", "بيستخبوا"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "اللعبة الأخيرة في الموسم الأول كانت إيه؟", options: ["شد الحبل", "لعبة الحبار (Squid Game)", "البلي", "الحجلة"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
-  { q: "الشرير اللي كان بيدير اللعبة (الرجل العجوز) كان بيعمل إيه عشان يخدعهم؟", options: ["بيساعدهم", "بيداري إنه عنده ورم في المخ", "بيصورهم", "بيتكلم معاهم"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
-  
-  // الموسم الثاني (الجزء 2)
-  { q: "في بداية الموسم الثاني، البطل (سيونغ جي هون) بيرجع فين؟", options: ["البيت", "المطار", "بيت اللعبة تاني", "المستشفى"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "البطل بيحاول يعمل إيه في الموسم الثاني؟", options: ["يهرب", "يوقف اللعبة من جواها", "يكسب الفلوس", "ينتقم"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "إيه اللعبة الجديدة اللي بيلعبوها في الموسم الثاني (لعبة الأطفال)؟", options: ["الحجلة", "شد الحبل", "لعبة الألوان (Five Stones)", "البلي"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "الموسم الثاني كام عدد المتسابقين اللي بيدخلوا اللعبة؟", options: ["456", "100", "300", "999"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "في الموسم الثاني، إيه اللي بيحصل بين المتسابقين في لعبة شد الحبل الجديدة؟", options: ["بيتحدوا بعض", "بيتحدوا بعض ويقتلوا بعض", "بيحاولوا ينقذوا بعض", "بيغشوا"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "إيه اللي بيكتشفه البطل عن اللعبة في الموسم الثاني؟", options: ["إن اللعبة معمولة للفقراء بس", "إن اللعبة بيديرها فاسدين", "إن اللعبة بتتصور", "إنها حقيقية"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 2" },
-  { q: "الموسم الثاني بينتهي بإيه؟", options: ["البطل بيكسب", "البطل بيموت", "البطل بيتصاب وبيتفجر", "البطل بيهرب"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
-  
-  // الموسم الثالث (الجزء 3)
-  { q: "في الموسم الثالث، البطل بيكتشف إن اللعبة بيديرها مين؟", options: ["الشخص اللي كان بيساعده", "شخص غريب", "صديقه", "عيلته"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 3" },
-  { q: "الموسم الثالث بيكشف عن إيه في نهاية اللعبة؟", options: ["البطل بيكسب الفلوس", "البطل بيتخلى عن الفلوس", "البطل بيتعاون معاهم", "البطل بيهرب"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" },
-  { q: "إيه اللي بيحصل للشرير الرئيسي في نهاية الموسم الثالث؟", options: ["بيهرب", "بيموت", "بيتسجن", "بيكسب"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" },
-  { q: "الموسم الثالث بيكشف عن إيه بخصوص أصل اللعبة؟", options: ["إنها لعبة حقيقية", "إنها تجربة نفسية", "إنها ملهاش أصل", "إنها معمولة للمتعة بس"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" }
-];
+function startGame(part) {
+  if (part === 'part1') { currentQuestions = [...quizData.part1]; currentSaveKey = 'squid_part1_HighScore'; }
+  else if (part === 'part2') { currentQuestions = [...quizData.part2]; currentSaveKey = 'squid_part2_HighScore'; }
+  else if (part === 'part3') { currentQuestions = [...quizData.part3]; currentSaveKey = 'squid_part3_HighScore'; }
+  else { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'squid_all_HighScore'; }
 
-const TOTAL_TIME = 15;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
 
-/* --- الأصوات (Web Audio API) --- */
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function playHeartbeat() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(60, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
-  gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-}
-
-// صوت رعب (بيختلف عن أنابيل، بيبقى زي صافرة أو صوت كهرباء)
-function playScareSound() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'square'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
-  gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-}
-
-setInterval(() => {
-  if (document.getElementById('quizScreen').style.display === 'block' && !answered) {
-    playHeartbeat(); setTimeout(playHeartbeat, 200);
-  }
-}, 1000);
-
-function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
   const optEl = document.getElementById('options');
   optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
     const div = document.createElement('div');
     div.className = 'option';
@@ -234,11 +225,9 @@ function loadQuestion() {
     div.onclick = () => checkAnswer(opt.isCorrect, div);
     optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
@@ -247,17 +236,15 @@ function loadQuestion() {
 function updateTimer() {
   const timerEl = document.getElementById('timer');
   timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#ff0066'; else timerEl.style.color = '#00ffcc';
-  
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
-      triggerScareEffect();
+      const q = currentQuestions[current];
+      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -267,56 +254,39 @@ function updateTimer() {
 function checkAnswer(isCorrect, el) {
   if (answered) return;
   answered = true; clearInterval(timerInterval);
-  
+  const q = currentQuestions[current];
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   const allOpts = document.querySelectorAll('.option');
   allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-  } else {
-    el.classList.add('wrong');
-    triggerScareEffect();
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
-}
-
-function triggerScareEffect() {
-  playScareSound();
-  
-  const box = document.getElementById('quizBox');
-  box.classList.add('shake');
-  setTimeout(() => box.classList.remove('shake'), 500);
-  
-  const blood = document.getElementById('bloodOverlay');
-  blood.classList.add('active');
-  setTimeout(() => blood.classList.remove('active'), 500);
 }
 
 function nextQuestion() {
   current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
 }
 
 function showFinal() {
   clearInterval(timerInterval);
   document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang];
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#ff0066; font-size:36px;">انتهت اللعبة! 🦑</h2>
-    <p style="color:#00ffcc; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#ff0066; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+    <h2 style="color:#ff0066; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#ff0066; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
 }
+
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
