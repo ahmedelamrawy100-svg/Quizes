@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦑 كويز لعبة الحبار</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #0a1a0a 0%, #000 100%);
+    transition: background 0.2s;
+  }
+
+  /* تأثير الدم */
+  .blood-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    box-shadow: inset 0 0 150px rgba(255,0,100,0.8); /* لون وردي فاقع */
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .blood-overlay.active { opacity: 1; }
+
+  .quiz-box {
+    background: rgba(10,10,10,0.95); border: 2px solid #ff0066; /* وردي */
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 50px rgba(255,0,102,0.6); position: relative;
+  }
+  h1 { text-align: center; color: #ff0066; text-shadow: 0 0 20px #ff0066; margin-bottom: 15px; font-size: 30px; animation: titlePulse 3s infinite; }
+  @keyframes titlePulse { 0%, 100% { text-shadow: 0 0 20px #ff0066; } 50% { text-shadow: 0 0 40px #ff0066; } }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #ff0066; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #ff0066; color: #fff; border: 2px solid #ff3388;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #ff3388; box-shadow: 0 0 20px #ff0066; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #ff0066; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #ff0066; }
+  .timer { text-align: center; font-size: 18px; color: #00ffcc; margin-bottom: 15px; font-weight: 700; }
+  
+  /* تأثير رجفة الشاشة */
+  .shake {
+    animation: shakeScreen 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shakeScreen {
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+    40%, 60% { transform: translate3d(8px, 0, 0); }
+  }
+
+  /* البوستر */
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #ff0066; box-shadow: 0 0 20px rgba(255,0,102,0.6);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 22px; margin-bottom: 20px; color: #fff; line-height: 1.6; text-shadow: 0 0 10px rgba(255,0,102,0.5); }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #ff0066; border-color: #ff3388; transform: translateX(-5px); color: #fff;}
+  .option.correct { background: #006400; border-color: #00ff00; }
+  .option.wrong { background: #ff0066; border-color: #ff0000; animation: shake 0.5s; color: #fff;}
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #ff0066;
+    color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #ff3388; box-shadow: 0 0 15px #ff0066; }
+  #score { margin-top: 15px; font-size: 15px; color: #00ffcc; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="blood-overlay" id="bloodOverlay"></div>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>🦑 كويز لعبة الحبار 🦑</h1>
+    <div class="start-content">
+      <h2>⚠️ اللعبة هتبدأ ⚠️</h2>
+      <p>20 سؤال عن أحداث المواسم الـ 3<br><strong>لديك 15 ثانية لكل سؤال</strong><br>هل تقدر تعدي اللعبة وتكسب؟</p>
+      <button class="start-btn" onclick="startQuiz()">🎬 ابدأ اللعب (وشغل الصوت)</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>🦑 كويز لعبة الحبار 🦑</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 15</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+// دالة رسم بوستر اللعبة
+function generatePoster(seasonName) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#050a05"/>
+    <circle cx="250" cy="125" r="90" fill="#ff0066" opacity="0.15"/>
+    <circle cx="250" cy="125" r="90" fill="none" stroke="#00ffcc" stroke-width="4" opacity="0.5"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#ff0066" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #ff0066)">SQUID GAME</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#00ffcc" font-family="Cairo, sans-serif" font-weight="bold" font-size="25" opacity="0.9">${seasonName}</text>
+    <path d="M 0 250 Q 250 180 500 250" fill="#ff0066" opacity="0.4"/>
+  </svg>
+  `;
+}
+
+// أسئلة أحداث (مفيش أسماء ممثلين أو مخرجين)
+const questions = [
+  // الموسم الأول (الجزء 1)
+  { q: "في بداية الموسم الأول، إيه اللعبة الأولى اللي بيلعبوها في الساحة؟", options: ["شد الحبل", "الحجلة", "إشارة الضوء الأخضر والأحمر", "البلي"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "المتسابقين بيعرفوا إنهم بيخسروا في اللعبة الأولى إزاي؟", options: ["بالصياح", "بإشارة حمراء", "بإنهم بيقعوا ويموتوا", "بيخرجوا من اللعبة"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "إيه الحلوى اللي بيحاولوا يطلعوها بالابرة في لعبة البسكويت؟", options: ["مثلث", "دائرة", "نجمة", "شكل حيوان"], answer: 3, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "في لعبة شد الحبل، إيه اللي بيحصل للفريق الخسران؟", options: ["بينزلوا في الهاوية", "بيتموتوا بالرصاص", "بيتسجنوا", "بيخرجوا برا"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "لعبة الليل (وقت النوم) بتخلي المتسابقين يعملوا إيه؟", options: ["يناموا بهدوء", "يتخانقوا ويقتلوا بعض", "يهربوا", "يلعبوا ألعاب تانية"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "في لعبة الكراسي الموسيقية، إيه اللي بيحصل لما الموسيقى تقف؟", options: ["الكل بيقعد", "اللي مابيلاقيش كرسي بيموت", "بيغنوا", "بيستخبوا"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "اللعبة الأخيرة في الموسم الأول كانت إيه؟", options: ["شد الحبل", "لعبة الحبار (Squid Game)", "البلي", "الحجلة"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
+  { q: "الشرير اللي كان بيدير اللعبة (الرجل العجوز) كان بيعمل إيه عشان يخدعهم؟", options: ["بيساعدهم", "بيداري إنه عنده ورم في المخ", "بيصورهم", "بيتكلم معاهم"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 1" },
+  
+  // الموسم الثاني (الجزء 2)
+  { q: "في بداية الموسم الثاني، البطل (سيونغ جي هون) بيرجع فين؟", options: ["البيت", "المطار", "بيت اللعبة تاني", "المستشفى"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "البطل بيحاول يعمل إيه في الموسم الثاني؟", options: ["يهرب", "يوقف اللعبة من جواها", "يكسب الفلوس", "ينتقم"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "إيه اللعبة الجديدة اللي بيلعبوها في الموسم الثاني (لعبة الأطفال)؟", options: ["الحجلة", "شد الحبل", "لعبة الألوان (Five Stones)", "البلي"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "الموسم الثاني كام عدد المتسابقين اللي بيدخلوا اللعبة؟", options: ["456", "100", "300", "999"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "في الموسم الثاني، إيه اللي بيحصل بين المتسابقين في لعبة شد الحبل الجديدة؟", options: ["بيتحدوا بعض", "بيتحدوا بعض ويقتلوا بعض", "بيحاولوا ينقذوا بعض", "بيغشوا"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "إيه اللي بيكتشفه البطل عن اللعبة في الموسم الثاني؟", options: ["إن اللعبة معمولة للفقراء بس", "إن اللعبة بيديرها فاسدين", "إن اللعبة بتتصور", "إنها حقيقية"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 2" },
+  { q: "الموسم الثاني بينتهي بإيه؟", options: ["البطل بيكسب", "البطل بيموت", "البطل بيتصاب وبيتفجر", "البطل بيهرب"], answer: 2, title: "SQUID GAME", subtitle: "SEASON 2" },
+  
+  // الموسم الثالث (الجزء 3)
+  { q: "في الموسم الثالث، البطل بيكتشف إن اللعبة بيديرها مين؟", options: ["الشخص اللي كان بيساعده", "شخص غريب", "صديقه", "عيلته"], answer: 0, title: "SQUID GAME", subtitle: "SEASON 3" },
+  { q: "الموسم الثالث بيكشف عن إيه في نهاية اللعبة؟", options: ["البطل بيكسب الفلوس", "البطل بيتخلى عن الفلوس", "البطل بيتعاون معاهم", "البطل بيهرب"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" },
+  { q: "إيه اللي بيحصل للشرير الرئيسي في نهاية الموسم الثالث؟", options: ["بيهرب", "بيموت", "بيتسجن", "بيكسب"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" },
+  { q: "الموسم الثالث بيكشف عن إيه بخصوص أصل اللعبة؟", options: ["إنها لعبة حقيقية", "إنها تجربة نفسية", "إنها ملهاش أصل", "إنها معمولة للمتعة بس"], answer: 1, title: "SQUID GAME", subtitle: "SEASON 3" }
+];
+
+const TOTAL_TIME = 15;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+/* --- الأصوات (Web Audio API) --- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playHeartbeat() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+}
+
+// صوت رعب (بيختلف عن أنابيل، بيبقى زي صافرة أو صوت كهرباء)
+function playScareSound() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'square'; 
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+}
+
+setInterval(() => {
+  if (document.getElementById('quizScreen').style.display === 'block' && !answered) {
+    playHeartbeat(); setTimeout(playHeartbeat, 200);
+  }
+}, 1000);
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.subtitle);
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#ff0066'; else timerEl.style.color = '#00ffcc';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      triggerScareEffect();
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+  } else {
+    el.classList.add('wrong');
+    triggerScareEffect();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function triggerScareEffect() {
+  playScareSound();
+  
+  const box = document.getElementById('quizBox');
+  box.classList.add('shake');
+  setTimeout(() => box.classList.remove('shake'), 500);
+  
+  const blood = document.getElementById('bloodOverlay');
+  blood.classList.add('active');
+  setTimeout(() => blood.classList.remove('active'), 500);
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#ff0066; font-size:36px;">انتهت اللعبة! 🦑</h2>
+    <p style="color:#00ffcc; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#ff0066; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
