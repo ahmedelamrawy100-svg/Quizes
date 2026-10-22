@@ -6,175 +6,197 @@
 <title>🖤 كويز وينزداي - Wednesday</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* زرار الرجوع */
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
+    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0a0a; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #1a0f1c 0%, #000 100%);
+  body { background: #0a0a0a; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; flex-direction: column; }
+  
+  h1 { text-align: center; color: #b17edb; text-shadow: 0 0 15px #5c2a75; margin-bottom: 10px; font-size: 40px; }
+  p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
+
+  /* ستايل الكروت */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
   }
 
-  .quiz-box {
-    background: rgba(15,15,15,0.98); border: 2px solid #5c2a75;
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 30px rgba(92,42,117,0.6); position: relative;
+  .quiz-card {
+    background-color: #111; border: 2px solid #333; border-radius: 15px;
+    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
+    cursor: pointer;
   }
-  h1 { text-align: center; color: #b17edb; text-shadow: 0 0 15px #5c2a75; margin-bottom: 15px; font-size: 30px; }
-  
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #b17edb; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #aaa; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #5c2a75; color: #fff; border: 2px solid #b17edb;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
+  .quiz-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
   }
-  .start-btn:hover { background: #b17edb; color: #000; box-shadow: 0 0 20px #5c2a75; }
-  
+  .quiz-card h2 {
+    position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
+    text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
+  }
+  .quiz-card:hover { border-color: #b17edb; transform: translateY(-5px); box-shadow: 0 0 20px rgba(177,126,219,0.6); }
+
+  /* شاشة اللعب */
+  .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(15,15,15,0.98); border: 2px solid #5c2a75; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(92,42,117,0.6); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #b17edb; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #5c2a75; }
+  .progress-bar { background: #b17edb; height: 100%; width: 0%; transition: width 0.5s; }
   .timer { text-align: center; font-size: 18px; color: #b17edb; margin-bottom: 15px; font-weight: 700; }
-  
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #5c2a75; box-shadow: 0 0 20px rgba(92,42,117,0.5);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
   .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
-  .option:hover:not(.disabled) { background: #2d1a3d; border-color: #b17edb; transform: translateX(-5px); }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
+  .option:hover:not(.disabled) { background: #2d1a3d; border-color: #b17edb; }
   .option.correct { background: #1a5c2a; border-color: #4caf50; }
   .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #5c2a75;
-    color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
-  #next:hover { background: #b17edb; color: #000; box-shadow: 0 0 15px #5c2a75; }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #5c2a75; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
+  #next:hover { background: #b17edb; color: #000; }
   #score { margin-top: 15px; font-size: 15px; color: #b17edb; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1>🖤 كويز وينزداي 🖤</h1>
-    <div class="start-content">
-      <h2>أهلاً بك في أكاديمية Nevermore</h2>
-      <p>20 سؤال عن أحداث مسلسل Wednesday<br><strong>لديك 20 ثانية لكل سؤال</strong><br>استعد للغموض...</p>
-      <button class="start-btn" onclick="startQuiz()">🖤 ابدأ التحقيق</button>
-    </div>
-  </div>
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-  <div id="quizScreen" style="display:none;">
-    <h1>🖤 كويز وينزداي 🖤</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 20</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title">🖤 كويز وينزداي 🖤</h1>
+  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+
+  <div class="grid-container">
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Wednesday 1.jpg');">
+      <h2>الجزء الأول (2022)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Wednesday 2.jpg');">
+      <h2>الجزء التاني (2025)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Wednesday.jpg');">
+      <h2>الشامل (20 سؤال)</h2>
+    </div>
   </div>
 </div>
 
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px;">🖤 كويز وينزداي 🖤</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
 <script>
-// بوستر Wednesday
-function generatePoster(title, subtitle) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#0a0510"/>
-    <circle cx="250" cy="125" r="80" fill="#5c2a75" opacity="0.3"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#b17edb" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #5c2a75)">${title}</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
-    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#5c2a75" stroke-width="4"/>
-  </svg>
-  `;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let highestScore = 0;
+let currentSaveKey = '';
+
+const quizData = {
+  part1: [ // 15 سؤال خاصين بالجزء الأول 2022
+    { q_ar: "في بداية المسلسل، وينزداي بتتنقل لمدرسة إيه؟", q_en: "At the start of the series, which school does Wednesday transfer to?", options_ar: ["Nevermore Academy", "Hogwarts", "Xavier's School", "Jericho High"], options_en: ["Nevermore Academy", "Hogwarts", "Xavier's School", "Jericho High"], answer: 0 },
+    { q_ar: "إيه موهبة وينزداي الخاصة اللي بتورثها عن أمها؟", q_en: "What is Wednesday's special ability that she inherits from her mother?", options_ar: ["قراءة الأفكار", "الرؤية (العرافة)", "التحكم في العقل", "الطيران"], options_en: ["Telepathy", "Visions (Psychic)", "Mind control", "Flight"], answer: 1 },
+    { q_ar: "إيه اسم المخلوق اللي بيتحول ليه الطلاب في المدرسة؟", q_en: "What is the name of the creature the students transform into?", options_ar: ["مستذئب", "مصاص دماء", "ساحر", "شبح"], options_en: ["Werewolf", "Vampire", "Wizard", "Ghost"], answer: 0 },
+    { q_ar: "مين الشخص اللي بيحاول يقتل وينزداي في أول حلقة؟", q_en: "Who tries to kill Wednesday in the first episode?", options_ar: ["صديقها", "وحش غامض", "أستاذها", "زوج أمها"], options_en: ["Her friend", "A mysterious monster", "Her teacher", "Her stepfather"], answer: 1 },
+    { q_ar: "وينزداي بتنضم لنادي إيه في المدرسة؟", q_en: "Which club does Wednesday join at school?", options_ar: ["نادي الشطرنج", "نادي علم النبات", "نادي الرسم", "نادي الفنون"], options_en: ["Chess club", "Botany club", "Art club", "Arts club"], answer: 1 },
+    { q_ar: "المدينة اللي جنب المدرسة اسمها إيه؟", q_en: "What is the name of the town next to the school?", options_ar: ["Jericho", "Salem", "Mystic Falls", "Riverdale"], options_en: ["Jericho", "Salem", "Mystic Falls", "Riverdale"], answer: 0 },
+    { q_ar: "الشخص اللي بيحل مع وينزداي الجرائم (الشرطي) اسمه إيه؟", q_en: "What is the name of the sheriff who solves crimes with Wednesday?", options_ar: ["Sheriff Galpin", "Xavier", "Tyler", "Enid"], options_en: ["Sheriff Galpin", "Xavier", "Tyler", "Enid"], answer: 0 },
+    { q_ar: "إيه اللغز الأساسي اللي وينزداي بتحاول تحله؟", q_en: "What is the main mystery Wednesday tries to solve?", options_ar: ["سرقة البنك", "اختفاء طالب", "جرائم قتل الوحش", "حادثة المدرسة"], options_en: ["A bank robbery", "A student's disappearance", "The monster's murders", "A school accident"], answer: 2 },
+    { q_ar: "مين اللي بيحاول يساعد وينزداي من غير ما تطلب؟", q_en: "Who tries to help Wednesday without her asking?", options_ar: ["Enid", "Xavier", "Tyler", "Bianca"], options_en: ["Enid", "Xavier", "Tyler", "Bianca"], answer: 0 },
+    { q_ar: "إيه علاقة عيلة وينزداي بالمدرسة؟", q_en: "What is Wednesday's family's connection to the school?", options_ar: ["جدها أسسها", "أمها وأبوها درسوا فيها", "هي بتملكها", "ملهاش علاقة"], options_en: ["Her grandfather founded it", "Her parents studied there", "She owns it", "No connection"], answer: 1 },
+    { q_ar: "في الحفلة المدرسية، إيه اللي بيحصل؟", q_en: "At the school dance, what happens?", options_ar: ["بتتحرق المدرسة", "بيتم قتل طالب", "بتهرب وينزداي", "بتكشف سر"], options_en: ["The school burns down", "A student gets killed", "Wednesday escapes", "A secret is revealed"], answer: 1 },
+    { q_ar: "مين الشخصية اللي بتخفي سر كبير عن الجميع؟", q_en: "Which character hides a big secret from everyone?", options_ar: ["Xavier", "Tyler", "Enid", "Bianca"], options_en: ["Xavier", "Tyler", "Enid", "Bianca"], answer: 1 },
+    { q_ar: "الوحش اللي بيقتل الطلاب بيطلع إيه؟", q_en: "What does the monster killing the students turn out to be?", options_ar: ["مستذئب", "مصاص دماء", "هجين", "شبح"], options_en: ["A werewolf", "A vampire", "A hybrid", "A ghost"], answer: 2 },
+    { q_ar: "قضية القتل الأساسية في الموسم الأول كانت مرتبطة بمين؟", q_en: "The main murder case in Season 1 was connected to whom?", options_ar: ["عيلة وينزداي", "المدير", "الطلاب", "شرطة المدينة"], options_en: ["Wednesday's family", "The principal", "The students", "The town police"], answer: 0 },
+    { q_ar: "في نهاية الموسم، مين اللي بيظهر إنه الشرير الحقيقي؟", q_en: "At the end of the season, who is revealed as the real villain?", options_ar: ["المدير", "المعلم", "الطلاب", "شخص مقرب"], options_en: ["The principal", "The teacher", "The students", "A close person"], answer: 3 }
+  ],
+  part2: [ // 15 سؤال خاصين بالجزء التاني 2025
+    { q_ar: "في بداية الجزء التاني، وينزداي بترجع فين؟", q_en: "At the start of Part 2, where does Wednesday return?", options_ar: ["أكاديمية نيفرمور", "البيت", "المدينة", "المدرسة التانية"], options_en: ["Nevermore Academy", "Home", "The city", "Another school"], answer: 0 },
+    { q_ar: "إيه التحدي الجديد اللي بيواجه وينزداي في الجزء التاني؟", q_en: "What new challenge does Wednesday face in Part 2?", options_ar: ["قضية جديدة", "وحش جديد", "أعداء قدام", "كل الإجابات صح"], options_en: ["A new case", "A new monster", "Old enemies", "All answers are correct"], answer: 3 },
+    { q_ar: "مين اللي بيرجع في الجزء التاني كشخصية مهمة؟", q_en: "Who returns in Part 2 as an important character?", options_ar: ["تايلر", "إينيد", "المدير", "كل الإجابات صح"], options_en: ["Tyler", "Enid", "The Principal", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيحاول وينزداي تكتشفه في الجزء التاني؟", q_en: "What does Wednesday try to discover in Part 2?", options_ar: ["سر عيلتها", "ماضي المدرسة", "خطة جديدة", "كل الإجابات صح"], options_en: ["Her family's secret", "The school's past", "A new plan", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيخلي وينزداي تواجه خطر أكبر في الجزء التاني؟", q_en: "What makes Wednesday face a bigger danger in Part 2?", options_ar: ["أعداء أقوى", "قوى جديدة", "أسرار خطيرة", "كل الإجابات صح"], options_en: ["Stronger enemies", "New powers", "Dangerous secrets", "All answers are correct"], answer: 3 },
+    { q_ar: "في الجزء التاني، إيه اللي بيحصل لعلاقة وينزداي بأمها؟", q_en: "In Part 2, what happens to Wednesday's relationship with her mother?", options_ar: ["بتتحسن", "بتسوء", "مفيش تغيير", "بتنتهي"], options_en: ["It improves", "It worsens", "No change", "It ends"], answer: 0 },
+    { q_ar: "إيه التطور اللي بيحصل لإينيد في الجزء التاني؟", q_en: "What development happens to Enid in Part 2?", options_ar: ["بتتحول لمستذئب", "بتقوى", "بتسيب المدرسة", "كل الإجابات صح"], options_en: ["She transforms into a werewolf", "She gets stronger", "She leaves the school", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيكتشفه وينزداي عن أكاديمية نيفرمور في الجزء التاني؟", q_en: "What does Wednesday discover about Nevermore Academy in Part 2?", options_ar: ["فيها أسرار جديدة", "فيها كنز", "فيها وحش", "كل الإجابات صح"], options_en: ["It has new secrets", "It has a treasure", "It has a monster", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيحصل للمدرسة في الجزء التاني؟", q_en: "What happens to the school in Part 2?", options_ar: ["بتتقفل", "بتتحرق", "بتهدد", "كل الإجابات صح"], options_en: ["It closes", "It burns", "It gets threatened", "All answers are correct"], answer: 2 },
+    { q_ar: "في الجزء التاني، مين اللي بيتعاون مع وينزداي؟", q_en: "In Part 2, who cooperates with Wednesday?", options_ar: ["إينيد", "تايلر", "الشرطي", "كل الإجابات صح"], options_en: ["Enid", "Tyler", "The sheriff", "All answers are correct"], answer: 0 },
+    { q_ar: "إيه نوع التهديد اللي بيواجه وينزداي في الجزء التاني؟", q_en: "What kind of threat does Wednesday face in Part 2?", options_ar: ["تهديد خارق", "تهديد بشري", "تهديد نفسي", "كل الإجابات صح"], options_en: ["Supernatural threat", "Human threat", "Psychological threat", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيحاول وينزداي تثبته في الجزء التاني؟", q_en: "What does Wednesday try to prove in Part 2?", options_ar: ["الحقيقة", "القوة", "الحب", "الخوف"], options_en: ["The truth", "Power", "Love", "Fear"], answer: 0 },
+    { q_ar: "في نهاية الجزء التاني، إيه اللي بيحصل للمدرسة؟", q_en: "At the end of Part 2, what happens to the school?", options_ar: ["بتفضل شغالة", "بتتقفل", "بتتحرر", "بتتغير"], options_en: ["It stays open", "It closes", "It gets liberated", "It changes"], answer: 0 },
+    { q_ar: "إيه اللي بتتعلمه وينزداي في الجزء التاني؟", q_en: "What does Wednesday learn in Part 2?", options_ar: ["إن العيلة مهمة", "إن القوة هي كل حاجة", "إن الحب صعب", "إن الخوف هو الحل"], options_en: ["Family is important", "Power is everything", "Love is hard", "Fear is the answer"], answer: 0 },
+    { q_ar: "إيه اللي بيميز نهاية الجزء التاني؟", q_en: "What characterizes the ending of Part 2?", options_ar: ["نهاية مفتوحة", "نهاية سعيدة", "نهاية حزينة", "نهاية غير متوقعة"], options_en: ["Open ending", "Happy ending", "Sad ending", "Unpredictable ending"], answer: 0 }
+  ],
+  comprehensive: [ // 20 سؤال خاصين بالشامل
+    { q_ar: "إيه الشيء المشترك بين الجزء الأول والتاني؟", q_en: "What's the common thing between Part 1 and Part 2?", options_ar: ["وينزداي", "المدرسة", "الوحش", "كل الإجابات صح"], options_en: ["Wednesday", "The school", "The monster", "All answers are correct"], answer: 3 },
+    { q_ar: "مين اللي بيلعب دور وينزداي؟", q_en: "Who plays Wednesday?", options_ar: ["جينا أورتيجا", "إيما مايرز", "كاثرين زيتا جونز", "كل الإجابات صح"], options_en: ["Jenna Ortega", "Emma Myers", "Catherine Zeta-Jones", "All answers are correct"], answer: 0 },
+    { q_ar: "إيه موهبة وينزداي؟", q_en: "What is Wednesday's ability?", options_ar: ["الرؤية (العرافة)", "قراءة الأفكار", "الطيران", "التحكم في العقل"], options_en: ["Visions (Psychic)", "Telepathy", "Flight", "Mind control"], answer: 0 },
+    { q_ar: "في أي جزء بتحل وينزداي قضية القتل؟", q_en: "In which part does Wednesday solve the murder case?", options_ar: ["الجزء الأول", "الجزء التاني", "الاتنين", "مفيش"], options_en: ["Part 1", "Part 2", "Both", "None"], answer: 0 },
+    { q_ar: "مين اللي بيظهر كصديق مقرب لوينزداي؟", q_en: "Who appears as Wednesday's close friend?", options_ar: ["إينيد", "تايلر", "المدير", "الشرطي"], options_en: ["Enid", "Tyler", "The principal", "The sheriff"], answer: 0 },
+    { q_ar: "إيه اللي بيميز وينزداي؟", q_en: "What characterizes Wednesday?", options_ar: ["شخصيتها الغامضة", "ضحكتها", "خوفها", "طيبتها"], options_en: ["Her mysterious personality", "Her laugh", "Her fear", "Her kindness"], answer: 0 },
+    { q_ar: "في الجزء التاني، إيه اللي بيواجه وينزداي؟", q_en: "In Part 2, what does Wednesday face?", options_ar: ["تهديد جديد", "أعداء قدام", "أسرار جديدة", "كل الإجابات صح"], options_en: ["A new threat", "Old enemies", "New secrets", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيربط الأجزاء ببعضها؟", q_en: "What connects the parts together?", options_ar: ["وينزداي", "المدرسة", "الأصدقاء", "كل الإجابات صح"], options_en: ["Wednesday", "The school", "The friends", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بتتعلمه وينزداي في النهاية؟", q_en: "What does Wednesday learn at the end?", options_ar: ["إن العيلة مهمة", "إن القوة هي كل حاجة", "إن الحب صعب", "إن الخوف هو الحل"], options_en: ["Family is important", "Power is everything", "Love is hard", "Fear is the answer"], answer: 0 },
+    { q_ar: "مين اللي بيساعد وينزداي في حل القضايا؟", q_en: "Who helps Wednesday solve cases?", options_ar: ["إينيد", "تايلر", "الشرطي", "كل الإجابات صح"], options_en: ["Enid", "Tyler", "The sheriff", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيميز المسلسل عن غيره؟", q_en: "What distinguishes the series from others?", options_ar: ["شخصية وينزداي", "الجرافيك", "الصوت", "السرعة"], options_en: ["Wednesday's character", "Graphics", "Sound", "Speed"], answer: 0 },
+    { q_ar: "إيه اللي بيحاول وينزداي تثبته؟", q_en: "What does Wednesday try to prove?", options_ar: ["الحقيقة", "القوة", "الحب", "الخوف"], options_en: ["The truth", "Power", "Love", "Fear"], answer: 0 },
+    { q_ar: "الوحش اللي بيقتل الطلاب في الجزء الأول كان إيه؟", q_en: "What was the monster killing students in Part 1?", options_ar: ["هجين", "مستذئب", "مصاص دماء", "شبح"], options_en: ["A hybrid", "A werewolf", "A vampire", "A ghost"], answer: 0 },
+    { q_ar: "إيه علاقة عيلة وينزداي بالمدرسة؟", q_en: "What is Wednesday's family's connection to the school?", options_ar: ["أهلها درسوا فيها", "جدها أسسها", "هي بتملكها", "ملهاش علاقة"], options_en: ["Her parents studied there", "Her grandfather founded it", "She owns it", "No connection"], answer: 0 },
+    { q_ar: "إيه اللي بيميز إينيد؟", q_en: "What characterizes Enid?", options_ar: ["إنها مستذئب", "إنها مصاص دماء", "إنها ساحرة", "إنها شبح"], options_en: ["She's a werewolf", "She's a vampire", "She's a wizard", "She's a ghost"], answer: 0 },
+    { q_ar: "إيه اللي بيحصل للمدرسة في الجزء التاني؟", q_en: "What happens to the school in Part 2?", options_ar: ["بتهدد", "بتتقفل", "بتتحرق", "بتتغير"], options_en: ["It gets threatened", "It closes", "It burns", "It changes"], answer: 0 },
+    { q_ar: "مين اللي بيظهر كشرير في الجزء الأول؟", q_en: "Who appears as the villain in Part 1?", options_ar: ["شخص مقرب", "المدير", "المعلم", "الطلاب"], options_en: ["A close person", "The principal", "The teacher", "The students"], answer: 0 },
+    { q_ar: "إيه اللي بيميز نهاية الجزء التاني؟", q_en: "What characterizes the ending of Part 2?", options_ar: ["نهاية مفتوحة", "نهاية سعيدة", "نهاية حزينة", "نهاية غير متوقعة"], options_en: ["Open ending", "Happy ending", "Sad ending", "Unpredictable ending"], answer: 0 },
+    { q_ar: "إيه اللي بيميز وينزداي عن باقي الطلاب؟", q_en: "What makes Wednesday different from other students?", options_ar: ["شخصيتها الغامضة", "قوتها", "جمالها", "خوفها"], options_en: ["Her mysterious personality", "Her power", "Her beauty", "Her fear"], answer: 0 },
+    { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["تقبل الاختلاف", "الخوف هو القوة", "الحب هو الحل", "الفلوس هي كل حاجة"], options_en: ["Accepting differences", "Fear is power", "Love is the answer", "Money is everything"], answer: 0 }
+  ]
+};
+
+const translations = {
+  ar: { title: "🖤 كويز وينزداي 🖤", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! 🖤", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "🖤 Wednesday Quiz 🖤", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! 🖤", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
+
+let currentQuestions = [];
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
 }
 
-const questions = [
-  { q: "في بداية المسلسل، وينزداي بتتنقل لمدرسة إيه؟", options: ["Nevermore Academy", "Hogwarts", "Xavier's School", "Jericho High"], answer: 0, title: "WEDNESDAY", subtitle: "THE SCHOOL" },
-  { q: "إيه موهبة وينزداي الخاصة اللي بتورثها عن أمها؟", options: ["قراءة الأفكار", "الرؤية (العرافة)", "التحكم في العقل", "الطيران"], answer: 1, title: "WEDNESDAY", subtitle: "THE POWER" },
-  { q: "إيه اسم المخلوق اللي بيتحول ليه الطلاب في المدرسة؟", options: ["مستذئب", "مصاص دماء", "ساحر", "شبح"], answer: 0, title: "WEDNESDAY", subtitle: "THE CREATURES" },
-  { q: "مين الشخص اللي بيحاول يقتل وينزداي في أول حلقة؟", options: ["صديقها", "وحش غامض", "أستاذها", "زوج أمها"], answer: 1, title: "WEDNESDAY", subtitle: "THE MURDER" },
-  { q: "وينزداي بتنضم لنادي إيه في المدرسة؟", options: ["نادي الشطرنج", "نادي علم النبات", "نادي الرسم", "نادي الفنون"], answer: 1, title: "WEDNESDAY", subtitle: "THE CLUB" },
-  { q: "المدينة اللي جنب المدرسة اسمها إيه؟", options: ["Jericho", "Salem", "Mystic Falls", "Riverdale"], answer: 0, title: "WEDNESDAY", subtitle: "THE TOWN" },
-  { q: "الشخص اللي بيحل مع وينزداي الجرائم (الشرطي) اسمه إيه؟", options: ["Sheriff Galpin", "Xavier", "Tyler", "Enid"], answer: 0, title: "WEDNESDAY", subtitle: "THE SHERIFF" },
-  { q: "إيه اللغز الأساسي اللي وينزداي بتحاول تحله؟", options: ["سرقة البنك", "اختفاء طالب", "جرائم قتل الوحش", "حادثة المدرسة"], answer: 2, title: "WEDNESDAY", subtitle: "THE MYSTERY" },
-  { q: "مين اللي بيحاول يساعد وينزداي من غير ما تطلب؟", options: ["Enid", "Xavier", "Tyler", "Bianca"], answer: 0, title: "WEDNESDAY", subtitle: "THE FRIEND" },
-  { q: "إيه علاقة عيلة وينزداي بالمدرسة؟", options: ["جدها أسسها", "أمها وأبوها درسوا فيها", "هي بتملكها", "ملهاش علاقة"], answer: 1, title: "WEDNESDAY", subtitle: "THE FAMILY" },
-  { q: "في الحفلة المدرسية، إيه اللي بيحصل؟", options: ["بتتحرق المدرسة", "بيتم قتل طالب", "بتهرب وينزداي", "بتكشف سر"], answer: 1, title: "WEDNESDAY", subtitle: "THE DANCE" },
-  { q: "مين الشخصية اللي بتخفي سر كبير عن الجميع؟", options: ["Xavier", "Tyler", "Enid", "Bianca"], answer: 1, title: "WEDNESDAY", subtitle: "THE SECRET" },
-  { q: "الوحش اللي بيقتل الطلاب بيطلع إيه؟", options: ["مستذئب", "مصاص دماء", "هجين", "شبح"], answer: 2, title: "WEDNESDAY", subtitle: "THE MONSTER" },
-  { q: "قضية القتل الأساسية في الموسم الأول كانت مرتبطة بمين؟", options: ["عيلة وينزداي", "المدير", "الطلاب", "شرطة المدينة"], answer: 0, title: "WEDNESDAY", subtitle: "THE PAST" },
-  { q: "إيه اللي بتكتشفه وينزداي عن أصلها؟", options: ["إنها تبنت", "إنها بتحمل قدرة غامضة", "إنها مش بشر", "إنها بتحب الرسم"], answer: 1, title: "WEDNESDAY", subtitle: "THE TRUTH" },
-  { q: "في نهاية الموسم، مين اللي بيظهر إنه الشرير الحقيقي؟", options: ["المدير", "المعلم", "الطلاب", "شخص مقرب"], answer: 3, title: "WEDNESDAY", subtitle: "THE VILLAIN" },
-  { q: "إيه اللي بيحصل لوينزداي في نهاية الموسم الأول؟", options: ["بترجع بيتها", "بتتقبل في المدرسة", "بتتحب من الجميع", "بتصير بطلة"], answer: 1, title: "WEDNESDAY", subtitle: "THE ENDING" },
-  { q: "العلاقة بين وينزداي وEnid بتتطور لإيه؟", options: ["خناقة", "صداقة قوية", "منافسة", "كره"], answer: 1, title: "WEDNESDAY", subtitle: "THE BOND" },
-  { q: "في المسلسل، مين اللي بيساعد وينزداي في حل الجرائم؟", options: ["Xavier", "Tyler", "Sheriff Galpin", "الجميع"], answer: 2, title: "WEDNESDAY", subtitle: "THE INVESTIGATION" },
-  { q: "إيه الميزة الأساسية اللي بتميز وينزداي عن باقي الطلاب؟", options: ["ذكاؤها التحليلي", "قوتها الجسدية", "جمالها", "سرعتها"], answer: 0, title: "WEDNESDAY", subtitle: "THE CHARACTER" }
-];
+function startGame(part) {
+  if (part === 'part1') { currentQuestions = [...quizData.part1]; currentSaveKey = 'wednesday_part1_HighScore'; }
+  else if (part === 'part2') { currentQuestions = [...quizData.part2]; currentSaveKey = 'wednesday_part2_HighScore'; }
+  else { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'wednesday_all_HighScore'; }
 
-const TOTAL_TIME = 20;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
 
-// صوت بسيط (تكة خفيفة)
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playClick() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-}
-
-function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
   const optEl = document.getElementById('options');
   optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
     const div = document.createElement('div');
     div.className = 'option';
@@ -182,11 +204,9 @@ function loadQuestion() {
     div.onclick = () => checkAnswer(opt.isCorrect, div);
     optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
@@ -195,16 +215,15 @@ function loadQuestion() {
 function updateTimer() {
   const timerEl = document.getElementById('timer');
   timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#b17edb';
-  
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current];
+      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -214,45 +233,39 @@ function updateTimer() {
 function checkAnswer(isCorrect, el) {
   if (answered) return;
   answered = true; clearInterval(timerInterval);
-  
+  const q = currentQuestions[current];
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   const allOpts = document.querySelectorAll('.option');
   allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-    playClick(); // تكة خفيفة لو صح
-  } else {
-    el.classList.add('wrong');
-    playClick(); // تكة خفيفة لو غلط
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
 function nextQuestion() {
   current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
 }
 
 function showFinal() {
   clearInterval(timerInterval);
   document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang];
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#b17edb; font-size:36px;">انتهى التحقيق! 🖤</h2>
-    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#5c2a75; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+    <h2 style="color:#b17edb; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#5c2a75; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
 }
+
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
