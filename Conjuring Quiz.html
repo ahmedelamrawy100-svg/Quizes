@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👻 كويز الكونجورينج</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0a; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #0d1117 0%, #000 100%);
+  }
+
+  .quiz-box {
+    background: rgba(15,15,15,0.98); border: 2px solid #4a5a6a;
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 30px rgba(74,90,106,0.6); position: relative;
+  }
+  h1 { text-align: center; color: #8ba3b8; text-shadow: 0 0 15px #4a5a6a; margin-bottom: 15px; font-size: 30px; }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #8ba3b8; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #aaa; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #4a5a6a; color: #fff; border: 2px solid #8ba3b8;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #8ba3b8; color: #000; box-shadow: 0 0 20px #4a5a6a; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #8ba3b8; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #4a5a6a; }
+  .timer { text-align: center; font-size: 18px; color: #8ba3b8; margin-bottom: 15px; font-weight: 700; }
+  
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #4a5a6a; box-shadow: 0 0 20px rgba(74,90,106,0.5);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #2d3a4a; border-color: #8ba3b8; transform: translateX(-5px); }
+  .option.correct { background: #1a5c2a; border-color: #4caf50; }
+  .option.wrong { background: #5c2a2a; border-color: #f44336; }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #4a5a6a;
+    color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #8ba3b8; color: #000; box-shadow: 0 0 15px #4a5a6a; }
+  #score { margin-top: 15px; font-size: 15px; color: #8ba3b8; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>👻 كويز الكونجورينج 👻</h1>
+    <div class="start-content">
+      <h2>عالم الـ Warren</h2>
+      <p>20 سؤال عن أحداث أفلام The Conjuring 1 & 2<br><strong>لديك 20 ثانية لكل سؤال</strong><br>استعد للغموض...</p>
+      <button class="start-btn" onclick="startQuiz()">👻 ابدأ التحقيق</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>👻 كويز الكونجورينج 👻</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 20</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+function generatePoster(title, subtitle) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#0a0f14"/>
+    <circle cx="250" cy="125" r="80" fill="#4a5a6a" opacity="0.3"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#8ba3b8" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #4a5a6a)">${title}</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
+    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#4a5a6a" stroke-width="4"/>
+  </svg>
+  `;
+}
+
+// أسئلة الجزء الأول والتاني (أحداث بس)
+const questions = [
+  // The Conjuring 1 (2013)
+  { q: "في الجزء الأول، عيلة بيرون بينتقلوا لبيت جديد. إيه أول حاجة غريبة بتحصللهم؟", options: ["كلابهم بترفض تدخل البيت", "بنتهم الصغيرة بتبدأ تتكلم مع صديق خيالي", "بيسمعوا أصوات في السقف", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "إيه اللي بيلاقيه الـ Warren في قبو البيت؟", options: ["غرفة سرية فيها مرايا", "كنز مدفون", "رسائل قديمة", "جثة"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "الروح الشريرة اللي بتطارد العيلة اسمها إيه؟", options: ["Bathsheba", "Valak", "Annabelle", "The Nun"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "إيه اللي بيخلي الروح الشريرة تطارد العيلة؟", options: ["لأنهم سكنوا بيتها", "لأنهم أغنياء", "لأنهم سرقوا حاجة", "لأنهم صلوا"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "في مشهد شهير، البنت الصغيرة بتشوف إيه في المرايا؟", options: ["شبح ورا أمها", "نفسها", "أبوها", "دمية"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "إزاي الـ Warren بيعرفوا إن البيت مسكون؟", options: ["بالصدفة", "عن طريق تحقيقاتهم", "من الجيران", "من الشرطة"], answer: 1, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "في نهاية الجزء الأول، إزاي بيواجهوا الروح الشريرة؟", options: ["بيحرقوا البيت", "بيستخدموا الصلاة والطقوس الدينية", "بيهربوا", "بيبيعوا البيت"], answer: 1, title: "THE CONJURING", subtitle: "PART 1" },
+  { q: "إيه اللي كان بيحصل للدمية أنابيل في مشهد البداية؟", options: ["بتتحرك لوحدها", "بتتكلم", "بتختفي", "بتضحك"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
+  
+  // The Conjuring 2 (2016)
+  { q: "في الجزء الثاني، الأحداث بتدور في أي دولة؟", options: ["أمريكا", "إنجلترا", "فرنسا", "ألمانيا"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "العيلة اللي بتتعرض للرعب في الجزء الثاني هي عيلة إيه؟", options: ["عيلة هودجسون", "عيلة بيرون", "عيلة وارن", "عيلة سميث"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "البنت الصغيرة اللي الروح بتتكلم من خلالها اسمها إيه؟", options: ["Janet", "Margaret", "Peggy", "Sarah"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "الروح الشريرة الرئيسية في الجزء الثاني هي مين؟", options: ["Valak (الراهبة)", "Bathsheba", "Annabelle", "Crooked Man"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "الروح بتظهر في شكل إيه في البداية؟", options: ["راهبة", "طفل", "كلب", "دمية"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "مين اللي بيتقمصه الشيطان في البيت؟", options: ["البنت الصغيرة", "الأم", "الأب", "الجدة"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "الروح الشريرة بتستخدم إيه عشان تخوف العيلة؟", options: ["الرسم على الحيطان", "تحريك الأثاث", "الأصوات الغريبة", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "في مشهد مشهور، الأب بيبني إيه في البيت؟", options: ["غرفة سرية", "صليب خشب كبير", "سور عالي", "قفل"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "الـ Warren بيستخدموا إيه عشان يعرفوا اسم الروح؟", options: ["الكتاب المقدس", "التواصل مع الأرواح", "التحقيق مع الجيران", "الشرطة"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "في نهاية الجزء الثاني، إيه اللي بيحصل للروح الشريرة؟", options: ["بتهرب", "بتترصد في مكان تاني", "بتتحبس", "بتختفي"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "إيه اللي بيميز الجزء الثاني عن الأول؟", options: ["بيحصل في إنجلترا", "الروح بتتكلم بصوت مسموع", "في عيلة تانية", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 2" },
+  { q: "الـ Warren قدروا يواجهوا الروح الشريرة في الجزء الثاني إزاي؟", options: ["بالهروب", "بالصلاة والإيمان", "بالقتال الجسدي", "بالنار"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" }
+];
+
+const TOTAL_TIME = 20;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+// صوت تكة خفيفة
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClick() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#8ba3b8';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+    playClick();
+  } else {
+    el.classList.add('wrong');
+    playClick();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#8ba3b8; font-size:36px;">انتهى التحقيق! 👻</h2>
+    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#4a5a6a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
