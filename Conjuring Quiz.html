@@ -3,181 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>👻 كويز الكونجورينج</title>
+<title>👻 كويز الكونجورينج - The Conjuring</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* زرار الرجوع */
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
+    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0a0a; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #0d1117 0%, #000 100%);
+  body { background: #0a0f14; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; flex-direction: column; }
+  
+  h1 { text-align: center; color: #8ba3b8; text-shadow: 0 0 15px #4a5a6a; margin-bottom: 10px; font-size: 40px; }
+  p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
+
+  /* ستايل الكروت */
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px; width: 100%; max-width: 1000px;
   }
 
-  .quiz-box {
-    background: rgba(15,15,15,0.98); border: 2px solid #4a5a6a;
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 30px rgba(74,90,106,0.6); position: relative;
+  .quiz-card {
+    background-color: #111; border: 2px solid #333; border-radius: 15px;
+    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
+    cursor: pointer;
   }
-  h1 { text-align: center; color: #8ba3b8; text-shadow: 0 0 15px #4a5a6a; margin-bottom: 15px; font-size: 30px; }
-  
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #8ba3b8; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #aaa; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #4a5a6a; color: #fff; border: 2px solid #8ba3b8;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
+  .quiz-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
   }
-  .start-btn:hover { background: #8ba3b8; color: #000; box-shadow: 0 0 20px #4a5a6a; }
-  
+  .quiz-card h2 {
+    position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
+    text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
+  }
+  .quiz-card:hover { border-color: #8ba3b8; transform: translateY(-5px); box-shadow: 0 0 20px rgba(139,163,184,0.6); }
+
+  /* شاشة اللعب */
+  .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(15,15,15,0.98); border: 2px solid #4a5a6a; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(74,90,106,0.6); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #8ba3b8; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #4a5a6a; }
+  .progress-bar { background: #8ba3b8; height: 100%; width: 0%; transition: width 0.5s; }
   .timer { text-align: center; font-size: 18px; color: #8ba3b8; margin-bottom: 15px; font-weight: 700; }
-  
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #4a5a6a; box-shadow: 0 0 20px rgba(74,90,106,0.5);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
   .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
-  .option:hover:not(.disabled) { background: #2d3a4a; border-color: #8ba3b8; transform: translateX(-5px); }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
+  .option:hover:not(.disabled) { background: #2d3a4a; border-color: #8ba3b8; }
   .option.correct { background: #1a5c2a; border-color: #4caf50; }
   .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #4a5a6a;
-    color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
-  #next:hover { background: #8ba3b8; color: #000; box-shadow: 0 0 15px #4a5a6a; }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #4a5a6a; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
+  #next:hover { background: #8ba3b8; color: #000; }
   #score { margin-top: 15px; font-size: 15px; color: #8ba3b8; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1>👻 كويز الكونجورينج 👻</h1>
-    <div class="start-content">
-      <h2>عالم الـ Warren</h2>
-      <p>20 سؤال عن أحداث أفلام The Conjuring 1 & 2<br><strong>لديك 20 ثانية لكل سؤال</strong><br>استعد للغموض...</p>
-      <button class="start-btn" onclick="startQuiz()">👻 ابدأ التحقيق</button>
-    </div>
-  </div>
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-  <div id="quizScreen" style="display:none;">
-    <h1>👻 كويز الكونجورينج 👻</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 20</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title">👻 كويز الكونجورينج 👻</h1>
+  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+
+  <div class="grid-container">
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/The Conjuring 1.jpg');">
+      <h2>الجزء الأول (2013)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/The Conjuring 2.jpeg');">
+      <h2>الجزء الثاني (2016)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part3')" style="background-image: url('pic/The Conjuring 3.jpeg');">
+      <h2>الجزء الثالث (2021)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/The Conjuring.jpg');">
+      <h2>الشامل (20 سؤال)</h2>
+    </div>
   </div>
 </div>
 
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px;">👻 كويز الكونجورينج 👻</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
 <script>
-function generatePoster(title, subtitle) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#0a0f14"/>
-    <circle cx="250" cy="125" r="80" fill="#4a5a6a" opacity="0.3"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#8ba3b8" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #4a5a6a)">${title}</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
-    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#4a5a6a" stroke-width="4"/>
-  </svg>
-  `;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let highestScore = 0;
+let currentSaveKey = '';
+
+const quizData = {
+  part1: [ // 15 سؤال خاصين بـ The Conjuring 1 (2013)
+    { q_ar: "في الجزء الأول، عيلة بيرون بينتقلوا لبيت جديد. إيه أول حاجة غريبة بتحصللهم؟", q_en: "In Part 1, the Perron family moves to a new house. What's the first strange thing?", options_ar: ["كلابهم بترفض تدخل البيت", "بنتهم بتبدأ تتكلم مع صديق خيالي", "بيسمعوا أصوات في السقف", "كل الإجابات صح"], options_en: ["Their dog refuses to enter", "Their daughter talks to an imaginary friend", "They hear noises in the ceiling", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيلاقيه الـ Warren في قبو البيت؟", q_en: "What do the Warrens find in the basement?", options_ar: ["غرفة سرية فيها مرايا", "كنز مدفون", "رسائل قديمة", "جثة"], options_en: ["A secret room with mirrors", "Buried treasure", "Old letters", "A corpse"], answer: 0 },
+    { q_ar: "الروح الشريرة اللي بتطارد العيلة اسمها إيه؟", q_en: "What is the name of the demon haunting the family?", options_ar: ["Bathsheba", "Valak", "Annabelle", "The Nun"], options_en: ["Bathsheba", "Valak", "Annabelle", "The Nun"], answer: 0 },
+    { q_ar: "إيه اللي بيخلي الروح الشريرة تطارد العيلة؟", q_en: "What makes the evil spirit haunt the family?", options_ar: ["لأنهم سكنوا بيتها", "لأنهم أغنياء", "لأنهم سرقوا حاجة", "لأنهم صلوا"], options_en: ["Because they moved into her house", "Because they are rich", "Because they stole something", "Because they prayed"], answer: 0 },
+    { q_ar: "في مشهد شهير، البنت الصغيرة بتشوف إيه في المرايا؟", q_en: "In a famous scene, what does the little girl see in the mirror?", options_ar: ["شبح ورا أمها", "نفسها", "أبوها", "دمية"], options_en: ["A ghost behind her mother", "Herself", "Her father", "A doll"], answer: 0 },
+    { q_ar: "إزاي الـ Warren بيعرفوا إن البيت مسكون؟", q_en: "How do the Warrens know the house is haunted?", options_ar: ["بالصدفة", "عن طريق تحقيقاتهم", "من الجيران", "من الشرطة"], options_en: ["By chance", "Through their investigations", "From the neighbors", "From the police"], answer: 1 },
+    { q_ar: "في نهاية الجزء الأول، إزاي بيواجهوا الروح الشريرة؟", q_en: "At the end of Part 1, how do they face the evil spirit?", options_ar: ["بيحرقوا البيت", "بيستخدموا الصلاة والطقوس الدينية", "بيهربوا", "بيبيعوا البيت"], options_en: ["They burn the house", "They use prayer and religious rituals", "They run away", "They sell the house"], answer: 1 },
+    { q_ar: "إيه اللي كان بيحصل للدمية أنابيل في مشهد البداية؟", q_en: "What happened to the Annabelle doll in the opening scene?", options_ar: ["بتتحرك لوحدها", "بتتكلم", "بتختفي", "بتضحك"], options_en: ["It moved on its own", "It talked", "It disappeared", "It laughed"], answer: 0 },
+    { q_ar: "مين اللي بيطلب من الـ Warren يساعدوا عيلة بيرون؟", q_en: "Who asks the Warrens to help the Perron family?", options_ar: ["البنت الكبيرة", "الأم (كارولين)", "الشرطة", "الجيران"], options_en: ["The oldest daughter", "The mother (Carolyn)", "The police", "The neighbors"], answer: 1 },
+    { q_ar: "الروح الشريرة بتظهر في البيت على شكل إيه في الأغلب؟", q_en: "What does the evil spirit mostly look like in the house?", options_ar: ["راهبة", "ست عجوز", "طفل", "كلب"], options_en: ["A nun", "An old woman", "A child", "A dog"], answer: 1 },
+    { q_ar: "مين اللي بيتم حبسه في قبو البيت في مشهد مرعب؟", q_en: "Who gets trapped in the basement in a scary scene?", options_ar: ["الأب", "البنت الصغيرة", "الأم", "الوسيط"], options_en: ["The father", "The little girl", "The mother", "The medium"], answer: 1 },
+    { q_ar: "إيه اللي بيحصل للروح الشريرة في النهاية؟", q_en: "What happens to the evil spirit at the end?", options_ar: ["بتهرب", "بتترصد في مكان تاني", "بتتحبس", "بتختفي"], options_en: ["She escapes", "She haunts another place", "She gets trapped", "She disappears"], answer: 1 },
+    { q_ar: "البنت الكبيرة (أندريا) إيه اللي بيحصلها؟", q_en: "What happens to the oldest daughter (Andrea)?", options_ar: ["بتتحول لروح", "بتختفي", "بتقع من السلم", "بتشوف أشباح"], options_en: ["She transforms into a spirit", "She disappears", "She falls down the stairs", "She sees ghosts"], answer: 0 },
+    { q_ar: "إيه اللي بيميز البيت في الجزء الأول؟", q_en: "What characterizes the house in Part 1?", options_ar: ["إنه جديد", "إنه قديم ومسكون", "إنه صغير", "إنه في المدينة"], options_en: ["It's new", "It's old and haunted", "It's small", "It's in the city"], answer: 1 },
+    { q_ar: "الفيلم بينتهي بإيه؟", q_en: "How does the film end?", options_ar: ["العيلة بتموت", "الروح بتتحبس والدمية بتتحفظ", "البيت بيتحرق", "بيسيبوا البيت"], options_en: ["The family dies", "The spirit is trapped and the doll is secured", "The house burns down", "They leave the house"], answer: 1 }
+  ],
+  part2: [ // 15 سؤال خاصين بـ The Conjuring 2 (2016)
+    { q_ar: "في الجزء الثاني، الأحداث بتدور في أي دولة؟", q_en: "In Part 2, which country does the story take place in?", options_ar: ["أمريكا", "إنجلترا", "فرنسا", "ألمانيا"], options_en: ["America", "England", "France", "Germany"], answer: 1 },
+    { q_ar: "العيلة اللي بتتعرض للرعب في الجزء الثاني هي عيلة إيه؟", q_en: "Which family is haunted in Part 2?", options_ar: ["عيلة هودجسون", "عيلة بيرون", "عيلة وارن", "عيلة سميث"], options_en: ["The Hodgson family", "The Perron family", "The Warren family", "The Smith family"], answer: 0 },
+    { q_ar: "البنت الصغيرة اللي الروح بتتكلم من خلالها اسمها إيه؟", q_en: "What is the name of the little girl the spirit speaks through?", options_ar: ["Janet", "Margaret", "Peggy", "Sarah"], options_en: ["Janet", "Margaret", "Peggy", "Sarah"], answer: 0 },
+    { q_ar: "الروح الشريرة الرئيسية في الجزء الثاني هي مين؟", q_en: "Who is the main evil spirit in Part 2?", options_ar: ["Valak (الراهبة)", "Bathsheba", "Annabelle", "Crooked Man"], options_en: ["Valak (The Nun)", "Bathsheba", "Annabelle", "Crooked Man"], answer: 0 },
+    { q_ar: "الروح بتظهر في شكل إيه في البداية؟", q_en: "What does the spirit look like at first?", options_ar: ["راهبة", "طفل", "كلب", "دمية"], options_en: ["A nun", "A child", "A dog", "A doll"], answer: 0 },
+    { q_ar: "مين اللي بيتقمصه الشيطان في البيت؟", q_en: "Who does the demon possess in the house?", options_ar: ["البنت الصغيرة", "الأم", "الأب", "الجدة"], options_en: ["The youngest daughter", "The mother", "The father", "The grandmother"], answer: 0 },
+    { q_ar: "الروح الشريرة بتستخدم إيه عشان تخوف العيلة؟", q_en: "What does the evil spirit use to scare the family?", options_ar: ["الرسم على الحيطان", "تحريك الأثاث", "الأصوات الغريبة", "كل الإجابات صح"], options_en: ["Drawings on the walls", "Moving furniture", "Strange noises", "All answers are correct"], answer: 3 },
+    { q_ar: "في مشهد مشهور، الأب بيبني إيه في البيت؟", q_en: "In a famous scene, what does the father build in the house?", options_ar: ["غرفة سرية", "صليب خشب كبير", "سور عالي", "قفل"], options_en: ["A secret room", "A large wooden cross", "A high wall", "A lock"], answer: 0 },
+    { q_ar: "الـ Warren بيستخدموا إيه عشان يعرفوا اسم الروح؟", q_en: "What do the Warrens use to find out the spirit's name?", options_ar: ["الكتاب المقدس", "التواصل مع الأرواح", "التحقيق مع الجيران", "الشرطة"], options_en: ["The Bible", "Spirit communication", "Investigating the neighbors", "The police"], answer: 1 },
+    { q_ar: "في نهاية الجزء الثاني، إيه اللي بيحصل للروح الشريرة؟", q_en: "At the end of Part 2, what happens to the evil spirit?", options_ar: ["بتهرب", "بتترصد في مكان تاني", "بتتحبس", "بتختفي"], options_en: ["She escapes", "She haunts another place", "She gets trapped", "She disappears"], answer: 1 },
+    { q_ar: "إيه اللي بيميز الجزء الثاني عن الأول؟", q_en: "What distinguishes Part 2 from Part 1?", options_ar: ["بيحصل في إنجلترا", "الروح بتتكلم بصوت مسموع", "في عيلة تانية", "كل الإجابات صح"], options_en: ["It's set in England", "The spirit speaks out loud", "There's a different family", "All answers are correct"], answer: 3 },
+    { q_ar: "الـ Warren قدروا يواجهوا الروح الشريرة في الجزء الثاني إزاي؟", q_en: "How did the Warrens face the evil spirit in Part 2?", options_ar: ["بالهروب", "بالصلاة والإيمان", "بالقتال الجسدي", "بالنار"], options_en: ["By running away", "Through prayer and faith", "Physical combat", "With fire"], answer: 1 },
+    { q_ar: "إيه علاقة فالاك (الراهبة) بالجزء الثاني؟", q_en: "What is Valak's (The Nun) connection to Part 2?", options_ar: ["هي الروح الرئيسية", "هي روح مساعدة", "هي من الجزء الأول", "مش موجودة"], options_en: ["She's the main spirit", "She's a helping spirit", "She's from Part 1", "She's not in it"], answer: 0 },
+    { q_ar: "الأم في الجزء الثاني بتشتغل إيه؟", q_en: "What does the mother in Part 2 do for a living?", options_ar: ["ممرضة", "مدرسة", "عاملة", "ربة منزل"], options_en: ["A nurse", "A teacher", "A worker", "A housewife"], answer: 3 },
+    { q_ar: "في مشهد مؤثر، الأب بيحاول ينقذ مين؟", q_en: "In an emotional scene, who does the father try to save?", options_ar: ["البنت الصغيرة", "زوجته", "الجيران", "الوسيط"], options_en: ["The little girl", "His wife", "The neighbors", "The medium"], answer: 0 }
+  ],
+  part3: [ // 15 سؤال خاصين بـ The Conjuring 3 (2021)
+    { q_ar: "في الجزء الثالث (The Devil Made Me Do It)، القضية بتدور حول إيه؟", q_en: "In Part 3 (The Devil Made Me Do It), what is the case about?", options_ar: ["قتل بدافع الجن", "سرقة", "حادثة سيارة", "غرق"], options_en: ["A murder motivated by demonic possession", "A robbery", "A car accident", "Drowning"], answer: 0 },
+    { q_ar: "المتهم الرئيسي في القضية كان بيقول إيه؟", q_en: "What did the main suspect claim?", options_ar: ["إنه بريء", "إنه كان متقمص", "إنه شاف شبح", "إنه مش فاكر حاجة"], options_en: ["He's innocent", "He was possessed", "He saw a ghost", "He doesn't remember anything"], answer: 1 },
+    { q_ar: "مين اللي بيحاول يساعد المتهم؟", q_en: "Who tries to help the suspect?", options_ar: ["عيلة وارن", "الشرطة", "المحامي", "الأطباء"], options_en: ["The Warrens", "The police", "The lawyer", "The doctors"], answer: 0 },
+    { q_ar: "الروح الشريرة في الجزء الثالث بتستخدم إيه عشان تسيطر على الناس؟", q_en: "What does the evil spirit in Part 3 use to control people?", options_ar: ["الخوف", "الدم", "الشعوذة", "الصلوات"], options_en: ["Fear", "Blood", "Witchcraft", "Prayers"], answer: 0 },
+    { q_ar: "إيه اللي بيميز الجزء الثالث عن باقي الأجزاء؟", q_en: "What distinguishes Part 3 from the other parts?", options_ar: ["إنه مبني على قضية حقيقية", "إنه فيه راهبة", "إنه في إنجلترا", "إنه مش مرعب"], options_en: ["It's based on a real case", "It has a nun", "It's in England", "It's not scary"], answer: 0 },
+    { q_ar: "عيلة وارن بيعملوا إيه في الجزء الثالث؟", q_en: "What do the Warrens do in Part 3?", options_ar: ["بيحققوا في القضية", "بيسافروا", "بيتقاعدوا", "بيسيبوا البيت"], options_en: ["They investigate the case", "They travel", "They retire", "They leave the house"], answer: 0 },
+    { q_ar: "الروح الشريرة بتظهر في إيه كتير في الجزء الثالث؟", q_en: "What does the evil spirit often appear in, in Part 3?", options_ar: ["المرايا", "الشاشات", "النوافذ", "الأبواب"], options_en: ["Mirrors", "Screens", "Windows", "Doors"], answer: 0 },
+    { q_ar: "في نهاية الجزء الثالث، إيه اللي بيحصل للروح الشريرة؟", q_en: "At the end of Part 3, what happens to the evil spirit?", options_ar: ["بتهرب", "بتتحبس", "بتختفي", "بتنتقم"], options_en: ["She escapes", "She gets trapped", "She disappears", "She takes revenge"], answer: 1 },
+    { q_ar: "الجزء الثالث بيحكي عن قضية حقيقية حصلت في أي سنة؟", q_en: "In what year did the real case in Part 3 happen?", options_ar: ["1981", "1970", "1990", "2000"], options_en: ["1981", "1970", "1990", "2000"], answer: 0 },
+    { q_ar: "مين اللي بيحاول يهرب من الروح الشريرة؟", q_en: "Who tries to escape the evil spirit?", options_ar: ["المتهم", "عيلة وارن", "الشرطة", "الأطفال"], options_en: ["The suspect", "The Warrens", "The police", "The children"], answer: 0 },
+    { q_ar: "في الجزء الثالث، إيه اللي بيحاول الـ Warren يثبتوه؟", q_en: "In Part 3, what do the Warrens try to prove?", options_ar: ["وجود الجن", "براءة المتهم", "إن البيت مسكون", "إن الدمية مسكونة"], options_en: ["The existence of demons", "The suspect's innocence", "That the house is haunted", "That the doll is haunted"], answer: 0 },
+    { q_ar: "المتهم كان بيدافع عن مين لما حصلت الجريمة؟", q_en: "Who was the suspect defending when the crime happened?", options_ar: ["أخوه", "صاحبه", "جاره", "مراته"], options_en: ["His brother", "His friend", "His neighbor", "His wife"], answer: 0 },
+    { q_ar: "الجزء الثالث بيحكي عن قضية مرتبطة بمين؟", q_en: "Who is the case in Part 3 connected to?", options_ar: ["عيلة وارن", "الكنيسة", "الشرطة", "عيلة تانية"], options_en: ["The Warrens", "The church", "The police", "Another family"], answer: 0 },
+    { q_ar: "الفيلم بينتهي بإيه؟", q_en: "How does the film end?", options_ar: ["المتهم بيتبرأ", "المتهم بيتحبس", "الروح بتتحبس", "عيلة وارن بتموت"], options_en: ["The suspect is acquitted", "The suspect is imprisoned", "The spirit is trapped", "The Warrens die"], answer: 2 },
+    { q_ar: "إيه الرسالة الأساسية للجزء الثالث؟", q_en: "What is the main message of Part 3?", options_ar: ["الخير ينتصر", "الجن موجود", "القانون مش كافي", "الشعوذة هي الحل"], options_en: ["Good triumphs", "Demons exist", "The law isn't enough", "Witchcraft is the answer"], answer: 0 }
+  ],
+  comprehensive: [ // 20 سؤال خاصين بالشامل
+    { q_ar: "عيلة وارن بيعملوا إيه في الأساس؟", q_en: "What do the Warrens do for a living?", options_ar: ["محققين في الخوارق", "أطباء", "مدرسين", "شرطة"], options_en: ["Paranormal investigators", "Doctors", "Teachers", "Police"], answer: 0 },
+    { q_ar: "إيه الشيء المشترك بين كل أجزاء الكونجورينج؟", q_en: "What is the common thing between all Conjuring parts?", options_ar: ["عيلة وارن", "الكنيسة", "الراهبة فالاك", "عيلة واحدة"], options_en: ["The Warrens", "The church", "The Nun Valak", "One family"], answer: 0 },
+    { q_ar: "في أي جزء ظهرت الراهبة فالاك لأول مرة؟", q_en: "In which part did The Nun Valak first appear?", options_ar: ["الجزء الأول", "الجزء التاني", "الجزء التالت", "مش موجودة"], options_en: ["Part 1", "Part 2", "Part 3", "She's not in it"], answer: 1 },
+    { q_ar: "الدمية أنابيل ظهرت في أي جزء من الكونجورينج؟", q_en: "In which Conjuring part did the Annabelle doll appear?", options_ar: ["الجزء الأول", "الجزء التاني", "الجزء التالت", "كلهم"], options_en: ["Part 1", "Part 2", "Part 3", "All of them"], answer: 0 },
+    { q_ar: "إيه نوع الروح الشريرة اللي بتطارد العائلات في الأفلام؟", q_en: "What type of evil spirit haunts families in the films?", options_ar: ["شيطان", "روح طفل", "ملاك", "مخلوق فضائي"], options_en: ["A demon", "A child's spirit", "An angel", "An alien"], answer: 0 },
+    { q_ar: "عيلة وارن الحقيقية كانت متخصصة في إيه؟", q_en: "What did the real Warrens specialize in?", options_ar: ["التحقيق في الخوارق", "الطب", "التعليم", "الشرطة"], options_en: ["Paranormal investigation", "Medicine", "Education", "Police"], answer: 0 },
+    { q_ar: "فيلم The Conjuring مبني على قضايا حقيقية لعيلة اسمها إيه؟", q_en: "The Conjuring films are based on real cases for a family named what?", options_ar: ["وارن", "بيرون", "هودجسون", "سميث"], options_en: ["Warren", "Perron", "Hodgson", "Smith"], answer: 0 },
+    { q_ar: "في أي جزء بيظهر (The Crooked Man)؟", q_en: "In which part does 'The Crooked Man' appear?", options_ar: ["الجزء الأول", "الجزء التاني", "الجزء التالت", "مش موجود"], options_en: ["Part 1", "Part 2", "Part 3", "Not in it"], answer: 1 },
+    { q_ar: "أشهر دمية في عالم الكونجورينج إيه؟", q_en: "What is the most famous doll in The Conjuring universe?", options_ar: ["أنابيل", "باربي", "دبدوب", "دمية الشيطان"], options_en: ["Annabelle", "Barbie", "Teddy bear", "The Devil's doll"], answer: 0 },
+    { q_ar: "إيه الحاجة اللي بتخلي عيلة وارن مميزين؟", q_en: "What makes the Warrens special?", options_ar: ["عندهم قدرات خارقة", "عندهم إيمان", "عندهم فلوس", "عندهم أسلحة"], options_en: ["They have supernatural abilities", "They have faith", "They have money", "They have weapons"], answer: 1 },
+    { q_ar: "الروح الشريرة في كل جزء بتدور على إيه؟", q_en: "What does the evil spirit look for in each part?", options_ar: ["تاخد الأرواح", "تساعد الناس", "تلعب", "تنام"], options_en: ["To take souls", "To help people", "To play", "To sleep"], answer: 0 },
+    { q_ar: "عيلة وارن بيعتمدوا على إيه في تحقيقاتهم؟", q_en: "What do the Warrens rely on in their investigations?", options_ar: ["العلم", "الإيمان والصلاة", "الفلوس", "الشرطة"], options_en: ["Science", "Faith and prayer", "Money", "The police"], answer: 1 },
+    { q_ar: "في الجزء التاني، الروح فالاك بتحاول تعمل إيه؟", q_en: "In Part 2, what is Valak trying to do?", options_ar: ["تسيطر على البنت", "تساعد العيلة", "تهرب", "تنام"], options_en: ["To possess the girl", "To help the family", "To escape", "To sleep"], answer: 0 },
+    { q_ar: "الجزء الثالث بيعتمد على إيه؟", q_en: "What is Part 3 based on?", options_ar: ["قضية حقيقية", "قصة خيالية", "فيلم تاني", "لعبة"], options_en: ["A real case", "A fictional story", "Another film", "A game"], answer: 0 },
+    { q_ar: "أخطر روح شريرة في عالم الكونجورينج هي مين؟", q_en: "Who is the most dangerous evil spirit in The Conjuring universe?", options_ar: ["فالاك", "أنابيل", "باثشيبة", "كلهم"], options_en: ["Valak", "Annabelle", "Bathsheba", "All of them"], answer: 3 },
+    { q_ar: "إيه اللي بيميز أفلام الكونجورينج عن غيرها؟", q_en: "What distinguishes The Conjuring films from others?", options_ar: ["إنها مبنية على قضايا حقيقية", "إنها كوميدية", "إنها أكشن", "إنها خيال علمي"], options_en: ["They're based on real cases", "They're comedies", "They're action", "They're sci-fi"], answer: 0 },
+    { q_ar: "الدمية أنابيل بتتحفظ فين في الحقيقة؟", q_en: "Where is the real Annabelle doll kept?", options_ar: ["متحف الرعب", "قفص زجاجي عند عيلة وارن", "كنيسة", "مقبرة"], options_en: ["Horror museum", "Glass case at the Warrens", "Church", "Cemetery"], answer: 1 },
+    { q_ar: "مين اللي بيساعد عيلة وارن في تحقيقاتهم؟", q_en: "Who helps the Warrens in their investigations?", options_ar: ["الكنيسة", "الشرطة", "الفلوس", "الكتب"], options_en: ["The church", "The police", "Money", "Books"], answer: 0 },
+    { q_ar: "فيلم The Conjuring 1 وقع في أي سنة؟", q_en: "What year did The Conjuring 1 take place?", options_ar: ["1971", "1981", "1991", "2001"], options_en: ["1971", "1981", "1991", "2001"], answer: 0 },
+    { q_ar: "إيه الرسالة الأساسية لكل أجزاء الكونجورينج؟", q_en: "What is the main message of all The Conjuring parts?", options_ar: ["الخير ينتصر على الشر", "الشر هو الحل", "الفلوس هي كل حاجة", "الخوف هو القوة"], options_en: ["Good triumphs over evil", "Evil is the answer", "Money is everything", "Fear is power"], answer: 0 }
+  ]
+};
+
+const translations = {
+  ar: { title: "👻 كويز الكونجورينج 👻", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! 👻", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "👻 The Conjuring Quiz 👻", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! 👻", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
+
+let currentQuestions = [];
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
 }
 
-// أسئلة الجزء الأول والتاني (أحداث بس)
-const questions = [
-  // The Conjuring 1 (2013)
-  { q: "في الجزء الأول، عيلة بيرون بينتقلوا لبيت جديد. إيه أول حاجة غريبة بتحصللهم؟", options: ["كلابهم بترفض تدخل البيت", "بنتهم الصغيرة بتبدأ تتكلم مع صديق خيالي", "بيسمعوا أصوات في السقف", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "إيه اللي بيلاقيه الـ Warren في قبو البيت؟", options: ["غرفة سرية فيها مرايا", "كنز مدفون", "رسائل قديمة", "جثة"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "الروح الشريرة اللي بتطارد العيلة اسمها إيه؟", options: ["Bathsheba", "Valak", "Annabelle", "The Nun"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "إيه اللي بيخلي الروح الشريرة تطارد العيلة؟", options: ["لأنهم سكنوا بيتها", "لأنهم أغنياء", "لأنهم سرقوا حاجة", "لأنهم صلوا"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "في مشهد شهير، البنت الصغيرة بتشوف إيه في المرايا؟", options: ["شبح ورا أمها", "نفسها", "أبوها", "دمية"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "إزاي الـ Warren بيعرفوا إن البيت مسكون؟", options: ["بالصدفة", "عن طريق تحقيقاتهم", "من الجيران", "من الشرطة"], answer: 1, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "في نهاية الجزء الأول، إزاي بيواجهوا الروح الشريرة؟", options: ["بيحرقوا البيت", "بيستخدموا الصلاة والطقوس الدينية", "بيهربوا", "بيبيعوا البيت"], answer: 1, title: "THE CONJURING", subtitle: "PART 1" },
-  { q: "إيه اللي كان بيحصل للدمية أنابيل في مشهد البداية؟", options: ["بتتحرك لوحدها", "بتتكلم", "بتختفي", "بتضحك"], answer: 0, title: "THE CONJURING", subtitle: "PART 1" },
-  
-  // The Conjuring 2 (2016)
-  { q: "في الجزء الثاني، الأحداث بتدور في أي دولة؟", options: ["أمريكا", "إنجلترا", "فرنسا", "ألمانيا"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "العيلة اللي بتتعرض للرعب في الجزء الثاني هي عيلة إيه؟", options: ["عيلة هودجسون", "عيلة بيرون", "عيلة وارن", "عيلة سميث"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "البنت الصغيرة اللي الروح بتتكلم من خلالها اسمها إيه؟", options: ["Janet", "Margaret", "Peggy", "Sarah"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "الروح الشريرة الرئيسية في الجزء الثاني هي مين؟", options: ["Valak (الراهبة)", "Bathsheba", "Annabelle", "Crooked Man"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "الروح بتظهر في شكل إيه في البداية؟", options: ["راهبة", "طفل", "كلب", "دمية"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "مين اللي بيتقمصه الشيطان في البيت؟", options: ["البنت الصغيرة", "الأم", "الأب", "الجدة"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "الروح الشريرة بتستخدم إيه عشان تخوف العيلة؟", options: ["الرسم على الحيطان", "تحريك الأثاث", "الأصوات الغريبة", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "في مشهد مشهور، الأب بيبني إيه في البيت؟", options: ["غرفة سرية", "صليب خشب كبير", "سور عالي", "قفل"], answer: 0, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "الـ Warren بيستخدموا إيه عشان يعرفوا اسم الروح؟", options: ["الكتاب المقدس", "التواصل مع الأرواح", "التحقيق مع الجيران", "الشرطة"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "في نهاية الجزء الثاني، إيه اللي بيحصل للروح الشريرة؟", options: ["بتهرب", "بتترصد في مكان تاني", "بتتحبس", "بتختفي"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "إيه اللي بيميز الجزء الثاني عن الأول؟", options: ["بيحصل في إنجلترا", "الروح بتتكلم بصوت مسموع", "في عيلة تانية", "كل الإجابات صح"], answer: 3, title: "THE CONJURING", subtitle: "PART 2" },
-  { q: "الـ Warren قدروا يواجهوا الروح الشريرة في الجزء الثاني إزاي؟", options: ["بالهروب", "بالصلاة والإيمان", "بالقتال الجسدي", "بالنار"], answer: 1, title: "THE CONJURING", subtitle: "PART 2" }
-];
+function startGame(part) {
+  if (part === 'part1') { currentQuestions = [...quizData.part1]; currentSaveKey = 'conjuring_part1_HighScore'; }
+  else if (part === 'part2') { currentQuestions = [...quizData.part2]; currentSaveKey = 'conjuring_part2_HighScore'; }
+  else if (part === 'part3') { currentQuestions = [...quizData.part3]; currentSaveKey = 'conjuring_part3_HighScore'; }
+  else { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'conjuring_all_HighScore'; }
 
-const TOTAL_TIME = 20;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
 
-// صوت تكة خفيفة
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playClick() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-}
-
-function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
   const optEl = document.getElementById('options');
   optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
     const div = document.createElement('div');
     div.className = 'option';
@@ -185,11 +225,9 @@ function loadQuestion() {
     div.onclick = () => checkAnswer(opt.isCorrect, div);
     optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
@@ -198,16 +236,15 @@ function loadQuestion() {
 function updateTimer() {
   const timerEl = document.getElementById('timer');
   timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#8ba3b8';
-  
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current];
+      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -217,45 +254,39 @@ function updateTimer() {
 function checkAnswer(isCorrect, el) {
   if (answered) return;
   answered = true; clearInterval(timerInterval);
-  
+  const q = currentQuestions[current];
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   const allOpts = document.querySelectorAll('.option');
   allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-    playClick();
-  } else {
-    el.classList.add('wrong');
-    playClick();
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
 function nextQuestion() {
   current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
 }
 
 function showFinal() {
   clearInterval(timerInterval);
   document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang];
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#8ba3b8; font-size:36px;">انتهى التحقيق! 👻</h2>
-    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#4a5a6a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+    <h2 style="color:#8ba3b8; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#4a5a6a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
 }
+
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
