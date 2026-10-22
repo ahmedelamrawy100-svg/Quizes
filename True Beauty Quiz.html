@@ -6,174 +6,130 @@
 <title>✨ كويز الجمال الحقيقي - True Beauty</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
+  /* زرار الرجوع */
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
+    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-  }
-
-  .quiz-box {
-    background: rgba(15,15,15,0.98); border: 2px solid #d48cba;
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 30px rgba(212,140,186,0.4); position: relative;
-  }
-  h1 { text-align: center; color: #f7a8d8; text-shadow: 0 0 15px #d48cba; margin-bottom: 15px; font-size: 30px; }
-  
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #f7a8d8; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #d48cba; color: #fff; border: 2px solid #f7a8d8;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
-  }
-  .start-btn:hover { background: #f7a8d8; color: #000; box-shadow: 0 0 20px #d48cba; }
-  
+  body { background: #1a1015; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+  .quiz-box { background: rgba(15,15,15,0.98); border: 2px solid #d48cba; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(212,140,186,0.4); }
+  h1 { text-align: center; color: #f7a8d8; text-shadow: 0 0 15px #d48cba; margin-bottom: 20px; font-size: 30px; }
+  p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
+  .selection-screen { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+  .select-btn { width: 100%; max-width: 400px; padding: 15px; background: #1a1a1a; border: 2px solid #333; border-radius: 10px; color: #fff; font-family: 'Cairo', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .select-btn:hover { background: #d48cba; border-color: #f7a8d8; box-shadow: 0 0 15px rgba(212,140,186,0.5); }
+  .play-screen { display: none; }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #f7a8d8; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #d48cba; }
+  .progress-bar { background: #f7a8d8; height: 100%; width: 0%; transition: width 0.5s; }
   .timer { text-align: center; font-size: 18px; color: #f7a8d8; margin-bottom: 15px; font-weight: 700; }
-  
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #d48cba; box-shadow: 0 0 20px rgba(212,140,186,0.4);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
   .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
-  .option:hover:not(.disabled) { background: #2d1a27; border-color: #f7a8d8; transform: translateX(-5px); }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
+  .option:hover:not(.disabled) { background: #2d1a27; border-color: #f7a8d8; }
   .option.correct { background: #1a5c2a; border-color: #4caf50; }
   .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #d48cba;
-    color: #fff; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
-  #next:hover { background: #f7a8d8; color: #000; box-shadow: 0 0 15px #d48cba; }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #d48cba; color: #000; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
+  #next:hover { background: #f7a8d8; }
   #score { margin-top: 15px; font-size: 15px; color: #f7a8d8; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1>✨ كويز الجمال الحقيقي ✨</h1>
-    <div class="start-content">
-      <h2>عالم الجمال</h2>
-      <p>20 سؤال عن أحداث مسلسل True Beauty<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل أنت مستعد؟</p>
-      <button class="start-btn" onclick="startQuiz()">✨ ابدأ</button>
-    </div>
-  </div>
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-  <div id="quizScreen" style="display:none;">
-    <h1>✨ كويز الجمال الحقيقي ✨</h1>
+<div class="quiz-box" id="quizBox">
+  <div id="selectionScreen" class="selection-screen">
+    <h1 id="main-title">✨ كويز الجمال الحقيقي ✨</h1>
+    <p id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+    <button class="select-btn" id="btn-all" onclick="startGame('all')">الشامل (20 سؤال خاص)</button>
+  </div>
+  <div id="playScreen" class="play-screen">
+    <h1 id="quiz-title">✨ كويز الجمال الحقيقي ✨</h1>
     <div class="progress"><div class="progress-bar" id="progress"></div></div>
     <div class="timer" id="timer">⏱️ 20</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
     <div id="question" class="question"></div>
     <div id="options"></div>
     <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+    <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
   </div>
 </div>
 
 <script>
-function generatePoster(title, subtitle) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#1a1015"/>
-    <circle cx="250" cy="125" r="80" fill="#d48cba" opacity="0.3"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#f7a8d8" font-family="Cairo, sans-serif" font-weight="900" font-size="40" filter="drop-shadow(0 0 10px #d48cba)">${title}</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
-    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#d48cba" stroke-width="4"/>
-  </svg>
-  `;
+let currentLang = localStorage.getItem('lang') || 'ar';
+let highestScore = 0;
+let currentSaveKey = '';
+
+const quizData = {
+  all: [ // 20 سؤال عن المسلسل كاملاً
+    { q_ar: "في بداية المسلسل، البطلة (Ju-kyung) كانت بتعاني من إيه في المدرسة؟", q_en: "At the start, what was the protagonist (Ju-kyung) suffering from at school?", options_ar: ["الفقر", "التنمر بسبب شكلها", "المرض", "مشاكل عائلية"], options_en: ["Poverty", "Bullying due to her appearance", "Illness", "Family problems"], answer: 1 },
+    { q_ar: "إيه اللي بيغير حياة البطلة Ju-kyung؟", q_en: "What changes Ju-kyung's life?", options_ar: ["السفر", "تعلم المكياج", "تغيير المدرسة", "عملية تجميل"], options_en: ["Travel", "Learning makeup", "Changing school", "Plastic surgery"], answer: 1 },
+    { q_ar: "البطل (Su-ho) إيه سمعته في المدرسة؟", q_en: "What is Su-ho's reputation at school?", options_ar: ["مشاغب", "ذكي جداً", "غامض ومنطوي", "رياضي"], options_en: ["Troublemaker", "Very smart", "Mysterious and introverted", "Athletic"], answer: 2 },
+    { q_ar: "إيه السبب الحقيقي اللي بيخلي Su-ho قريب من Ju-kyung؟", q_en: "What's the real reason Su-ho is close to Ju-kyung?", options_ar: ["بيحبها", "بيعرف سرها", "بيحب المكياج", "بيحب الأكل"], options_en: ["He loves her", "He knows her secret", "He loves makeup", "He loves food"], answer: 1 },
+    { q_ar: "الشخص التالت في المثلث (Seo-jun) بيشتغل إيه؟", q_en: "What does the third person in the triangle (Seo-jun) do?", options_ar: ["مغني", "راقص", "ممثل", "لاعب كرة"], options_en: ["Singer", "Dancer", "Actor", "Football player"], answer: 0 },
+    { q_ar: "إيه اللي بيجمع بين Ju-kyung و Su-ho في البداية؟", q_en: "What brings Ju-kyung and Su-ho together at first?", options_ar: ["الدراسة", "الرياضة", "الصدفة", "العمل"], options_en: ["Study", "Sports", "Coincidence", "Work"], answer: 2 },
+    { q_ar: "إيه المشكلة اللي بتواجه البطلة في المدرسة الجديدة؟", q_en: "What problem does the protagonist face at the new school?", options_ar: ["مفيش مشاكل", "مشاكل مع البنات", "مشاكل مع المدرسين", "مشاكل مادية"], options_en: ["No problems", "Problems with girls", "Problems with teachers", "Financial problems"], answer: 1 },
+    { q_ar: "إيه الصفة الأساسية في شخصية Su-ho؟", q_en: "What's the main trait of Su-ho's personality?", options_ar: ["الغموض", "الخوف", "الضحك", "الحب"], options_en: ["Mystery", "Fear", "Laughter", "Love"], answer: 0 },
+    { q_ar: "إيه اللي بيحاول Seo-jun يعمله؟", q_en: "What does Seo-jun try to do?", options_ar: ["يساعد Ju-kyung", "يأذي Su-ho", "ياخد مكان Su-ho", "يبعد Ju-kyung"], options_en: ["Help Ju-kyung", "Hurt Su-ho", "Take Su-ho's place", "Push Ju-kyung away"], answer: 2 },
+    { q_ar: "العلاقة بين Ju-kyung و Su-ho بتتطور لإيه؟", q_en: "What does the relationship between Ju-kyung and Su-ho develop into?", options_ar: ["صداقة قوية", "حب", "خناقة", "منافسة"], options_en: ["Strong friendship", "Love", "Fight", "Rivalry"], answer: 1 },
+    { q_ar: "إيه اللي بيخلي Ju-kyung تحس بالثقة في نفسها؟", q_en: "What makes Ju-kyung feel confident in herself?", options_ar: ["المكياج", "الحب", "الأصدقاء", "كل الإجابات صح"], options_en: ["Makeup", "Love", "Friends", "All answers are correct"], answer: 3 },
+    { q_ar: "مين الشخص اللي بيعرف سر Ju-kyung؟", q_en: "Who knows Ju-kyung's secret?", options_ar: ["Su-ho", "Seo-jun", "صديقتها", "كل الإجابات صح"], options_en: ["Su-ho", "Seo-jun", "Her friend", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه الموضوع الأساسي اللي بيعالجه المسلسل؟", q_en: "What's the main theme the series addresses?", options_ar: ["الحب", "الجمال الحقيقي", "التنمر", "كل الإجابات صح"], options_en: ["Love", "True beauty", "Bullying", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه اللي بيحصل لـ Ju-kyung في نهاية المسلسل؟", q_en: "What happens to Ju-kyung at the end of the series?", options_ar: ["بتسافر", "بتتقبل نفسها", "بتغير شكلها", "بتسيب المدرسة"], options_en: ["She travels", "She accepts herself", "She changes her appearance", "She leaves school"], answer: 1 },
+    { q_ar: "إيه اللي بيميز مسلسل True Beauty عن باقي المسلسلات؟", q_en: "What distinguishes True Beauty from other series?", options_ar: ["الكوميديا", "الرومانسية", "موضوع الجمال", "كل الإجابات صح"], options_en: ["Comedy", "Romance", "The theme of beauty", "All answers are correct"], answer: 3 },
+    { q_ar: "مين اللي بيساعد Ju-kyung في مشاكلها؟", q_en: "Who helps Ju-kyung with her problems?", options_ar: ["أختها", "صديقها", "أمها", "كل الإجابات صح"], options_en: ["Her sister", "Her friend", "Her mother", "All answers are correct"], answer: 3 },
+    { q_ar: "إيه المشكلة اللي بتواجه Su-ho؟", q_en: "What problem does Su-ho face?", options_ar: ["مشاكل عائلية", "مشاكل دراسية", "مشاكل صحية", "مشاكل مالية"], options_en: ["Family problems", "Study problems", "Health problems", "Financial problems"], answer: 0 },
+    { q_ar: "إيه اللي بيعمله Seo-jun عشان يقرب من Ju-kyung؟", q_en: "What does Seo-jun do to get closer to Ju-kyung?", options_ar: ["بيغير شكله", "بيحاول يساعدها", "بيجاهر بحبه", "بيترك المدرسة"], options_en: ["He changes his appearance", "He tries to help her", "He declares his love publicly", "He leaves school"], answer: 1 },
+    { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["الجمال الداخلي هو الأهم", "المكياج هو الحل", "الحب هو كل حاجة", "الفقر هو المشكلة"], options_en: ["Inner beauty is what matters most", "Makeup is the solution", "Love is everything", "Poverty is the problem"], answer: 0 },
+    { q_ar: "إيه اللي بتتعلمه Ju-kyung في النهاية؟", q_en: "What does Ju-kyung learn at the end?", options_ar: ["إن الجمال الحقيقي هو الداخلي", "إن المكياج هو الأهم", "إن الحب هو كل حاجة", "إن الأصدقاء هم العيلة"], options_en: ["True beauty is inner beauty", "Makeup is the most important", "Love is everything", "Friends are family"], answer: 0 }
+  ]
+};
+
+const translations = {
+  ar: { title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر الجزء اللي عايز تلعب فيه", btnAll: "الشامل (20 سؤال خاص)", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "✨ True Beauty Quiz ✨", subtitle: "Choose the part you want to play", btnAll: "Comprehensive (20 Special Questions)", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
+
+let currentQuestions = [];
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('btn-all').innerText = t.btnAll;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
 }
 
-const questions = [
-  { q: "في بداية المسلسل، البطلة (Ju-kyung) كانت بتعاني من إيه في المدرسة؟", options: ["الفقر", "التنمر بسبب شكلها", "المرض", "مشاكل عائلية"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE BEGINNING" },
-  { q: "إيه اللي بيغير حياة البطلة Ju-kyung؟", options: ["السفر", "تعلم المكياج", "تغيير المدرسة", "عملية تجميل"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE CHANGE" },
-  { q: "البطل (Su-ho) إيه سمعته في المدرسة؟", options: ["مشاغب", "ذكي جداً", "غامض ومنطوي", "رياضي"], answer: 2, title: "TRUE BEAUTY", subtitle: "THE HERO" },
-  { q: "إيه السبب الحقيقي اللي بيخلي Su-ho قريب من Ju-kyung؟", options: ["بيحبها", "بيعرف سرها", "بيحب المكياج", "بيحب الأكل"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE SECRET" },
-  { q: "الشخص التالت في المثلث (Seo-jun) بيشتغل إيه؟", options: ["مغني", "راقص", "ممثل", "لاعب كرة"], answer: 0, title: "TRUE BEAUTY", subtitle: "THE THIRD" },
-  { q: "إيه اللي بيجمع بين Ju-kyung و Su-ho في البداية؟", options: ["الدراسة", "الرياضة", "الصدفة", "العمل"], answer: 2, title: "TRUE BEAUTY", subtitle: "THE MEETING" },
-  { q: "إيه المشكلة اللي بتواجه البطلة في المدرسة الجديدة؟", options: ["مفيش مشاكل", "مشاكل مع البنات", "مشاكل مع المدرسين", "مشاكل مادية"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE SCHOOL" },
-  { q: "إيه الصفة الأساسية في شخصية Su-ho؟", options: ["الغموض", "الخوف", "الضحك", "الحب"], answer: 0, title: "TRUE BEAUTY", subtitle: "THE PERSONALITY" },
-  { q: "إيه اللي بيحاول Seo-jun يعمله؟", options: ["يساعد Ju-kyung", "يأذي Su-ho", "ياخد مكان Su-ho", "يبعد Ju-kyung"], answer: 2, title: "TRUE BEAUTY", subtitle: "THE RIVAL" },
-  { q: "العلاقة بين Ju-kyung و Su-ho بتتطور لإيه؟", options: ["صداقة قوية", "حب", "خناقة", "منافسة"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE LOVE" },
-  { q: "إيه اللي بيخلي Ju-kyung تحس بالثقة في نفسها؟", options: ["المكياج", "الحب", "الأصدقاء", "كل الإجابات صح"], answer: 3, title: "TRUE BEAUTY", subtitle: "THE CONFIDENCE" },
-  { q: "مين الشخص اللي بيعرف سر Ju-kyung؟", options: ["Su-ho", "Seo-jun", "صديقتها", "كل الإجابات صح"], answer: 3, title: "TRUE BEAUTY", subtitle: "THE SECRET" },
-  { q: "إيه الموضوع الأساسي اللي بيعالجه المسلسل؟", options: ["الحب", "الجمال الحقيقي", "التنمر", "كل الإجابات صح"], answer: 3, title: "TRUE BEAUTY", subtitle: "THE THEME" },
-  { q: "إيه اللي بيحصل لـ Ju-kyung في نهاية المسلسل؟", options: ["بتسافر", "بتتقبل نفسها", "بتغير شكلها", "بتسيب المدرسة"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE END" },
-  { q: "إيه اللي بيميز مسلسل True Beauty عن باقي المسلسلات؟", options: ["الكوميديا", "الرومانسية", "موضوع الجمال", "كل الإجابات صح"], answer: 3, title: "TRUE BEAUTY", subtitle: "THE STORY" },
-  { q: "مين اللي بيساعد Ju-kyung في مشاكلها؟", options: ["أختها", "صديقها", "أمها", "كل الإجابات صح"], answer: 3, title: "TRUE BEAUTY", subtitle: "THE SUPPORT" },
-  { q: "إيه المشكلة اللي بتواجه Su-ho؟", options: ["مشاكل عائلية", "مشاكل دراسية", "مشاكل صحية", "مشاكل مالية"], answer: 0, title: "TRUE BEAUTY", subtitle: "THE CONFLICT" },
-  { q: "إيه اللي بيعمله Seo-jun عشان يقرب من Ju-kyung؟", options: ["بيغير شكله", "بيحاول يساعدها", "بيجاهر بحبه", "بيترك المدرسة"], answer: 1, title: "TRUE BEAUTY", subtitle: "THE APPROACH" },
-  { q: "إيه الرسالة الأساسية للمسلسل؟", options: ["الجمال الداخلي هو الأهم", "المكياج هو الحل", "الحب هو كل حاجة", "الفقر هو المشكلة"], answer: 0, title: "TRUE BEAUTY", subtitle: "THE MESSAGE" },
-  { q: "إيه اللي بتتعلمه Ju-kyung في النهاية؟", options: ["إن الجمال الحقيقي هو الداخلي", "إن المكياج هو الأهم", "إن الحب هو كل حاجة", "إن الأصدقاء هم العيلة"], answer: 0, title: "TRUE BEAUTY", subtitle: "THE LESSON" }
-];
+function startGame(part) {
+  currentQuestions = [...quizData.all];
+  currentSaveKey = 'beauty_all_HighScore';
+  
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
 
-const TOTAL_TIME = 20;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
-
-// صوت تكة خفيفة
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playClick() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-}
-
-function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
   const optEl = document.getElementById('options');
   optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
     const div = document.createElement('div');
     div.className = 'option';
@@ -181,11 +137,9 @@ function loadQuestion() {
     div.onclick = () => checkAnswer(opt.isCorrect, div);
     optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
   clearInterval(timerInterval);
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
@@ -194,16 +148,15 @@ function loadQuestion() {
 function updateTimer() {
   const timerEl = document.getElementById('timer');
   timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#f7a8d8';
-  
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current];
+      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -213,45 +166,39 @@ function updateTimer() {
 function checkAnswer(isCorrect, el) {
   if (answered) return;
   answered = true; clearInterval(timerInterval);
-  
+  const q = currentQuestions[current];
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   const allOpts = document.querySelectorAll('.option');
   allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-    playClick();
-  } else {
-    el.classList.add('wrong');
-    playClick();
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
 function nextQuestion() {
   current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
 }
 
 function showFinal() {
   clearInterval(timerInterval);
   document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang];
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#f7a8d8; font-size:36px;">انتهى الكويز! ✨</h2>
-    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#d48cba; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+    <h2 style="color:#f7a8d8; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
 }
+
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
