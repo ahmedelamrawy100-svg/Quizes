@@ -6,7 +6,15 @@
 <title>🦸 كويز الحمقى الخارقون - The WONDERfools</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .back-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: #333; color: #fff; border: 1px solid #555;
+    padding: 5px 15px; border-radius: 5px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
+    transition: 0.3s; z-index: 10;
+  }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     background: #000; color: #eee; font-family: 'Cairo', sans-serif;
     min-height: 100vh; display: flex; justify-content: center; align-items: center;
