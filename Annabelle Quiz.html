@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💀 كويز أنابيل - طور الجحيم</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #1a0000 0%, #000 100%);
+    transition: background 0.2s;
+  }
+
+  /* تأثير الدم */
+  .blood-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    box-shadow: inset 0 0 150px rgba(255,0,0,0.9);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .blood-overlay.active { opacity: 1; }
+
+  .quiz-box {
+    background: rgba(10,10,10,0.95); border: 2px solid #8b0000;
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 50px rgba(139,0,0,0.8); position: relative;
+  }
+  h1 { text-align: center; color: #ff2020; text-shadow: 0 0 20px #ff0000; margin-bottom: 15px; font-size: 30px; animation: titlePulse 2s infinite; }
+  @keyframes titlePulse { 0%, 100% { text-shadow: 0 0 20px #ff0000; } 50% { text-shadow: 0 0 50px #ff0000; } }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #ff2020; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #8b0000; color: #fff; border: 2px solid #ff0000;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #ff0000; box-shadow: 0 0 20px #ff0000; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #ff0000; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #ff0000; }
+  .timer { text-align: center; font-size: 22px; color: #ffcc00; margin-bottom: 15px; font-weight: 900; text-shadow: 0 0 10px #ffcc00; }
+  
+  /* رجة الشاشة */
+  .shake {
+    animation: shakeScreen 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes shakeScreen {
+    10%, 90% { transform: translate3d(-3px, 0, 0); }
+    20%, 80% { transform: translate3d(6px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
+    40%, 60% { transform: translate3d(10px, 0, 0); }
+  }
+
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.8);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 22px; margin-bottom: 20px; color: #fff; line-height: 1.6; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #8b0000; border-color: #ff0000; transform: translateX(-5px); }
+  .option.correct { background: #006400; border-color: #00ff00; }
+  .option.wrong { background: #8b0000; border-color: #ff0000; animation: shake 0.5s; }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #8b0000;
+    color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+  #score { margin-top: 15px; font-size: 15px; color: #ffcc00; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="blood-overlay" id="bloodOverlay"></div>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>💀 طور الجحيم 💀</h1>
+    <div class="start-content">
+      <h2>🔥 Hardcore 🔥</h2>
+      <p>20 سؤال أصعب من الأول<br><strong>10 ثواني بس لكل سؤال</strong><br>لو الوقت خلص هتخسر السؤال وتاخد رجة وصوت رعب...</p>
+      <button class="start-btn" onclick="startQuiz()">🎬 ابدأ الجحيم</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>💀 طور الجحيم 💀</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 10</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+function generatePoster(title, subtitle, color) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#0a0000"/>
+    <circle cx="250" cy="125" r="100" fill="${color}" opacity="0.2"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="${color}" font-family="Cairo, sans-serif" font-weight="900" font-size="45" filter="drop-shadow(0 0 15px ${color})">${title}</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.8">${subtitle}</text>
+    <path d="M 0 250 Q 250 180 500 250" fill="#8b0000" opacity="0.8"/>
+  </svg>
+  `;
+}
+
+// أسئلة قصة صعبة جداً
+const questions = [
+  { q: "في Annabelle: Creation، إيه اللي كان بيحصل في غرفة البنت الميتة (Bee) كل ليلة؟", options: ["باب الغرفة كان بيتفتح لوحده", "الضوء كان بيطفي", "السرير بيتحرك", "المرايا بتتكسر"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "صانع الدمى في Creation كان بيرفض يتكلم عن إيه؟", options: ["عن ابنته الميتة", "عن شغله", "عن بيته", "عن الدين"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "إيه اللي كان بيحصل للدمية أنابيل لما البنت العاجزة (Janice) تقرب منها؟", options: ["الدمية كانت بتتحرك", "الدمية كانت بتضحك", "الدمية كانت بتتكلم", "الدمية كانت بتختفي"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "في Creation، البنت اللي عايزة تاخد الدمية كانت بتخاف من إيه؟", options: ["إنها تتحول لروح شريرة", "إنها تنام لوحدها", "إنها تروح المدرسة", "إنها تشرب الدوا"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "الراهبة في Creation، إيه اللي كانت بتحاول تخبيه عن البنات في البداية؟", options: ["إن البيت مسكون", "إن الدمية غالية", "إنها بتحب الأطفال", "إنها هتسيب الدير"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "في نهاية Creation، Janice اتقفلت مع مين في الغرفة؟", options: ["مع الدمية أنابيل", "مع الراهبة", "مع صانع الدمى", "مع البنات التانية"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  
+  { q: "في Annabelle Comes Home، إيه اللي كان بيحصل لكل حاجة مسكونة في غرفة التحف لما أنابيل تخرج؟", options: ["بتستيقظ كلها", "بتختفي", "بتتحط في قفص تاني", "بتتحول لتراب"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "البنت 'Mary Ellen' في Comes Home، إيه اللي كان بيخليها تدخل غرفة التحف؟", options: ["عايزة تبيع حاجة", "عايزة تلعب", "بتدور على كتب", "بتنضف الغرفة"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "الروح اللي ظهرت في شكل 'Bee' في Comes Home، عايزة إيه من Judy؟", options: ["عايزة تاخدها معاها", "عايزة تتكلم معاها", "عايزة تقتلها", "عايزة تخوفها بس"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "في Comes Home، مين اللي كان بيحاول يساعد البنات ويحميهم من أنابيل؟", options: ["صاحب محل التحف", "الراهبة", "الشرطة", "الجيران"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "الروح 'The Ferryman' في Comes Home، بيظهر فين؟", options: ["على السقف", "في المرايا", "في الدولاب", "في المطبخ"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "في Comes Home، إيه اللي بيحصل لما البنت الصغيرة 'Judy' تكون لوحدها في الغرفة؟", options: ["الدمية بتظهر لها", "الكلاب بتتحرك", "السرير بيتحرك", "الستارة بتقع"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  
+  { q: "الدمية الحقيقية أنابيل (اللي في المتحف) متحفظة فين دلوقتي؟", options: ["في قفص زجاجي مقدس", "في متحف الرعب", "في بيت عيلة Warren", "في الكنيسة"], answer: 0, title: "ANNABELLE", subtitle: "THE TRUTH" },
+  { q: "إيه اللي بيميز أرواح أنابيل إنها بتظهر في المرايا؟", options: ["عشان هي بتحب تشوف نفسها", "عشان هي بتعكس الروح الحقيقية", "عشان هي بتخاف من الضوء", "عشان هي بتحب الانعكاس"], answer: 1, title: "ANNABELLE", subtitle: "THE MIRROR" },
+  { q: "في Creation، أول ما البنت بتدخل الغرفة المقفولة، إيه اللي بتلاقيه؟", options: ["دمية على الكرسي", "سرير", "ورق حائط مرعب", "مرايا مكسورة"], answer: 2, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "في Come Home، البنت 'Bee' بتطلب من Judy تعمل إيه؟", options: ["تفتح الباب", "تخليها تلعب معاها", "تنام", "تخرج من البيت"], answer: 1, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "إيه اللي بيخلي الروح الشريرة 'أنابيل' تقوى في الجزء الثالث؟", options: ["الدم البشري", "الخوف", "الصوت العالي", "الصلوات"], answer: 1, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "في Creation، صانع الدمى كان بيصنع الدمية أنابيل عشان إيه؟", options: ["هدية لابنته", "يبيعها", "يعبدها", "يرميها"], answer: 0, title: "ANNABELLE", subtitle: "CREATION (2017)" },
+  { q: "في آخر Comes Home، إيه اللي بيحصل لأنابيل؟", options: ["اتقفل عليها تاني", "اتحرقت", "اتكسرت", "اترمت في البحر"], answer: 0, title: "ANNABELLE", subtitle: "COMES HOME (2019)" },
+  { q: "أهم قاعدة في عالم أنابيل إن الدمية بتستمد قوتها من إيه؟", options: ["الخوف البشري", "الضوء", "الماء", "الظلام"], answer: 0, title: "ANNABELLE", subtitle: "THE RULE" }
+];
+
+const TOTAL_TIME = 10;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+/* --- الأصوات --- */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playHeartbeat() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+}
+
+// صوت صراخ (Noise + Sawtooth) مرعب جداً
+function playScareSound() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sawtooth'; 
+  osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+  gain.gain.setValueAtTime(0.6, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+
+  const bufferSize = audioCtx.sampleRate * 0.8;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+  noise.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+  noise.start();
+}
+
+setInterval(() => {
+  if (document.getElementById('quizScreen').style.display === 'block' && !answered) {
+    playHeartbeat(); setTimeout(playHeartbeat, 200);
+  }
+}, 1000);
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle, "#ff0000");
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 3) timerEl.style.color = '#ff0000'; else timerEl.style.color = '#ffcc00';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      triggerScareEffect();
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+  } else {
+    el.classList.add('wrong');
+    triggerScareEffect();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function triggerScareEffect() {
+  playScareSound();
+  
+  const box = document.getElementById('quizBox');
+  box.classList.add('shake');
+  setTimeout(() => box.classList.remove('shake'), 500);
+  
+  const blood = document.getElementById('bloodOverlay');
+  blood.classList.add('active');
+  setTimeout(() => blood.classList.remove('active'), 500);
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#ff2020; font-size:36px;">انتهى الجحيم! 💀</h2>
+    <p style="color:#ffcc00; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
