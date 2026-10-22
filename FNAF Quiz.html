@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐻 كويز فايف نايتس - FNAF</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px; overflow-x: hidden;
+    background: radial-gradient(circle at center, #1a0a0a 0%, #000 100%);
+  }
+
+  .quiz-box {
+    background: rgba(15,15,15,0.98); border: 2px solid #8b0000;
+    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
+    box-shadow: 0 0 30px rgba(139,0,0,0.5); position: relative;
+  }
+  h1 { text-align: center; color: #ff3333; text-shadow: 0 0 15px #8b0000; margin-bottom: 15px; font-size: 30px; }
+  
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #ff3333; font-size: 32px; margin-bottom: 20px; }
+  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
+  .start-btn {
+    padding: 15px 50px; background: #8b0000; color: #fff; border: 2px solid #ff3333;
+    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
+    font-size: 20px; font-weight: 900; transition: 0.3s;
+  }
+  .start-btn:hover { background: #ff3333; color: #000; box-shadow: 0 0 20px #8b0000; }
+  
+  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
+  .progress-bar { background: #ff3333; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #8b0000; }
+  .timer { text-align: center; font-size: 18px; color: #ff3333; margin-bottom: 15px; font-weight: 700; }
+  
+  .movie-image {
+    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
+    border: 2px solid #8b0000; box-shadow: 0 0 20px rgba(139,0,0,0.5);
+    background: #000; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative;
+  }
+  .movie-image svg { width: 100%; height: 100%; display: block; }
+
+  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
+  .option {
+    display: block; background: #1a1a1a; border: 1px solid #333;
+    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
+    transition: 0.25s; font-size: 16px;
+  }
+  .option:hover:not(.disabled) { background: #2d1a1a; border-color: #ff3333; transform: translateX(-5px); }
+  .option.correct { background: #1a5c2a; border-color: #4caf50; }
+  .option.wrong { background: #5c2a2a; border-color: #f44336; }
+  
+  #next {
+    display: none; margin-top: 20px; padding: 12px; background: #8b0000;
+    color: #fff; border: none; border-radius: 8px; cursor: pointer;
+    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
+  }
+  #next:hover { background: #ff3333; color: #000; box-shadow: 0 0 15px #8b0000; }
+  #score { margin-top: 15px; font-size: 15px; color: #ff3333; text-align: center; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="quiz-box" id="quizBox">
+  <div id="startScreen">
+    <h1>🐻 كويز فايف نايتس 🐻</h1>
+    <div class="start-content">
+      <h2>مرحباً بك في Freddy Fazbear's Pizza</h2>
+      <p>20 سؤال عن أحداث وقصة Five Nights at Freddy's<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تصمد لـ 5 ليالي؟</p>
+      <button class="start-btn" onclick="startQuiz()">🐻 ابدأ الليلة الأولى</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" style="display:none;">
+    <h1>🐻 كويز فايف نايتس 🐻</h1>
+    <div class="progress"><div class="progress-bar" id="progress"></div></div>
+    <div class="timer" id="timer">⏱️ 20</div>
+    
+    <div id="movieImage" class="movie-image"></div>
+    
+    <div id="question" class="question"></div>
+    <div id="options"></div>
+    <div id="score"></div>
+    <button id="next">السؤال التالي ←</button>
+  </div>
+</div>
+
+<script>
+function generatePoster(title, subtitle) {
+  return `
+  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
+    <rect width="500" height="250" fill="#0a0a0a"/>
+    <circle cx="250" cy="125" r="80" fill="#8b0000" opacity="0.3"/>
+    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#ff3333" font-family="Cairo, sans-serif" font-weight="900" font-size="35" filter="drop-shadow(0 0 10px #8b0000)">${title}</text>
+    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
+    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#8b0000" stroke-width="4"/>
+  </svg>
+  `;
+}
+
+const questions = [
+  { q: "في فيلم FNAF، إيه اللي بيخلي (Mike) يقبل شغل حارس ليلي في المطعم؟", options: ["عشان الفلوس", "عشان يهرب من حاجة", "عشان ياخد أخته", "عشان يعرف سر المكان"], answer: 1, title: "FNAF", subtitle: "THE BEGINNING" },
+  { q: "مين اللي بيشتغل مع Mike في المطعم كحارس؟", options: ["شرطي", "امرأة اسمها Vanessa", "صاحبه", "مفيش حد"], answer: 1, title: "FNAF", subtitle: "THE PARTNER" },
+  { q: "الدمى في المطعم بيتحركوا إمتى؟", options: ["في الصبح", "في الليل", "وقت الغدا", "عمرهم ما بيتحركوا"], answer: 1, title: "FNAF", subtitle: "THE RULE" },
+  { q: "مين الدمية الرئيسية اللي بتطارد Mike في الليل؟", options: ["Bonnie", "Chica", "Freddy Fazbear", "Foxy"], answer: 2, title: "FNAF", subtitle: "THE BEAR" },
+  { q: "إيه سر الدمى في القصة؟", options: ["أطفال مفقودين", "روبوتات عادية", "أشباح", "تجارب علمية"], answer: 0, title: "FNAF", subtitle: "THE SECRET" },
+  { q: "مين الشرير الحقيقي وراء كل اللي بيحصل في المطعم؟", options: ["صاحب المطعم", "William Afton", "الشرطة", "الدمى نفسها"], answer: 1, title: "FNAF", subtitle: "THE VILLAIN" },
+  { q: "أخت Mike إيه اللي بيحصلها؟", options: ["بتتحول لدمية", "بتختفي", "بتحب المطعم", "بتشتغل هناك"], answer: 0, title: "FNAF", subtitle: "THE SISTER" },
+  { q: "إيه اللي بيحاول Mike يعمله عشان يحمي أخته؟", options: ["يسيب البيت", "يخبيها في المطعم", "يفضل صاحي في الليل", "يبلغ الشرطة"], answer: 2, title: "FNAF", subtitle: "THE PROTECTION" },
+  { q: "الدمية (Golden Freddy) بتظهر لمين؟", options: ["Mike", "Vanessa", "أخت Mike", "كل الناس"], answer: 2, title: "FNAF", subtitle: "GOLDEN FREDDY" },
+  { q: "إيه اللي بيميز الدمية (Foxy) عن باقي الدمى؟", options: ["بيجري بسرعة", "بيطير", "بيتكلم", "بيختفي"], answer: 0, title: "FNAF", subtitle: "FOXY" },
+  { q: "في النهاية، إيه اللي بيحصل لـ Mike؟", options: ["بيموت", "بيهرب", "بيكتشف إنه كان جزء من اللعبة", "بيسيب المطعم"], answer: 2, title: "FNAF", subtitle: "THE END" },
+  { q: "إيه اللي بيحصل للدمى في نهاية الفيلم؟", options: ["بيدمروا", "بيهربوا", "بيتحرروا من الأرواح", "بيفضلوا يطاردوا"], answer: 2, title: "FNAF", subtitle: "THE FREEDOM" },
+  { q: "إيه اللي بيميز مطعم Freddy's في القصة؟", options: ["إنه مطعم أطفال", "إنه مسكون", "إنه مهجور", "إنه مشهور"], answer: 0, title: "FNAF", subtitle: "THE PLACE" },
+  { q: "مين اللي كان بيدير المطعم قبل ما يتقفل؟", options: ["William Afton", "Mike", "Vanessa", "الشرطة"], answer: 0, title: "FNAF", subtitle: "THE OWNER" },
+  { q: "إيه اللي بيميز شخصية Vanessa؟", options: ["شرطية", "حارسة", "عندها سر", "كل الإجابات صح"], answer: 2, title: "FNAF", subtitle: "VANESSA" },
+  { q: "إيه اللي بيميز الدمية (Chica) عن غيرها؟", options: ["دجاجة", "أرنب", "ثعلب", "دب"], answer: 0, title: "FNAF", subtitle: "CHICA" },
+  { q: "إيه اللي بيميز الدمية (Bonnie) عن غيرها؟", options: ["دجاجة", "أرنب", "ثعلب", "دب"], answer: 1, title: "FNAF", subtitle: "BONNIE" },
+  { q: "الدمية (Freddy Fazbear) بيميزه إيه؟", options: ["دب", "أرنب", "ثعلب", "دجاجة"], answer: 0, title: "FNAF", subtitle: "FREDDY" },
+  { q: "إيه اللي بيحصل لـ William Afton في النهاية؟", options: ["بيهرب", "بيتم القبض عليه", "بيتحول لدمية", "بيموت"], answer: 2, title: "FNAF", subtitle: "WILLIAM" },
+  { q: "إيه الرسالة الأساسية لفيلم FNAF؟", options: ["الانتقام", "الخوف", "إن الأرواح عايزة تتحرر", "الفلوس"], answer: 2, title: "FNAF", subtitle: "THE MESSAGE" }
+];
+
+const TOTAL_TIME = 20;
+let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
+let shuffled = [];
+
+function shuffleArray(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
+
+// صوت تكة خفيفة
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClick() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = 'sine'; 
+  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+  osc.connect(gain); gain.connect(audioCtx.destination); 
+  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+}
+
+function startQuiz() {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  current = 0; score = 0;
+  document.getElementById('next').onclick = nextQuestion;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false; timeLeft = TOTAL_TIME;
+  const q = shuffled[current];
+  
+  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
+  document.getElementById('question').innerText = q.q;
+  
+  const optEl = document.getElementById('options');
+  optEl.innerHTML = '';
+  
+  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
+  
+  optionsWithAnswers.forEach((opt) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div);
+    optEl.appendChild(div);
+  });
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'none';
+  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
+}
+
+function updateTimer() {
+  const timerEl = document.getElementById('timer');
+  timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#ff3333';
+  
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    if (!answered) {
+      answered = true;
+      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+      document.querySelectorAll('.option').forEach(o => {
+        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+      });
+      document.getElementById('next').style.display = 'inline-block';
+    }
+  }
+  timeLeft--;
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true; clearInterval(timerInterval);
+  
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach(o => o.classList.add('disabled'));
+  
+  allOpts.forEach(o => {
+    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
+  });
+  
+  if (isCorrect) {
+    score++;
+    playClick();
+  } else {
+    el.classList.add('wrong');
+    playClick();
+  }
+  
+  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('next').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
+}
+
+function showFinal() {
+  clearInterval(timerInterval);
+  document.getElementById('progress').style.width = '100%';
+  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+    <h2 style="color:#ff3333; font-size:36px;">انتهى الكويز! 🐻</h2>
+    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
+    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">🔄 العب تاني</button>
+  </div>`;
+  document.getElementById('options').innerHTML = '';
+  document.getElementById('movieImage').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = '';
+  document.getElementById('next').style.display = 'none';
+}
+</script>
+</body>
+</html>
