@@ -104,6 +104,43 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
+<!-- نافذة لوحة الصدارة -->
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #8ba3b8; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(139,163,184,0.5);">
+        <h3 style="color:#8ba3b8; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#8ba3b8; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+    projectId: "quiz-hub-app-f4cd0",
+    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+    messagingSenderId: "282772179392",
+    appId: "1:282772179392:web:64646d757592b29ff3a025",
+    measurementId: "G-02K0TEPE31"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  window.db = db;
+  window.ref = ref;
+  window.push = push;
+  window.onValue = onValue;
+  window.query = query;
+  window.orderByChild = orderByChild;
+  window.limitToLast = limitToLast;
+</script>
+
 <script>
   if (localStorage.getItem('theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -113,7 +150,7 @@ let highestScore = 0;
 let currentSaveKey = '';
 
 const quizData = {
-  part1: [ // 15 سؤال خاصين بـ The Conjuring 1 (2013)
+  part1: [
     { q_ar: "في الجزء الأول، عيلة بيرون بينتقلوا لبيت جديد. إيه أول حاجة غريبة بتحصللهم؟", q_en: "In Part 1, the Perron family moves to a new house. What's the first strange thing?", options_ar: ["كلابهم بترفض تدخل البيت", "بنتهم بتبدأ تتكلم مع صديق خيالي", "بيسمعوا أصوات في السقف", "كل الإجابات صح"], options_en: ["Their dog refuses to enter", "Their daughter talks to an imaginary friend", "They hear noises in the ceiling", "All answers are correct"], answer: 3 },
     { q_ar: "إيه اللي بيلاقيه الـ Warren في قبو البيت؟", q_en: "What do the Warrens find in the basement?", options_ar: ["غرفة سرية فيها مرايا", "كنز مدفون", "رسائل قديمة", "جثة"], options_en: ["A secret room with mirrors", "Buried treasure", "Old letters", "A corpse"], answer: 0 },
     { q_ar: "الروح الشريرة اللي بتطارد العيلة اسمها إيه؟", q_en: "What is the name of the demon haunting the family?", options_ar: ["Bathsheba", "Valak", "Annabelle", "The Nun"], options_en: ["Bathsheba", "Valak", "Annabelle", "The Nun"], answer: 0 },
@@ -130,7 +167,7 @@ const quizData = {
     { q_ar: "إيه اللي بيميز البيت في الجزء الأول؟", q_en: "What characterizes the house in Part 1?", options_ar: ["إنه جديد", "إنه قديم ومسكون", "إنه صغير", "إنه في المدينة"], options_en: ["It's new", "It's old and haunted", "It's small", "It's in the city"], answer: 1 },
     { q_ar: "الفيلم بينتهي بإيه؟", q_en: "How does the film end?", options_ar: ["العيلة بتموت", "الروح بتتحبس والدمية بتتحفظ", "البيت بيتحرق", "بيسيبوا البيت"], options_en: ["The family dies", "The spirit is trapped and the doll is secured", "The house burns down", "They leave the house"], answer: 1 }
   ],
-  part2: [ // 15 سؤال خاصين بـ The Conjuring 2 (2016)
+  part2: [
     { q_ar: "في الجزء الثاني، الأحداث بتدور في أي دولة؟", q_en: "In Part 2, which country does the story take place in?", options_ar: ["أمريكا", "إنجلترا", "فرنسا", "ألمانيا"], options_en: ["America", "England", "France", "Germany"], answer: 1 },
     { q_ar: "العيلة اللي بتتعرض للرعب في الجزء الثاني هي عيلة إيه؟", q_en: "Which family is haunted in Part 2?", options_ar: ["عيلة هودجسون", "عيلة بيرون", "عيلة وارن", "عيلة سميث"], options_en: ["The Hodgson family", "The Perron family", "The Warren family", "The Smith family"], answer: 0 },
     { q_ar: "البنت الصغيرة اللي الروح بتتكلم من خلالها اسمها إيه؟", q_en: "What is the name of the little girl the spirit speaks through?", options_ar: ["Janet", "Margaret", "Peggy", "Sarah"], options_en: ["Janet", "Margaret", "Peggy", "Sarah"], answer: 0 },
@@ -147,7 +184,7 @@ const quizData = {
     { q_ar: "الأم في الجزء الثاني بتشتغل إيه؟", q_en: "What does the mother in Part 2 do for a living?", options_ar: ["ممرضة", "مدرسة", "عاملة", "ربة منزل"], options_en: ["A nurse", "A teacher", "A worker", "A housewife"], answer: 3 },
     { q_ar: "في مشهد مؤثر، الأب بيحاول ينقذ مين؟", q_en: "In an emotional scene, who does the father try to save?", options_ar: ["البنت الصغيرة", "زوجته", "الجيران", "الوسيط"], options_en: ["The little girl", "His wife", "The neighbors", "The medium"], answer: 0 }
   ],
-  part3: [ // 15 سؤال خاصين بـ The Conjuring 3 (2021)
+  part3: [
     { q_ar: "في الجزء الثالث (The Devil Made Me Do It)، القضية بتدور حول إيه؟", q_en: "In Part 3 (The Devil Made Me Do It), what is the case about?", options_ar: ["قتل بدافع الجن", "سرقة", "حادثة سيارة", "غرق"], options_en: ["A murder motivated by demonic possession", "A robbery", "A car accident", "Drowning"], answer: 0 },
     { q_ar: "المتهم الرئيسي في القضية كان بيقول إيه؟", q_en: "What did the main suspect claim?", options_ar: ["إنه بريء", "إنه كان متقمص", "إنه شاف شبح", "إنه مش فاكر حاجة"], options_en: ["He's innocent", "He was possessed", "He saw a ghost", "He doesn't remember anything"], answer: 1 },
     { q_ar: "مين اللي بيحاول يساعد المتهم؟", q_en: "Who tries to help the suspect?", options_ar: ["عيلة وارن", "الشرطة", "المحامي", "الأطباء"], options_en: ["The Warrens", "The police", "The lawyer", "The doctors"], answer: 0 },
@@ -164,7 +201,7 @@ const quizData = {
     { q_ar: "الفيلم بينتهي بإيه؟", q_en: "How does the film end?", options_ar: ["المتهم بيتبرأ", "المتهم بيتحبس", "الروح بتتحبس", "عيلة وارن بتموت"], options_en: ["The suspect is acquitted", "The suspect is imprisoned", "The spirit is trapped", "The Warrens die"], answer: 2 },
     { q_ar: "إيه الرسالة الأساسية للجزء الثالث؟", q_en: "What is the main message of Part 3?", options_ar: ["الخير ينتصر", "الجن موجود", "القانون مش كافي", "الشعوذة هي الحل"], options_en: ["Good triumphs", "Demons exist", "The law isn't enough", "Witchcraft is the answer"], answer: 0 }
   ],
-  comprehensive: [ // 20 سؤال خاصين بالشامل
+  comprehensive: [
     { q_ar: "عيلة وارن بيعملوا إيه في الأساس؟", q_en: "What do the Warrens do for a living?", options_ar: ["محققين في الخوارق", "أطباء", "مدرسين", "شرطة"], options_en: ["Paranormal investigators", "Doctors", "Teachers", "Police"], answer: 0 },
     { q_ar: "إيه الشيء المشترك بين كل أجزاء الكونجورينج؟", q_en: "What is the common thing between all Conjuring parts?", options_ar: ["عيلة وارن", "الكنيسة", "الراهبة فالاك", "عيلة واحدة"], options_en: ["The Warrens", "The church", "The Nun Valak", "One family"], answer: 0 },
     { q_ar: "في أي جزء ظهرت الراهبة فالاك لأول مرة؟", q_en: "In which part did The Nun Valak first appear?", options_ar: ["الجزء الأول", "الجزء التاني", "الجزء التالت", "مش موجودة"], options_en: ["Part 1", "Part 2", "Part 3", "She's not in it"], answer: 1 },
@@ -203,6 +240,10 @@ function applyLanguage() {
   document.getElementById('subtitle').innerText = t.subtitle;
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  
+  // ترجمة زرار الرجوع
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startGame(part) {
@@ -287,16 +328,72 @@ function showFinal() {
   document.getElementById('progress').style.width = '100%';
   if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
   const t = translations[currentLang];
+  const isEnglish = currentLang === 'en';
+  
+  // حفظ النتيجة في Firebase
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = currentSaveKey.split('_')[0]; 
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), {
+              user: playerName,
+              score: score,
+              total: currentQuestions.length,
+              time: new Date().toISOString()
+          });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
+  // شاشة النهاية مع زرار لوحة الصدارة
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#8ba3b8; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#4a5a6a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    
+    <button onclick="showLeaderboard('${currentSaveKey.split('_')[0]}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">
+      ${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}
+    </button>
+    
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#4a5a6a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">
+      ${t.playAgain}
+    </button>
   </div>`;
   document.getElementById('options').innerHTML = '';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
+}
+
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal');
+    const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    
+    if(!window.db) return;
+    
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val();
+            list.innerHTML = '';
+            if(!data) {
+                list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`;
+                return;
+            }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
 }
 
 window.onload = applyLanguage;
