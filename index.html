@@ -22,14 +22,23 @@
     display: flex; flex-direction: column; align-items: center; transition: background 0.3s, color 0.3s;
   }
   
-  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  
   .control-btn {
     background: #333; color: #fff; border: 2px solid #555; border-radius: 8px; padding: 8px 15px;
     cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 16px; transition: 0.3s;
+    display: flex; align-items: center; gap: 5px;
   }
   body.light-mode .control-btn { background: #fff; color: #111; border-color: #aaa; }
-  .control-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
+  .control-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; transform: translateY(-2px); }
+  
+  .btn-whatsapp { background: #25D366; border-color: #25D366; color: #fff; }
+  .btn-whatsapp:hover { background: #128C7E; border-color: #128C7E; }
+  
+  .btn-telegram { background: #0088cc; border-color: #0088cc; color: #fff; }
+  .btn-telegram:hover { background: #005f8f; border-color: #005f8f; }
+
   .user-greeting { font-size: 18px; font-weight: bold; color: #ffd700; display: flex; align-items: center; }
 
   #nameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; width: 100%; max-width: 500px; }
@@ -71,8 +80,8 @@
   .close-chat { cursor: pointer; font-size: 20px; }
   .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
   .msg { padding: 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-  .msg.bot { background: #222; color: #fff; align-self: flex-start; } /* لون الرسالة في الدارك */
-  body.light-mode .msg.bot { background: #eee; color: #111; } /* لون الرسالة في اللايت */
+  .msg.bot { background: #222; color: #fff; align-self: flex-start; }
+  body.light-mode .msg.bot { background: #eee; color: #111; }
   .msg.user { background: #ff0000; color: #fff; align-self: flex-end; }
   .chat-input-container { display: flex; padding: 10px; border-top: 1px solid #333; }
   body.light-mode .chat-input-container { border-top: 1px solid #ccc; }
@@ -108,6 +117,14 @@
         <span class="user-greeting" id="userGreeting">👤 اللاعب</span>
         <button class="control-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light</button>
         <button class="control-btn" onclick="toggleLanguage()">EN / AR</button>
+        
+        <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" style="text-decoration:none;">
+            <button class="control-btn btn-whatsapp" id="whatsappBtn"><span>💬</span> واتساب</button>
+        </a>
+        
+        <a href="https://t.me/quiz_hub001" target="_blank" style="text-decoration:none;">
+            <button class="control-btn btn-telegram" id="telegramBtn"><span>✈️</span> تليجرام</button>
+        </a>
       </div>
       <div class="controls">
         <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;" id="logoutBtn">🚪 خروج</button>
@@ -349,6 +366,10 @@
       const postCommentBtn = document.getElementById('postCommentBtn');
       const logoutBtn = document.getElementById('logoutBtn');
       const chatBtn = document.getElementById('chatBtn');
+      
+      // زراير السوشيال ميديا
+      const whatsappBtn = document.getElementById('whatsappBtn');
+      const telegramBtn = document.getElementById('telegramBtn');
 
       if (lang === 'en') {
         body.dir = 'ltr';
@@ -368,11 +389,14 @@
         playerNameInput.placeholder = 'Your name here...';
         document.getElementById('startBtn').innerText = 'Enter';
         
-        // ترجمة الشات
         document.getElementById('chat-header-title').innerText = '🤖 Quiz Assistant';
         document.getElementById('welcomeMsg').innerText = "Hello! I'm your smart assistant. Ask me about any movie, series, or quiz details on the site.";
         document.getElementById('chatInput').placeholder = "Ask about anything...";
         document.getElementById('sendBtn').innerText = "Send";
+        
+        // ترجمة السوشيال ميديا
+        whatsappBtn.innerHTML = '<span>💬</span> WhatsApp';
+        telegramBtn.innerHTML = '<span>✈️</span> Telegram';
         
         loadComments();
 
@@ -394,11 +418,14 @@
         playerNameInput.placeholder = 'اسمك هنا...';
         document.getElementById('startBtn').innerText = 'دخول';
         
-        // ترجمة الشات
         document.getElementById('chat-header-title').innerText = '🤖 مساعد الكويزات';
         document.getElementById('welcomeMsg').innerText = "أهلاً بيك! أنا مساعدك الذكي. اسألني عن أي فيلم أو مسلسل موجود في الموقع، أو عن تفاصيل الكويزات!";
         document.getElementById('chatInput').placeholder = "اسأل عن أي حاجة...";
         document.getElementById('sendBtn').innerText = "إرسال";
+        
+        // ترجمة السوشيال ميديا
+        whatsappBtn.innerHTML = '<span>💬</span> واتساب';
+        telegramBtn.innerHTML = '<span>✈️</span> تليجرام';
         
         loadComments();
       }
