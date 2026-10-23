@@ -40,15 +40,28 @@
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
   }
 
+  /* تظبيط الوضع النهاري (Light Mode) */
   body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode h1 { color: #111; text-shadow: none; }
+  body.light-mode p.subtitle { color: #333; }
   body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
   body.light-mode .question { color: #111; }
+  body.light-mode .timer { color: #8b0000; }
+  body.light-mode #score { color: #8b0000; }
   body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
   body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
+  
+  /* الكروت في الوضع النهاري */
+  body.light-mode .quiz-card h2 { 
+      color: #fff; 
+      text-shadow: 0 0 10px #000; 
+      background: rgba(0,0,0,0.7); 
+      border-radius: 8px; 
+  }
+  
   body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
   body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
+  
   .quiz-card h2 {
     position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
     text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
@@ -76,17 +89,17 @@
 
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="main-title">✝️ كويز الراهبة ✝️</h1>
-  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+  <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
 
   <div class="grid-container">
     <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/The Nun 1.jpeg');">
-      <h2>الجزء الأول (2018)</h2>
+      <h2 class="card-title" data-ar="الجزء الأول (2018)" data-en="Part 1 (2018)">الجزء الأول (2018)</h2>
     </div>
     <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/The Nun 2.jpeg');">
-      <h2>الجزء الثاني (2023)</h2>
+      <h2 class="card-title" data-ar="الجزء الثاني (2023)" data-en="Part 2 (2023)">الجزء الثاني (2023)</h2>
     </div>
     <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/The Nun.jpg');">
-      <h2>الشامل (20 سؤال)</h2>
+      <h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل (20 سؤال)</h2>
     </div>
   </div>
 </div>
@@ -101,6 +114,43 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
+<!-- نافذة لوحة الصدارة -->
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #ccc; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
+        <h3 style="color:#ccc; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#333; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+    projectId: "quiz-hub-app-f4cd0",
+    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+    messagingSenderId: "282772179392",
+    appId: "1:282772179392:web:64646d757592b29ff3a025",
+    measurementId: "G-02K0TEPE31"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  window.db = db;
+  window.ref = ref;
+  window.push = push;
+  window.onValue = onValue;
+  window.query = query;
+  window.orderByChild = orderByChild;
+  window.limitToLast = limitToLast;
+</script>
+
 <script>
   if (localStorage.getItem('theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -110,7 +160,7 @@ let highestScore = 0;
 let currentSaveKey = '';
 
 const quizData = {
-  part1: [ // 15 سؤال خاصين بالجزء الأول 2018
+  part1: [ 
     { q_ar: "في بداية الجزء الأول، إيه اللي بيحصل في الدير اللي بيخلي الكنيسة تبعت تحقيق؟", q_en: "At the start of Part 1, what happens in the abbey that makes the church send an investigation?", options_ar: ["راهبة بتنتحر", "راهبة بتختفي", "حريق في الدير", "سرقة الدير"], options_en: ["A nun commits suicide", "A nun goes missing", "A fire in the abbey", "The abbey is robbed"], answer: 0 },
     { q_ar: "مين اللي بيتبعت من الفاتيكان للتحقيق في الدير؟", q_en: "Who is sent from the Vatican to investigate the abbey?", options_ar: ["الأب بيرك", "الأب ميرين", "الأخت إيرين", "كاهن تاني"], options_en: ["Father Burke", "Father Merin", "Sister Irene", "Another priest"], answer: 0 },
     { q_ar: "مين الراهبة الشابة اللي بتساعد الأب في التحقيق؟", q_en: "Who is the young nun that helps the priest in the investigation?", options_ar: ["الأخت إيرين", "الأخت أوفيليا", "الأخت فيكتوريا", "الأخت ماري"], options_en: ["Sister Irene", "Sister Ophilia", "Sister Victoria", "Sister Mary"], answer: 0 },
@@ -127,7 +177,7 @@ const quizData = {
     { q_ar: "الراهبة فالاك بتظهر في شكل إيه؟", q_en: "What does Valak look like?", options_ar: ["راهبة شريرة", "طفل", "ست عجوز", "مهرج"], options_en: ["An evil nun", "A child", "An old woman", "A clown"], answer: 0 },
     { q_ar: "في النهاية، إيه اللي بيحصل لدمية فالاك (الراهبة)؟", q_en: "At the end, what happens to Valak (the nun)?", options_ar: ["بتهرب", "بتترصد في مكان تاني", "بتتحبس", "بتختفي"], options_en: ["She escapes", "She haunts another place", "She gets trapped", "She disappears"], answer: 1 }
   ],
-  part2: [ // 15 سؤال خاصين بالجزء التاني 2023
+  part2: [ 
     { q_ar: "في الجزء الثاني، الراهبة إيرين بقت عايشة فين؟", q_en: "In Part 2, where is Sister Irene living?", options_ar: ["دير في فرنسا", "دير في رومانيا", "كنيسة في إنجلترا", "بيت أهلها"], options_en: ["A convent in France", "A convent in Romania", "A church in England", "Her family's house"], answer: 0 },
     { q_ar: "إيه اللي بيحصل في بداية الجزء الثاني في الكنيسة؟", q_en: "What happens at the beginning of Part 2 in the church?", options_ar: ["ظهور فالاك", "حريق", "سرقة", "موت كاهن"], options_en: ["Valak appears", "A fire", "A robbery", "A priest dies"], answer: 0 },
     { q_ar: "الروح الشريرة فالاك بترجع في الجزء الثاني عشان تعمل إيه؟", q_en: "Why does Valak return in Part 2?", options_ar: ["تنتقم من إيرين", "تاخد كنز", "تقتل الكاهن", "تخرج من الدير"], options_en: ["To take revenge on Irene", "To take a treasure", "To kill the priest", "To leave the abbey"], answer: 0 },
@@ -144,7 +194,7 @@ const quizData = {
     { q_ar: "في الجزء الثاني، إيرين بتواجه فالاك فين؟", q_en: "In Part 2, where does Irene face Valak?", options_ar: ["في المدرسة", "في الكنيسة", "في الدير", "في البيت"], options_en: ["At the school", "In the church", "In the abbey", "At the house"], answer: 0 },
     { q_ar: "الفيلم بيحكي عن إيه في الأساس؟", q_en: "What is the film basically about?", options_ar: ["صراع بين الخير والشر", "حب", "مغامرة", "كوميديا"], options_en: ["A battle between good and evil", "Love", "Adventure", "Comedy"], answer: 0 }
   ],
-  comprehensive: [ // 20 سؤال خاصين بالشامل
+  comprehensive: [ 
     { q_ar: "إيه الشيء المشترك بين الجزء الأول والتاني؟", q_en: "What's the common thing between Part 1 and Part 2?", options_ar: ["فالاك (الراهبة)", "الكنيسة", "الأب بيرك", "الراهبة إيرين"], options_en: ["Valak (The Nun)", "The church", "Father Burke", "Sister Irene"], answer: 0 },
     { q_ar: "في أي جزء بتظهر فالاك لأول مرة؟", q_en: "In which part does Valak first appear?", options_ar: ["الجزء الأول", "الجزء التاني", "الجزء التالت", "مش موجودة"], options_en: ["Part 1", "Part 2", "Part 3", "She's not in it"], answer: 0 },
     { q_ar: "مين اللي بيساعد إيرين في الجزء الأول؟", q_en: "Who helps Irene in Part 1?", options_ar: ["الأب بيرك", "فرينش", "الراهبة", "الشرطة"], options_en: ["Father Burke", "Frenchie", "The nun", "The police"], answer: 0 },
@@ -179,10 +229,19 @@ let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 2
 function applyLanguage() {
   const t = translations[currentLang];
   document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  
   document.getElementById('main-title').innerText = t.title;
-  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('subtitle-text').innerText = t.subtitle;
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  
+  // ترجمة الكروت
+  document.querySelectorAll('.card-title').forEach(card => {
+    card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar');
+  });
+
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startGame(part) {
@@ -266,16 +325,70 @@ function showFinal() {
   document.getElementById('progress').style.width = '100%';
   if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
   const t = translations[currentLang];
+  const isEnglish = currentLang === 'en';
+  
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = currentSaveKey.split('_')[0]; 
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), {
+              user: playerName,
+              score: score,
+              total: currentQuestions.length,
+              time: new Date().toISOString()
+          });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#ccc; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    
+    <button onclick="showLeaderboard('${currentSaveKey.split('_')[0]}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">
+      ${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}
+    </button>
+    
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">
+      ${t.playAgain}
+    </button>
   </div>`;
   document.getElementById('options').innerHTML = '';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
+}
+
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal');
+    const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    
+    if(!window.db) return;
+    
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val();
+            list.innerHTML = '';
+            if(!data) {
+                list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`;
+                return;
+            }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
 }
 
 window.onload = applyLanguage;
