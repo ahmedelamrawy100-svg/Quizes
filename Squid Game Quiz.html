@@ -6,56 +6,27 @@
 <title>🦑 كويز لعبة الحبار - Squid Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* زرار الرجوع */
-  .back-btn {
-    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
-    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
-    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
-  }
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
   .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #050505; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px; flex-direction: column; }
-  
   h1 { text-align: center; color: #ff0066; text-shadow: 0 0 15px #ff0066; margin-bottom: 10px; font-size: 40px; }
   p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
-
-  /* ستايل الكروت */
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px; width: 100%; max-width: 1000px;
-  }
-
-  .quiz-card {
-    background-color: #111; border: 2px solid #333; border-radius: 15px;
-    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
-    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
-    cursor: pointer;
-  }
-  
-    body.light-mode { background: #f4f4f4; color: #111; }
+  .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+  .quiz-card { background-color: #111; border: 2px solid #333; border-radius: 15px; text-decoration: none; color: #fff; text-align: center; transition: 0.3s; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center; cursor: pointer; }
+  .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
+  body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode h1 { color: #ff0066; text-shadow: none; }
+  body.light-mode p.subtitle { color: #333; }
   body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
   body.light-mode .question { color: #111; }
   body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
   body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
+  body.light-mode .quiz-card h2 { color: #fff; text-shadow: 0 0 10px #000; background: rgba(0,0,0,0.7); border-radius: 8px; }
   body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
   body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
-  .quiz-card::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
-  }
-  .quiz-card h2 {
-    position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
-    text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
-  }
+  .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; text-shadow: 0 0 10px #000; width: 100%; padding: 10px; }
   .quiz-card:hover { border-color: #ff0066; transform: translateY(-5px); box-shadow: 0 0 20px rgba(255,0,102,0.6); }
-
-  /* شاشة اللعب */
   .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(10,10,10,0.98); border: 2px solid #ff0066; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(255,0,102,0.4); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
   .progress-bar { background: #ff0066; height: 100%; width: 0%; transition: width 0.5s; }
@@ -76,21 +47,12 @@
 
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="main-title">🦑 كويز لعبة الحبار 🦑</h1>
-  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
-
+  <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
   <div class="grid-container">
-    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Squid Game 1.jpeg');">
-      <h2>الجزء الأول (2021)</h2>
-    </div>
-    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Squid Game 2.jpg');">
-      <h2>الجزء التاني (2024)</h2>
-    </div>
-    <div class="quiz-card" onclick="startGame('part3')" style="background-image: url('pic/Squid Game 3.jpg');">
-      <h2>الجزء الثالث (2025)</h2>
-    </div>
-    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Squid Game.jpg');">
-      <h2>الشامل (20 سؤال)</h2>
-    </div>
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Squid Game 1.jpeg');"><h2 class="card-title" data-ar="الجزء الأول (2021)" data-en="Part 1 (2021)">الجزء الأول (2021)</h2></div>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Squid Game 2.jpg');"><h2 class="card-title" data-ar="الجزء التاني (2024)" data-en="Part 2 (2024)">الجزء التاني (2024)</h2></div>
+    <div class="quiz-card" onclick="startGame('part3')" style="background-image: url('pic/Squid Game 3.jpg');"><h2 class="card-title" data-ar="الجزء الثالث (2025)" data-en="Part 3 (2025)">الجزء الثالث (2025)</h2></div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title" data-ar="الشامل " data-en="Comprehensive ">الشامل </h2></div>
   </div>
 </div>
 
@@ -104,13 +66,25 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #ff0066; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(255,0,102,0.5);">
+        <h3 style="color:#ff0066; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#ff0066; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+</script>
+
 <script>
-  if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-}
-let currentLang = localStorage.getItem('lang') || 'ar';
-let highestScore = 0;
-let currentSaveKey = '';
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = '';
 
 const quizData = {
   part1: [ 
@@ -200,9 +174,14 @@ function applyLanguage() {
   const t = translations[currentLang];
   document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
   document.getElementById('main-title').innerText = t.title;
-  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('subtitle-text').innerText = t.subtitle;
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  document.querySelectorAll('.card-title').forEach(card => {
+    card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar');
+  });
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startGame(part) {
@@ -213,11 +192,9 @@ function startGame(part) {
 
   highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
   currentQuestions.sort(() => Math.random() - 0.5);
-
   document.getElementById('selectionScreen').style.display = 'none';
   document.getElementById('playScreen').style.display = 'block';
   document.getElementById('backBtn').style.display = 'none';
-
   current = 0; score = 0;
   loadQuestion();
 }
@@ -287,18 +264,55 @@ function showFinal() {
   document.getElementById('progress').style.width = '100%';
   if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
   const t = translations[currentLang];
+  const isEnglish = currentLang === 'en';
+  
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = currentSaveKey.split('_')[0]; 
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), {
+              user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString()
+          });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#ff0066; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#ff0066; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    <button onclick="showLeaderboard('${currentSaveKey.split('_')[0]}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#ff0066; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
 }
 
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal');
+    const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    if(!window.db) return;
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val(); list.innerHTML = '';
+            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+}
 window.onload = applyLanguage;
 </script>
 </body>
