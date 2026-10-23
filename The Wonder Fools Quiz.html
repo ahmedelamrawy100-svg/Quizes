@@ -27,6 +27,16 @@
     border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
     box-shadow: 0 0 30px rgba(245,197,66,0.3); position: relative;
   }
+
+  body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
+  body.light-mode .question { color: #111; }
+  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
+  body.light-mode .option:hover:not(.disabled) { background: #eee; }
+  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
+
+  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
+  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
   h1 { text-align: center; color: #f5c542; text-shadow: 0 0 15px #f5c542; margin-bottom: 15px; font-size: 30px; }
   
   .start-content { text-align: center; padding: 30px 10px; }
@@ -97,6 +107,9 @@
 </div>
 
 <script>
+  if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-mode');
+}
 function generatePoster(title, subtitle) {
   return `
   <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
@@ -164,6 +177,8 @@ function startQuiz() {
   shuffled = [...questions].sort(() => Math.random() - 0.5);
   document.getElementById('startScreen').style.display = 'none';
   document.getElementById('quizScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none'; // إخفاء الرجوع جوه اللعب
+
   current = 0; score = 0;
   document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
