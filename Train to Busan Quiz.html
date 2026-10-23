@@ -6,7 +6,6 @@
 <title>🚄 كويز قطار بوسان - Train to Busan</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* زرار الرجوع */
   .back-btn {
     position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
     border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
@@ -21,22 +20,11 @@
   h1 { text-align: center; color: #7ba8d4; text-shadow: 0 0 15px #3b4a5a; margin-bottom: 10px; font-size: 40px; }
   p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18px; }
 
-  /* ستايل الكروت */
   .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px; width: 100%; max-width: 1000px;
   }
-
-  body.light-mode { background: #f4f4f4; color: #111; }
-  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
-  body.light-mode .question { color: #111; }
-  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
-  body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
-  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
-  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
 
   .quiz-card {
     background-color: #111; border: 2px solid #333; border-radius: 15px;
@@ -49,13 +37,24 @@
     content: ''; position: absolute; inset: 0;
     background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
   }
+
+  body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode h1 { color: #3b4a5a; text-shadow: none; }
+  body.light-mode p.subtitle { color: #333; }
+  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
+  body.light-mode .question { color: #111; }
+  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
+  body.light-mode .option:hover:not(.disabled) { background: #eee; }
+  body.light-mode .quiz-card h2 { color: #fff; text-shadow: 0 0 10px #000; background: rgba(0,0,0,0.7); border-radius: 8px; }
+  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
+  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
+
   .quiz-card h2 {
     position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px;
     text-shadow: 0 0 10px #000; width: 100%; padding: 10px;
   }
   .quiz-card:hover { border-color: #7ba8d4; transform: translateY(-5px); box-shadow: 0 0 20px rgba(123,168,212,0.6); }
 
-  /* شاشة اللعب */
   .play-screen { display: none; width: 100%; max-width: 750px; background: rgba(15,15,15,0.98); border: 2px solid #3b4a5a; border-radius: 15px; padding: 25px; box-shadow: 0 0 30px rgba(59,74,90,0.6); }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
   .progress-bar { background: #7ba8d4; height: 100%; width: 0%; transition: width 0.5s; }
@@ -76,17 +75,17 @@
 
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="main-title">🚄 كويز قطار بوسان 🚄</h1>
-  <p class="subtitle" id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
+  <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
 
   <div class="grid-container">
     <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Train to Busan 1.jpeg');">
-      <h2>الجزء الأول (2016)</h2>
+      <h2 class="card-title" data-ar="الجزء الأول (2016)" data-en="Part 1 (2016)">الجزء الأول (2016)</h2>
     </div>
     <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Train to Busan 2.jpeg');">
-      <h2>الجزء التاني (2020)</h2>
+      <h2 class="card-title" data-ar="الجزء التاني (2020)" data-en="Part 2 (2020)">الجزء التاني (2020)</h2>
     </div>
     <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Train to Busan.jpg');">
-      <h2>الشامل (20 سؤال)</h2>
+      <h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2>
     </div>
   </div>
 </div>
@@ -101,16 +100,28 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #7ba8d4; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(123,168,212,0.5);">
+        <h3 style="color:#7ba8d4; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#7ba8d4; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+</script>
+
 <script>
-  if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-}
-let currentLang = localStorage.getItem('lang') || 'ar';
-let highestScore = 0;
-let currentSaveKey = '';
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = '';
 
 const quizData = {
-  part1: [ // 15 سؤال خاصين بالجزء الأول 2016
+  part1: [ 
     { q_ar: "في الجزء الأول، إيه اللي بيخلي البطل (Seok-woo) يقرر يسافر بالقطار مع بنته؟", q_en: "In Part 1, what makes the protagonist (Seok-woo) decide to travel by train with his daughter?", options_ar: ["عشان يهربوا من الزومبي", "عشان بنته عايزة تشوف أمها", "عشان شغل", "عشان عيد ميلادها"], options_en: ["To escape the zombies", "Because his daughter wants to see her mother", "For work", "For her birthday"], answer: 1 },
     { q_ar: "أول زومبي بيظهر في القطار بيكون مين؟", q_en: "Who is the first zombie to appear on the train?", options_ar: ["امرأة عجوز", "شاب", "طفل", "رجل أعمال"], options_en: ["An old woman", "A young man", "A child", "A businessman"], answer: 0 },
     { q_ar: "الزومبي في الفيلم بيتحولوا بسرعة إيه؟", q_en: "How fast do the zombies turn in the film?", options_ar: ["في ثواني", "في دقايق", "في ساعات", "في يومين"], options_en: ["In seconds", "In minutes", "In hours", "In days"], answer: 0 },
@@ -127,7 +138,7 @@ const quizData = {
     { q_ar: "في نهاية الفيلم، مين اللي بيفضل عايش من الشخصيات الرئيسية؟", q_en: "At the end of the film, who survives from the main characters?", options_ar: ["البنت وأم الراجل القوي", "البطل", "الراجل الشرير", "كلهم"], options_en: ["The daughter and the strong man's wife", "The protagonist", "The villain", "All of them"], answer: 0 },
     { q_ar: "إيه اللي بيميز نهاية الجزء الأول؟", q_en: "What characterizes the ending of Part 1?", options_ar: ["تضحية", "نهاية سعيدة", "نهاية مفتوحة", "نهاية كوميدية"], options_en: ["Sacrifice", "Happy ending", "Open ending", "Comedic ending"], answer: 0 }
   ],
-  part2: [ // 15 سؤال خاصين بالجزء التاني 2020
+  part2: [ 
     { q_ar: "في الجزء الثاني (Peninsula)، الأحداث بتحصل بعد كام سنة من الجزء الأول؟", q_en: "In Part 2 (Peninsula), how many years after Part 1 do the events take place?", options_ar: ["سنة", "4 سنين", "10 سنين", "20 سنة"], options_en: ["One year", "4 years", "10 years", "20 years"], answer: 1 },
     { q_ar: "البطل الجديد في الجزء الثاني كان بيعمل إيه قبل الزومبي؟", q_en: "What did the new protagonist in Part 2 do before the zombies?", options_ar: ["جندي", "دكتور", "عامل", "مهندس"], options_en: ["Soldier", "Doctor", "Worker", "Engineer"], answer: 0 },
     { q_ar: "إيه اللي بيرجع البطل الجديد لكوريا؟", q_en: "What brings the new protagonist back to Korea?", options_ar: ["مهمة سرية", "عشان عيلته", "عشان فلوس", "عشان ينتقم"], options_en: ["A secret mission", "For his family", "For money", "For revenge"], answer: 2 },
@@ -144,7 +155,7 @@ const quizData = {
     { q_ar: "الجزء الثاني بيكشف عن إيه بخصوص الزومبي؟", q_en: "What does Part 2 reveal about the zombies?", options_ar: ["إنهم لسه موجودين", "إنهم اختفوا", "إنهم بقوا مسالمين", "إنهم بقوا أذكى"], options_en: ["They still exist", "They disappeared", "They became peaceful", "They became smarter"], answer: 0 },
     { q_ar: "إيه اللي بيميز نهاية الجزء التاني؟", q_en: "What characterizes the ending of Part 2?", options_ar: ["أمل", "تضحية", "نهاية مفتوحة", "نهاية كوميدية"], options_en: ["Hope", "Sacrifice", "Open ending", "Comedic ending"], answer: 0 }
   ],
-  comprehensive: [ // 20 سؤال خاصين بالشامل
+  comprehensive: [ 
     { q_ar: "إيه الشيء المشترك بين الجزء الأول والتاني؟", q_en: "What's the common thing between Part 1 and Part 2?", options_ar: ["الزومبي", "القطار", "البطل", "العيلة"], options_en: ["Zombies", "The train", "The protagonist", "The family"], answer: 0 },
     { q_ar: "في أي جزء بتبدأ أحداث الزومبي؟", q_en: "In which part do the zombie events start?", options_ar: ["الجزء الأول", "الجزء التاني", "الاتنين", "مفيش"], options_en: ["Part 1", "Part 2", "Both", "None"], answer: 0 },
     { q_ar: "إيه اللي بيربط البطل الأول بالبطل التاني؟", q_en: "What connects the first protagonist to the second protagonist?", options_ar: ["الزومبي", "العيلة", "القطار", "المدينة"], options_en: ["Zombies", "Family", "The train", "The city"], answer: 0 },
@@ -180,9 +191,14 @@ function applyLanguage() {
   const t = translations[currentLang];
   document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
   document.getElementById('main-title').innerText = t.title;
-  document.getElementById('subtitle').innerText = t.subtitle;
+  document.getElementById('subtitle-text').innerText = t.subtitle;
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  document.querySelectorAll('.card-title').forEach(card => {
+    card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar');
+  });
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startGame(part) {
@@ -192,11 +208,9 @@ function startGame(part) {
 
   highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
   currentQuestions.sort(() => Math.random() - 0.5);
-
   document.getElementById('selectionScreen').style.display = 'none';
   document.getElementById('playScreen').style.display = 'block';
   document.getElementById('backBtn').style.display = 'none';
-
   current = 0; score = 0;
   loadQuestion();
 }
@@ -266,18 +280,55 @@ function showFinal() {
   document.getElementById('progress').style.width = '100%';
   if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
   const t = translations[currentLang];
+  const isEnglish = currentLang === 'en';
+  
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = currentSaveKey.split('_')[0]; 
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), {
+              user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString()
+          });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#7ba8d4; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#3b4a5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    <button onclick="showLeaderboard('${currentSaveKey.split('_')[0]}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#3b4a5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
   </div>`;
   document.getElementById('options').innerHTML = '';
   document.getElementById('timer').style.display = 'none';
   document.getElementById('score').innerText = '';
   document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
 }
 
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal');
+    const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    if(!window.db) return;
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val(); list.innerHTML = '';
+            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+}
 window.onload = applyLanguage;
 </script>
 </body>
