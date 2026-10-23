@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎬 منصة الكويزات - Quiz Hub</title>
-<link rel="icon" type="image/png" href="pic/Logo.jpg">
+<link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -32,20 +32,11 @@
   .control-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
   .user-greeting { font-size: 18px; font-weight: bold; color: #ffd700; display: flex; align-items: center; }
 
-  #nameScreen {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    height: 80vh; text-align: center; width: 100%; max-width: 500px;
-  }
+  #nameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; width: 100%; max-width: 500px; }
   #nameScreen h1 { font-size: 40px; margin-bottom: 20px; color: #ff0000; text-shadow: 0 0 20px #ff0000; }
   .name-input-container { display: flex; gap: 10px; width: 100%; }
-  #playerNameInput {
-    flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #555;
-    background: #111; color: #fff; font-family: 'Cairo'; font-size: 18px; outline: none;
-  }
-  #startBtn {
-    padding: 15px 30px; background: #ff0000; color: #fff; border: none; border-radius: 10px;
-    font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
-  }
+  #playerNameInput { flex: 1; padding: 15px; border-radius: 10px; border: 2px solid #555; background: #111; color: #fff; font-family: 'Cairo'; font-size: 18px; outline: none; }
+  #startBtn { padding: 15px 30px; background: #ff0000; color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
   #startBtn:hover { background: #cc0000; box-shadow: 0 0 15px #ff0000; }
 
   #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
@@ -53,37 +44,18 @@
   p.subtitle { color: var(--subtitle-color); font-size: 18px; margin-bottom: 20px; text-align: center; }
 
   .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
-  #searchInput {
-    flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border);
-    background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px;
-    outline: none; transition: 0.3s;
-  }
+  #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
   #searchInput:focus { border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
-  .ai-btn {
-    background: #ff0000; color: #fff; border: none; border-radius: 25px; padding: 0 20px;
-    font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s;
-  }
+  .ai-btn { background: #ff0000; color: #fff; border: none; border-radius: 25px; padding: 0 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; }
   .ai-btn:hover { background: #cc0000; }
 
   .tabs-container { display: flex; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; justify-content: center; }
-  .tab-btn {
-    background: transparent; color: var(--text-color); border: 2px solid var(--card-border);
-    border-radius: 25px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-weight: 700; font-size: 16px; transition: 0.3s;
-  }
+  .tab-btn { background: transparent; color: var(--text-color); border: 2px solid var(--card-border); border-radius: 25px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 16px; transition: 0.3s; }
   .tab-btn.active, .tab-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; }
 
   .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-  .quiz-card {
-    background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px;
-    text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
-    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-    height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center;
-  }
-  .quiz-card::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1;
-  }
+  .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; text-align: center; transition: 0.3s; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 320px; position: relative; overflow: hidden; background-size: cover; background-position: center; }
+  .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
   .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; text-shadow: 0 0 10px #000; width: 100%; padding: 10px; }
 
   .card-horror:hover { border-color: #ff0000; box-shadow: 0 0 20px rgba(255,0,0,0.6); transform: translateY(-5px); }
@@ -93,28 +65,20 @@
   
   .hidden { display: none !important; }
 
-  .chat-modal {
-    display: none; position: fixed; bottom: 20px; right: 20px; width: 380px; height: 550px;
-    background: #111; border: 2px solid #ff0000; border-radius: 15px; z-index: 1000;
-    box-shadow: 0 0 30px rgba(255,0,0,0.5); flex-direction: column;
-  }
+  .chat-modal { display: none; position: fixed; bottom: 20px; right: 20px; width: 380px; height: 550px; background: #111; border: 2px solid #ff0000; border-radius: 15px; z-index: 1000; box-shadow: 0 0 30px rgba(255,0,0,0.5); flex-direction: column; }
   body.light-mode .chat-modal { background: #fff; color: #111; }
-  .chat-header {
-    background: #ff0000; color: #fff; padding: 15px; border-radius: 13px 13px 0 0;
-    display: flex; justify-content: space-between; align-items: center; font-weight: bold;
-  }
+  .chat-header { background: #ff0000; color: #fff; padding: 15px; border-radius: 13px 13px 0 0; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
   .close-chat { cursor: pointer; font-size: 20px; }
   .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
   .msg { padding: 10px; border-radius: 10px; max-width: 85%; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-  .msg.bot { background: #222; align-self: flex-start; }
+  .msg.bot { background: #222; color: #fff; align-self: flex-start; } /* لون الرسالة في الدارك */
+  body.light-mode .msg.bot { background: #eee; color: #111; } /* لون الرسالة في اللايت */
   .msg.user { background: #ff0000; color: #fff; align-self: flex-end; }
   .chat-input-container { display: flex; padding: 10px; border-top: 1px solid #333; }
-  .chat-input-container input {
-    flex: 1; padding: 10px; border-radius: 5px 0 0 5px; border: 1px solid #333; background: #222; color: #fff; outline: none;
-  }
-  .chat-input-container button {
-    padding: 10px 15px; background: #ff0000; color: #fff; border: none; border-radius: 0 5px 5px 0; cursor: pointer;
-  }
+  body.light-mode .chat-input-container { border-top: 1px solid #ccc; }
+  .chat-input-container input { flex: 1; padding: 10px; border-radius: 5px 0 0 5px; border: 1px solid #333; background: #222; color: #fff; outline: none; }
+  body.light-mode .chat-input-container input { background: #f9f9f9; color: #111; border-color: #ccc; }
+  .chat-input-container button { padding: 10px 15px; background: #ff0000; color: #fff; border: none; border-radius: 0 5px 5px 0; cursor: pointer; }
 
   .comments-section { width: 100%; max-width: 1000px; margin-top: 40px; background: var(--card-bg); border: 2px solid #ffd700; border-radius: 15px; padding: 20px; }
   .comments-section h3 { color: #ffd700; margin-bottom: 15px; }
@@ -130,8 +94,8 @@
 <body>
 
   <div id="nameScreen">
-    <h1>🎬 أهلاً بيك</h1>
-    <p style="margin-bottom: 20px; color: #aaa;">اكتب اسمك عشان نبدأ التحدي!</p>
+    <h1 id="name-welcome">🎬 أهلاً بيك</h1>
+    <p style="margin-bottom: 20px; color: #aaa;" id="name-desc">اكتب اسمك عشان نبدأ التحدي!</p>
     <div class="name-input-container">
       <input type="text" id="playerNameInput" placeholder="اسمك هنا..." onkeypress="handleNameEnter(event)">
       <button id="startBtn" onclick="saveName()">دخول</button>
@@ -146,7 +110,7 @@
         <button class="control-btn" onclick="toggleLanguage()">EN / AR</button>
       </div>
       <div class="controls">
-        <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;">🚪 خروج</button>
+        <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;" id="logoutBtn">🚪 خروج</button>
       </div>
     </div>
 
@@ -155,7 +119,7 @@
 
     <div class="search-container">
       <input type="text" id="searchInput" placeholder="ابحث عن كويز..." onkeyup="searchQuizzes()">
-      <button class="ai-btn" onclick="toggleChat()">🤖 مساعد</button>
+      <button class="ai-btn" onclick="toggleChat()" id="chatBtn">🤖 مساعد</button>
     </div>
 
     <div class="tabs-container">
@@ -185,7 +149,7 @@
     </div>
 
     <div class="comments-section">
-      <h3>💬 ساحة النقاش (التعليقات)</h3>
+      <h3 id="comments-title">💬 ساحة النقاش (التعليقات)</h3>
       <div class="comment-input-area">
         <input type="text" id="commentInput" placeholder="اكتب تعليقك هنا...">
         <button id="postCommentBtn" onclick="postComment()">نشر</button>
@@ -196,7 +160,7 @@
 
   <div class="chat-modal" id="chatModal">
     <div class="chat-header">
-      <span>🤖 مساعد الكويزات</span>
+      <span id="chat-header-title">🤖 مساعد الكويزات</span>
       <span class="close-chat" onclick="toggleChat()">×</span>
     </div>
     <div class="chat-messages" id="chatMessages">
@@ -204,19 +168,18 @@
     </div>
     <div class="chat-input-container">
       <input type="text" id="chatInput" placeholder="اسأل عن أي حاجة..." onkeypress="handleChatEnter(event)">
-      <button onclick="sendMessage()">إرسال</button>
+      <button onclick="sendMessage()" id="sendBtn">إرسال</button>
     </div>
   </div>
 
-  <!-- Firebase Realtime Database -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
       authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
-      databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", // الرابط بتاعك
+      databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
       projectId: "quiz-hub-app-f4cd0",
       storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
       messagingSenderId: "282772179392",
@@ -231,18 +194,18 @@
     window.ref = ref;
     window.push = push;
     window.onValue = onValue;
-    window.serverTimestamp = serverTimestamp;
   </script>
 
   <script>
     const playerNameInput = document.getElementById('playerNameInput');
     let currentUser = localStorage.getItem('loggedInUser') || '';
+    let currentLang = localStorage.getItem('lang') || 'ar';
 
     function handleNameEnter(e) { if (e.key === 'Enter') saveName(); }
 
     function saveName() {
       const name = playerNameInput.value.trim();
-      if (name.length < 2) { alert('اكتب اسمك صح'); return; }
+      if (name.length < 2) { alert(currentLang === 'en' ? 'Enter a valid name' : 'اكتب اسمك صح'); return; }
       localStorage.setItem('loggedInUser', name);
       currentUser = name;
       showMainContent();
@@ -262,40 +225,30 @@
       loadComments(); 
     }
 
-    // التعليقات (Firebase)
     function postComment() {
       const input = document.getElementById('commentInput');
       const text = input.value.trim();
       if (!text || !window.db) return;
-
       try {
-        push(ref(window.db, 'comments'), {
-          user: currentUser,
-          text: text,
-          time: new Date().toLocaleString('ar-EG')
-        });
+        push(ref(window.db, 'comments'), { user: currentUser, text: text, time: new Date().toLocaleString(currentLang === 'en' ? 'en-US' : 'ar-EG') });
         input.value = '';
-      } catch (e) {
-        alert("حصل خطأ في نشر التعليق.");
-      }
+      } catch (e) { alert(currentLang === 'en' ? "An error occurred." : "حصل خطأ."); }
     }
 
     function loadComments() {
       const commentsList = document.getElementById('commentsList');
-      commentsList.innerHTML = '<p style="color:#888;">جاري تحميل التعليقات...</p>';
+      const isEnglish = localStorage.getItem('lang') === 'en';
+      commentsList.innerHTML = `<p style="color:#888;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
       
       if (!window.db) return;
-
       try {
         onValue(ref(window.db, 'comments'), (snapshot) => {
           const data = snapshot.val();
           commentsList.innerHTML = '';
-          
-          if (!data) {
-            commentsList.innerHTML = '<p style="color:#888;">كن أول من يعلق!</p>';
-            return;
+          if (!data) { 
+            commentsList.innerHTML = `<p style="color:#888;">${isEnglish ? 'Be the first to comment!' : 'كن أول من يعلق!'}</p>`; 
+            return; 
           }
-
           const comments = Object.values(data).reverse();
           comments.forEach(c => {
             const div = document.createElement('div');
@@ -304,9 +257,7 @@
             commentsList.appendChild(div);
           });
         });
-      } catch (e) {
-        commentsList.innerHTML = '<p style="color:#f44336;">حصل خطأ في تحميل التعليقات.</p>';
-      }
+      } catch (e) { commentsList.innerHTML = `<p style="color:#f44336;">${isEnglish ? 'Error loading.' : 'خطأ.'}</p>`; }
     }
 
     function searchQuizzes() {
@@ -340,20 +291,16 @@
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
-
       addMessage(text, 'user');
       input.value = '';
-
       const lowerText = text.toLowerCase();
       const isEnglish = localStorage.getItem('lang') === 'en';
-
       if (lowerText.includes('اهلا') || lowerText.includes('أهلاً') || lowerText.includes('hi') || lowerText.includes('hello') || lowerText.includes('ازيك')) {
         setTimeout(() => { 
           addMessage(isEnglish ? "Hello! Ask me about any movie, series, or quiz details on the site." : "أهلاً بيك! اسألني عن أي فيلم أو مسلسل أو تفاصيل كويز موجود في الموقع.", 'bot'); 
         }, 500);
         return;
       }
-
       setTimeout(() => {
         let reply = isEnglish ? "Sorry, this work is not available on our site." : "معلش، العمل ده مش موجود عندنا في الموقع.";
         const database = {
@@ -362,14 +309,12 @@
            "انابيل": { ar: "سلسلة أفلام رعب عن دمية مسكونة.", en: "A horror film series about a haunted doll." },
            "squid": { ar: "مسلسل كوري عن لعبة بقاء قاتلة.", en: "A Korean series about a deadly survival game." }
         };
-
         for (let key in database) {
           if (lowerText.includes(key)) {
             reply = isEnglish ? database[key].en : database[key].ar;
             break;
           }
         }
-
         addMessage(reply, 'bot');
       }, 800);
     }
@@ -391,7 +336,6 @@
       else { btn.innerText = '☀️ Light'; localStorage.setItem('theme', 'dark'); }
     }
 
-    let currentLang = localStorage.getItem('lang') || 'ar';
     function applyLanguage(lang) {
       const body = document.body;
       const title = document.getElementById('title-text');
@@ -399,21 +343,64 @@
       const cards = document.querySelectorAll('.card-title');
       const tabs = document.querySelectorAll('.tab-btn');
       const searchInput = document.getElementById('searchInput');
+      
+      const commentsTitle = document.getElementById('comments-title');
+      const commentInput = document.getElementById('commentInput');
+      const postCommentBtn = document.getElementById('postCommentBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const chatBtn = document.getElementById('chatBtn');
 
       if (lang === 'en') {
         body.dir = 'ltr';
         title.innerText = '🎬 Quiz Library 🎬';
         subtitle.innerText = 'Choose the quiz you want to play';
         searchInput.placeholder = 'Search for a quiz...';
+        commentsTitle.innerText = '💬 Comments';
+        commentInput.placeholder = 'Write your comment here...';
+        postCommentBtn.innerText = 'Post';
+        logoutBtn.innerText = '🚪 Logout';
+        chatBtn.innerText = '🤖 Assistant';
         cards.forEach(card => card.innerText = card.getAttribute('data-en'));
         tabs.forEach(tab => tab.innerText = tab.getAttribute('data-en'));
+        
+        document.getElementById('name-welcome').innerText = '🎬 Welcome';
+        document.getElementById('name-desc').innerText = 'Enter your name to start the challenge!';
+        playerNameInput.placeholder = 'Your name here...';
+        document.getElementById('startBtn').innerText = 'Enter';
+        
+        // ترجمة الشات
+        document.getElementById('chat-header-title').innerText = '🤖 Quiz Assistant';
+        document.getElementById('welcomeMsg').innerText = "Hello! I'm your smart assistant. Ask me about any movie, series, or quiz details on the site.";
+        document.getElementById('chatInput').placeholder = "Ask about anything...";
+        document.getElementById('sendBtn').innerText = "Send";
+        
+        loadComments();
+
       } else {
         body.dir = 'rtl';
         title.innerText = '🎬 مكتبة الكويزات 🎬';
         subtitle.innerText = 'اختر الكويز اللي عايز تلعبه';
         searchInput.placeholder = 'ابحث عن كويز...';
+        commentsTitle.innerText = '💬 ساحة النقاش (التعليقات)';
+        commentInput.placeholder = 'اكتب تعليقك هنا...';
+        postCommentBtn.innerText = 'نشر';
+        logoutBtn.innerText = '🚪 خروج';
+        chatBtn.innerText = '🤖 مساعد';
         cards.forEach(card => card.innerText = card.getAttribute('data-ar'));
         tabs.forEach(tab => tab.innerText = tab.getAttribute('data-ar'));
+        
+        document.getElementById('name-welcome').innerText = '🎬 أهلاً بيك';
+        document.getElementById('name-desc').innerText = 'اكتب اسمك عشان نبدأ التحدي!';
+        playerNameInput.placeholder = 'اسمك هنا...';
+        document.getElementById('startBtn').innerText = 'دخول';
+        
+        // ترجمة الشات
+        document.getElementById('chat-header-title').innerText = '🤖 مساعد الكويزات';
+        document.getElementById('welcomeMsg').innerText = "أهلاً بيك! أنا مساعدك الذكي. اسألني عن أي فيلم أو مسلسل موجود في الموقع، أو عن تفاصيل الكويزات!";
+        document.getElementById('chatInput').placeholder = "اسأل عن أي حاجة...";
+        document.getElementById('sendBtn').innerText = "إرسال";
+        
+        loadComments();
       }
     }
 
