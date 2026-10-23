@@ -28,7 +28,7 @@
   .control-btn {
     background: #333; color: #fff; border: 2px solid #555; border-radius: 8px; padding: 8px 15px;
     cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 16px; transition: 0.3s;
-    display: flex; align-items: center; gap: 5px;
+    display: flex; align-items: center; gap: 5px; text-decoration: none;
   }
   body.light-mode .control-btn { background: #fff; color: #111; border-color: #aaa; }
   .control-btn:hover { background: #ff0000; border-color: #ff0000; color: #fff; transform: translateY(-2px); }
@@ -118,13 +118,8 @@
         <button class="control-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light</button>
         <button class="control-btn" onclick="toggleLanguage()">EN / AR</button>
         
-        <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" style="text-decoration:none;">
-            <button class="control-btn btn-whatsapp" id="whatsappBtn"><span>💬</span> واتساب</button>
-        </a>
-        
-        <a href="https://t.me/quiz_hub001" target="_blank" style="text-decoration:none;">
-            <button class="control-btn btn-telegram" id="telegramBtn"><span>✈️</span> تليجرام</button>
-        </a>
+        <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="control-btn btn-whatsapp" id="whatsappBtn"><span>💬</span> واتساب</a>
+        <a href="https://t.me/quiz_hub001" target="_blank" class="control-btn btn-telegram" id="telegramBtn"><span>✈️</span> تليجرام</a>
       </div>
       <div class="controls">
         <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;" id="logoutBtn">🚪 خروج</button>
@@ -152,7 +147,9 @@
       <a href="FNAF Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title" data-ar="FNAF" data-en="FNAF">FNAF</h2></a>
       <a href="The Nun Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title" data-ar="The Nun" data-en="The Nun">The Nun</h2></a>
       <a href="Annabelle Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title" data-ar="Annabelle" data-en="Annabelle">Annabelle</h2></a>
-      <a href="Train to Busan Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/Train to Busan.jpg');"><h2 class="card-title" data-ar="Train to Busan" data-en="Train to Busan">Train to Busan</h2></a>
+      
+      <!-- تم تعديل صورة Train to Busan لتتطابق مع اسم الصورة الجديد -->
+      <a href="Train to Busan Quiz.html" class="quiz-card card-horror" data-category="horror" style="background-image: url('pic/Train-to-Busan.jpg');"><h2 class="card-title" data-ar="Train to Busan" data-en="Train to Busan">Train to Busan</h2></a>
       
       <a href="Squid Game Quiz.html" class="quiz-card card-action" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title" data-ar="Squid Game" data-en="Squid Game">Squid Game</h2></a>
       <a href="The Wonder Fools Quiz.html" class="quiz-card card-action" data-category="action" style="background-image: url('pic/The Wonder Fools.jpeg');"><h2 class="card-title" data-ar="The WONDERfools" data-en="The WONDERfools">The WONDERfools</h2></a>
@@ -367,7 +364,6 @@
       const logoutBtn = document.getElementById('logoutBtn');
       const chatBtn = document.getElementById('chatBtn');
       
-      // زراير السوشيال ميديا
       const whatsappBtn = document.getElementById('whatsappBtn');
       const telegramBtn = document.getElementById('telegramBtn');
 
@@ -394,7 +390,6 @@
         document.getElementById('chatInput').placeholder = "Ask about anything...";
         document.getElementById('sendBtn').innerText = "Send";
         
-        // ترجمة السوشيال ميديا
         whatsappBtn.innerHTML = '<span>💬</span> WhatsApp';
         telegramBtn.innerHTML = '<span>✈️</span> Telegram';
         
@@ -423,7 +418,6 @@
         document.getElementById('chatInput').placeholder = "اسأل عن أي حاجة...";
         document.getElementById('sendBtn').innerText = "إرسال";
         
-        // ترجمة السوشيال ميديا
         whatsappBtn.innerHTML = '<span>💬</span> واتساب';
         telegramBtn.innerHTML = '<span>✈️</span> تليجرام';
         
