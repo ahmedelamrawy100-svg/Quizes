@@ -28,6 +28,16 @@
     gap: 20px; width: 100%; max-width: 1000px;
   }
 
+  body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
+  body.light-mode .question { color: #111; }
+  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
+  body.light-mode .option:hover:not(.disabled) { background: #eee; }
+  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
+
+  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
+  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
+
   .quiz-card {
     background-color: #111; border: 2px solid #333; border-radius: 15px;
     text-decoration: none; color: #fff; text-align: center; transition: 0.3s;
@@ -92,6 +102,9 @@
 </div>
 
 <script>
+  if (localStorage.getItem('theme') === 'light') {
+  document.body.classList.add('light-mode');
+}
 let currentLang = localStorage.getItem('lang') || 'ar';
 let highestScore = 0;
 let currentSaveKey = '';
