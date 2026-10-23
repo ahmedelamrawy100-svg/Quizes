@@ -6,34 +6,29 @@
 <title>🏡 كويز عيلة بالاختيار - Family By Choice</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* زرار الرجوع */
-  .back-btn {
-    position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff;
-    border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
-    transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px;
-  }
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
   .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #050505; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-
   .quiz-box { background: rgba(10,10,10,0.98); border: 2px solid #c9a87c; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(201,168,124,0.4); }
-
-body.light-mode { background: #f4f4f4; color: #111; }
-body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
-body.light-mode .question { color: #111; }
-body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
-body.light-mode .option:hover:not(.disabled) { background: #eee; }
-body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
-body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
-body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
   h1 { text-align: center; color: #f0d9b5; text-shadow: 0 0 15px #c9a87c; margin-bottom: 20px; font-size: 30px; }
   p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
-  .selection-screen { display: flex; flex-direction: column; gap: 15px; align-items: center; }
-  .select-btn { width: 100%; max-width: 400px; padding: 15px; background: #1a1a1a; border: 2px solid #333; border-radius: 10px; color: #fff; font-family: 'Cairo', sans-serif; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-  .select-btn:hover { background: #c9a87c; border-color: #f0d9b5; box-shadow: 0 0 15px rgba(201,168,124,0.5); }
+  
+  body.light-mode { background: #f4f4f4; color: #111; }
+  body.light-mode h1 { color: #8b6b3d; text-shadow: none; }
+  body.light-mode p { color: #333; }
+  body.light-mode .quiz-box { background: #fff; border-color: #c9a87c; }
+  body.light-mode .question { color: #111; }
+  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
+  body.light-mode .option:hover:not(.disabled) { background: #eee; }
+  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
+  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
+
+  .start-content { text-align: center; padding: 30px 10px; }
+  .start-content h2 { color: #f0d9b5; font-size: 32px; margin-bottom: 20px; }
+  .start-btn { padding: 15px 50px; background: #c9a87c; color: #000; border: 2px solid #f0d9b5; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 20px; font-weight: 900; transition: 0.3s; }
+  .start-btn:hover { background: #f0d9b5; color: #000; box-shadow: 0 0 20px #c9a87c; }
+
   .play-screen { display: none; }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
   .progress-bar { background: #f0d9b5; height: 100%; width: 0%; transition: width 0.5s; }
@@ -53,11 +48,15 @@ body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !imp
 <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
 <div class="quiz-box" id="quizBox">
-  <div id="selectionScreen" class="selection-screen">
+  <div id="startScreen">
     <h1 id="main-title">🏡 كويز عيلة بالاختيار 🏡</h1>
-    <p id="subtitle">اختر الجزء اللي عايز تلعب فيه</p>
-    <button class="select-btn" id="btn-all" onclick="startGame('all')">الشامل (20 سؤال خاص)</button>
+    <div class="start-content">
+      <h2 id="start-heading">العيلة مش بالدم</h2>
+      <p id="start-desc">20 سؤال عن أحداث مسلسل Family By Choice<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تعرف معنى العيلة الحقيقية؟</p>
+      <button class="start-btn" id="start-btn" onclick="startQuiz()">🏡 ابدأ</button>
+    </div>
   </div>
+
   <div id="playScreen" class="play-screen">
     <h1 id="quiz-title">🏡 كويز عيلة بالاختيار 🏡</h1>
     <div class="progress"><div class="progress-bar" id="progress"></div></div>
@@ -69,68 +68,76 @@ body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !imp
   </div>
 </div>
 
-<script>
-  if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-}
-let currentLang = localStorage.getItem('lang') || 'ar';
-let highestScore = 0;
-let currentSaveKey = '';
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #f0d9b5; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(240,217,181,0.5);">
+        <h3 style="color:#f0d9b5; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#f0d9b5; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
 
-const quizData = {
-  all: [ // 20 سؤال عن المسلسل كاملاً
-    { q_ar: "في بداية المسلسل، إيه اللي بيجمع البطلة (Ju-won) بـ (San-ha) و(Hae-joon)؟", q_en: "At the start, what brings the protagonist (Ju-won) together with (San-ha) and (Hae-joon)?", options_ar: ["بيحبوا نفس الهواية", "بيتنقلوا لنفس العمارة وبيتربوا مع بعض", "أصدقاء دراسة", "بيشتغلوا مع بعض"], options_en: ["They share the same hobby", "They move to the same building and grow up together", "Study friends", "Work together"], answer: 1 },
-    { q_ar: "إيه الحاجة اللي بتتمناها Ju-won عشان تحس إنهم عيلة واحدة؟", q_en: "What does Ju-won wish for to feel like one family?", options_ar: ["يسافروا مع بعض", "ياخدوا نفس اللقب العائلي بالتبني", "يعملوا حفلة", "يغيروا المدرسة"], options_en: ["Travel together", "Take the same adopted family name", "Throw a party", "Change school"], answer: 1 },
-    { q_ar: "مين الشخص اللي بيربي العيال التلاتة مع بعض؟", q_en: "Who raises the three kids together?", options_ar: ["أم Ju-won", "أبو Ju-won وأبو San-ha", "الجد", "المدرسة"], options_en: ["Ju-won's mom", "Ju-won's dad and San-ha's dad", "The grandfather", "The school"], answer: 1 },
-    { q_ar: "إيه اللي بيخلي San-ha وHae-joon يسيبوا Ju-won ويسافروا؟", q_en: "Why do San-ha and Hae-joon leave Ju-won and travel?", options_ar: ["عشان الشغل", "عشان يرجعوا لعائلاتهم الحقيقية", "عشان الدراسة", "عشان مشاكل مادية"], options_en: ["For work", "To return to their real families", "For study", "For financial problems"], answer: 1 },
-    { q_ar: "بعد كام سنة بيرجعوا يتقابلوا تاني؟", q_en: "After how many years do they reunite?", options_ar: ["5 سنين", "10 سنين", "سنة", "20 سنة"], options_en: ["5 years", "10 years", "One year", "20 years"], answer: 1 },
-    { q_ar: "إيه إحساس Ju-won لما بيرجعوا بعد الغياب الطويل؟", q_en: "How does Ju-won feel when they return after a long absence?", options_ar: ["فرحة كبيرة", "زعل وإحساس إنهم سابوها", "لامبالاة", "خوف"], options_en: ["Great joy", "Sadness and feeling abandoned", "Indifference", "Fear"], answer: 1 },
-    { q_ar: "إيه اللي بيتغير في العلاقة بين التلاتة لما يكبروا؟", q_en: "What changes in the trio's relationship as they grow up?", options_ar: ["بيقربوا أكتر", "بتظهر مشاعر حب بينهم", "بيسيبوا بعض", "بيتخانقوا"], options_en: ["They get closer", "Romantic feelings appear", "They leave each other", "They fight"], answer: 1 },
-    { q_ar: "مين اللي بيعترف بحبه لـ Ju-won الأول؟", q_en: "Who confesses their love to Ju-won first?", options_ar: ["Hae-joon", "San-ha", "صديق تاني", "محدش"], options_en: ["Hae-joon", "San-ha", "Another friend", "No one"], answer: 1 },
-    { q_ar: "إيه المشكلة الأساسية اللي بتواجهها العيلة في المسلسل؟", q_en: "What is the main problem the family faces in the series?", options_ar: ["الفقر", "مشاكل عائلية ومشاعر معقدة", "المرض", "السفر"], options_en: ["Poverty", "Family issues and complex emotions", "Illness", "Travel"], answer: 1 },
-    { q_ar: "مين الشخص اللي بيعترف بحبه لـ Hae-joon في النهاية؟", q_en: "Who confesses their love to Hae-joon at the end?", options_ar: ["Ju-won", "Park Dal", "أخت San-ha", "صديقة تانية"], options_en: ["Ju-won", "Park Dal", "San-ha's sister", "Another friend"], answer: 1 },
-    { q_ar: "إيه اللي بيحصل لأبو Ju-won في نهاية المسلسل؟", q_en: "What happens to Ju-won's dad at the end of the series?", options_ar: ["بيسافر", "بيتجوز", "بيموت", "بيعمل مشروع"], options_en: ["He travels", "He gets married", "He dies", "He starts a project"], answer: 1 },
-    { q_ar: "مين اللي بيتجوز في النهاية؟", q_en: "Who gets married at the end?", options_ar: ["San-ha وJu-won", "أبو Ju-won وأم Hae-joon", "Hae-joon وPark Dal", "محدش"], options_en: ["San-ha and Ju-won", "Ju-won's dad and Hae-joon's mom", "Hae-joon and Park Dal", "No one"], answer: 1 },
-    { q_ar: "إيه اللي بيعمله Hae-joon عشان يقرب من Park Dal في النهاية؟", q_en: "What does Hae-joon do to get closer to Park Dal at the end?", options_ar: ["بيعترف بحبه", "بيتحداها في كرة السلة", "بيسافر", "بيشتري ليها هدية"], options_en: ["Confesses his love", "Challenges her in basketball", "Travels", "Buys her a gift"], answer: 1 },
-    { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What is the main message of the series?", options_ar: ["الحب هو كل حاجة", "العيلة مش بالدم بس", "الفقر هو المشكلة", "السفر هو الحل"], options_en: ["Love is everything", "Family is not just by blood", "Poverty is the problem", "Travel is the solution"], answer: 1 },
-    { q_ar: "مين اللي كان بيعارض علاقة San-ha وJu-won في البداية؟", q_en: "Who opposed San-ha and Ju-won's relationship at first?", options_ar: ["أبو Ju-won", "أم San-ha", "Hae-joon", "كل الإجابات صح"], options_en: ["Ju-won's dad", "San-ha's mom", "Hae-joon", "All answers are correct"], answer: 3 },
-    { q_ar: "إيه اللي بيخلي أبو Ju-won يوافق على علاقة San-ha وJu-won في النهاية؟", q_en: "What makes Ju-won's dad approve of San-ha and Ju-won's relationship at the end?", options_ar: ["بيحب San-ha", "San-ha بيثبت حبه وصدقه", "Ju-won بتقنعه", "بيغير رأيه فجأة"], options_en: ["He loves San-ha", "San-ha proves his love and honesty", "Ju-won convinces him", "He changes his mind suddenly"], answer: 1 },
-    { q_ar: "إيه اللي بيميز مسلسل Family By Choice عن باقي المسلسلات؟", q_en: "What distinguishes Family By Choice from other series?", options_ar: ["الأكشن", "الرومانسية العائلية الدافئة", "الرعب", "الكوميديا بس"], options_en: ["Action", "Warm family romance", "Horror", "Just comedy"], answer: 1 },
-    { q_ar: "مين الشخص اللي بيحب Ju-won من غير ما يقولها في البداية؟", q_en: "Who loves Ju-won without telling her at first?", options_ar: ["Hae-joon", "San-ha", "صديق تالت", "محدش"], options_en: ["Hae-joon", "San-ha", "A third friend", "No one"], answer: 1 },
-    { q_ar: "إيه اللي بيحصل للعلاقة بين Ju-won وSan-ha في النهاية؟", q_en: "What happens to Ju-won and San-ha's relationship at the end?", options_ar: ["بيفترقوا", "بيحبوا بعض وبيتقربوا", "بيسيبوا البلد", "بيتجوزوا"], options_en: ["They separate", "They love each other and get closer", "They leave the country", "They get married"], answer: 1 },
-    { q_ar: "إيه اللي بتتعلمه الشخصيات في النهاية؟", q_en: "What do the characters learn at the end?", options_ar: ["إن العيلة هي اللي بتختارها", "إن الحب صعب", "إن السفر هو الحل", "إن الفلوس هي كل حاجة"], options_en: ["Family is who you choose", "Love is hard", "Travel is the solution", "Money is everything"], answer: 0 }
-  ]
-};
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+</script>
+
+<script>
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'family_HighScore';
+
+const questions = [
+  { q_ar: "في بداية المسلسل، إيه اللي بيجمع البطلة (Ju-won) بـ (San-ha) و(Hae-joon)؟", q_en: "At the start, what brings the protagonist (Ju-won) together with (San-ha) and (Hae-joon)?", options_ar: ["بيحبوا نفس الهواية", "بيتنقلوا لنفس العمارة وبيتربوا مع بعض", "أصدقاء دراسة", "بيشتغلوا مع بعض"], options_en: ["They share the same hobby", "They move to the same building and grow up together", "Study friends", "Work together"], answer: 1 },
+  { q_ar: "إيه الحاجة اللي بتتمناها Ju-won عشان تحس إنهم عيلة واحدة؟", q_en: "What does Ju-won wish for to feel like one family?", options_ar: ["يسافروا مع بعض", "ياخدوا نفس اللقب العائلي بالتبني", "يعملوا حفلة", "يغيروا المدرسة"], options_en: ["Travel together", "Take the same adopted family name", "Throw a party", "Change school"], answer: 1 },
+  { q_ar: "مين الشخص اللي بيربي العيال التلاتة مع بعض؟", q_en: "Who raises the three kids together?", options_ar: ["أم Ju-won", "أبو Ju-won وأبو San-ha", "الجد", "المدرسة"], options_en: ["Ju-won's mom", "Ju-won's dad and San-ha's dad", "The grandfather", "The school"], answer: 1 },
+  { q_ar: "إيه اللي بيخلي San-ha وHae-joon يسيبوا Ju-won ويسافروا؟", q_en: "Why do San-ha and Hae-joon leave Ju-won and travel?", options_ar: ["عشان الشغل", "عشان يرجعوا لعائلاتهم الحقيقية", "عشان الدراسة", "عشان مشاكل مادية"], options_en: ["For work", "To return to their real families", "For study", "For financial problems"], answer: 1 },
+  { q_ar: "بعد كام سنة بيرجعوا يتقابلوا تاني؟", q_en: "After how many years do they reunite?", options_ar: ["5 سنين", "10 سنين", "سنة", "20 سنة"], options_en: ["5 years", "10 years", "One year", "20 years"], answer: 1 },
+  { q_ar: "إيه إحساس Ju-won لما بيرجعوا بعد الغياب الطويل؟", q_en: "How does Ju-won feel when they return after a long absence?", options_ar: ["فرحة كبيرة", "زعل وإحساس إنهم سابوها", "لامبالاة", "خوف"], options_en: ["Great joy", "Sadness and feeling abandoned", "Indifference", "Fear"], answer: 1 },
+  { q_ar: "إيه اللي بيتغير في العلاقة بين التلاتة لما يكبروا؟", q_en: "What changes in the trio's relationship as they grow up?", options_ar: ["بيقربوا أكتر", "بتظهر مشاعر حب بينهم", "بيسيبوا بعض", "بيتخانقوا"], options_en: ["They get closer", "Romantic feelings appear", "They leave each other", "They fight"], answer: 1 },
+  { q_ar: "مين اللي بيعترف بحبه لـ Ju-won الأول؟", q_en: "Who confesses their love to Ju-won first?", options_ar: ["Hae-joon", "San-ha", "صديق تاني", "محدش"], options_en: ["Hae-joon", "San-ha", "Another friend", "No one"], answer: 1 },
+  { q_ar: "إيه المشكلة الأساسية اللي بتواجهها العيلة في المسلسل؟", q_en: "What is the main problem the family faces in the series?", options_ar: ["الفقر", "مشاكل عائلية ومشاعر معقدة", "المرض", "السفر"], options_en: ["Poverty", "Family issues and complex emotions", "Illness", "Travel"], answer: 1 },
+  { q_ar: "مين الشخص اللي بيعترف بحبه لـ Hae-joon في النهاية؟", q_en: "Who confesses their love to Hae-joon at the end?", options_ar: ["Ju-won", "Park Dal", "أخت San-ha", "صديقة تانية"], options_en: ["Ju-won", "Park Dal", "San-ha's sister", "Another friend"], answer: 1 },
+  { q_ar: "إيه اللي بيحصل لأبو Ju-won في نهاية المسلسل؟", q_en: "What happens to Ju-won's dad at the end of the series?", options_ar: ["بيسافر", "بيتجوز", "بيموت", "بيعمل مشروع"], options_en: ["He travels", "He gets married", "He dies", "He starts a project"], answer: 1 },
+  { q_ar: "مين اللي بيتجوز في النهاية؟", q_en: "Who gets married at the end?", options_ar: ["San-ha وJu-won", "أبو Ju-won وأم Hae-joon", "Hae-joon وPark Dal", "محدش"], options_en: ["San-ha and Ju-won", "Ju-won's dad and Hae-joon's mom", "Hae-joon and Park Dal", "No one"], answer: 1 },
+  { q_ar: "إيه اللي بيعمله Hae-joon عشان يقرب من Park Dal في النهاية؟", q_en: "What does Hae-joon do to get closer to Park Dal at the end?", options_ar: ["بيعترف بحبه", "بيتحداها في كرة السلة", "بيسافر", "بيشتري ليها هدية"], options_en: ["Confesses his love", "Challenges her in basketball", "Travels", "Buys her a gift"], answer: 1 },
+  { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What is the main message of the series?", options_ar: ["الحب هو كل حاجة", "العيلة مش بالدم بس", "الفقر هو المشكلة", "السفر هو الحل"], options_en: ["Love is everything", "Family is not just by blood", "Poverty is the problem", "Travel is the solution"], answer: 1 },
+  { q_ar: "مين اللي كان بيعارض علاقة San-ha وJu-won في البداية؟", q_en: "Who opposed San-ha and Ju-won's relationship at first?", options_ar: ["أبو Ju-won", "أم San-ha", "Hae-joon", "كل الإجابات صح"], options_en: ["Ju-won's dad", "San-ha's mom", "Hae-joon", "All answers are correct"], answer: 3 },
+  { q_ar: "إيه اللي بيخلي أبو Ju-won يوافق على علاقة San-ha وJu-won في النهاية؟", q_en: "What makes Ju-won's dad approve of San-ha and Ju-won's relationship at the end?", options_ar: ["بيحب San-ha", "San-ha بيثبت حبه وصدقه", "Ju-won بتقنعه", "بيغير رأيه فجأة"], options_en: ["He loves San-ha", "San-ha proves his love and honesty", "Ju-won convinces him", "He changes his mind suddenly"], answer: 1 },
+  { q_ar: "إيه اللي بيميز مسلسل Family By Choice عن باقي المسلسلات؟", q_en: "What distinguishes Family By Choice from other series?", options_ar: ["الأكشن", "الرومانسية العائلية الدافئة", "الرعب", "الكوميديا بس"], options_en: ["Action", "Warm family romance", "Horror", "Just comedy"], answer: 1 },
+  { q_ar: "مين الشخص اللي بيحب Ju-won من غير ما يقولها في البداية؟", q_en: "Who loves Ju-won without telling her at first?", options_ar: ["Hae-joon", "San-ha", "صديق تالت", "محدش"], options_en: ["Hae-joon", "San-ha", "A third friend", "No one"], answer: 1 },
+  { q_ar: "إيه اللي بيحصل للعلاقة بين Ju-won وSan-ha في النهاية؟", q_en: "What happens to Ju-won and San-ha's relationship at the end?", options_ar: ["بيفترقوا", "بيحبوا بعض وبيتقربوا", "بيسيبوا البلد", "بيتجوزوا"], options_en: ["They separate", "They love each other and get closer", "They leave the country", "They get married"], answer: 1 },
+  { q_ar: "إيه اللي بتتعلمه الشخصيات في النهاية؟", q_en: "What do the characters learn at the end?", options_ar: ["إن العيلة هي اللي بتختارها", "إن الحب صعب", "إن السفر هو الحل", "إن الفلوس هي كل حاجة"], options_en: ["Family is who you choose", "Love is hard", "Travel is the solution", "Money is everything"], answer: 0 }
+];
 
 const translations = {
-  ar: { title: "🏡 كويز عيلة بالاختيار 🏡", subtitle: "اختر الجزء اللي عايز تلعب فيه", btnAll: "الشامل (20 سؤال خاص)", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🏡", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
-  en: { title: "🏡 Family By Choice Quiz 🏡", subtitle: "Choose the part you want to play", btnAll: "Comprehensive (20 Special Questions)", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🏡", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+  ar: { title: "🏡 كويز عيلة بالاختيار 🏡", startHeading: "العيلة مش بالدم", startDesc: "20 سؤال عن أحداث مسلسل Family By Choice<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تعرف معنى العيلة الحقيقية؟", startBtn: "🏡 ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🏡", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "🏡 Family By Choice Quiz 🏡", startHeading: "Family is not just blood", startDesc: "20 questions about Family By Choice<br><strong>You have 20 seconds per question</strong><br>Do you know the meaning of true family?", startBtn: "🏡 Start", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🏡", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
 };
 
-let currentQuestions = [];
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
 
 function applyLanguage() {
   const t = translations[currentLang];
   document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
   document.getElementById('main-title').innerText = t.title;
-  document.getElementById('subtitle').innerText = t.subtitle;
-  document.getElementById('btn-all').innerText = t.btnAll;
+  document.getElementById('start-heading').innerText = t.startHeading;
+  document.getElementById('start-desc').innerHTML = t.startDesc;
+  document.getElementById('start-btn').innerText = t.startBtn;
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
-function startGame(part) {
-  currentQuestions = [...quizData.all];
-  currentSaveKey = 'family_all_HighScore';
-  
+function startQuiz() {
+  currentQuestions = [...questions];
   highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
   currentQuestions.sort(() => Math.random() - 0.5);
-
-  document.getElementById('selectionScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'none';
   document.getElementById('playScreen').style.display = 'block';
   document.getElementById('backBtn').style.display = 'none';
-
   current = 0; score = 0;
   loadQuestion();
 }
@@ -139,37 +146,29 @@ function loadQuestion() {
   answered = false; timeLeft = 20;
   const q = currentQuestions[current];
   document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
-  const optEl = document.getElementById('options');
-  optEl.innerHTML = '';
+  const optEl = document.getElementById('options'); optEl.innerHTML = '';
   const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
   optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
-    const div = document.createElement('div');
-    div.className = 'option';
-    div.innerText = opt.text;
-    div.onclick = () => checkAnswer(opt.isCorrect, div);
-    optEl.appendChild(div);
+    const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
   });
   document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
   document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
-  clearInterval(timerInterval);
-  timerInterval = setInterval(updateTimer, 1000);
-  updateTimer();
+  clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
 }
 
 function updateTimer() {
-  const timerEl = document.getElementById('timer');
-  timerEl.innerText = `⏱️ ${timeLeft}`;
+  const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
   if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const q = currentQuestions[current];
-      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
       document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
@@ -178,40 +177,64 @@ function updateTimer() {
 }
 
 function checkAnswer(isCorrect, el) {
-  if (answered) return;
-  answered = true; clearInterval(timerInterval);
-  const q = currentQuestions[current];
-  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  const allOpts = document.querySelectorAll('.option');
-  allOpts.forEach(o => o.classList.add('disabled'));
+  if (answered) return; answered = true; clearInterval(timerInterval);
+  const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
   allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
   if (isCorrect) { score++; } else { el.classList.add('wrong'); }
   document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
-function nextQuestion() {
-  current++;
-  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
-}
+function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
 
 function showFinal() {
-  clearInterval(timerInterval);
-  document.getElementById('progress').style.width = '100%';
+  clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
   if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-  const t = translations[currentLang];
+  const t = translations[currentLang]; const isEnglish = currentLang === 'en';
+  
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = 'family';
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#f0d9b5; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#c9a87c; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    <button onclick="showLeaderboard('family')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#c9a87c; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
   </div>`;
-  document.getElementById('options').innerHTML = '';
-  document.getElementById('timer').style.display = 'none';
-  document.getElementById('score').innerText = '';
-  document.getElementById('next').style.display = 'none';
+  document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
 }
 
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    if(!window.db) return;
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val(); list.innerHTML = '';
+            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+}
 window.onload = applyLanguage;
 </script>
 </body>
