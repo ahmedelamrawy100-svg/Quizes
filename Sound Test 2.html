@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تجربة الأصوات MP3</title>
+<style>
+  body { background: #111; color: #fff; font-family: sans-serif; text-align: center; padding: 50px; }
+  button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; border-radius: 8px; border: none; color: #fff; }
+  .correct { background: #4caf50; }
+  .wrong { background: #f44336; }
+  .finish { background: #ffcc00; color: #000; }
+</style>
+</head>
+<body>
+  <h1>اختبار الأصوات (MP3)</h1>
+  <p>دوس على الزراير دي واسمعلنا</p>
+  
+  <button class="correct" onclick="playAudio('correct')">✅ إجابة صح</button>
+  <button class="wrong" onclick="playAudio('wrong')">❌ إجابة غلط</button>
+  <button class="finish" onclick="playAudio('finish')">🏆 نهاية الكويز</button>
+
+  <audio id="audioCorrect" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="audioWrong" src="https://actions.google.com/sounds/v1/cartoon/buzz.ogg"></audio>
+  <audio id="audioFinish" src="https://actions.google.com/sounds/v1/cartoon/magic_wand.ogg"></audio>
+
+  <script>
+    function playAudio(type) {
+      let audio;
+      if (type === 'correct') audio = document.getElementById('audioCorrect');
+      if (type === 'wrong') audio = document.getElementById('audioWrong');
+      if (type === 'finish') audio = document.getElementById('audioFinish');
+      
+      if (audio) {
+        audio.currentTime = 0; // إعادة الصوت من الأول
+        audio.play().catch(e => alert("المتصفح منع الصوت. دوس على الصفحة الأول."));
+      }
+    }
+  </script>
+</body>
+</html>
