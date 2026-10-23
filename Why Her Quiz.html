@@ -6,40 +6,27 @@
 <title>⚖️ كويز لماذا هي؟ - Why Her?</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* زرار الرجوع */
-  .back-btn {
-    position: fixed; top: 20px; left: 20px;
-    background: rgba(30, 30, 30, 0.9); color: #fff;
-    border: 2px solid #555; padding: 8px 15px; border-radius: 8px;
-    cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold;
-    text-decoration: none; transition: 0.3s; z-index: 999;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
   .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #0a0a0a; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
   .quiz-box { background: rgba(15,15,15,0.98); border: 2px solid #a88c5a; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(168,140,90,0.6); position: relative; }
   h1 { text-align: center; color: #d4b87a; text-shadow: 0 0 15px #a88c5a; margin-bottom: 20px; font-size: 30px; }
   p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
-
+  
   body.light-mode { background: #f4f4f4; color: #111; }
-  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
+  body.light-mode h1 { color: #8b6b3d; text-shadow: none; }
+  body.light-mode p { color: #333; }
+  body.light-mode .quiz-box { background: #fff; border-color: #a88c5a; }
   body.light-mode .question { color: #111; }
   body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
   body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
   body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
   body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
 
   .start-content { text-align: center; padding: 30px 10px; }
   .start-content h2 { color: #d4b87a; font-size: 32px; margin-bottom: 20px; }
-  .start-btn {
-    padding: 15px 50px; background: #a88c5a; color: #fff; border: 2px solid #d4b87a;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
-  }
+  .start-btn { padding: 15px 50px; background: #a88c5a; color: #fff; border: 2px solid #d4b87a; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 20px; font-weight: 900; transition: 0.3s; }
   .start-btn:hover { background: #d4b87a; color: #000; box-shadow: 0 0 20px #a88c5a; }
 
   .play-screen { display: none; }
@@ -58,11 +45,9 @@
 </head>
 <body>
 
-<!-- زرار الرجوع (بيختفي جوه الكويز) -->
 <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
 <div class="quiz-box" id="quizBox">
-  <!-- شاشة البداية -->
   <div id="startScreen">
     <h1 id="main-title">⚖️ كويز لماذا هي؟ ⚖️</h1>
     <div class="start-content">
@@ -72,7 +57,6 @@
     </div>
   </div>
 
-  <!-- شاشة اللعب -->
   <div id="playScreen" class="play-screen">
     <h1 id="quiz-title">⚖️ كويز لماذا هي؟ ⚖️</h1>
     <div class="progress"><div class="progress-bar" id="progress"></div></div>
@@ -84,15 +68,26 @@
   </div>
 </div>
 
-<script>
-  if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-}
-let currentLang = localStorage.getItem('lang') || 'ar';
-let highestScore = 0;
-let currentSaveKey = 'whyher_HighScore';
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #d4b87a; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(212,184,122,0.5);">
+        <h3 style="color:#d4b87a; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#d4b87a; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
 
-// 20 سؤال مترجمين
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+</script>
+
+<script>
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'whyher_HighScore';
+
 const questions = [
   { q_ar: "في بداية المسلسل، البطلة (Oh Soo-jae) بتشتغل إيه؟", q_en: "At the start of the series, what does the protagonist (Oh Soo-jae) do?", options_ar: ["محامية في شركة كبيرة", "قاضية", "صحفية", "أستاذة"], options_en: ["A lawyer at a major firm", "A judge", "A journalist", "A professor"], answer: 0 },
   { q_ar: "إيه اللي بيحصل لـ Soo-jae عشان تغير حياتها؟", q_en: "What happens to Soo-jae that changes her life?", options_ar: ["بتحل قضية كبيرة", "بتتعرض لغدر من زميلها", "بتترقى", "بتسيب الشغل"], options_en: ["She solves a big case", "She's betrayed by a colleague", "She gets promoted", "She quits her job"], answer: 1 },
@@ -117,62 +112,32 @@ const questions = [
 ];
 
 const translations = {
-  ar: { 
-    title: "⚖️ كويز لماذا هي؟ ⚖️", 
-    startHeading: "القانون والانتقام",
-    startDesc: "20 سؤال عن أحداث مسلسل Why Her?<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكشف الحقيقة؟",
-    startBtn: "⚖️ ابدأ",
-    nextBtn: "السؤال التالي ←", 
-    scoreText: "السؤال {c} من {t} | النقاط: {s}", 
-    endTitle: "انتهى التحقيق! ⚖️", 
-    endScore: "نتيجتك: {s} / {t}", 
-    playAgain: "🔄 العب تاني",
-    highScore: "🏆 أعلى نتيجة:"
-  },
-  en: { 
-    title: "⚖️ Why Her? Quiz ⚖️", 
-    startHeading: "Law and Revenge",
-    startDesc: "20 questions about Why Her?<br><strong>You have 20 seconds per question</strong><br>Can you uncover the truth?",
-    startBtn: "⚖️ Start",
-    nextBtn: "Next Question →", 
-    scoreText: "Question {c} of {t} | Score: {s}", 
-    endTitle: "Investigation Over! ⚖️", 
-    endScore: "Your Score: {s} / {t}", 
-    playAgain: "🔄 Play Again",
-    highScore: "🏆 High Score:"
-  }
+  ar: { title: "⚖️ كويز لماذا هي؟ ⚖️", startHeading: "القانون والانتقام", startDesc: "20 سؤال عن أحداث مسلسل Why Her?<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكشف الحقيقة؟", startBtn: "⚖️ ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! ⚖️", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "⚖️ Why Her? Quiz ⚖️", startHeading: "Law and Revenge", startDesc: "20 questions about Why Her?<br><strong>You have 20 seconds per question</strong><br>Can you uncover the truth?", startBtn: "⚖️ Start", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! ⚖️", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
 };
 
-let currentQuestions = [];
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
 
-// تطبيق اللغة مرة واحدة عند التحميل
 function applyLanguage() {
   const t = translations[currentLang];
   document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-  
-  // ترجمة شاشة البداية
   document.getElementById('main-title').innerText = t.title;
   document.getElementById('start-heading').innerText = t.startHeading;
   document.getElementById('start-desc').innerHTML = t.startDesc;
   document.getElementById('start-btn').innerText = t.startBtn;
-  
-  // ترجمة شاشة اللعب
   document.getElementById('quiz-title').innerText = t.title;
   document.getElementById('next').innerText = t.nextBtn;
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startQuiz() {
   currentQuestions = [...questions];
   highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
   currentQuestions.sort(() => Math.random() - 0.5);
-  
   document.getElementById('startScreen').style.display = 'none';
   document.getElementById('playScreen').style.display = 'block';
-  
-  // إخفاء زرار الرجوع عشان تركز
   document.getElementById('backBtn').style.display = 'none';
-  
   current = 0; score = 0;
   loadQuestion();
 }
@@ -180,48 +145,31 @@ function startQuiz() {
 function loadQuestion() {
   answered = false; timeLeft = 20;
   const q = currentQuestions[current];
-  
   document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
-  
-  const optEl = document.getElementById('options');
-  optEl.innerHTML = '';
-  
+  const optEl = document.getElementById('options'); optEl.innerHTML = '';
   const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
   let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
   optionsWithAnswers.sort(() => Math.random() - 0.5); 
-  
   optionsWithAnswers.forEach((opt) => {
-    const div = document.createElement('div');
-    div.className = 'option';
-    div.innerText = opt.text;
-    div.onclick = () => checkAnswer(opt.isCorrect, div);
-    optEl.appendChild(div);
+    const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
   });
-  
   document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
   document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
-  
-  clearInterval(timerInterval);
-  timerInterval = setInterval(updateTimer, 1000);
-  updateTimer();
+  clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
 }
 
 function updateTimer() {
-  const timerEl = document.getElementById('timer');
-  timerEl.innerText = `⏱️ ${timeLeft}`;
+  const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
   if (timeLeft <= 5) timerEl.style.color = '#f44336';
-  
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const q = currentQuestions[current];
-      const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === currentOptions[q.answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -229,56 +177,65 @@ function updateTimer() {
 }
 
 function checkAnswer(isCorrect, el) {
-  if (answered) return;
-  answered = true; clearInterval(timerInterval);
-  
-  const q = currentQuestions[current];
-  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  const allOpts = document.querySelectorAll('.option');
-  allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === currentOptions[q.answer]) o.classList.add('correct');
-  });
-  
+  if (answered) return; answered = true; clearInterval(timerInterval);
+  const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
   if (isCorrect) { score++; } else { el.classList.add('wrong'); }
-  
   document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
-function nextQuestion() {
-  current++;
-  if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); }
-}
+function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
 
 function showFinal() {
-  clearInterval(timerInterval);
-  document.getElementById('progress').style.width = '100%';
+  clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang]; const isEnglish = currentLang === 'en';
   
-  if (score > highestScore) {
-    highestScore = score;
-    localStorage.setItem(currentSaveKey, highestScore);
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = 'whyher';
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
+      } catch(e) { console.log("Error saving score", e); }
   }
-  
-  const t = translations[currentLang];
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
     <h2 style="color:#d4b87a; font-size:36px;">${t.endTitle}</h2>
     <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
-    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">
-      ${t.highScore} ${highestScore}
-    </p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${t.playAgain}</button>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="showLeaderboard('whyher')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
   </div>`;
-  document.getElementById('options').innerHTML = '';
-  document.getElementById('timer').style.display = 'none';
-  document.getElementById('score').innerText = '';
-  document.getElementById('next').style.display = 'none';
+  document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
 }
 
-window.onload = () => {
-  applyLanguage();
-};
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    if(!window.db) return;
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val(); list.innerHTML = '';
+            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+}
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
