@@ -6,227 +6,170 @@
 <title>🦸 كويز الحمقى الخارقون - The WONDERfools</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  .back-btn {
-    position: absolute; top: 15px; right: 15px;
-    background: #333; color: #fff; border: 1px solid #555;
-    padding: 5px 15px; border-radius: 5px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none;
-    transition: 0.3s; z-index: 10;
-  }
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
   .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #000; color: #eee; font-family: 'Cairo', sans-serif;
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
-    padding: 20px; overflow-x: hidden;
-    background: radial-gradient(circle at center, #0f141a 0%, #000 100%);
-  }
-
-  .quiz-box {
-    background: rgba(15,15,15,0.98); border: 2px solid #f5c542;
-    border-radius: 15px; padding: 25px; max-width: 750px; width: 100%;
-    box-shadow: 0 0 30px rgba(245,197,66,0.3); position: relative;
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #000; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; overflow-x: hidden; background: radial-gradient(circle at center, #0f141a 0%, #000 100%); }
+  .quiz-box { background: rgba(15,15,15,0.98); border: 2px solid #f5c542; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(245,197,66,0.3); position: relative; }
+  h1 { text-align: center; color: #f5c542; text-shadow: 0 0 15px #f5c542; margin-bottom: 20px; font-size: 30px; }
+  p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
+  
   body.light-mode { background: #f4f4f4; color: #111; }
-  body.light-mode .play-screen { background: #fff; border-color: #8b0000; }
+  body.light-mode h1 { color: #a67c00; text-shadow: none; }
+  body.light-mode p { color: #333; }
+  body.light-mode .quiz-box { background: #fff; border-color: #f5c542; }
   body.light-mode .question { color: #111; }
   body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
   body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .quiz-card h2 { color: #111; text-shadow: none; }
-
   body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
   body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
-  h1 { text-align: center; color: #f5c542; text-shadow: 0 0 15px #f5c542; margin-bottom: 15px; font-size: 30px; }
-  
+
   .start-content { text-align: center; padding: 30px 10px; }
   .start-content h2 { color: #f5c542; font-size: 32px; margin-bottom: 20px; }
-  .start-content p { color: #ccc; font-size: 17px; margin-bottom: 25px; line-height: 1.7; }
-  .start-btn {
-    padding: 15px 50px; background: #f5c542; color: #000; border: 2px solid #fff;
-    border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif;
-    font-size: 20px; font-weight: 900; transition: 0.3s;
-  }
+  .start-btn { padding: 15px 50px; background: #f5c542; color: #000; border: 2px solid #fff; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 20px; font-weight: 900; transition: 0.3s; }
   .start-btn:hover { background: #fff; color: #000; box-shadow: 0 0 20px #f5c542; }
-  
+
+  .play-screen { display: none; }
   .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
   .progress-bar { background: #f5c542; height: 100%; width: 0%; transition: width 0.5s; box-shadow: 0 0 10px #f5c542; }
   .timer { text-align: center; font-size: 18px; color: #f5c542; margin-bottom: 15px; font-weight: 700; }
-  
-  .movie-image {
-    width: 100%; height: 250px; border-radius: 10px; margin-bottom: 15px;
-    border: 2px solid #f5c542; box-shadow: 0 0 20px rgba(245,197,66,0.3);
-    background: #000; display: flex; justify-content: center; align-items: center;
-    overflow: hidden; position: relative;
-  }
-  .movie-image svg { width: 100%; height: 100%; display: block; }
-
   .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option {
-    display: block; background: #1a1a1a; border: 1px solid #333;
-    padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer;
-    transition: 0.25s; font-size: 16px;
-  }
+  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
   .option:hover:not(.disabled) { background: #2d2418; border-color: #f5c542; transform: translateX(-5px); }
   .option.correct { background: #1a5c2a; border-color: #4caf50; }
   .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  
-  #next {
-    display: none; margin-top: 20px; padding: 12px; background: #f5c542;
-    color: #000; border: none; border-radius: 8px; cursor: pointer;
-    font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%;
-  }
+  #next { display: none; margin-top: 20px; padding: 12px; background: #f5c542; color: #000; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
   #next:hover { background: #fff; color: #000; box-shadow: 0 0 15px #f5c542; }
   #score { margin-top: 15px; font-size: 15px; color: #f5c542; text-align: center; font-weight: 700; }
 </style>
 </head>
 <body>
 
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
+
 <div class="quiz-box" id="quizBox">
   <div id="startScreen">
-    <h1>🦸 كويز الحمقى الخارقون 🦸</h1>
+    <h1 id="main-title">🦸 كويز الحمقى الخارقون 🦸</h1>
     <div class="start-content">
-      <h2>مدينة هايسونغ 1999</h2>
-      <p>20 سؤال عن أحداث مسلسل The WONDERfools<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكتشف السر؟</p>
-      <button class="start-btn" onclick="startQuiz()">🦸 ابدأ</button>
+      <h2 id="start-heading">مدينة هايسونغ 1999</h2>
+      <p id="start-desc">20 سؤال عن أحداث مسلسل The WONDERfools<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكتشف السر؟</p>
+      <button class="start-btn" id="start-btn" onclick="startQuiz()">🦸 ابدأ</button>
     </div>
   </div>
 
-  <div id="quizScreen" style="display:none;">
-    <h1>🦸 كويز الحمقى الخارقون 🦸</h1>
+  <div id="playScreen" class="play-screen">
+    <h1 id="quiz-title">🦸 كويز الحمقى الخارقون 🦸</h1>
     <div class="progress"><div class="progress-bar" id="progress"></div></div>
     <div class="timer" id="timer">⏱️ 20</div>
-    
-    <div id="movieImage" class="movie-image"></div>
-    
     <div id="question" class="question"></div>
     <div id="options"></div>
     <div id="score"></div>
-    <button id="next">السؤال التالي ←</button>
+    <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
   </div>
 </div>
 
+<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:#111; border:2px solid #f5c542; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(245,197,66,0.5);">
+        <h3 style="color:#f5c542; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+        <div id="leaderboardList"></div>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#f5c542; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+</script>
+
 <script>
-  if (localStorage.getItem('theme') === 'light') {
-  document.body.classList.add('light-mode');
-}
-function generatePoster(title, subtitle) {
-  return `
-  <svg viewBox="0 0 500 250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="500" height="250" fill="#0f141a"/>
-    <circle cx="250" cy="125" r="80" fill="#f5c542" opacity="0.2"/>
-    <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="#f5c542" font-family="Cairo, sans-serif" font-weight="900" font-size="35" filter="drop-shadow(0 0 10px #f5c542)">${title}</text>
-    <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Cairo, sans-serif" font-weight="bold" font-size="20" opacity="0.7">${subtitle}</text>
-    <path d="M 0 250 L 250 180 L 500 250" fill="none" stroke="#f5c542" stroke-width="4"/>
-  </svg>
-  `;
-}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'wonderfools_HighScore';
 
 const questions = [
-  { q: "في بداية المسلسل، إيه اللي كان بيخلي تشاي ني تعمل خطة اختطاف وهمية؟", options: ["عشان تجيب فلوس للسفر", "عشان تشتهر", "عشان تنتقم من حد", "عشان تهرب من البيت"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE BEGINNING" },
-  { q: "تشاي ني وصحابها اكتشفوا إن عندهم قوى خارقة بعد ما وقعوا فين؟", options: ["في نهر ملوث", "في حفرة", "في بيت مهجور", "في المدرسة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE INCIDENT" },
-  { q: "إيه نوع القوة الخارقة اللي ظهرت عند تشاي ني؟", options: ["الانتقال الآني (Teleportation)", "الطيران", "قراءة الأفكار", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
-  { q: "لي أون جونغ (الموظف الحكومي) كان بيدور على إيه في مدينة هايسونغ؟", options: ["لغز اختفاءات غامضة", "كنز مدفون", "شغل جديد", "بيت للبيع"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE MYSTERY" },
-  { q: "إيه القوة الخارقة اللي كانت عند أون جونغ من الأصل؟", options: ["التحريك الذهني (Telekinesis)", "القوة الجسدية", "الشفاء", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
-  { q: "مين العالم الشرير اللي كان بيدير تجارب سرية على الأطفال؟", options: ["ها وون دو", "لي أون جونغ", "تشاي ني", "سون كيونغ هون"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE VILLAIN" },
-  { q: "إيه اسم المنظمة/الكنيسة اللي كانت واجهة للتجارب السرية؟", options: ["كنيسة الخلاص الأبدي", "معبد هايسونغ", "مشروع الأمل", "جمعية الأبطال"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE CULT" },
-  { q: "إيه اللي كان بيميز \"طفل القلب الأبدي\" في التجارب؟", options: ["قلبه كان بيشفيه من الموت", "كان بيطير", "كان بيقرأ الأفكار", "كان بيختفي"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE CHILD" },
-  { q: "إيه اللي حصل لطفل القلب الأبدي في النهاية؟", options: ["قلبه اتزرع لتشاي ني", "اتبنى", "هرب", "فضل عايش"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE TRUTH" },
-  { q: "مين اللي كان بيدعم تجارب ها وون دو بالفلوس من غير ما يعرف الحقيقة؟", options: ["جدة تشاي ني", "أم أون جونغ", "الحكومة", "الكنيسة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE SECRET" },
-  { q: "إيه اللي كان بيخلي قوة تشاي ني تشتغل؟", options: ["دقات قلبها ومشاعرها", "الضوء", "الماء", "الظلام"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RULE" },
-  { q: "إيه نوع قوة سون كيونغ هون (صاحب تشاي ني)؟", options: ["جسمه مرن جداً", "القوة الجسدية", "الطيران", "الاختفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
-  { q: "إيه نوع قوة كانغ رو بين (صاحب تشاي ني التاني)؟", options: ["القوة الجسدية الخارقة", "الانتقال الآني", "التحريك الذهني", "الشفاء"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE POWER" },
-  { q: "إيه الخطة الكبيرة بتاعة ها وون دو في نهاية المسلسل؟", options: ["نشر مواد سامة في المدينة", "تدمير الكنيسة", "خطف تشاي ني", "حرق المدينة"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE PLAN" },
-  { q: "مين اللي ساعد تشاي ني إنها توصل للمنطاد اللي فيه المواد السامة؟", options: ["رو بين (بقوته الجسدية)", "أون جونغ", "كيونغ هون", "جدتها"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RESCUE" },
-  { q: "إيه اللي عملته تشاي ني عشان تنقذ المدينة من الانفجار؟", options: ["نقلت المنطاد بعيد عن المدينة", "طفت بيه", "فجرته في السما", "اختفيت بيه"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE SACRIFICE" },
-  { q: "بعد الانفجار، الناس افتكروا إن تشاي ني ماتت. بعد كام يوم رجعت؟", options: ["49 يوم", "10 أيام", "سنة", "شهر"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE RETURN" },
-  { q: "إيه اللي كان بيميز نهاية المسلسل (آخر مشهد)؟", options: ["ها وون دو فتح عينه (احتمال جزء تاني)", "كل الأبطال ماتوا", "المدينة اتدمرت", "تشاي ني سافرت"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE ENDING" },
-  { q: "إيه الرسالة الأساسية للمسلسل؟", options: ["الأبطال مش لازم يكونوا كاملين عشان ينقذوا العالم", "القوة هي كل حاجة", "الانتقام هو الحل", "السفر هو النهاية"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE MESSAGE" },
-  { q: "إيه اللي بيميز The WONDERfools عن مسلسلات الأبطال الخارقين التانية؟", options: ["القوى غير كاملة وبتعمل مشاكل", "الأبطال محترفين", "مفيش شرير", "الأكشن قليل"], answer: 0, title: "THE WONDERFOOLS", subtitle: "THE STORY" }
+  { q_ar: "في بداية المسلسل، إيه اللي كان بيخلي تشاي ني تعمل خطة اختطاف وهمية؟", q_en: "At the start, what made Chae-ni make a fake kidnapping plan?", options_ar: ["عشان تجيب فلوس للسفر", "عشان تشتهر", "عشان تنتقم من حد", "عشان تهرب من البيت"], options_en: ["To get money to travel", "To become famous", "To take revenge", "To run away from home"], answer: 0 },
+  { q_ar: "تشاي ني وصحابها اكتشفوا إن عندهم قوى خارقة بعد ما وقعوا فين؟", q_en: "Where did Chae-ni and her friends fall to discover their superpowers?", options_ar: ["في نهر ملوث", "في حفرة", "في بيت مهجور", "في المدرسة"], options_en: ["In a polluted river", "In a hole", "In an abandoned house", "In the school"], answer: 0 },
+  { q_ar: "إيه نوع القوة الخارقة اللي ظهرت عند تشاي ني؟", q_en: "What superpower did Chae-ni get?", options_ar: ["الانتقال الآني (Teleportation)", "الطيران", "قراءة الأفكار", "الاختفاء"], options_en: ["Teleportation", "Flight", "Mind reading", "Invisibility"], answer: 0 },
+  { q_ar: "لي أون جونغ (الموظف الحكومي) كان بيدور على إيه في مدينة هايسونغ؟", q_en: "What was Lee Eun-jung (the government worker) looking for in Hyeseong City?", options_ar: ["لغز اختفاءات غامضة", "كنز مدفون", "شغل جديد", "بيت للبيع"], options_en: ["The mystery of strange disappearances", "Buried treasure", "A new job", "A house for sale"], answer: 0 },
+  { q_ar: "إيه القوة الخارقة اللي كانت عند أون جونغ من الأصل؟", q_en: "What superpower did Eun-jung originally have?", options_ar: ["التحريك الذهني (Telekinesis)", "القوة الجسدية", "الشفاء", "الاختفاء"], options_en: ["Telekinesis", "Physical strength", "Healing", "Invisibility"], answer: 0 },
+  { q_ar: "مين العالم الشرير اللي كان بيدير تجارب سرية على الأطفال؟", q_en: "Who is the evil scientist running secret experiments on children?", options_ar: ["ها وون دو", "لي أون جونغ", "تشاي ني", "سون كيونغ هون"], options_en: ["Ha Won-do", "Lee Eun-jung", "Chae-ni", "Son Kyung-hoon"], answer: 0 },
+  { q_ar: "إيه اسم المنظمة/الكنيسة اللي كانت واجهة للتجارب السرية؟", q_en: "What is the name of the organization/church that was a front for secret experiments?", options_ar: ["كنيسة الخلاص الأبدي", "معبد هايسونغ", "مشروع الأمل", "جمعية الأبطال"], options_en: ["Church of Eternal Salvation", "Hyesung Temple", "Project Hope", "Heroes Society"], answer: 0 },
+  { q_ar: "إيه اللي كان بيميز \"طفل القلب الأبدي\" في التجارب؟", q_en: "What characterized the 'Eternal Heart Child' in the experiments?", options_ar: ["قلبه كان بيشفيه من الموت", "كان بيطير", "كان بيقرأ الأفكار", "كان بيختفي"], options_en: ["His heart could heal him from death", "He could fly", "He could read minds", "He could disappear"], answer: 0 },
+  { q_ar: "إيه اللي حصل لطفل القلب الأبدي في النهاية؟", q_en: "What happened to the Eternal Heart Child in the end?", options_ar: ["قلبه اتزرع لتشاي ني", "اتبنى", "هرب", "فضل عايش"], options_en: ["His heart was transplanted to Chae-ni", "He was adopted", "He escaped", "He stayed alive"], answer: 0 },
+  { q_ar: "مين اللي كان بيدعم تجارب ها وون دو بالفلوس من غير ما يعرف الحقيقة؟", q_en: "Who funded Ha Won-do's experiments without knowing the truth?", options_ar: ["جدة تشاي ني", "أم أون جونغ", "الحكومة", "الكنيسة"], options_en: ["Chae-ni's grandmother", "Eun-jung's mother", "The government", "The church"], answer: 0 },
+  { q_ar: "إيه اللي كان بيخلي قوة تشاي ني تشتغل؟", q_en: "What made Chae-ni's power work?", options_ar: ["دقات قلبها ومشاعرها", "الضوء", "الماء", "الظلام"], options_en: ["Her heartbeat and emotions", "Light", "Water", "Darkness"], answer: 0 },
+  { q_ar: "إيه نوع قوة سون كيونغ هون (صاحب تشاي ني)؟", q_en: "What is the power of Son Kyung-hoon (Chae-ni's friend)?", options_ar: ["جسمه مرن جداً", "القوة الجسدية", "الطيران", "الاختفاء"], options_en: ["His body is very flexible", "Physical strength", "Flight", "Invisibility"], answer: 0 },
+  { q_ar: "إيه نوع قوة كانغ رو بين (صاحب تشاي ني التاني)؟", q_en: "What is the power of Kang Ro-bin (Chae-ni's other friend)?", options_ar: ["القوة الجسدية الخارقة", "الانتقال الآني", "التحريك الذهني", "الشفاء"], options_en: ["Super strength", "Teleportation", "Telekinesis", "Healing"], answer: 0 },
+  { q_ar: "إيه الخطة الكبيرة بتاعة ها وون دو في نهاية المسلسل؟", q_en: "What is Ha Won-do's big plan at the end of the series?", options_ar: ["نشر مواد سامة في المدينة", "تدمير الكنيسة", "خطف تشاي ني", "حرق المدينة"], options_en: ["Release toxic materials in the city", "Destroy the church", "Kidnap Chae-ni", "Burn the city"], answer: 0 },
+  { q_ar: "مين اللي ساعد تشاي ني إنها توصل للمنطاد اللي فيه المواد السامة؟", q_en: "Who helped Chae-ni reach the blimp with the toxic materials?", options_ar: ["رو بين (بقوته الجسدية)", "أون جونغ", "كيونغ هون", "جدتها"], options_en: ["Ro-bin (with his super strength)", "Eun-jung", "Kyung-hoon", "Her grandmother"], answer: 0 },
+  { q_ar: "إيه اللي عملته تشاي ني عشان تنقذ المدينة من الانفجار؟", q_en: "What did Chae-ni do to save the city from the explosion?", options_ar: ["نقلت المنطاد بعيد عن المدينة", "طفت بيه", "فجرته في السما", "اختفيت بيه"], options_en: ["She moved the blimp away from the city", "She flew with it", "She blew it up in the sky", "She disappeared with it"], answer: 0 },
+  { q_ar: "بعد الانفجار، الناس افتكروا إن تشاي ني ماتت. بعد كام يوم رجعت؟", q_en: "After the explosion, people thought Chae-ni died. After how many days did she return?", options_ar: ["49 يوم", "10 أيام", "سنة", "شهر"], options_en: ["49 days", "10 days", "A year", "A month"], answer: 0 },
+  { q_ar: "إيه اللي كان بيميز نهاية المسلسل (آخر مشهد)؟", q_en: "What characterized the ending of the series (last scene)?", options_ar: ["ها وون دو فتح عينه (احتمال جزء تاني)", "كل الأبطال ماتوا", "المدينة اتدمرت", "تشاي ني سافرت"], options_en: ["Ha Won-do opened his eyes (possibility of season 2)", "All the heroes died", "The city was destroyed", "Chae-ni traveled"], answer: 0 },
+  { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What is the main message of the series?", options_ar: ["الأبطال مش لازم يكونوا كاملين عشان ينقذوا العالم", "القوة هي كل حاجة", "الانتقام هو الحل", "السفر هو النهاية"], options_en: ["Heroes don't have to be perfect to save the world", "Power is everything", "Revenge is the answer", "Travel is the end"], answer: 0 },
+  { q_ar: "إيه اللي بيميز The WONDERfools عن مسلسلات الأبطال الخارقين التانية؟", q_en: "What distinguishes The WONDERfools from other superhero series?", options_ar: ["القوى غير كاملة وبتعمل مشاكل", "الأبطال محترفين", "مفيش شرير", "الأكشن قليل"], options_en: ["The powers are imperfect and cause problems", "The heroes are professionals", "There is no villain", "There's little action"], answer: 0 }
 ];
 
-const TOTAL_TIME = 20;
-let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = TOTAL_TIME;
-let shuffled = [];
+const translations = {
+  ar: { title: "🦸 كويز الحمقى الخارقون 🦸", startHeading: "مدينة هايسونغ 1999", startDesc: "20 سؤال عن أحداث مسلسل The WONDERfools<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تقدر تكتشف السر؟", startBtn: "🦸 ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🦸", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+  en: { title: "🦸 The WONDERfools Quiz 🦸", startHeading: "Hyesung City 1999", startDesc: "20 questions about The WONDERfools<br><strong>You have 20 seconds per question</strong><br>Can you uncover the secret?", startBtn: "🦸 Start", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🦸", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+};
 
-function shuffleArray(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
+let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
 
-// صوت تكة خفيفة
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playClick() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = 'sine'; 
-  osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-  osc.connect(gain); gain.connect(audioCtx.destination); 
-  osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+function applyLanguage() {
+  const t = translations[currentLang];
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('main-title').innerText = t.title;
+  document.getElementById('start-heading').innerText = t.startHeading;
+  document.getElementById('start-desc').innerHTML = t.startDesc;
+  document.getElementById('start-btn').innerText = t.startBtn;
+  document.getElementById('quiz-title').innerText = t.title;
+  document.getElementById('next').innerText = t.nextBtn;
+  const backBtn = document.getElementById('backBtn');
+  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
 }
 
 function startQuiz() {
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-  shuffled = [...questions].sort(() => Math.random() - 0.5);
+  currentQuestions = [...questions];
+  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+  currentQuestions.sort(() => Math.random() - 0.5);
   document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('quizScreen').style.display = 'block';
-  document.getElementById('backBtn').style.display = 'none'; // إخفاء الرجوع جوه اللعب
-
+  document.getElementById('playScreen').style.display = 'block';
+  document.getElementById('backBtn').style.display = 'none';
   current = 0; score = 0;
-  document.getElementById('next').onclick = nextQuestion;
   loadQuestion();
 }
 
 function loadQuestion() {
-  answered = false; timeLeft = TOTAL_TIME;
-  const q = shuffled[current];
-  
-  document.getElementById('movieImage').innerHTML = generatePoster(q.title, q.subtitle);
-  document.getElementById('question').innerText = q.q;
-  
-  const optEl = document.getElementById('options');
-  optEl.innerHTML = '';
-  
-  let optionsWithAnswers = q.options.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers = shuffleArray(optionsWithAnswers); 
-  
+  answered = false; timeLeft = 20;
+  const q = currentQuestions[current];
+  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
+  const optEl = document.getElementById('options'); optEl.innerHTML = '';
+  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+  optionsWithAnswers.sort(() => Math.random() - 0.5); 
   optionsWithAnswers.forEach((opt) => {
-    const div = document.createElement('div');
-    div.className = 'option';
-    div.innerText = opt.text;
-    div.onclick = () => checkAnswer(opt.isCorrect, div);
-    optEl.appendChild(div);
+    const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+    div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
   });
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / shuffled.length * 100) + '%';
-  
-  clearInterval(timerInterval);
-  timerInterval = setInterval(updateTimer, 1000);
-  updateTimer();
+  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
+  clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
 }
 
 function updateTimer() {
-  const timerEl = document.getElementById('timer');
-  timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336'; else timerEl.style.color = '#f5c542';
-  
+  const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
+  if (timeLeft <= 5) timerEl.style.color = '#f44336';
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
     if (!answered) {
       answered = true;
       document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      document.querySelectorAll('.option').forEach(o => {
-        if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-      });
+      const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
       document.getElementById('next').style.display = 'inline-block';
     }
   }
@@ -234,47 +177,65 @@ function updateTimer() {
 }
 
 function checkAnswer(isCorrect, el) {
-  if (answered) return;
-  answered = true; clearInterval(timerInterval);
-  
-  const allOpts = document.querySelectorAll('.option');
-  allOpts.forEach(o => o.classList.add('disabled'));
-  
-  allOpts.forEach(o => {
-    if(o.innerText === shuffled[current].options[shuffled[current].answer]) o.classList.add('correct');
-  });
-  
-  if (isCorrect) {
-    score++;
-    playClick();
-  } else {
-    el.classList.add('wrong');
-    playClick();
-  }
-  
-  document.getElementById('score').innerText = `السؤال ${current + 1} من ${shuffled.length} | النقاط: ${score}`;
+  if (answered) return; answered = true; clearInterval(timerInterval);
+  const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+  const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
+  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
   document.getElementById('next').style.display = 'inline-block';
 }
 
-function nextQuestion() {
-  current++;
-  if (current < shuffled.length) { loadQuestion(); } else { showFinal(); }
-}
+function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
 
 function showFinal() {
-  clearInterval(timerInterval);
-  document.getElementById('progress').style.width = '100%';
+  clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+  const t = translations[currentLang]; const isEnglish = currentLang === 'en';
+  
+  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+  if(window.db && window.push) {
+      try {
+          const quizName = 'wonderfools';
+          window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
+      } catch(e) { console.log("Error saving score", e); }
+  }
+
   document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#f5c542; font-size:36px;">انتهى الكويز! 🦸</h2>
-    <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${shuffled.length}</p>
-    <button onclick="location.reload()" style="margin-top:20px; padding:10px 30px; background:#f5c542; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">🔄 العب تاني</button>
+    <h2 style="color:#f5c542; font-size:36px;">${t.endTitle}</h2>
+    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+    <button onclick="showLeaderboard('wonderfools')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#f5c542; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
   </div>`;
-  document.getElementById('options').innerHTML = '';
-  document.getElementById('movieImage').style.display = 'none';
-  document.getElementById('timer').style.display = 'none';
-  document.getElementById('score').innerText = '';
-  document.getElementById('next').style.display = 'none';
+  document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+  document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+  document.getElementById('backBtn').style.display = 'flex'; 
 }
+
+function showLeaderboard(quizName) {
+    const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
+    const isEnglish = localStorage.getItem('lang') === 'en';
+    modal.style.display = 'flex';
+    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
+    if(!window.db) return;
+    try {
+        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
+        window.onValue(lbRef, (snapshot) => {
+            const data = snapshot.val(); list.innerHTML = '';
+            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
+            const arr = Object.values(data).sort((a,b) => b.score - a.score);
+            arr.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
+                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
+                list.appendChild(div);
+            });
+        });
+    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+}
+window.onload = applyLanguage;
 </script>
 </body>
 </html>
