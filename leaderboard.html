@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏆 المتصدرين - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333;
+  }
+  body.light-mode {
+    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); 
+    font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; 
+    display: flex; flex-direction: column; align-items: center; 
+  }
+  
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+
+  .leaderboard-container { width: 100%; max-width: 800px; margin-top: 60px; }
+  
+  .header-title { 
+    text-align: center; font-size: 40px; color: gold; margin-bottom: 10px; 
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900;
+  }
+  .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
+
+  .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 40px; height: 200px; }
+  
+  .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; }
+  .podium-avatar { font-size: 40px; margin-bottom: 10px; }
+  .podium-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; text-align: center; word-break: break-all; }
+  .podium-score { font-size: 14px; color: gold; font-weight: bold; margin-bottom: 10px; }
+  
+  .podium-base { width: 100%; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; font-size: 24px; padding-top: 10px; color: #000; }
+  .p1 .podium-base { height: 130px; background: linear-gradient(to top, #b8860b, #ffd700); font-size: 36px; }
+  .p2 .podium-base { height: 100px; background: linear-gradient(to top, #708090, #c0c0c0); }
+  .p3 .podium-base { height: 80px; background: linear-gradient(to top, #8b4513, #cd7f32); }
+
+  .leaderboard-list { 
+    background: var(--card-bg); border: 2px solid gold; border-radius: 15px; 
+    overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  
+  .lb-item { 
+    display: flex; justify-content: space-between; align-items: center; 
+    padding: 15px 25px; border-bottom: 1px solid var(--card-border); 
+    font-size: 18px; transition: 0.3s;
+  }
+  .lb-item:hover { background: rgba(255, 215, 0, 0.1); }
+  .lb-item:last-child { border-bottom: none; }
+  
+  .lb-rank { font-size: 20px; font-weight: bold; width: 50px; text-align: center; color: var(--subtitle-color); }
+  .lb-name { flex: 1; text-align: right; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+  .lb-score { color: #ff0000; font-weight: 900; font-size: 20px; background: rgba(255,0,0,0.1); padding: 5px 15px; border-radius: 20px; }
+
+  .no-data { text-align: center; color: var(--subtitle-color); padding: 40px; font-size: 18px; }
+
+  @media (max-width: 600px) {
+    .header-title { font-size: 30px; }
+    .podium-item { width: 90px; }
+    .podium-avatar { font-size: 30px; }
+    .podium-name { font-size: 14px; }
+    .podium-score { font-size: 12px; }
+    .p1 .podium-base { height: 110px; }
+    .p2 .podium-base { height: 80px; }
+    .p3 .podium-base { height: 60px; }
+    .lb-item { padding: 12px 15px; font-size: 16px; }
+    .lb-score { font-size: 16px; padding: 4px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
+
+<div class="leaderboard-container">
+  <h1 class="header-title">🏆 قاعة المشاهير</h1>
+  <p class="header-subtitle">أفضل 10 لاعبين في منصة Quiz Hub</p>
+
+  <!-- منصة التتويج (أول 3 مراكز) -->
+  <div class="podium-container" id="podiumContainer">
+    <!-- هتتملي أوتوماتيك بالجافاسكريبت -->
+  </div>
+
+  <!-- باقي اللاعبين (المراكز من 4 لـ 10) -->
+  <div class="leaderboard-list" id="leaderboardList">
+    <div class="no-data">جاري تحميل البيانات...</div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+    projectId: "quiz-hub-app-f4cd0",
+    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+    messagingSenderId: "282772179392",
+    appId: "1:282772179392:web:64646d757592b29ff3a025"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+
+  const podiumContainer = document.getElementById('podiumContainer');
+  const leaderboardList = document.getElementById('leaderboardList');
+
+  onValue(ref(db, 'scores'), (snapshot) => {
+    const allScores = snapshot.val();
+    if (!allScores) { 
+        leaderboardList.innerHTML = '<div class="no-data">مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!</div>'; 
+        return; 
+    }
+    
+    let players = [];
+    for (let username in allScores) {
+      // تجاهل الأدمن والأونر عشان ميظهروش في الليدر بورد
+      if (username.toLowerCase() === 'ahmed') continue; 
+
+      let playerTotal = 0;
+      for (let quiz in allScores[username]) {
+        const bestScore = Math.max(...Object.values(allScores[username][quiz]).map(entry => entry.score));
+        playerTotal += bestScore;
+      }
+      players.push({ username, total: playerTotal });
+    }
+    
+    // ترتيب تنازلي
+    players.sort((a, b) => b.total - a.total);
+    const top10 = players.slice(0, 10);
+    
+    // تقسيم اللاعبين (التوب 3 والباقي)
+    const top3 = top10.slice(0, 3);
+    const rest = top10.slice(3);
+
+    // 1. رسم منصة التتويج (Top 3)
+    podiumContainer.innerHTML = '';
+    const podiumOrder = [top3[1], top3[0], top3[2]]; // ترتيب العرض: التاني، الأول، التالت
+    const podiumClasses = ['p2', 'p1', 'p3'];
+    const medals = ['🥈', '🥇', '🥉'];
+
+    podiumOrder.forEach((player, index) => {
+        if (!player) return; // لو في أقل من 3 لاعبين
+        
+        const div = document.createElement('div');
+        div.className = `podium-item ${podiumClasses[index]}`;
+        div.innerHTML = `
+            <div class="podium-avatar">${index === 1 ? '👑' : '👤'}</div>
+            <div class="podium-name">${player.username}</div>
+            <div class="podium-score">${player.total} نقطة</div>
+            <div class="podium-base">${medals[index]}</div>
+        `;
+        podiumContainer.appendChild(div);
+    });
+
+    // 2. رسم باقي اللاعبين (من 4 لـ 10)
+    leaderboardList.innerHTML = '';
+    if (rest.length === 0) {
+        leaderboardList.innerHTML = '<div class="no-data">محتاجين لاعبين أكتر عشان نكمل القائمة!</div>';
+    } else {
+        rest.forEach((player, index) => {
+            const actualRank = index + 4;
+            const div = document.createElement('div');
+            div.className = 'lb-item';
+            div.innerHTML = `
+                <span class="lb-rank">#${actualRank}</span>
+                <span class="lb-name">👤 ${player.username}</span>
+                <span class="lb-score">${player.total} نقطة</span>
+            `;
+            leaderboardList.appendChild(div);
+        });
+    }
+  });
+</script>
+</body>
+</html>
