@@ -21,7 +21,6 @@
   .btn-close:hover { background: #555; }
   .room-code-display { font-size: 32px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #b17edb; margin-bottom: 15px; letter-spacing: 5px; }
   .status-text { color: #aaa; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
-  
   .challenge-btn { margin-top: 30px; padding: 15px 40px; background: #5c2a75; color: #fff; border: 2px solid #b17edb; border-radius: 10px; font-family: 'Cairo'; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(92,42,117,0.6); }
   .challenge-btn:hover { background: #b17edb; color: #fff; transform: scale(1.05); }
 </style>
@@ -65,10 +64,10 @@
 </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, get, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove;
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove; window.push = push;
 </script>
 <script src="questions.js"></script>
 <script>
@@ -121,9 +120,8 @@
     window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        if (data.status === 'waiting') {
-          window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); });
-        } else { alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
+        if (data.status === 'waiting') { window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); }); } 
+        else { alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
       } else { alert("كود الغرفة غير صحيح."); }
     });
   }
@@ -200,6 +198,8 @@
         });
       });
     } else {
+      const playerName = localStorage.getItem('loggedInUser') || 'Unknown';
+      if(window.db && window.push) { try { window.push(window.ref(window.db, 'scores/' + playerName + '/' + currentSaveKey.split('_')[0]), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); } catch(e) { console.log("Error saving score", e); } }
       if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
       const t = translations[currentLang];
       document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#b17edb; font-size:36px;">${t.endTitle}</h2><p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p><p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p><button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#5c2a75; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button></div>`;
