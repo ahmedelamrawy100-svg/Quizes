@@ -5,237 +5,334 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ كويز الجمال الحقيقي - True Beauty</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
-  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #1a1015; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-  .quiz-box { background: rgba(15,15,15,0.98); border: 2px solid #d48cba; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(212,140,186,0.4); }
-  h1 { text-align: center; color: #f7a8d8; text-shadow: 0 0 15px #d48cba; margin-bottom: 20px; font-size: 30px; }
-  p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
-  
-  body.light-mode { background: #f4f4f4; color: #111; }
-  body.light-mode h1 { color: #c06a9c; text-shadow: none; }
-  body.light-mode p { color: #333; }
-  body.light-mode .quiz-box { background: #fff; border-color: #d48cba; }
-  body.light-mode .question { color: #111; }
-  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
-  body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
-  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
-
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #f7a8d8; font-size: 32px; margin-bottom: 20px; }
-  .start-btn { padding: 15px 50px; background: #d48cba; color: #000; border: 2px solid #f7a8d8; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 20px; font-weight: 900; transition: 0.3s; }
-  .start-btn:hover { background: #f7a8d8; color: #000; box-shadow: 0 0 20px #d48cba; }
-
-  .play-screen { display: none; }
-  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #f7a8d8; height: 100%; width: 0%; transition: width 0.5s; }
-  .timer { text-align: center; font-size: 18px; color: #f7a8d8; margin-bottom: 15px; font-weight: 700; }
-  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
-  .option:hover:not(.disabled) { background: #2d1a27; border-color: #f7a8d8; }
-  .option.correct { background: #1a5c2a; border-color: #4caf50; }
-  .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  #next { display: none; margin-top: 20px; padding: 12px; background: #d48cba; color: #000; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
-  #next:hover { background: #f7a8d8; }
-  #score { margin-top: 15px; font-size: 15px; color: #f7a8d8; text-align: center; font-weight: 700; }
+  /* ستايلات إضافية خاصة بشاشة التحدي */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+  .modal-box { background: #111; border: 2px solid #f7a8d8; border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(247,168,216,0.4); }
+  .modal-box h2 { color: #f7a8d8; margin-bottom: 20px; }
+  .modal-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #222; color: #fff; font-family: 'Cairo'; font-size: 18px; text-align: center; letter-spacing: 2px; }
+  .modal-box button { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-create { background: #f7a8d8; color: #000; }
+  .btn-create:hover { background: #fff; }
+  .btn-join { background: #d48cba; color: #000; }
+  .btn-join:hover { background: #fff; }
+  .btn-close { background: #333; color: #fff; }
+  .btn-close:hover { background: #555; }
+  .room-code-display { font-size: 32px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f7a8d8; margin-bottom: 15px; letter-spacing: 5px; }
+  .status-text { color: #aaa; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
 </style>
 </head>
 <body>
 
 <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1 id="main-title">✨ كويز الجمال الحقيقي ✨</h1>
-    <div class="start-content">
-      <h2 id="start-heading">الجمال الداخلي</h2>
-      <p id="start-desc">20 سؤال عن أحداث مسلسل True Beauty<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تعرف سر الجمال الحقيقي؟</p>
-      <button class="start-btn" id="start-btn" onclick="startQuiz()">✨ ابدأ</button>
-    </div>
-  </div>
+<!-- شاشة البداية -->
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title" class="main-title">✨ كويز الجمال الحقيقي ✨</h1>
+  <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
 
-  <div id="playScreen" class="play-screen">
-    <h1 id="quiz-title">✨ كويز الجمال الحقيقي ✨</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 20</div>
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+    <!-- كارت اللعب الفردي -->
+    <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/True Beauty.jpg');">
+      <h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2>
+    </div>
+    <!-- كارت التحدي -->
+    <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/True Beauty.jpg');">
+      <h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
+    </div>
   </div>
 </div>
 
-<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
-    <div style="background:#111; border:2px solid #f7a8d8; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(247,168,216,0.5);">
-        <h3 style="color:#f7a8d8; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
-        <div id="leaderboardList"></div>
-        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#f7a8d8; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
-    </div>
+<!-- شاشة اللعب -->
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#f7a8d8;">✨ كويز الجمال الحقيقي ✨</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
+<!-- شاشة التحدي (Modal) -->
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal-box">
+    <h2 id="modal-title">تحدي الأصدقاء ⚔️</h2>
+    
+    <!-- شاشة عمل غرفة أو انضمام -->
+    <div id="challengeOptions">
+      <button class="btn-create" onclick="createRoom()">إنشاء غرفة جديدة</button>
+      <input type="text" id="roomCodeInput" placeholder="اكتب كود الغرفة هنا" maxlength="6" style="margin-top: 15px;">
+      <button class="btn-join" onclick="joinRoom()">انضمام لغرفة</button>
+    </div>
+
+    <!-- شاشة عرض الكود والانتظار -->
+    <div id="waitingRoom" style="display: none;">
+      <p style="color:#fff; margin-bottom: 10px;">ابعت الكود ده لصاحبك:</p>
+      <div class="room-code-display" id="displayRoomCode">------</div>
+      <p class="status-text" id="waitingStatus">في انتظار انضمام صديقك...</p>
+    </div>
+
+    <button class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;">إغلاق</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get;
 </script>
 
+<!-- استدعاء ملف الأسئلة -->
+<script src="questions.js"></script>
+
 <script>
-if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'beauty_HighScore';
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'beauty';
+  const quizData = allQuizzesData.beauty;
 
-const questions = [
-  { q_ar: "في بداية المسلسل، البطلة (Ju-kyung) كانت بتعاني من إيه في المدرسة؟", q_en: "At the start, what was the protagonist (Ju-kyung) suffering from at school?", options_ar: ["الفقر", "التنمر بسبب شكلها", "المرض", "مشاكل عائلية"], options_en: ["Poverty", "Bullying due to her appearance", "Illness", "Family problems"], answer: 1 },
-  { q_ar: "إيه اللي بيغير حياة البطلة Ju-kyung؟", q_en: "What changes Ju-kyung's life?", options_ar: ["السفر", "تعلم المكياج", "تغيير المدرسة", "عملية تجميل"], options_en: ["Travel", "Learning makeup", "Changing school", "Plastic surgery"], answer: 1 },
-  { q_ar: "البطل (Su-ho) إيه سمعته في المدرسة؟", q_en: "What is Su-ho's reputation at school?", options_ar: ["مشاغب", "ذكي جداً", "غامض ومنطوي", "رياضي"], options_en: ["Troublemaker", "Very smart", "Mysterious and introverted", "Athletic"], answer: 2 },
-  { q_ar: "إيه السبب الحقيقي اللي بيخلي Su-ho قريب من Ju-kyung؟", q_en: "What's the real reason Su-ho is close to Ju-kyung?", options_ar: ["بيحبها", "بيعرف سرها", "بيحب المكياج", "بيحب الأكل"], options_en: ["He loves her", "He knows her secret", "He loves makeup", "He loves food"], answer: 1 },
-  { q_ar: "الشخص التالت في المثلث (Seo-jun) بيشتغل إيه؟", q_en: "What does the third person in the triangle (Seo-jun) do?", options_ar: ["مغني", "راقص", "ممثل", "لاعب كرة"], options_en: ["Singer", "Dancer", "Actor", "Football player"], answer: 0 },
-  { q_ar: "إيه اللي بيجمع بين Ju-kyung و Su-ho في البداية؟", q_en: "What brings Ju-kyung and Su-ho together at first?", options_ar: ["الدراسة", "الرياضة", "الصدفة", "العمل"], options_en: ["Study", "Sports", "Coincidence", "Work"], answer: 2 },
-  { q_ar: "إيه المشكلة اللي بتواجه البطلة في المدرسة الجديدة؟", q_en: "What problem does the protagonist face at the new school?", options_ar: ["مفيش مشاكل", "مشاكل مع البنات", "مشاكل مع المدرسين", "مشاكل مادية"], options_en: ["No problems", "Problems with girls", "Problems with teachers", "Financial problems"], answer: 1 },
-  { q_ar: "إيه الصفة الأساسية في شخصية Su-ho؟", q_en: "What's the main trait of Su-ho's personality?", options_ar: ["الغموض", "الخوف", "الضحك", "الحب"], options_en: ["Mystery", "Fear", "Laughter", "Love"], answer: 0 },
-  { q_ar: "إيه اللي بيحاول Seo-jun يعمله؟", q_en: "What does Seo-jun try to do?", options_ar: ["يساعد Ju-kyung", "يأذي Su-ho", "ياخد مكان Su-ho", "يبعد Ju-kyung"], options_en: ["Help Ju-kyung", "Hurt Su-ho", "Take Su-ho's place", "Push Ju-kyung away"], answer: 2 },
-  { q_ar: "العلاقة بين Ju-kyung و Su-ho بتتطور لإيه؟", q_en: "What does the relationship between Ju-kyung and Su-ho develop into?", options_ar: ["صداقة قوية", "حب", "خناقة", "منافسة"], options_en: ["Strong friendship", "Love", "Fight", "Rivalry"], answer: 1 },
-  { q_ar: "إيه اللي بيخلي Ju-kyung تحس بالثقة في نفسها؟", q_en: "What makes Ju-kyung feel confident in herself?", options_ar: ["المكياج", "الحب", "الأصدقاء", "كل الإجابات صح"], options_en: ["Makeup", "Love", "Friends", "All answers are correct"], answer: 3 },
-  { q_ar: "مين الشخص اللي بيعرف سر Ju-kyung؟", q_en: "Who knows Ju-kyung's secret?", options_ar: ["Su-ho", "Seo-jun", "صديقتها", "كل الإجابات صح"], options_en: ["Su-ho", "Seo-jun", "Her friend", "All answers are correct"], answer: 3 },
-  { q_ar: "إيه الموضوع الأساسي اللي بيعالجه المسلسل؟", q_en: "What's the main theme the series addresses?", options_ar: ["الحب", "الجمال الحقيقي", "التنمر", "كل الإجابات صح"], options_en: ["Love", "True beauty", "Bullying", "All answers are correct"], answer: 3 },
-  { q_ar: "إيه اللي بيحصل لـ Ju-kyung في نهاية المسلسل؟", q_en: "What happens to Ju-kyung at the end of the series?", options_ar: ["بتسافر", "بتتقبل نفسها", "بتغير شكلها", "بتسيب المدرسة"], options_en: ["She travels", "She accepts herself", "She changes her appearance", "She leaves school"], answer: 1 },
-  { q_ar: "إيه اللي بيميز مسلسل True Beauty عن باقي المسلسلات؟", q_en: "What distinguishes True Beauty from other series?", options_ar: ["الكوميديا", "الرومانسية", "موضوع الجمال", "كل الإجابات صح"], options_en: ["Comedy", "Romance", "The theme of beauty", "All answers are correct"], answer: 3 },
-  { q_ar: "مين اللي بيساعد Ju-kyung في مشاكلها؟", q_en: "Who helps Ju-kyung with her problems?", options_ar: ["أختها", "صديقها", "أمها", "كل الإجابات صح"], options_en: ["Her sister", "Her friend", "Her mother", "All answers are correct"], answer: 3 },
-  { q_ar: "إيه المشكلة اللي بتواجه Su-ho؟", q_en: "What problem does Su-ho face?", options_ar: ["مشاكل عائلية", "مشاكل دراسية", "مشاكل صحية", "مشاكل مالية"], options_en: ["Family problems", "Study problems", "Health problems", "Financial problems"], answer: 0 },
-  { q_ar: "إيه اللي بيعمله Seo-jun عشان يقرب من Ju-kyung؟", q_en: "What does Seo-jun do to get closer to Ju-kyung?", options_ar: ["بيغير شكله", "بيحاول يساعدها", "بيجاهر بحبه", "بيترك المدرسة"], options_en: ["He changes his appearance", "He tries to help her", "He declares his love publicly", "He leaves school"], answer: 1 },
-  { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["الجمال الداخلي هو الأهم", "المكياج هو الحل", "الحب هو كل حاجة", "الفقر هو المشكلة"], options_en: ["Inner beauty is what matters most", "Makeup is the solution", "Love is everything", "Poverty is the problem"], answer: 0 },
-  { q_ar: "إيه اللي بتتعلمه Ju-kyung في النهاية؟", q_en: "What does Ju-kyung learn at the end?", options_ar: ["إن الجمال الحقيقي هو الداخلي", "إن المكياج هو الأهم", "إن الحب هو كل حاجة", "إن الأصدقاء هم العيلة"], options_en: ["True beauty is inner beauty", "Makeup is the most important", "Love is everything", "Friends are family"], answer: 0 }
-];
+  const translations = {
+    ar: { title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!" },
+    en: { title: "✨ True Beauty Quiz ✨", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!" }
+  };
 
-const translations = {
-  ar: { title: "✨ كويز الجمال الحقيقي ✨", startHeading: "الجمال الداخلي", startDesc: "20 سؤال عن أحداث مسلسل True Beauty<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تعرف سر الجمال الحقيقي؟", startBtn: "✨ ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
-  en: { title: "✨ True Beauty Quiz ✨", startHeading: "Inner Beauty", startDesc: "20 questions about True Beauty<br><strong>You have 20 seconds per question</strong><br>Do you know the secret of true beauty?", startBtn: "✨ Start", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
-};
+  let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+  
+  // متغيرات التحدي
+  let isChallengeMode = false;
+  let myRoomCode = null;
+  let myRole = null; // 'player1' or 'player2'
+  let opponentScore = null;
 
-let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('main-title').innerText = t.title;
+    document.getElementById('subtitle-text').innerText = t.subtitle;
+    document.getElementById('quiz-title').innerText = t.title;
+    document.getElementById('next').innerText = t.nextBtn;
+    document.querySelectorAll('.card-title').forEach(card => {
+      card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar');
+    });
+    const backBtn = document.getElementById('backBtn');
+    if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
+  }
 
-function applyLanguage() {
-  const t = translations[currentLang];
-  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-  document.getElementById('main-title').innerText = t.title;
-  document.getElementById('start-heading').innerText = t.startHeading;
-  document.getElementById('start-desc').innerHTML = t.startDesc;
-  document.getElementById('start-btn').innerText = t.startBtn;
-  document.getElementById('quiz-title').innerText = t.title;
-  document.getElementById('next').innerText = t.nextBtn;
-  const backBtn = document.getElementById('backBtn');
-  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
-}
+  // ================== دوال التحدي ==================
+  function openChallengeModal() {
+    document.getElementById('challengeModal').style.display = 'flex';
+    document.getElementById('challengeOptions').style.display = 'block';
+    document.getElementById('waitingRoom').style.display = 'none';
+  }
 
-function startQuiz() {
-  currentQuestions = [...questions];
-  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
-  currentQuestions.sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('playScreen').style.display = 'block';
-  document.getElementById('backBtn').style.display = 'none';
-  current = 0; score = 0;
-  loadQuestion();
-}
-
-function loadQuestion() {
-  answered = false; timeLeft = 20;
-  const q = currentQuestions[current];
-  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
-  const optEl = document.getElementById('options'); optEl.innerHTML = '';
-  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers.sort(() => Math.random() - 0.5); 
-  optionsWithAnswers.forEach((opt) => {
-    const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
-    div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
-  });
-  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
-  document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
-  clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
-}
-
-function updateTimer() {
-  const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336';
-  if (timeLeft <= 0) {
-    clearInterval(timerInterval);
-    if (!answered) {
-      answered = true;
-      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-      document.getElementById('next').style.display = 'inline-block';
+  function closeChallengeModal() {
+    document.getElementById('challengeModal').style.display = 'none';
+    if (myRoomCode) {
+      window.ref(window.db, 'rooms/' + myRoomCode).remove();
+      myRoomCode = null;
     }
   }
-  timeLeft--;
-}
 
-function checkAnswer(isCorrect, el) {
-  if (answered) return; answered = true; clearInterval(timerInterval);
-  const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
-  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
-  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
-  document.getElementById('next').style.display = 'inline-block';
-}
+  function createRoom() {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    myRoomCode = code;
+    myRole = 'player1';
+    isChallengeMode = true;
 
-function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
+    document.getElementById('displayRoomCode').innerText = code;
+    document.getElementById('challengeOptions').style.display = 'none';
+    document.getElementById('waitingRoom').style.display = 'block';
+    document.getElementById('waitingStatus').innerText = "في انتظار انضمام صديقك...";
 
-function showFinal() {
-  clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
-  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-  const t = translations[currentLang]; const isEnglish = currentLang === 'en';
-  
-  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
-  if(window.db && window.push) {
-      try {
-          const quizName = 'beauty';
-          window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
-      } catch(e) { console.log("Error saving score", e); }
+    // إنشاء الغرفة في Firebase
+    window.set(window.ref(window.db, 'rooms/' + code), {
+      player1_score: null,
+      player2_score: null,
+      status: 'waiting',
+      created_at: Date.now()
+    }).then(() => {
+      // الاستماع للتغييرات في الغرفة عشان نعرف امتى صاحبنا ينضم
+      window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.player2_score !== undefined && data.player2_score !== null && data.status === 'playing') {
+           // صاحبنا انضم وبدأنا
+           if(document.getElementById('challengeModal').style.display === 'flex') {
+               document.getElementById('challengeModal').style.display = 'none';
+               startChallengeQuiz();
+           }
+        }
+      });
+    });
   }
 
-  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#f7a8d8; font-size:36px;">${t.endTitle}</h2>
-    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
-    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="showLeaderboard('beauty')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
-    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
-  </div>`;
-  document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
-  document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
-  document.getElementById('backBtn').style.display = 'flex'; 
-}
+  function joinRoom() {
+    const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+    if (!code) { alert("اكتب كود الغرفة الأول!"); return; }
 
-function showLeaderboard(quizName) {
-    const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
-    const isEnglish = localStorage.getItem('lang') === 'en';
-    modal.style.display = 'flex';
-    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
-    if(!window.db) return;
-    try {
-        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
-        window.onValue(lbRef, (snapshot) => {
-            const data = snapshot.val(); list.innerHTML = '';
-            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
-            const arr = Object.values(data).sort((a,b) => b.score - a.score);
-            arr.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
-                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
-                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
-                list.appendChild(div);
-            });
+    myRole = 'player2';
+    myRoomCode = code;
+    isChallengeMode = true;
+
+    window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.status === 'waiting') {
+          // تحديث الغرفة إن اللاعب التاني انضم
+          window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => {
+             document.getElementById('challengeModal').style.display = 'none';
+             startChallengeQuiz();
+          });
+        } else {
+          alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل.");
+        }
+      } else {
+        alert("كود الغرفة غير صحيح.");
+      }
+    });
+  }
+
+  function startChallengeQuiz() {
+    // في التحدي، الأسئلة لازم تكون ثابتة ومش متخلطة عشان يبقى في عدالة
+    currentQuestions = [...quizData.comprehensive]; 
+    document.getElementById('selectionScreen').style.display = 'none';
+    document.getElementById('playScreen').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'none';
+    current = 0; score = 0; loadQuestion();
+  }
+
+  // ================== دوال اللعب الأساسية ==================
+  function startGame(mode) {
+    if (!quizData || !quizData.comprehensive) {
+        alert("خطأ: بيانات الكويز غير موجودة في ملف questions.js");
+        return;
+    }
+    isChallengeMode = false;
+    currentQuestions = [...quizData.comprehensive];
+    currentQuestions.sort(() => Math.random() - 0.5); // في اللعب الفردي بنخلط عادي
+    
+    currentSaveKey = 'beauty_HighScore';
+    highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+    
+    document.getElementById('selectionScreen').style.display = 'none';
+    document.getElementById('playScreen').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'none';
+    current = 0; score = 0; loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false; timeLeft = 20;
+    const q = currentQuestions[current];
+    document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
+    const optEl = document.getElementById('options'); optEl.innerHTML = '';
+    const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+    let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+    optionsWithAnswers.sort(() => Math.random() - 0.5); 
+    optionsWithAnswers.forEach((opt) => {
+      const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+      div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
+    });
+    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    document.getElementById('next').style.display = 'none';
+    document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
+    clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
+  }
+
+  function updateTimer() {
+    const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
+    if (timeLeft <= 5) timerEl.style.color = '#f44336';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) {
+        answered = true;
+        document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+        const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+        document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+        document.getElementById('next').style.display = 'inline-block';
+      }
+    }
+    timeLeft--;
+  }
+
+  function checkAnswer(isCorrect, el) {
+    if (answered) return; answered = true; clearInterval(timerInterval);
+    const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+    const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
+    allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+    if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    document.getElementById('next').style.display = 'inline-block';
+  }
+
+  function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
+
+  function showFinal() {
+    clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+    
+    // لو تحدي، بنبعت النتيجة بتاعتنا لـ Firebase ونستنى نتيجة الخصم
+    if (isChallengeMode && myRoomCode) {
+      let updateData = {};
+      if (myRole === 'player1') updateData.player1_score = score;
+      else updateData.player2_score = score;
+      
+      document.getElementById('question').innerHTML = `<h2 style="color:#f7a8d8; font-size:36px; text-align:center;">انتهى الكويز!</h2>
+      <p style="text-align:center; color:#fff; font-size:20px;">في انتظار صديقك عشان تظهر النتيجة...</p>`;
+      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+
+      window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
+        // نستنى لحد ما الخصم يخلص
+        window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
+          const data = snapshot.val();
+          if (data && data.player1_score !== null && data.player2_score !== null) {
+            const p1 = data.player1_score;
+            const p2 = data.player2_score;
+            const myScore = myRole === 'player1' ? p1 : p2;
+            const opScore = myRole === 'player1' ? p2 : p1;
+            let resultMsg = "";
+            if (myScore > opScore) resultMsg = translations[currentLang].youWon;
+            else if (myScore < opScore) resultMsg = translations[currentLang].youLost;
+            else resultMsg = translations[currentLang].draw;
+
+            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+              <h2 style="color:#f7a8d8; font-size:36px;">${resultMsg}</h2>
+              <p style="color:#fff; font-size:22px;">نتيجتك: ${myScore} | نتيجة صديقك: ${opScore}</p>
+              <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button>
+            </div>`;
+            document.getElementById('backBtn').style.display = 'flex';
+            // مسح الغرفة بعد ما خلصت
+            window.ref(window.db, 'rooms/' + myRoomCode).remove();
+          }
         });
-    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
-}
-window.onload = applyLanguage;
+      });
+    } 
+    // الوضع الفردي
+    else {
+      if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+      const t = translations[currentLang]; const isEnglish = currentLang === 'en';
+      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+        <h2 style="color:#f7a8d8; font-size:36px;">${t.endTitle}</h2>
+        <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+        <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+        <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
+      </div>`;
+      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'flex'; 
+    }
+  }
+
+  window.startGame = startGame;
+  window.nextQuestion = nextQuestion;
+  window.openChallengeModal = openChallengeModal;
+  window.closeChallengeModal = closeChallengeModal;
+  window.createRoom = createRoom;
+  window.joinRoom = joinRoom;
+  window.onload = applyLanguage;
 </script>
 </body>
 </html>
