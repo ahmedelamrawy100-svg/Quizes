@@ -30,7 +30,6 @@
 
   .header-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center;}
   
-  /* تعديل شكل الصورة */
   .avatar { 
     width: 120px; height: 120px; background: var(--accent); border-radius: 50%; 
     display: flex; justify-content: center; align-items: center; font-size: 60px; 
@@ -42,7 +41,6 @@
   .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; }
   .total-score { color: var(--text-color); font-size: 18px; background: rgba(255,0,0,0.1); padding: 10px 20px; border-radius: 20px; display: inline-block; margin-bottom: 15px;}
 
-  /* قسم رفع الصورة */
   .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); }
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
@@ -63,29 +61,26 @@
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع / Back</a>
+<a href="index.html" class="back-btn" data-ar="⬅ رجوع / Back" data-en="⬅ Back">⬅ رجوع / Back</a>
 
 <div class="profile-container">
   
   <div class="header-card">
-    <!-- الصورة هنا -->
     <div class="avatar" id="userAvatar">A</div>
-    
     <div class="username" id="userName">Ahmed</div>
-    <div class="total-score">🏆 مجموع النقاط: <span id="totalScoreDisplay">0</span></div>
+    <div class="total-score" data-ar="🏆 مجموع النقاط:" data-en="🏆 Total Score:">🏆 مجموع النقاط: <span id="totalScoreDisplay">0</span></div>
 
-    <!-- قسم رفع الصورة -->
     <div class="upload-section">
-      <label for="imageUpload" class="upload-label">📷 اختر صورة</label>
+      <label for="imageUpload" class="upload-label" data-ar="📷 اختر صورة" data-en="📷 Choose Image">📷 اختر صورة</label>
       <input type="file" id="imageUpload" accept="image/*" onchange="previewImage(event)">
-      <button id="saveImgBtn" class="upload-btn" onclick="uploadProfilePic()">حفظ الصورة</button>
+      <button id="saveImgBtn" class="upload-btn" onclick="uploadProfilePic()" data-ar="حفظ الصورة" data-en="Save Image">حفظ الصورة</button>
     </div>
   </div>
 
   <div class="history-section">
-    <h2>📜 سجل كويزاتك</h2>
+    <h2 data-ar="📜 سجل كويزاتك" data-en="📜 Quiz History">📜 سجل كويزاتك</h2>
     <div class="history-list" id="historyList">
-      <div class="no-data">جاري التحميل...</div>
+      <div class="no-data" data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</div>
     </div>
   </div>
 </div>
@@ -112,33 +107,37 @@
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
-  // مفتاح API الخاص بك
   const IMGBB_API_KEY = "3e7c71a0a091350d70363ef5909198d7"; 
-
+  let currentLang = localStorage.getItem('lang') || 'ar';
   const avatarEl = document.getElementById('userAvatar');
 
-  // 1. جلب بيانات المستخدم (الصورة والاسم)
+  // دالة الترجمة
+  function applyLanguage() {
+    const elements = document.querySelectorAll('[data-ar]');
+    elements.forEach(el => {
+      el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+    });
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  }
+
+  // جلب بيانات المستخدم
   window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snapshot) => {
     const userData = snapshot.val();
     if (userData && userData.profilePic) {
-      // لو فيه صورة، اعرضها
       avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
-      avatarEl.innerText = ''; // شيل الحرف
+      avatarEl.innerText = '';
     } else {
-      // لو مفيش صورة، اعرض أول حرف
       avatarEl.style.backgroundImage = 'none';
       avatarEl.innerText = currentUser.charAt(0).toUpperCase();
     }
   });
 
-  // عرض الاسم
   if (currentUser.toLowerCase() === 'ahmed') {
       document.getElementById('userName').innerHTML = `${currentUser} <span class="owner-badge">👑 Owner</span>`;
   } else {
       document.getElementById('userName').innerText = currentUser;
   }
 
-  // 2. معاينة الصورة قبل الرفع
   let selectedFile = null;
   window.previewImage = function(event) {
     selectedFile = event.target.files[0];
@@ -147,51 +146,41 @@
       reader.onload = function(e) {
         avatarEl.style.backgroundImage = `url('${e.target.result}')`;
         avatarEl.innerText = '';
-        document.getElementById('saveImgBtn').style.display = 'block'; // إظهار زرار الحفظ
+        document.getElementById('saveImgBtn').style.display = 'block';
       }
       reader.readAsDataURL(selectedFile);
     }
   }
 
-  // 3. رفع الصورة إلى ImgBB وحفظها في الداتابيز
   window.uploadProfilePic = async function() {
     if (!selectedFile) return;
     const btn = document.getElementById('saveImgBtn');
-    btn.innerText = 'جاري الرفع...';
+    btn.innerText = currentLang === 'en' ? 'Uploading...' : 'جاري الرفع...';
     btn.disabled = true;
 
     const formData = new FormData();
     formData.append('image', selectedFile);
 
     try {
-      // رفع الصورة لـ ImgBB
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-        method: 'POST',
-        body: formData
-      });
-      
+      const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
       const data = await response.json();
       
       if (data.success) {
-        const imageUrl = data.data.url; // اللينك اللي رجع من الموقع
-        
-        // حفظ اللينك في Firebase
+        const imageUrl = data.data.url;
         await window.set(window.ref(window.db, 'users_data/' + currentUser + '/profilePic'), imageUrl);
-        
-        alert("تم رفع الصورة بنجاح! 🎉");
+        alert(currentLang === 'en' ? "Image uploaded successfully! 🎉" : "تم رفع الصورة بنجاح! 🎉");
         btn.style.display = 'none';
       } else {
-        alert("فشل رفع الصورة. اتأكد من مفتاح الـ API.");
+        alert(currentLang === 'en' ? "Upload failed. Check API Key." : "فشل رفع الصورة. اتأكد من مفتاح الـ API.");
       }
     } catch (error) {
-      alert("حصل خطأ أثناء الرفع: " + error.message);
+      alert("Error: " + error.message);
     }
     
-    btn.innerText = 'حفظ الصورة';
+    btn.innerText = currentLang === 'en' ? 'Save Image' : 'حفظ الصورة';
     btn.disabled = false;
   }
 
-  // 4. سجل الكويزات والنقاط
   const historyList = document.getElementById('historyList');
   const quizNames = {
     "annabelle": "أنابيل", "conjuring": "الكونجورينج", "nun": "الراهبة", "fnaf": "FNAF", "squid": "لعبة الحبار",
@@ -207,7 +196,7 @@
     totalScore = 0;
     
     if (!data) {
-      historyList.innerHTML = '<div class="no-data">لسه ما لعبتش كويزات.</div>';
+      historyList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No quizzes played yet.' : 'لسه ما لعبتش كويزات.'}</div>`;
     } else {
       for (let quizKey in data) {
         const attempts = data[quizKey];
@@ -232,6 +221,12 @@
     }
     document.getElementById('totalScoreDisplay').innerText = totalScore;
   });
+
+  // تشغيل الترجمة أول ما الصفحة تفتح
+  window.onload = () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+    applyLanguage();
+  };
 </script>
 </body>
 </html>
