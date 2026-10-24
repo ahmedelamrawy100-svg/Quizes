@@ -6,6 +6,32 @@
 <title>🎬 منصة الكويزات - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+
+<!-- ========================================== -->
+<!-- كود تحسين محركات البحث (SEO & Social Media) -->
+<!-- ========================================== -->
+<meta name="description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم في Quiz Hub.">
+<meta name="keywords" content="كويزات, كويز, أسئلة, أفلام, مسلسلات, رعب, دراما كورية, أنابيل, لعبة الحبار, Quiz Hub">
+
+<!-- ألوان المتصفح على الموبايل -->
+<meta name="theme-color" content="#ff0000">
+
+<!-- كود يظهر اللينك بشكل احترافي على فيسبوك وواتساب وتليجرام (Open Graph) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ahmedelamrawy100-svg.github.io/Quizes/">
+<meta property="og:title" content="Quiz Hub | منصة الكويزات">
+<meta property="og:description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم.">
+<!-- صورة اللوجو اللي هتظهر -->
+<meta property="og:image" content="https://ahmedelamrawy100-svg.github.io/Quizes/pic/Logo.png">
+
+<!-- كود يظهر اللينك بشكل احترافي على تويتر (Twitter Card) -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://ahmedelamrawy100-svg.github.io/Quizes/">
+<meta name="twitter:title" content="Quiz Hub | منصة الكويزات">
+<meta name="twitter:description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم.">
+<meta name="twitter:image" content="https://ahmedelamrawy100-svg.github.io/Quizes/pic/Logo.png">
+<!-- ========================================== -->
+
 <style>
   :root {
     --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
@@ -23,7 +49,7 @@
   }
   
   /* شريط التنقل */
-  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; z-index: 10; position: relative;}
   .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   
   .control-btn {
@@ -44,7 +70,7 @@
   .telegram-btn:hover { background: #006699; border-color: #004d73; color: #fff; }
 
   /* شاشة تسجيل الدخول */
-  #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; width: 100%; max-width: 500px; position: relative; }
+  #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; text-align: center; width: 100%; max-width: 500px; position: relative; z-index: 10;}
   #authScreen h1 { font-size: 40px; margin-bottom: 20px; color: #ff0000; text-shadow: 0 0 20px #ff0000; }
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: #111; color: #fff; font-family: 'Cairo'; font-size: 18px; outline: none; }
   .auth-btn { width: 100%; padding: 15px; background: #ff0000; color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 10px; }
@@ -52,7 +78,7 @@
   .auth-switch { color: #aaa; cursor: pointer; text-decoration: underline; font-size: 14px; display: inline-block; margin-top: 10px; }
 
   /* المحتوى الرئيسي */
-  #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
+  #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; z-index: 10; position: relative;}
   h1.main-title { font-size: 40px; margin-bottom: 10px; text-align: center; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
   p.subtitle { color: var(--subtitle-color); font-size: 18px; margin-bottom: 20px; text-align: center; }
 
@@ -111,6 +137,7 @@
         <a href="index.html" class="control-btn" style="background:#ff0000; color:#fff; text-decoration:none;">🏠 الرئيسية</a>
         <a href="leaderboard.html" class="control-btn" style="text-decoration:none;">🏆 المتصدرين</a>
         <a href="comments.html" class="control-btn" style="text-decoration:none;">💬 المجتمع</a>
+        <a href="users.html" class="control-btn" style="text-decoration:none;">👥 اللاعبين</a>
         <button class="control-btn" onclick="scrollToSection('rating-section')">⭐ التقييم</button>
         <!-- عداد الزوار -->
         <span style="color: #aaa; font-size: 14px; margin-right: 10px; font-weight: bold;" id="visitorCounter">👀 --- زائر</span>
@@ -256,7 +283,6 @@
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'flex';
       
-      // إضافة كلمة Owner لو اليوزر اسمه Ahmed
       if (currentUser.toLowerCase() === 'ahmed') {
           document.getElementById('userGreeting').innerHTML = `👤 ${currentUser} <span class="owner-badge">👑 Owner</span>`;
       } else {
@@ -271,7 +297,6 @@
         const counterEl = document.getElementById('visitorCounter');
         const hasVisited = localStorage.getItem('hasVisitedSite');
 
-        // لو الزائر جديد (أول مرة يفتح الموقع)
         if (!hasVisited) {
             const visitorRef = window.ref(window.db, 'site_stats/visitors');
             
@@ -279,18 +304,13 @@
                 let currentCount = snapshot.exists() ? snapshot.val() : 0;
                 currentCount++;
                 window.set(visitorRef, currentCount);
-                
-                // نحفظ إنه زار الموقع خلاص
                 localStorage.setItem('hasVisitedSite', 'true');
-                
-                // نعرض الرقم
                 counterEl.innerText = `👀 ${currentCount} زائر`;
             }).catch((error) => {
                 console.error("Error with visitor counter:", error);
                 counterEl.innerText = `👀 --- زائر`;
             });
         } else {
-            // لو زائر قديم، بنجيب الرقم الحالي من غير ما نزوده
             window.get(window.ref(window.db, 'site_stats/visitors')).then((snapshot) => {
                 let currentCount = snapshot.exists() ? snapshot.val() : 0;
                 counterEl.innerText = `👀 ${currentCount} زائر`;
@@ -348,6 +368,36 @@
       else { btn.innerText = '☀️ Light'; localStorage.setItem('theme', 'dark'); }
     }
 
+    // ================== توليد النجوم (الخلفية) ==================
+    function generateStars() {
+      const container = document.getElementById('stars-bg');
+      if(!container) return;
+
+      for (let i = 0; i < 50; i++) {
+        let star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        let size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        container.appendChild(star);
+      }
+
+      for (let i = 0; i < 20; i++) {
+        let star = document.createElement('div');
+        star.className = 'falling-star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = '-10px';
+        let duration = Math.random() * 10 + 5;
+        star.style.animationDuration = duration + 's';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        container.appendChild(star);
+      }
+    }
+
     window.onload = () => {
       if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
@@ -360,8 +410,8 @@
         document.getElementById('authScreen').style.display = 'flex';
       }
       
-      // تشغيل العداد أول ما الصفحة تفتح
       updateVisitorCounter();
+      generateStars();
     };
   </script>
 </body>
