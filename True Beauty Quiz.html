@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✨ كويز الجمال الحقيقي - True Beauty</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -235,32 +236,22 @@
       if (myRole === 'player1') updateData.player1_score = score;
       else updateData.player2_score = score;
       
-      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-      <h2 style="color:#f7a8d8; font-size:30px; margin-bottom:15px;">في انتظار صديقك... ⏳</h2>
-      <p style="color:#aaa; font-size:18px;">رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة النهائية.</p>
-      </div>`;
-      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
-      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
-
       window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
+        // شاشة الانتظار
+        document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+          <h2 style="color:#f7a8d8; font-size:30px; margin-bottom:15px;">في انتظار صديقك... ⏳</h2>
+          <p style="color:#aaa; font-size:18px;">رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة النهائية.</p>
+        </div>`;
+        document.getElementById('options').innerHTML = ''; 
+        document.getElementById('timer').style.display = 'none';
+        document.getElementById('score').innerText = ''; 
+        document.getElementById('next').style.display = 'none';
+
         window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
           const data = snapshot.val();
           
-          // لو اللاعب التاني قفل الصفحة أو مسجلش، بنعتبره انسحب
-          if (data && (data.player1_score !== undefined && data.player1_score !== null) && (data.player2_score === undefined || data.player2_score === null)) {
-             if(myRole === 'player1') { // أنا اللي خلصت وهو لأ
-                let opScore = 0;
-                document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-                  <h2 style="color:#f7a8d8; font-size:36px;">🎉 أنت الفائز! (صديقك انسحب)</h2>
-                  <p style="color:#fff; font-size:22px;">نتيجتك: ${score} | نتيجة صديقك: 0</p>
-                  <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button>
-                </div>`;
-                document.getElementById('backBtn').style.display = 'flex';
-                window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
-             }
-          }
-          // لو الاتنين خلصوا
-          else if (data && data.player1_score !== null && data.player2_score !== null) {
+          // النتيجة متظهرش غير لما الاتنين يسجلوا
+          if (data && data.player1_score !== null && data.player2_score !== null) {
             const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
             const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
             
