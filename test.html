@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>اختبار الصوت</title>
+</head>
+<body style="background: #111; color: #fff; text-align: center; padding-top: 50px;">
+    <h1>اختبار الصوت</h1>
+    <button onclick="testAudio()" style="padding: 20px; font-size: 20px; cursor: pointer;">دوس هنا</button>
+
+    <script>
+        function testAudio() {
+            // محاولة تشغيل ملف صوتي
+            let audio = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+            
+            audio.play().then(() => {
+                alert("✅ ملف الصوت شغال!");
+            }).catch((error) => {
+                alert("❌ ملف الصوت مش شغال: " + error.name);
+                
+                // لو الملف مش شغال، هنستخدم النطق كبديل
+                let msg = new SpeechSynthesisUtterance("الصوت شغال!");
+                msg.lang = 'ar-SA';
+                window.speechSynthesis.speak(msg);
+            });
+        }
+    </script>
+</body>
+</html>
