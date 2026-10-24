@@ -55,16 +55,16 @@
   <div class="modal-box">
     <h2 id="modal-title"></h2>
     <div id="challengeOptions">
-      <button class="btn-create" onclick="createRoom()"></button>
+      <button id="btnCreateRoom" class="btn-create" onclick="createRoom()"></button>
       <input type="text" id="roomCodeInput" maxlength="6" style="margin-top: 15px;">
-      <button class="btn-join" onclick="joinRoom()"></button>
+      <button id="btnJoinRoom" class="btn-join" onclick="joinRoom()"></button>
     </div>
     <div id="waitingRoom" style="display: none;">
       <p id="sendCodeText" style="color:#fff; margin-bottom: 10px;"></p>
       <div class="room-code-display" id="displayRoomCode">------</div>
       <p class="status-text" id="waitingStatus"></p>
     </div>
-    <button class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
+    <button id="btnCloseModal" class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
   </div>
 </div>
 
@@ -124,12 +124,12 @@
 
     // ترجمة شاشة الغرفة
     document.getElementById('modal-title').innerText = t.roomTitle;
-    document.querySelector('.btn-create').innerText = t.createRoomBtn;
-    document.querySelector('.btn-join').innerText = t.joinRoomBtn;
+    document.getElementById('btnCreateRoom').innerText = t.createRoomBtn;
+    document.getElementById('btnJoinRoom').innerText = t.joinRoomBtn;
     document.getElementById('roomCodeInput').placeholder = t.roomCodePlaceholder;
     document.getElementById('sendCodeText').innerText = t.sendCodeText;
     document.getElementById('waitingStatus').innerText = t.waitJoinText;
-    document.querySelector('.btn-close').innerText = t.closeBtn;
+    document.getElementById('btnCloseModal').innerText = t.closeBtn;
   }
 
   function openChallengeModal() {
