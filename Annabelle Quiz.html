@@ -70,12 +70,6 @@
   </div>
 </div>
 
-<script>
-  // تعريف الأصوات
-  const correctSound = new Audio('sounds/the_nun.mp3'); 
-  const wrongSound = new Audio('sounds/laugh-annabelle.mp3'); 
-</script>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -116,18 +110,6 @@
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
   let isChallengeMode = false; let myRoomCode = null; let myRole = null;
-
-  // دالة عشان نفك قفل الصوت في المتصفح عند أول دوسة
-  document.body.addEventListener('click', function initAudio() {
-      correctSound.volume = 0; wrongSound.volume = 0;
-      correctSound.play().then(() => {
-          correctSound.pause(); correctSound.volume = 1;
-          wrongSound.play().then(() => {
-              wrongSound.pause(); wrongSound.volume = 1;
-          }).catch(()=>{});
-      }).catch(()=>{});
-      document.body.removeEventListener('click', initAudio);
-  });
 
   function applyLanguage() {
     const t = translations[currentLang];
@@ -273,15 +255,7 @@
     const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
     allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
     
-    if (isCorrect) { 
-        score++; 
-        correctSound.currentTime = 0; 
-        correctSound.play(); 
-    } else { 
-        el.classList.add('wrong'); 
-        wrongSound.currentTime = 0; 
-        wrongSound.play(); 
-    }
+    if (isCorrect) { score++; } else { el.classList.add('wrong'); }
     
     document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
     document.getElementById('next').style.display = 'inline-block';
