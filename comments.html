@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 المجتمع - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333;
+  }
+  body.light-mode {
+    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); 
+    font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; 
+    display: flex; flex-direction: column; align-items: center; 
+  }
+  
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+
+  /* شريط الأزرار العلوي */
+  .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }
+  .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+  .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
+  body.light-mode .ctrl-btn:hover { background: #ff0000; color: #fff; border-color: #ff0000; }
+
+  .community-container { width: 100%; max-width: 800px; }
+  .header-title { text-align: center; color: #ffd700; font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.5); }
+  .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; }
+
+  /* التبويبات (Tabs) */
+  .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+  .tab-btn { background: transparent; color: var(--text-color); border: 2px solid var(--card-border); border-radius: 25px; padding: 10px 30px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 18px; transition: 0.3s; }
+  .tab-btn.active { background: #ffd700; color: #000; border-color: #ffd700; }
+  .tab-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: #ffd700; }
+
+  .input-area { background: var(--card-bg); border: 2px solid #ffd700; border-radius: 15px; padding: 20px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 10px; }
+  .input-area textarea { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; resize: vertical; min-height: 100px; outline: none; }
+  .input-area textarea:focus { border-color: #ffd700; }
+  .input-area button { align-self: flex-end; padding: 10px 30px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; font-family: 'Cairo'; font-size: 16px; cursor: pointer; transition: 0.3s; }
+  .input-area button:hover { background: #ffcc00; }
+
+  .posts-list { display: flex; flex-direction: column; gap: 15px; }
+  .post-item { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 15px 20px; border-right: 5px solid #ffd700; }
+  .post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .post-user { font-weight: bold; color: #ffd700; font-size: 16px; display: flex; align-items: center; gap: 5px;}
+  .post-time { font-size: 12px; color: var(--subtitle-color); }
+  .post-text { font-size: 16px; line-height: 1.6; }
+
+  .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
+</style>
+
+<!-- استدعاء فايربيز -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+    projectId: "quiz-hub-app-f4cd0",
+    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+    messagingSenderId: "282772179392",
+    appId: "1:282772179392:web:64646d757592b29ff3a025"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue;
+</script>
+</head>
+<body>
+
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+
+<div class="top-bar">
+  <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div class="community-container">
+  <h1 class="header-title" id="mainTitle">💬 مجتمع Quiz Hub</h1>
+  <p class="header-subtitle" id="mainSubtitle">شاركنا رأيك واقتراحاتك لتطوير المنصة!</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('comments')" id="tabComments">💬 تعليقات</button>
+    <button class="tab-btn" onclick="switchTab('suggestions')" id="tabSuggestions">💡 اقتراحات</button>
+  </div>
+
+  <div class="input-area">
+    <textarea id="postInput" placeholder="اكتب رسالتك هنا..."></textarea>
+    <button onclick="submitPost()" id="postBtn">نشر</button>
+  </div>
+
+  <div class="posts-list" id="postsList">
+    <div class="no-data">جاري التحميل...</div>
+  </div>
+</div>
+
+<script>
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  let currentTab = 'comments'; 
+  let currentUser = localStorage.getItem('loggedInUser') || 'زائر';
+
+  // دالة الوضع الليلي والنهاري
+  function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeBtn');
+    body.classList.toggle('light-mode');
+    
+    if (body.classList.contains('light-mode')) {
+      btn.innerText = '🌙 Dark';
+      localStorage.setItem('theme', 'light');
+    } else {
+      btn.innerText = '☀️ Light';
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+
+  // دالة ترجمة النصوص
+  const translations = {
+    ar: {
+      back: "⬅ رجوع",
+      mainTitle: "💬 مجتمع Quiz Hub",
+      mainSubtitle: "شاركنا رأيك واقتراحاتك لتطوير المنصة!",
+      tabComments: "💬 تعليقات",
+      tabSuggestions: "💡 اقتراحات",
+      placeholderComment: "اكتب تعليقك هنا...",
+      placeholderSuggestion: "اكتب اقتراحك هنا...",
+      btnPost: "نشر",
+      noData: "لا يوجد مشاركات بعد. كن الأول!",
+      loading: "جاري التحميل...",
+      guest: "زائر"
+    },
+    en: {
+      back: "⬅ Back",
+      mainTitle: "💬 Quiz Hub Community",
+      mainSubtitle: "Share your thoughts and suggestions to improve the platform!",
+      tabComments: "💬 Comments",
+      tabSuggestions: "💡 Suggestions",
+      placeholderComment: "Write your comment here...",
+      placeholderSuggestion: "Write your suggestion here...",
+      btnPost: "Post",
+      noData: "No posts yet. Be the first!",
+      loading: "Loading...",
+      guest: "Guest"
+    }
+  };
+
+  function toggleLanguage() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+    loadPosts();
+  }
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('mainTitle').innerText = t.mainTitle;
+    document.getElementById('mainSubtitle').innerText = t.mainSubtitle;
+    document.getElementById('tabComments').innerText = t.tabComments;
+    document.getElementById('tabSuggestions').innerText = t.tabSuggestions;
+    document.getElementById('postInput').placeholder = currentTab === 'comments' ? t.placeholderComment : t.placeholderSuggestion;
+    document.getElementById('postBtn').innerText = t.btnPost;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tabComments').classList.remove('active');
+    document.getElementById('tabSuggestions').classList.remove('active');
+    document.getElementById(tab === 'comments' ? 'tabComments' : 'tabSuggestions').classList.add('active');
+    document.getElementById('postInput').placeholder = tab === 'comments' ? translations[currentLang].placeholderComment : translations[currentLang].placeholderSuggestion;
+    loadPosts();
+  }
+
+  function submitPost() {
+    const input = document.getElementById('postInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const dbNode = currentTab === 'comments' ? 'comments' : 'suggestions';
+    const displayUser = currentUser === 'زائر' ? translations[currentLang].guest : currentUser;
+
+    try {
+      window.push(window.ref(window.db, dbNode), { 
+        user: displayUser, 
+        originalUser: currentUser,
+        text: text, 
+        time: new Date().toLocaleString(currentLang === 'en' ? 'en-US' : 'ar-EG') 
+      });
+      input.value = '';
+    } catch (e) { alert("Error: " + e.message); }
+  }
+
+  function loadPosts() {
+    const list = document.getElementById('postsList');
+    const t = translations[currentLang];
+    list.innerHTML = `<div class="no-data">${t.loading}</div>`;
+
+    const dbNode = currentTab === 'comments' ? 'comments' : 'suggestions';
+
+    window.onValue(window.ref(window.db, dbNode), (snapshot) => {
+      const data = snapshot.val();
+      list.innerHTML = '';
+      
+      if (!data) { 
+        list.innerHTML = `<div class="no-data">${t.noData}</div>`; 
+        return; 
+      }
+      
+      const posts = Object.values(data).reverse(); 
+      posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post-item';
+        
+        let displayName = post.user;
+        if (post.originalUser && post.originalUser.toLowerCase() === 'ahmed') {
+            displayName += ` <span style="color: #ffd700; font-size: 12px; background: #333; padding: 2px 6px; border-radius: 10px;">👑 Owner</span>`;
+        }
+
+        div.innerHTML = `
+          <div class="post-header">
+            <span class="post-user">👤 ${displayName}</span>
+            <span class="post-time">${post.time}</span>
+          </div>
+          <div class="post-text">${post.text}</div>
+        `;
+        list.appendChild(div);
+      });
+    });
+  }
+
+  // تشغيل الدوال أول ما الصفحة تفتح
+  window.onload = () => {
+    // التحقق من الوضع الليلي
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light-mode');
+      document.getElementById('themeBtn').innerText = '🌙 Dark';
+    }
+    
+    applyLanguage();
+    loadPosts();
+  };
+</script>
+</body>
+</html>
