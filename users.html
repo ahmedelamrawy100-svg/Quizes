@@ -16,11 +16,7 @@
     --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); 
-    font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; 
-    display: flex; flex-direction: column; align-items: center; 
-  }
+  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
   .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
   .back-btn:hover { background: var(--accent); border-color: var(--accent); }
@@ -34,45 +30,34 @@
   .search-box input:focus { border-color: var(--accent); }
 
   .users-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
-  
   .user-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; transition: 0.3s; }
   .user-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-  
-  /* كارت الأونر */
   .user-card.owner-card { border-color: #ffd700; background: linear-gradient(135deg, rgba(255,215,0,0.05), transparent); box-shadow: 0 0 15px rgba(255,215,0,0.2); }
-
   .user-info { display: flex; align-items: center; gap: 15px; flex: 1; }
   .user-avatar { width: 50px; height: 50px; background: var(--card-border); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-color); font-weight: bold; }
   .owner-card .user-avatar { background: #ffd700; color: #000; }
-  
   .user-name { font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 5px; }
-
   .action-btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; text-decoration: none; display: flex; align-items: center; gap: 5px; font-size: 14px; }
   .btn-add { background: var(--accent); color: #fff; }
   .btn-add:hover { background: #cc0000; }
   .btn-msg { background: #0088cc; color: #fff; }
   .btn-msg:hover { background: #006699; }
-  
-  /* زرار الانتظار */
   .btn-pending { background: #444; color: #ccc; cursor: not-allowed; }
   body.light-mode .btn-pending { background: #ddd; color: #666; }
-
   .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; width: 100%; grid-column: 1 / -1; }
 </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
+<a href="index.html" class="back-btn" data-ar="⬅ رجوع للرئيسية" data-en="⬅ Back to Home">⬅ رجوع للرئيسية</a>
 
 <div class="users-container">
-  <h1 class="header-title">👥 كل اللاعبين</h1>
-  
+  <h1 class="header-title" data-ar="👥 كل اللاعبين" data-en="👥 All Players">👥 كل اللاعبين</h1>
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="ابحث عن لاعب بالاسم..." onkeyup="filterUsers()">
+    <input type="text" id="searchInput" placeholder="ابحث عن لاعب بالاسم..." data-ar="ابحث عن لاعب بالاسم..." data-en="Search by username...">
   </div>
-
   <div class="users-list" id="usersList">
-    <div class="no-data">جاري تحميل اللاعبين...</div>
+    <div class="no-data" data-ar="جاري تحميل اللاعبين..." data-en="Loading...">جاري تحميل اللاعبين...</div>
   </div>
 </div>
 
@@ -97,18 +82,29 @@
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
+  let currentLang = localStorage.getItem('lang') || 'ar';
 
   let allUsers = [];
   let myFriends = {};
   let sentRequests = {};
 
-  // 1. جلب أصدقائي
+  function applyLanguage() {
+    const elements = document.querySelectorAll('[data-ar]');
+    elements.forEach(el => {
+      if(el.tagName === 'INPUT') {
+        el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      } else {
+        el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      }
+    });
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  }
+
   window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
     myFriends = snapshot.val() || {};
     renderUsers();
   });
 
-  // 2. جلب الطلبات اللي أنا بعتها
   window.onValue(window.ref(window.db, 'friend_requests'), (snapshot) => {
     const data = snapshot.val();
     sentRequests = {};
@@ -122,26 +118,21 @@
     renderUsers();
   });
 
-  // 3. جلب كل المستخدمين
   window.onValue(window.ref(window.db, 'usernames'), (snapshot) => {
     const data = snapshot.val();
     allUsers = [];
-    
     if (data) {
       for (let username in data) {
         allUsers.push(username);
       }
     }
-    
     renderUsers();
   });
 
-  // 4. دالة رسم المستخدمين
   function renderUsers() {
     const list = document.getElementById('usersList');
     list.innerHTML = '';
 
-    // ترتيب القائمة بحيث الأونر (Ahmed) يبقى في الأول
     allUsers.sort((a, b) => {
       const isAOwner = (a.toLowerCase() === 'ahmed' || a === 'احمد');
       const isBOwner = (b.toLowerCase() === 'ahmed' || b === 'احمد');
@@ -151,12 +142,11 @@
     });
 
     if (allUsers.length === 0) {
-      list.innerHTML = '<div class="no-data">مفيش مستخدمين تانيين لحد دلوقتي.</div>';
+      list.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No other players yet.' : 'مفيش مستخدمين تانيين لحد دلوقتي.'}</div>`;
       return;
     }
 
     allUsers.forEach(user => {
-      // إخفاء المستخدم الحالي (عشان متشوفش نفسك)
       if (user === currentUser) return; 
 
       const isFriend = myFriends[user] === true;
@@ -173,12 +163,11 @@
       let actionBtn = '';
 
       if (isFriend) {
-        actionBtn = `<a href="messages.html?to=${user}" class="action-btn btn-msg">💬 رسالة</a>`;
+        actionBtn = `<a href="messages.html?to=${user}" class="action-btn btn-msg">${currentLang === 'en' ? '💬 Message' : '💬 رسالة'}</a>`;
       } else if (isPending) {
-        actionBtn = `<button class="action-btn btn-pending" disabled>⏳ في انتظار الموافقة</button>`;
+        actionBtn = `<button class="action-btn btn-pending" disabled>${currentLang === 'en' ? '⏳ Pending' : '⏳ في انتظار الموافقة'}</button>`;
       } else {
-        // زرار إضافة بيظهر للكل (حتى للأونر)
-        actionBtn = `<button class="action-btn btn-add" onclick="addFriend('${user}', this)">➕ إضافة</button>`;
+        actionBtn = `<button class="action-btn btn-add" onclick="addFriend('${user}', this)">${currentLang === 'en' ? '➕ Add' : '➕ إضافة'}</button>`;
       }
 
       div.innerHTML = `
@@ -197,32 +186,29 @@
     });
   }
 
-  // 5. دالة إضافة صديق
   window.addFriend = async function(targetUser, btnElement) {
     if (targetUser === currentUser) {
-        alert("مش ممكن تضيف نفسك يا صاحبي! 😂");
+        alert(currentLang === 'en' ? "You can't add yourself!" : "مش ممكن تضيف نفسك يا صاحبي! 😂");
         return;
     }
-
     try {
-      btnElement.innerHTML = '⏳ في انتظار الموافقة';
+      btnElement.innerHTML = currentLang === 'en' ? '⏳ Pending' : '⏳ في انتظار الموافقة';
       btnElement.className = 'action-btn btn-pending';
       btnElement.disabled = true;
 
       if (currentUser.toLowerCase() === 'ahmed' || currentUser === 'احمد') {
         await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + targetUser), true);
         await window.set(window.ref(window.db, 'friends/' + targetUser + '/' + currentUser), true);
-        alert(`تمت إضافة ${targetUser} كصديق فوراً! 👑`);
+        alert(currentLang === 'en' ? `Added ${targetUser} as friend instantly! 👑` : `تمت إضافة ${targetUser} كصديق فوراً! 👑`);
       } else {
         await window.set(window.ref(window.db, 'friend_requests/' + targetUser + '/' + currentUser), "pending");
-        alert(`تم إرسال طلب صداقة لـ ${targetUser}. في انتظار الموافقة. ⏳`);
+        alert(currentLang === 'en' ? `Friend request sent to ${targetUser}. ⏳` : `تم إرسال طلب صداقة لـ ${targetUser}. في انتظار الموافقة. ⏳`);
       }
     } catch (e) {
-      alert("حدث خطأ: " + e.message);
+      alert("Error: " + e.message);
     }
   };
 
-  // 6. دالة البحث
   window.filterUsers = function() {
     const query = document.getElementById('searchInput').value.toLowerCase();
     document.querySelectorAll('.user-card').forEach(card => {
@@ -233,6 +219,11 @@
         card.style.display = 'none';
       }
     });
+  };
+
+  window.onload = () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+    applyLanguage();
   };
 </script>
 </body>
