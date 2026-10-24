@@ -84,8 +84,8 @@
   const quizData = allQuizzesData.beauty;
 
   const translations = {
-    ar: { title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!" },
-    en: { title: "✨ True Beauty Quiz ✨", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!" }
+    ar: { title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة." },
+    en: { title: "✨ True Beauty Quiz ✨", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result." }
   };
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
@@ -237,10 +237,9 @@
       else updateData.player2_score = score;
       
       window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
-        // شاشة الانتظار
         document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-          <h2 style="color:#f7a8d8; font-size:30px; margin-bottom:15px;">في انتظار صديقك... ⏳</h2>
-          <p style="color:#aaa; font-size:18px;">رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة النهائية.</p>
+          <h2 style="color:#f7a8d8; font-size:30px; margin-bottom:15px;">${translations[currentLang].waiting}</h2>
+          <p style="color:#aaa; font-size:18px;">${translations[currentLang].waitingDesc}</p>
         </div>`;
         document.getElementById('options').innerHTML = ''; 
         document.getElementById('timer').style.display = 'none';
@@ -250,7 +249,7 @@
         window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
           const data = snapshot.val();
           
-          // النتيجة متظهرش غير لما الاتنين يسجلوا
+          // النتيجة متظهرش نهائي غير لما الاتنين يكونوا سجلوا
           if (data && data.player1_score !== null && data.player2_score !== null) {
             const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
             const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
