@@ -53,18 +53,18 @@
 
 <div class="modal-overlay" id="challengeModal">
   <div class="modal-box">
-    <h2 id="modal-title">تحدي الأصدقاء ⚔️</h2>
+    <h2 id="modal-title"></h2>
     <div id="challengeOptions">
-      <button class="btn-create" onclick="createRoom()">إنشاء غرفة جديدة</button>
-      <input type="text" id="roomCodeInput" placeholder="اكتب كود الغرفة هنا" maxlength="6" style="margin-top: 15px;">
-      <button class="btn-join" onclick="joinRoom()">انضمام لغرفة</button>
+      <button class="btn-create" onclick="createRoom()"></button>
+      <input type="text" id="roomCodeInput" maxlength="6" style="margin-top: 15px;">
+      <button class="btn-join" onclick="joinRoom()"></button>
     </div>
     <div id="waitingRoom" style="display: none;">
-      <p style="color:#fff; margin-bottom: 10px;">ابعت الكود ده لصاحبك:</p>
+      <p id="sendCodeText" style="color:#fff; margin-bottom: 10px;"></p>
       <div class="room-code-display" id="displayRoomCode">------</div>
-      <p class="status-text" id="waitingStatus">في انتظار انضمام صديقك...</p>
+      <p class="status-text" id="waitingStatus"></p>
     </div>
-    <button class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;">إغلاق</button>
+    <button class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
   </div>
 </div>
 
@@ -84,8 +84,26 @@
   const quizData = allQuizzesData.beauty;
 
   const translations = {
-    ar: { title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة." },
-    en: { title: "✨ True Beauty Quiz ✨", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result." }
+    ar: { 
+      title: "✨ كويز الجمال الحقيقي ✨", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", 
+      scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! ✨", 
+      endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", 
+      youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", 
+      waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة.",
+      roomTitle: "تحدي الأصدقاء ⚔️", createRoomBtn: "إنشاء غرفة جديدة", joinRoomBtn: "انضمام لغرفة",
+      roomCodePlaceholder: "اكتب كود الغرفة هنا", sendCodeText: "ابعت الكود ده لصاحبك:",
+      waitJoinText: "في انتظار انضمام صديقك...", closeBtn: "إغلاق"
+    },
+    en: { 
+      title: "✨ True Beauty Quiz ✨", subtitle: "Choose game mode", nextBtn: "Next Question →", 
+      scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! ✨", 
+      endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", 
+      youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", 
+      waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.",
+      roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room",
+      roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:",
+      waitJoinText: "Waiting for your friend to join...", closeBtn: "Close"
+    }
   };
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
@@ -103,6 +121,15 @@
     });
     const backBtn = document.getElementById('backBtn');
     if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
+
+    // ترجمة شاشة الغرفة
+    document.getElementById('modal-title').innerText = t.roomTitle;
+    document.querySelector('.btn-create').innerText = t.createRoomBtn;
+    document.querySelector('.btn-join').innerText = t.joinRoomBtn;
+    document.getElementById('roomCodeInput').placeholder = t.roomCodePlaceholder;
+    document.getElementById('sendCodeText').innerText = t.sendCodeText;
+    document.getElementById('waitingStatus').innerText = t.waitJoinText;
+    document.querySelector('.btn-close').innerText = t.closeBtn;
   }
 
   function openChallengeModal() {
