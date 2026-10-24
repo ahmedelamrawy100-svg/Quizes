@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
-  /* ستايلات إضافية خاصة بشاشة التحدي */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
   .modal-box { background: #111; border: 2px solid #f7a8d8; border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(247,168,216,0.4); }
   .modal-box h2 { color: #f7a8d8; margin-bottom: 20px; }
@@ -27,24 +26,20 @@
 
 <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-<!-- شاشة البداية -->
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="main-title" class="main-title">✨ كويز الجمال الحقيقي ✨</h1>
   <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
 
   <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-    <!-- كارت اللعب الفردي -->
     <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/True Beauty.jpg');">
       <h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2>
     </div>
-    <!-- كارت التحدي -->
     <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/True Beauty.jpg');">
       <h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
     </div>
   </div>
 </div>
 
-<!-- شاشة اللعب -->
 <div id="playScreen" class="play-screen">
   <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#f7a8d8;">✨ كويز الجمال الحقيقي ✨</h1>
   <div class="progress"><div class="progress-bar" id="progress"></div></div>
@@ -55,40 +50,31 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
-<!-- شاشة التحدي (Modal) -->
 <div class="modal-overlay" id="challengeModal">
   <div class="modal-box">
     <h2 id="modal-title">تحدي الأصدقاء ⚔️</h2>
-    
-    <!-- شاشة عمل غرفة أو انضمام -->
     <div id="challengeOptions">
       <button class="btn-create" onclick="createRoom()">إنشاء غرفة جديدة</button>
       <input type="text" id="roomCodeInput" placeholder="اكتب كود الغرفة هنا" maxlength="6" style="margin-top: 15px;">
       <button class="btn-join" onclick="joinRoom()">انضمام لغرفة</button>
     </div>
-
-    <!-- شاشة عرض الكود والانتظار -->
     <div id="waitingRoom" style="display: none;">
       <p style="color:#fff; margin-bottom: 10px;">ابعت الكود ده لصاحبك:</p>
       <div class="room-code-display" id="displayRoomCode">------</div>
       <p class="status-text" id="waitingStatus">في انتظار انضمام صديقك...</p>
     </div>
-
     <button class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;">إغلاق</button>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  
+  import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get;
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove;
 </script>
 
-<!-- استدعاء ملف الأسئلة -->
 <script src="questions.js"></script>
 
 <script>
@@ -102,12 +88,7 @@
   };
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
-  
-  // متغيرات التحدي
-  let isChallengeMode = false;
-  let myRoomCode = null;
-  let myRole = null; // 'player1' or 'player2'
-  let opponentScore = null;
+  let isChallengeMode = false; let myRoomCode = null; let myRole = null;
 
   function applyLanguage() {
     const t = translations[currentLang];
@@ -123,7 +104,6 @@
     if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
   }
 
-  // ================== دوال التحدي ==================
   function openChallengeModal() {
     document.getElementById('challengeModal').style.display = 'flex';
     document.getElementById('challengeOptions').style.display = 'block';
@@ -132,39 +112,27 @@
 
   function closeChallengeModal() {
     document.getElementById('challengeModal').style.display = 'none';
-    if (myRoomCode) {
-      window.ref(window.db, 'rooms/' + myRoomCode).remove();
+    if (myRoomCode && myRole === 'player1') {
+      window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
       myRoomCode = null;
     }
   }
 
   function createRoom() {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    myRoomCode = code;
-    myRole = 'player1';
-    isChallengeMode = true;
-
+    myRoomCode = code; myRole = 'player1'; isChallengeMode = true;
     document.getElementById('displayRoomCode').innerText = code;
     document.getElementById('challengeOptions').style.display = 'none';
     document.getElementById('waitingRoom').style.display = 'block';
-    document.getElementById('waitingStatus').innerText = "في انتظار انضمام صديقك...";
 
-    // إنشاء الغرفة في Firebase
     window.set(window.ref(window.db, 'rooms/' + code), {
-      player1_score: null,
-      player2_score: null,
-      status: 'waiting',
-      created_at: Date.now()
+      player1_score: null, player2_score: null, status: 'waiting', created_at: Date.now()
     }).then(() => {
-      // الاستماع للتغييرات في الغرفة عشان نعرف امتى صاحبنا ينضم
       window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => {
         const data = snapshot.val();
-        if (data && data.player2_score !== undefined && data.player2_score !== null && data.status === 'playing') {
-           // صاحبنا انضم وبدأنا
-           if(document.getElementById('challengeModal').style.display === 'flex') {
-               document.getElementById('challengeModal').style.display = 'none';
-               startChallengeQuiz();
-           }
+        if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) {
+           document.getElementById('challengeModal').style.display = 'none';
+           startChallengeQuiz();
         }
       });
     });
@@ -173,16 +141,12 @@
   function joinRoom() {
     const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
     if (!code) { alert("اكتب كود الغرفة الأول!"); return; }
-
-    myRole = 'player2';
-    myRoomCode = code;
-    isChallengeMode = true;
+    myRole = 'player2'; myRoomCode = code; isChallengeMode = true;
 
     window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
         if (data.status === 'waiting') {
-          // تحديث الغرفة إن اللاعب التاني انضم
           window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => {
              document.getElementById('challengeModal').style.display = 'none';
              startChallengeQuiz();
@@ -197,7 +161,7 @@
   }
 
   function startChallengeQuiz() {
-    // في التحدي، الأسئلة لازم تكون ثابتة ومش متخلطة عشان يبقى في عدالة
+    document.getElementById('playScreen').classList.add('active-play');
     currentQuestions = [...quizData.comprehensive]; 
     document.getElementById('selectionScreen').style.display = 'none';
     document.getElementById('playScreen').style.display = 'block';
@@ -205,19 +169,12 @@
     current = 0; score = 0; loadQuestion();
   }
 
-  // ================== دوال اللعب الأساسية ==================
   function startGame(mode) {
-    if (!quizData || !quizData.comprehensive) {
-        alert("خطأ: بيانات الكويز غير موجودة في ملف questions.js");
-        return;
-    }
     isChallengeMode = false;
     currentQuestions = [...quizData.comprehensive];
-    currentQuestions.sort(() => Math.random() - 0.5); // في اللعب الفردي بنخلط عادي
-    
+    currentQuestions.sort(() => Math.random() - 0.5); 
     currentSaveKey = 'beauty_HighScore';
     highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
-    
     document.getElementById('selectionScreen').style.display = 'none';
     document.getElementById('playScreen').style.display = 'block';
     document.getElementById('backBtn').style.display = 'none';
@@ -273,7 +230,6 @@
   function showFinal() {
     clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
     
-    // لو تحدي، بنبعت النتيجة بتاعتنا لـ Firebase ونستنى نتيجة الخصم
     if (isChallengeMode && myRoomCode) {
       let updateData = {};
       if (myRole === 'player1') updateData.player1_score = score;
@@ -285,14 +241,27 @@
       document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
 
       window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
-        // نستنى لحد ما الخصم يخلص
         window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
           const data = snapshot.val();
-          if (data && data.player1_score !== null && data.player2_score !== null) {
-            const p1 = data.player1_score;
-            const p2 = data.player2_score;
-            const myScore = myRole === 'player1' ? p1 : p2;
-            const opScore = myRole === 'player1' ? p2 : p1;
+          
+          // لو اللاعب التاني قفل الصفحة أو مسجلش، بنعتبره انسحب
+          if (data && (data.player1_score !== undefined && data.player1_score !== null) && (data.player2_score === undefined || data.player2_score === null)) {
+             if(myRole === 'player1') { // أنا اللي خلصت وهو لأ
+                let opScore = 0;
+                document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+                  <h2 style="color:#f7a8d8; font-size:36px;">🎉 أنت الفائز! (صديقك انسحب)</h2>
+                  <p style="color:#fff; font-size:22px;">نتيجتك: ${score} | نتيجة صديقك: 0</p>
+                  <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button>
+                </div>`;
+                document.getElementById('backBtn').style.display = 'flex';
+                window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
+             }
+          }
+          // لو الاتنين خلصوا
+          else if (data && data.player1_score !== null && data.player2_score !== null) {
+            const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
+            const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
+            
             let resultMsg = "";
             if (myScore > opScore) resultMsg = translations[currentLang].youWon;
             else if (myScore < opScore) resultMsg = translations[currentLang].youLost;
@@ -304,16 +273,13 @@
               <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#d48cba; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button>
             </div>`;
             document.getElementById('backBtn').style.display = 'flex';
-            // مسح الغرفة بعد ما خلصت
-            window.ref(window.db, 'rooms/' + myRoomCode).remove();
+            window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
           }
         });
       });
-    } 
-    // الوضع الفردي
-    else {
+    } else {
       if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-      const t = translations[currentLang]; const isEnglish = currentLang === 'en';
+      const t = translations[currentLang];
       document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
         <h2 style="color:#f7a8d8; font-size:36px;">${t.endTitle}</h2>
         <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
