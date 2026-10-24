@@ -76,6 +76,7 @@
     </div>
 </div>
 
+<!-- مكتبات فايربيس -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -87,29 +88,6 @@
 <script>
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'family_HighScore';
-
-const questions = [
-  { q_ar: "في بداية المسلسل، إيه اللي بيجمع البطلة (Ju-won) بـ (San-ha) و(Hae-joon)؟", q_en: "At the start, what brings the protagonist (Ju-won) together with (San-ha) and (Hae-joon)?", options_ar: ["بيحبوا نفس الهواية", "بيتنقلوا لنفس العمارة وبيتربوا مع بعض", "أصدقاء دراسة", "بيشتغلوا مع بعض"], options_en: ["They share the same hobby", "They move to the same building and grow up together", "Study friends", "Work together"], answer: 1 },
-  { q_ar: "إيه الحاجة اللي بتتمناها Ju-won عشان تحس إنهم عيلة واحدة؟", q_en: "What does Ju-won wish for to feel like one family?", options_ar: ["يسافروا مع بعض", "ياخدوا نفس اللقب العائلي بالتبني", "يعملوا حفلة", "يغيروا المدرسة"], options_en: ["Travel together", "Take the same adopted family name", "Throw a party", "Change school"], answer: 1 },
-  { q_ar: "مين الشخص اللي بيربي العيال التلاتة مع بعض؟", q_en: "Who raises the three kids together?", options_ar: ["أم Ju-won", "أبو Ju-won وأبو San-ha", "الجد", "المدرسة"], options_en: ["Ju-won's mom", "Ju-won's dad and San-ha's dad", "The grandfather", "The school"], answer: 1 },
-  { q_ar: "إيه اللي بيخلي San-ha وHae-joon يسيبوا Ju-won ويسافروا؟", q_en: "Why do San-ha and Hae-joon leave Ju-won and travel?", options_ar: ["عشان الشغل", "عشان يرجعوا لعائلاتهم الحقيقية", "عشان الدراسة", "عشان مشاكل مادية"], options_en: ["For work", "To return to their real families", "For study", "For financial problems"], answer: 1 },
-  { q_ar: "بعد كام سنة بيرجعوا يتقابلوا تاني؟", q_en: "After how many years do they reunite?", options_ar: ["5 سنين", "10 سنين", "سنة", "20 سنة"], options_en: ["5 years", "10 years", "One year", "20 years"], answer: 1 },
-  { q_ar: "إيه إحساس Ju-won لما بيرجعوا بعد الغياب الطويل؟", q_en: "How does Ju-won feel when they return after a long absence?", options_ar: ["فرحة كبيرة", "زعل وإحساس إنهم سابوها", "لامبالاة", "خوف"], options_en: ["Great joy", "Sadness and feeling abandoned", "Indifference", "Fear"], answer: 1 },
-  { q_ar: "إيه اللي بيتغير في العلاقة بين التلاتة لما يكبروا؟", q_en: "What changes in the trio's relationship as they grow up?", options_ar: ["بيقربوا أكتر", "بتظهر مشاعر حب بينهم", "بيسيبوا بعض", "بيتخانقوا"], options_en: ["They get closer", "Romantic feelings appear", "They leave each other", "They fight"], answer: 1 },
-  { q_ar: "مين اللي بيعترف بحبه لـ Ju-won الأول؟", q_en: "Who confesses their love to Ju-won first?", options_ar: ["Hae-joon", "San-ha", "صديق تاني", "محدش"], options_en: ["Hae-joon", "San-ha", "Another friend", "No one"], answer: 1 },
-  { q_ar: "إيه المشكلة الأساسية اللي بتواجهها العيلة في المسلسل؟", q_en: "What is the main problem the family faces in the series?", options_ar: ["الفقر", "مشاكل عائلية ومشاعر معقدة", "المرض", "السفر"], options_en: ["Poverty", "Family issues and complex emotions", "Illness", "Travel"], answer: 1 },
-  { q_ar: "مين الشخص اللي بيعترف بحبه لـ Hae-joon في النهاية؟", q_en: "Who confesses their love to Hae-joon at the end?", options_ar: ["Ju-won", "Park Dal", "أخت San-ha", "صديقة تانية"], options_en: ["Ju-won", "Park Dal", "San-ha's sister", "Another friend"], answer: 1 },
-  { q_ar: "إيه اللي بيحصل لأبو Ju-won في نهاية المسلسل؟", q_en: "What happens to Ju-won's dad at the end of the series?", options_ar: ["بيسافر", "بيتجوز", "بيموت", "بيعمل مشروع"], options_en: ["He travels", "He gets married", "He dies", "He starts a project"], answer: 1 },
-  { q_ar: "مين اللي بيتجوز في النهاية؟", q_en: "Who gets married at the end?", options_ar: ["San-ha وJu-won", "أبو Ju-won وأم Hae-joon", "Hae-joon وPark Dal", "محدش"], options_en: ["San-ha and Ju-won", "Ju-won's dad and Hae-joon's mom", "Hae-joon and Park Dal", "No one"], answer: 1 },
-  { q_ar: "إيه اللي بيعمله Hae-joon عشان يقرب من Park Dal في النهاية؟", q_en: "What does Hae-joon do to get closer to Park Dal at the end?", options_ar: ["بيعترف بحبه", "بيتحداها في كرة السلة", "بيسافر", "بيشتري ليها هدية"], options_en: ["Confesses his love", "Challenges her in basketball", "Travels", "Buys her a gift"], answer: 1 },
-  { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What is the main message of the series?", options_ar: ["الحب هو كل حاجة", "العيلة مش بالدم بس", "الفقر هو المشكلة", "السفر هو الحل"], options_en: ["Love is everything", "Family is not just by blood", "Poverty is the problem", "Travel is the solution"], answer: 1 },
-  { q_ar: "مين اللي كان بيعارض علاقة San-ha وJu-won في البداية؟", q_en: "Who opposed San-ha and Ju-won's relationship at first?", options_ar: ["أبو Ju-won", "أم San-ha", "Hae-joon", "كل الإجابات صح"], options_en: ["Ju-won's dad", "San-ha's mom", "Hae-joon", "All answers are correct"], answer: 3 },
-  { q_ar: "إيه اللي بيخلي أبو Ju-won يوافق على علاقة San-ha وJu-won في النهاية؟", q_en: "What makes Ju-won's dad approve of San-ha and Ju-won's relationship at the end?", options_ar: ["بيحب San-ha", "San-ha بيثبت حبه وصدقه", "Ju-won بتقنعه", "بيغير رأيه فجأة"], options_en: ["He loves San-ha", "San-ha proves his love and honesty", "Ju-won convinces him", "He changes his mind suddenly"], answer: 1 },
-  { q_ar: "إيه اللي بيميز مسلسل Family By Choice عن باقي المسلسلات؟", q_en: "What distinguishes Family By Choice from other series?", options_ar: ["الأكشن", "الرومانسية العائلية الدافئة", "الرعب", "الكوميديا بس"], options_en: ["Action", "Warm family romance", "Horror", "Just comedy"], answer: 1 },
-  { q_ar: "مين الشخص اللي بيحب Ju-won من غير ما يقولها في البداية؟", q_en: "Who loves Ju-won without telling her at first?", options_ar: ["Hae-joon", "San-ha", "صديق تالت", "محدش"], options_en: ["Hae-joon", "San-ha", "A third friend", "No one"], answer: 1 },
-  { q_ar: "إيه اللي بيحصل للعلاقة بين Ju-won وSan-ha في النهاية؟", q_en: "What happens to Ju-won and San-ha's relationship at the end?", options_ar: ["بيفترقوا", "بيحبوا بعض وبيتقربوا", "بيسيبوا البلد", "بيتجوزوا"], options_en: ["They separate", "They love each other and get closer", "They leave the country", "They get married"], answer: 1 },
-  { q_ar: "إيه اللي بتتعلمه الشخصيات في النهاية؟", q_en: "What do the characters learn at the end?", options_ar: ["إن العيلة هي اللي بتختارها", "إن الحب صعب", "إن السفر هو الحل", "إن الفلوس هي كل حاجة"], options_en: ["Family is who you choose", "Love is hard", "Travel is the solution", "Money is everything"], answer: 0 }
-];
 
 const translations = {
   ar: { title: "🏡 كويز عيلة بالاختيار 🏡", startHeading: "العيلة مش بالدم", startDesc: "20 سؤال عن أحداث مسلسل Family By Choice<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تعرف معنى العيلة الحقيقية؟", startBtn: "🏡 ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🏡", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
