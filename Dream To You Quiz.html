@@ -5,74 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎬 كويز Dream To You</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; transition: 0.3s; z-index: 999; display: flex; align-items: center; gap: 8px; }
-  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #0a0f14; color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-  .quiz-box { background: rgba(15,15,15,0.98); border: 2px solid #6b8cae; border-radius: 15px; padding: 25px; max-width: 750px; width: 100%; box-shadow: 0 0 30px rgba(107,140,174,0.4); }
-  h1 { text-align: center; color: #a8c8e8; text-shadow: 0 0 15px #6b8cae; margin-bottom: 20px; font-size: 30px; }
-  p { text-align: center; color: #ccc; margin-bottom: 30px; font-size: 18px; }
-  
-  body.light-mode { background: #f4f4f4; color: #111; }
-  body.light-mode h1 { color: #3b5a7a; text-shadow: none; }
-  body.light-mode p { color: #333; }
-  body.light-mode .quiz-box { background: #fff; border-color: #6b8cae; }
-  body.light-mode .question { color: #111; }
-  body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
-  body.light-mode .option:hover:not(.disabled) { background: #eee; }
-  body.light-mode .option.correct { background: #1a5c2a !important; color: #fff !important; border-color: #4caf50 !important; }
-  body.light-mode .option.wrong { background: #5c2a2a !important; color: #fff !important; border-color: #f44336 !important; }
-
-  .start-content { text-align: center; padding: 30px 10px; }
-  .start-content h2 { color: #a8c8e8; font-size: 32px; margin-bottom: 20px; }
-  .start-btn { padding: 15px 50px; background: #6b8cae; color: #fff; border: 2px solid #a8c8e8; border-radius: 10px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 20px; font-weight: 900; transition: 0.3s; }
-  .start-btn:hover { background: #a8c8e8; color: #000; box-shadow: 0 0 20px #6b8cae; }
-
-  .play-screen { display: none; }
-  .progress { background: #2a2a2a; height: 8px; border-radius: 4px; margin-bottom: 15px; }
-  .progress-bar { background: #a8c8e8; height: 100%; width: 0%; transition: width 0.5s; }
-  .timer { text-align: center; font-size: 18px; color: #a8c8e8; margin-bottom: 15px; font-weight: 700; }
-  .question { font-size: 20px; margin-bottom: 20px; color: #fff; line-height: 1.6; }
-  .option { display: block; background: #1a1a1a; border: 1px solid #333; padding: 13px 18px; margin: 9px 0; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; }
-  .option:hover:not(.disabled) { background: #1a2a3a; border-color: #a8c8e8; }
-  .option.correct { background: #1a5c2a; border-color: #4caf50; }
-  .option.wrong { background: #5c2a2a; border-color: #f44336; }
-  #next { display: none; margin-top: 20px; padding: 12px; background: #6b8cae; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 16px; font-weight: 700; width: 100%; }
-  #next:hover { background: #a8c8e8; color: #000; }
-  #score { margin-top: 15px; font-size: 15px; color: #a8c8e8; text-align: center; font-weight: 700; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
 
-<div class="quiz-box" id="quizBox">
-  <div id="startScreen">
-    <h1 id="main-title">🎬 كويز Dream To You 🎬</h1>
-    <div class="start-content">
-      <h2 id="start-heading">الحلم والصداقة</h2>
-      <p id="start-desc">20 سؤال عن أحداث مسلسل Dream To You<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تتذكر تفاصيل الحلم؟</p>
-      <button class="start-btn" id="start-btn" onclick="startQuiz()">🎬 ابدأ</button>
-    </div>
-  </div>
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title" class="main-title">🎬 كويز Dream To You 🎬</h1>
+  <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
 
-  <div id="playScreen" class="play-screen">
-    <h1 id="quiz-title">🎬 كويز Dream To You 🎬</h1>
-    <div class="progress"><div class="progress-bar" id="progress"></div></div>
-    <div class="timer" id="timer">⏱️ 20</div>
-    <div id="question" class="question"></div>
-    <div id="options"></div>
-    <div id="score"></div>
-    <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+  <div class="grid-container">
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Dream To You.jpeg');"><h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2></div>
   </div>
 </div>
 
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#a8c8e8;">🎬 كويز Dream To You 🎬</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
 <div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
-    <div style="background:#111; border:2px solid #a8c8e8; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(168,200,232,0.5);">
-        <h3 style="color:#a8c8e8; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
+    <div style="background:#111; border:2px solid #a8c8e8; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto;">
+        <h3 style="color:#a8c8e8; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة</h3>
         <div id="leaderboardList"></div>
-        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#a8c8e8; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#a8c8e8; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق</button>
     </div>
 </div>
 
@@ -84,136 +46,116 @@
   window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
 </script>
 
+<!-- استدعاء ملف الأسئلة -->
+<script src="questions.js"></script>
+
 <script>
-if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'dream_HighScore';
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'dream';
+  const quizData = allQuizzesData.dream;
 
-const questions = [
-  { q_ar: "في بداية المسلسل، مين كان صاحب فكرة إنهم يعملوا فيلم مع بعض؟", q_en: "At the start, who had the idea to make a film together?", options_ar: ["وو سو بين", "جو يي جاي", "صاحبهم", "المدرس"], options_en: ["Woo Soo-bin", "Joo Yi-jae", "Their friend", "The teacher"], answer: 1 },
-  { q_ar: "إيه الحلم اللي كانوا بيحلموا بيه سوا وهم في المدرسة؟", q_en: "What dream did they share while in school?", options_ar: ["يسافروا مع بعض", "يعملوا فيلم مع بعض", "يتجوزوا", "يفتحوا مطعم"], options_en: ["Travel together", "Make a film together", "Get married", "Open a restaurant"], answer: 1 },
-  { q_ar: "ليه سو بين ساب يي جاي وسافر برا كوريا؟", q_en: "Why did Soo-bin leave Yi-jae and travel abroad?", options_ar: ["عشان يدرس الطب زي ما أبوه عايز", "عشان يشتغل", "عشان يتجوز", "عشان يهرب"], options_en: ["To study medicine as his father wanted", "For work", "To get married", "To escape"], answer: 0 },
-  { q_ar: "بعد كام سنة تقابلوا تاني؟", q_en: "After how many years do they meet again?", options_ar: ["5 سنين", "10 سنين", "15 سنة", "20 سنة"], options_en: ["5 years", "10 years", "15 years", "20 years"], answer: 2 },
-  { q_ar: "سو بين رجع كوريا وهو بقى إيه؟", q_en: "What did Soo-bin become when he returned to Korea?", options_ar: ["دكتور", "مخرج أفلام ناجح", "صحفي", "رجل أعمال"], options_en: ["A doctor", "A successful film director", "A journalist", "A businessman"], answer: 1 },
-  { q_ar: "يي جاي بقت بتشتغل إيه لما كبرت؟", q_en: "What did Yi-jae do for a living when she grew up?", options_ar: ["مخرجة", "مراسلة صحفية", "ممثلة", "كاتبة"], options_en: ["Director", "Journalist", "Actress", "Writer"], answer: 1 },
-  { q_ar: "إيه اللي كان مخبيه سو بين في المدرسة عن حلمه الحقيقي؟", q_en: "What did Soo-bin hide in school about his real dream?", options_ar: ["إنه بيحب يي جاي", "إنه كان بيكره الطب وعايز يبقى مخرج", "إنه غني", "إنه بيكره المدرسة"], options_en: ["That he loved Yi-jae", "That he hated medicine and wanted to be a director", "That he was rich", "That he hated school"], answer: 1 },
-  { q_ar: "إيه اسم السيناريو اللي كتبوه سوا وهم طلاب؟", q_en: "What's the name of the script they wrote together as students?", options_ar: ["Gyeongseong Love Song", "Dream High", "First Love", "The Movie"], options_en: ["Gyeongseong Love Song", "Dream High", "First Love", "The Movie"], answer: 0 },
-  { q_ar: "لما سو بين رجع، يي جاي عملت إيه عشان تبعد عنه؟", q_en: "When Soo-bin returned, what did Yi-jae do to push him away?", options_ar: ["سافررت", "قالت إنها متجوزة وعندها عيال", "غيرت رقمها", "سابت الشغل"], options_en: ["She traveled", "She said she was married with kids", "She changed her number", "She quit her job"], answer: 1 },
-  { q_ar: "إيه اللي طلبه سو بين من يي جاي في أول لقاء بينهم بعد الرجوع؟", q_en: "What did Soo-bin ask Yi-jae for at their first meeting after returning?", options_ar: ["يتجوزوا", "تساعده يخلص السيناريو اللي كتبوه", "تسيب شغلها", "تسافر معاه"], options_en: ["To get married", "To help him finish the script they wrote", "To quit her job", "To travel with him"], answer: 1 },
-  { q_ar: "إيه رد فعل يي جاي على طلب سو بين؟", q_en: "What was Yi-jae's reaction to Soo-bin's request?", options_ar: ["وافقت على طول", "ضربته", "كبت القهوة على السيناريو", "سابت البيت"], options_en: ["She agreed immediately", "She hit him", "She poured coffee on the script", "She left the house"], answer: 2 },
-  { q_ar: "إيه اللي كان بيمنع يي جاي إنها تكمل حلمها كمخرجة؟", q_en: "What was preventing Yi-jae from pursuing her dream as a director?", options_ar: ["مفيش فلوس", "إحباط من سفر سو بين", "مفيش موهبة", "أهلها رافضين"], options_en: ["No money", "Frustration from Soo-bin leaving", "No talent", "Her family refusing"], answer: 1 },
-  { q_ar: "الشخصية التانية اللي بتحب التمثيل (شيم يو جيون) بيشتغل إيه في البداية؟", q_en: "What does the second character who loves acting (Shim Yoo-jin) do initially?", options_ar: ["ممثل مشهور", "كومبارس", "مخرج", "كاتب"], options_en: ["A famous actor", "An extra", "A director", "A writer"], answer: 1 },
-  { q_ar: "الممثلة اللي بتحب شيم يو جيون (أو هانا) بقت مشهورة ليه؟", q_en: "Why did the actress who loves Shim Yoo-jin (Oh Ha-na) become famous?", options_ar: ["لأنها ممثلة شاطرة", "لأنها كانت ملكة جمال", "لأن أبوها مشهور", "كل الإجابات صح"], options_en: ["Because she's a good actress", "Because she was a beauty queen", "Because her father is famous", "All answers are correct"], answer: 1 },
-  { q_ar: "إيه اللي بيحصل لعلاقة سو بين ويي جاي لما يبدأوا يشتغلوا سوا تاني؟", q_en: "What happens to Soo-bin and Yi-jae's relationship when they start working together again?", options_ar: ["بتتحسن بالتدريج", "بتسوء أكتر", "بتخلص", "مفيش تغيير"], options_en: ["It gradually improves", "It worsens", "It ends", "No change"], answer: 0 },
-  { q_ar: "في الحلقات الأخيرة، يي جاي قررت تعمل إيه عشان تحقق حلمها؟", q_en: "In the final episodes, what did Yi-jae decide to do to achieve her dream?", options_ar: ["تسافر تدرس سينما برا", "تسيب المجال", "تتجوز سو بين", "تفتح شركة"], options_en: ["Travel abroad to study cinema", "Leave the field", "Marry Soo-bin", "Open a company"], answer: 0 },
-  { q_ar: "سو بين قال ليي جاي جملة مهمة في الحلقة 11، إيه هي؟", q_en: "Soo-bin said an important sentence to Yi-jae in episode 11, what was it?", options_ar: ["أنا بحبك", "أنت أغلى عندي من الأفلام", "أنا آسف", "أنا هسيبك"], options_en: ["I love you", "You are more precious to me than films", "I'm sorry", "I'm leaving you"], answer: 1 },
-  { q_ar: "إيه اللي كان بيعمله سو بين في نهاية المسلسل عشان يلحق يي جاي؟", q_en: "What did Soo-bin do at the end of the series to catch up with Yi-jae?", options_ar: ["سافر وراها", "بعتلها رسالة", "كلمها", "استنى"], options_en: ["He traveled after her", "He sent her a message", "He called her", "He waited"], answer: 0 },
-  { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["الحب هو كل حاجة", "الحلم ممكن يتحقق تاني لو لقيت اللي يشجعك", "السفر هو الحل", "الفلوس هي الأهم"], options_en: ["Love is everything", "Dreams can come true again if you find someone to support you", "Travel is the solution", "Money is the most important"], answer: 1 },
-  { q_ar: "إيه اللي بيميز Dream to You عن باقي المسلسلات الرومانسية؟", q_en: "What distinguishes Dream to You from other romantic series?", options_ar: ["إنه عن تحقيق الأحلام والفشل والرجوع تاني", "إنه كوميدي بس", "إنه عن الطب", "إنه أكشن"], options_en: ["It's about pursuing dreams, failure, and coming back", "It's just comedy", "It's about medicine", "It's action"], answer: 0 }
-];
+  const translations = {
+    ar: { title: "🎬 كويز Dream To You 🎬", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🎬", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
+    en: { title: "🎬 Dream To You Quiz 🎬", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🎬", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+  };
 
-const translations = {
-  ar: { title: "🎬 كويز Dream To You 🎬", startHeading: "الحلم والصداقة", startDesc: "20 سؤال عن أحداث مسلسل Dream To You<br><strong>لديك 20 ثانية لكل سؤال</strong><br>هل تتذكر تفاصيل الحلم؟", startBtn: "🎬 ابدأ", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🎬", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
-  en: { title: "🎬 Dream To You Quiz 🎬", startHeading: "Dream and Friendship", startDesc: "20 questions about Dream To You<br><strong>You have 20 seconds per question</strong><br>Do you remember the dream details?", startBtn: "🎬 Start", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🎬", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
-};
+  let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
 
-let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('main-title').innerText = t.title;
+    document.getElementById('subtitle-text').innerText = t.subtitle;
+    document.getElementById('quiz-title').innerText = t.title;
+    document.getElementById('next').innerText = t.nextBtn;
+    document.querySelectorAll('.card-title').forEach(card => {
+      card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar');
+    });
+    const backBtn = document.getElementById('backBtn');
+    if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
+  }
 
-function applyLanguage() {
-  const t = translations[currentLang];
-  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-  document.getElementById('main-title').innerText = t.title;
-  document.getElementById('start-heading').innerText = t.startHeading;
-  document.getElementById('start-desc').innerHTML = t.startDesc;
-  document.getElementById('start-btn').innerText = t.startBtn;
-  document.getElementById('quiz-title').innerText = t.title;
-  document.getElementById('next').innerText = t.nextBtn;
-  const backBtn = document.getElementById('backBtn');
-  if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
-}
-
-function startQuiz() {
-  currentQuestions = [...questions];
-  highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
-  currentQuestions.sort(() => Math.random() - 0.5);
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('playScreen').style.display = 'block';
-  document.getElementById('backBtn').style.display = 'none';
-  current = 0; score = 0;
-  loadQuestion();
-}
-
-function loadQuestion() {
-  answered = false; timeLeft = 20;
-  const q = currentQuestions[current];
-  document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
-  const optEl = document.getElementById('options'); optEl.innerHTML = '';
-  const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
-  optionsWithAnswers.sort(() => Math.random() - 0.5); 
-  optionsWithAnswers.forEach((opt) => {
-    const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
-    div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
-  });
-  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
-  document.getElementById('next').style.display = 'none';
-  document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
-  clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
-}
-
-function updateTimer() {
-  const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
-  if (timeLeft <= 5) timerEl.style.color = '#f44336';
-  if (timeLeft <= 0) {
-    clearInterval(timerInterval);
-    if (!answered) {
-      answered = true;
-      document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-      const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-      document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-      document.getElementById('next').style.display = 'inline-block';
+  function startGame(part) {
+    if (!quizData || !quizData.comprehensive) {
+        alert("خطأ: بيانات كويز Dream To You غير موجودة في ملف questions.js");
+        return;
     }
-  }
-  timeLeft--;
-}
-
-function checkAnswer(isCorrect, el) {
-  if (answered) return; answered = true; clearInterval(timerInterval);
-  const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-  const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
-  allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-  if (isCorrect) { score++; } else { el.classList.add('wrong'); }
-  document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
-  document.getElementById('next').style.display = 'inline-block';
-}
-
-function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
-
-function showFinal() {
-  clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
-  if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-  const t = translations[currentLang]; const isEnglish = currentLang === 'en';
-  
-  const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
-  if(window.db && window.push) {
-      try {
-          const quizName = 'dream';
-          window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
-      } catch(e) { console.log("Error saving score", e); }
+    currentQuestions = [...quizData.comprehensive];
+    highestScore = parseInt(localStorage.getItem(currentSaveKey + '_HighScore')) || 0;
+    currentQuestions.sort(() => Math.random() - 0.5);
+    document.getElementById('selectionScreen').style.display = 'none';
+    document.getElementById('playScreen').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'none';
+    current = 0; score = 0; loadQuestion();
   }
 
-  document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-    <h2 style="color:#a8c8e8; font-size:36px;">${t.endTitle}</h2>
-    <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
-    <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-    <button onclick="showLeaderboard('dream')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
-    <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#6b8cae; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
-  </div>`;
-  document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
-  document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
-  document.getElementById('backBtn').style.display = 'flex'; 
-}
+  function loadQuestion() {
+    answered = false; timeLeft = 20;
+    const q = currentQuestions[current];
+    document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
+    const optEl = document.getElementById('options'); optEl.innerHTML = '';
+    const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+    let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+    optionsWithAnswers.sort(() => Math.random() - 0.5); 
+    optionsWithAnswers.forEach((opt) => {
+      const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+      div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
+    });
+    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    document.getElementById('next').style.display = 'none';
+    document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
+    clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
+  }
 
-function showLeaderboard(quizName) {
+  function updateTimer() {
+    const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
+    if (timeLeft <= 5) timerEl.style.color = '#f44336';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) {
+        answered = true;
+        document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+        const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+        document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+        document.getElementById('next').style.display = 'inline-block';
+      }
+    }
+    timeLeft--;
+  }
+
+  function checkAnswer(isCorrect, el) {
+    if (answered) return; answered = true; clearInterval(timerInterval);
+    const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+    const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
+    allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
+    if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    document.getElementById('next').style.display = 'inline-block';
+  }
+
+  function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
+
+  function showFinal() {
+    clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+    if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey + '_HighScore', highestScore); }
+    const t = translations[currentLang]; const isEnglish = currentLang === 'en';
+    const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
+    if(window.db && window.push) {
+        try { window.push(window.ref(window.db, 'leaderboard/' + currentSaveKey), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() }); } catch(e) { console.log("Error", e); }
+    }
+    document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+      <h2 style="color:#a8c8e8; font-size:36px;">${t.endTitle}</h2>
+      <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+      <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+      <button onclick="showLeaderboard('${currentSaveKey}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
+      <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#6b8cae; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
+    </div>`;
+    document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+    document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+    document.getElementById('backBtn').style.display = 'flex'; 
+  }
+
+  function showLeaderboard(quizName) {
     const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
     const isEnglish = localStorage.getItem('lang') === 'en';
     modal.style.display = 'flex';
@@ -234,8 +176,12 @@ function showLeaderboard(quizName) {
             });
         });
     } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
-}
-window.onload = applyLanguage;
+  }
+
+  window.startGame = startGame;
+  window.nextQuestion = nextQuestion;
+  window.showLeaderboard = showLeaderboard;
+  window.onload = applyLanguage;
 </script>
 </body>
 </html>
