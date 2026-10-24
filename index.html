@@ -7,30 +7,18 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
-<!-- ========================================== -->
-<!-- كود تحسين محركات البحث (SEO & Social Media) -->
-<!-- ========================================== -->
+<!-- كود الـ SEO -->
 <meta name="description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم في Quiz Hub.">
-<meta name="keywords" content="كويزات, كويز, أسئلة, أفلام, مسلسلات, رعب, دراما كورية, أنابيل, لعبة الحبار, Quiz Hub">
-
-<!-- ألوان المتصفح على الموبايل -->
 <meta name="theme-color" content="#ff0000">
-
-<!-- كود يظهر اللينك بشكل احترافي على فيسبوك وواتساب وتليجرام (Open Graph) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ahmedelamrawy100-svg.github.io/Quizes/">
 <meta property="og:title" content="Quiz Hub | منصة الكويزات">
 <meta property="og:description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم.">
-<!-- صورة اللوجو اللي هتظهر -->
 <meta property="og:image" content="https://ahmedelamrawy100-svg.github.io/Quizes/pic/Logo.png">
-
-<!-- كود يظهر اللينك بشكل احترافي على تويتر (Twitter Card) -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:url" content="https://ahmedelamrawy100-svg.github.io/Quizes/">
 <meta name="twitter:title" content="Quiz Hub | منصة الكويزات">
 <meta name="twitter:description" content="اختبر معلوماتك في أفلام الرعب، الدراما الكورية، والمسلسلات الشهيرة! العب مع أصحابك وتحداهم.">
 <meta name="twitter:image" content="https://ahmedelamrawy100-svg.github.io/Quizes/pic/Logo.png">
-<!-- ========================================== -->
 
 <style>
   :root {
@@ -119,7 +107,6 @@
 </head>
 <body>
 
-  <!-- شاشة تسجيل الدخول -->
   <div id="authScreen">
     <h1 id="auth-title">🎬 أهلاً بيك</h1>
     <p style="margin-bottom: 20px; color: #aaa;" id="auth-desc">سجل دخولك عشان نبدأ التحدي!</p>
@@ -130,44 +117,45 @@
     <span class="auth-switch" onclick="toggleAuthMode()" id="switchAuth">ليس لديك حساب؟ سجل الآن</span>
   </div>
 
-  <!-- المحتوى الرئيسي -->
   <div id="mainContent">
     <div class="top-bar">
       <div class="controls">
-        <a href="index.html" class="control-btn" style="background:#ff0000; color:#fff; text-decoration:none;">🏠 الرئيسية</a>
-        <a href="leaderboard.html" class="control-btn" style="text-decoration:none;">🏆 المتصدرين</a>
-        <a href="comments.html" class="control-btn" style="text-decoration:none;">💬 المجتمع</a>
-        <a href="users.html" class="control-btn" style="text-decoration:none;">👥 اللاعبين</a>
-        <button class="control-btn" onclick="scrollToSection('rating-section')">⭐ التقييم</button>
-        <!-- عداد الزوار -->
+        <a href="index.html" class="control-btn" style="background:#ff0000; color:#fff; text-decoration:none;" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
+        <a href="leaderboard.html" class="control-btn" style="text-decoration:none;" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
+        <a href="comments.html" class="control-btn" style="text-decoration:none;" data-ar="💬 المجتمع" data-en="💬 Community">💬 المجتمع</a>
+        <a href="users.html" class="control-btn" style="text-decoration:none;" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
+        <button class="control-btn" onclick="scrollToSection('rating-section')" data-ar="⭐ التقييم" data-en="⭐ Rating">⭐ التقييم</button>
         <span style="color: #aaa; font-size: 14px; margin-right: 10px; font-weight: bold;" id="visitorCounter">👀 --- زائر</span>
       </div>
       <div class="controls">
-        <!-- زراير الواتس والتليجرام -->
-        <a href="https://wa.me/201000000000" target="_blank" class="control-btn whatsapp-btn" title="تواصل واتساب">📱 واتساب</a>
-        <a href="https://t.me/username" target="_blank" class="control-btn telegram-btn" title="تواصل تليجرام">✈️ تليجرام</a>
+        <!-- زراير السوشيال ميديا الجديدة -->
+        <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="control-btn whatsapp-btn" title="تواصل واتساب" data-ar="📱 واتساب" data-en="📱 WhatsApp">📱 واتساب</a>
+        <a href="https://t.me/quiz_hub001" target="_blank" class="control-btn telegram-btn" title="تواصل تليجرام" data-ar="✈️ تليجرام" data-en="✈️ Telegram">✈️ تليجرام</a>
         
         <span class="user-greeting" id="userGreeting">👤 اللاعب</span>
         <button class="control-btn" id="themeBtn" onclick="toggleTheme()">☀️ Light</button>
-        <a href="profile.html" class="control-btn" style="background:#ffd700; color:#000; text-decoration:none;">👤 بروفايلي</a>
-        <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;" id="logoutBtn">🚪 خروج</button>
+        <!-- زرار الترجمة -->
+        <button class="control-btn" onclick="toggleLanguage()" id="langBtn">EN / AR</button>
+        
+        <a href="profile.html" class="control-btn" style="background:#ffd700; color:#000; text-decoration:none;" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
+        <button class="control-btn" onclick="logoutUser()" style="background:#ff0000;" id="logoutBtn" data-ar="🚪 خروج" data-en="🚪 Logout">🚪 خروج</button>
       </div>
     </div>
 
-    <h1 class="main-title" id="title-text">🎬 مكتبة الكويزات 🎬</h1>
-    <p class="subtitle" id="subtitle-text">اختر الكويز اللي عايز تلعبه</p>
+    <h1 class="main-title" id="title-text" data-ar="🎬 مكتبة الكويزات 🎬" data-en="🎬 Quiz Library 🎬">🎬 مكتبة الكويزات 🎬</h1>
+    <p class="subtitle" id="subtitle-text" data-ar="اختر الكويز اللي عايز تلعبه" data-en="Choose the quiz you want to play">اختر الكويز اللي عايز تلعبه</p>
 
     <div class="search-container">
-      <input type="text" id="searchInput" placeholder="ابحث عن كويز..." onkeyup="searchQuizzes()">
-      <a href="assistant.html" class="ai-btn" id="chatBtn">🤖 مساعد</a>
+      <input type="text" id="searchInput" placeholder="ابحث عن كويز..." data-ar="ابحث عن كويز..." data-en="Search for a quiz...">
+      <a href="assistant.html" class="ai-btn" id="chatBtn" data-ar="🤖 مساعد" data-en="🤖 Assistant">🤖 مساعد</a>
     </div>
 
     <div class="tabs-container">
-      <button class="tab-btn active" onclick="filterCards('all', this)">الكل</button>
-      <button class="tab-btn" onclick="filterCards('horror', this)">رعب 🎃</button>
-      <button class="tab-btn" onclick="filterCards('kdrama', this)">دراما كورية 💖</button>
-      <button class="tab-btn" onclick="filterCards('action', this)">أكشن وإثارة 💥</button>
-      <button class="tab-btn" onclick="filterCards('mystery', this)">غموض 🕵️</button>
+      <button class="tab-btn active" onclick="filterCards('all', this)" data-ar="الكل" data-en="All">الكل</button>
+      <button class="tab-btn" onclick="filterCards('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+      <button class="tab-btn" onclick="filterCards('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+      <button class="tab-btn" onclick="filterCards('action', this)" data-ar="أكشن وإثارة 💥" data-en="Action 💥">أكشن وإثارة 💥</button>
+      <button class="tab-btn" onclick="filterCards('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
     </div>
 
     <div class="grid-container" id="cards-container">
@@ -188,10 +176,9 @@
       <a href="Wednesday Quiz.html" class="quiz-card card-mystery" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title">Wednesday</h2></a>
     </div>
 
-    <!-- التقييم -->
     <div class="rating-section" id="rating-section">
-      <h3>⭐ قيّم تجربتك على الموقع</h3>
-      <p style="color: var(--subtitle-color); margin-bottom: 15px;">رأيك يهمنا عشان نطور المنصة!</p>
+      <h3 data-ar="⭐ قيّم تجربتك على الموقع" data-en="⭐ Rate your experience">⭐ قيّم تجربتك على الموقع</h3>
+      <p style="color: var(--subtitle-color); margin-bottom: 15px;" data-ar="رأيك يهمنا عشان نطور المنصة!" data-en="Your feedback helps us improve!">رأيك يهمنا عشان نطور المنصة!</p>
       <div id="starRating">
         <span onclick="rateWebsite(1)" class="star" onmouseover="hoverStar(1)" onmouseout="resetStars()">☆</span>
         <span onclick="rateWebsite(2)" class="star" onmouseover="hoverStar(2)" onmouseout="resetStars()">☆</span>
@@ -230,7 +217,27 @@
 
   <script>
     let currentUser = localStorage.getItem('loggedInUser') || '';
+    let currentLang = localStorage.getItem('lang') || 'ar';
     let isSignupMode = false;
+
+    // دالة تغيير اللغة
+    function toggleLanguage() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+    }
+
+    function applyLanguage() {
+      const elements = document.querySelectorAll('[data-ar]');
+      elements.forEach(el => {
+        if(el.tagName === 'INPUT') {
+          el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+        } else {
+          el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+        }
+      });
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    }
 
     function toggleAuthMode() {
         isSignupMode = !isSignupMode;
@@ -305,15 +312,15 @@
                 currentCount++;
                 window.set(visitorRef, currentCount);
                 localStorage.setItem('hasVisitedSite', 'true');
-                counterEl.innerText = `👀 ${currentCount} زائر`;
+                counterEl.innerText = `👀 ${currentCount} ${currentLang === 'en' ? 'Visitors' : 'زائر'}`;
             }).catch((error) => {
                 console.error("Error with visitor counter:", error);
-                counterEl.innerText = `👀 --- زائر`;
+                counterEl.innerText = `👀 --- ${currentLang === 'en' ? 'Visitors' : 'زائر'}`;
             });
         } else {
             window.get(window.ref(window.db, 'site_stats/visitors')).then((snapshot) => {
                 let currentCount = snapshot.exists() ? snapshot.val() : 0;
-                counterEl.innerText = `👀 ${currentCount} زائر`;
+                counterEl.innerText = `👀 ${currentCount} ${currentLang === 'en' ? 'Visitors' : 'زائر'}`;
             });
         }
     }
@@ -335,7 +342,7 @@
     function rateWebsite(rating) {
         currentRating = rating; resetStars();
         const msgEl = document.getElementById('ratingMessage');
-        msgEl.innerText = `شكراً لتقييمك! أنت قيّمت الموقع بـ ${rating} نجوم 🌟`;
+        msgEl.innerText = currentLang === 'en' ? `Thanks for rating! You rated us ${rating} stars 🌟` : `شكراً لتقييمك! أنت قيّمت الموقع بـ ${rating} نجوم 🌟`;
         if (window.db && window.push && currentUser) {
             try { window.push(window.ref(window.db, 'ratings'), { user: currentUser, rating: rating, time: new Date().toISOString() }); } catch (error) { console.error(error); }
         }
@@ -368,41 +375,14 @@
       else { btn.innerText = '☀️ Light'; localStorage.setItem('theme', 'dark'); }
     }
 
-    // ================== توليد النجوم (الخلفية) ==================
-    function generateStars() {
-      const container = document.getElementById('stars-bg');
-      if(!container) return;
-
-      for (let i = 0; i < 50; i++) {
-        let star = document.createElement('div');
-        star.className = 'star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        let size = Math.random() * 3 + 1;
-        star.style.width = size + 'px';
-        star.style.height = size + 'px';
-        star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        star.style.animationDelay = Math.random() * 2 + 's';
-        container.appendChild(star);
-      }
-
-      for (let i = 0; i < 20; i++) {
-        let star = document.createElement('div');
-        star.className = 'falling-star';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = '-10px';
-        let duration = Math.random() * 10 + 5;
-        star.style.animationDuration = duration + 's';
-        star.style.animationDelay = Math.random() * 5 + 's';
-        container.appendChild(star);
-      }
-    }
-
     window.onload = () => {
       if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
         document.getElementById('themeBtn').innerText = '🌙 Dark';
       }
+      
+      applyLanguage();
+      
       if (currentUser) {
         document.getElementById('usernameInput').value = currentUser;
         showMainContent();
@@ -411,7 +391,6 @@
       }
       
       updateVisitorCounter();
-      generateStars();
     };
   </script>
 </body>
