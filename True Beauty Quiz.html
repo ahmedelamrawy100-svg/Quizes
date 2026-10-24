@@ -235,8 +235,10 @@
       if (myRole === 'player1') updateData.player1_score = score;
       else updateData.player2_score = score;
       
-      document.getElementById('question').innerHTML = `<h2 style="color:#f7a8d8; font-size:36px; text-align:center;">انتهى الكويز!</h2>
-      <p style="text-align:center; color:#fff; font-size:20px;">في انتظار صديقك عشان تظهر النتيجة...</p>`;
+      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+      <h2 style="color:#f7a8d8; font-size:30px; margin-bottom:15px;">في انتظار صديقك... ⏳</h2>
+      <p style="color:#aaa; font-size:18px;">رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة النهائية.</p>
+      </div>`;
       document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
       document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
 
