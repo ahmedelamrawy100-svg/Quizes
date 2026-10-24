@@ -4,8 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✝️ كويز الراهبة - The Nun</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+  .modal-box { background: #111; border: 2px solid #ccc; border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+  .modal-box h2 { color: #ccc; margin-bottom: 20px; }
+  .modal-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #222; color: #fff; font-family: 'Cairo'; font-size: 18px; text-align: center; letter-spacing: 2px; }
+  .modal-box button { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-create { background: #ccc; color: #000; }
+  .btn-create:hover { background: #fff; }
+  .btn-join { background: #555; color: #fff; }
+  .btn-join:hover { background: #ccc; color: #000; }
+  .btn-close { background: #333; color: #fff; }
+  .btn-close:hover { background: #555; }
+  .room-code-display { font-size: 32px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #ccc; margin-bottom: 15px; letter-spacing: 5px; }
+  .status-text { color: #aaa; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
+</style>
 </head>
 <body>
 
@@ -13,17 +29,20 @@
 
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
   <h1 id="main-title" class="main-title">✝️ كويز الراهبة ✝️</h1>
-  <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
+  <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
 
-  <div class="grid-container">
-    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/The Nun 1.jpeg');"><h2 class="card-title" data-ar="الجزء الأول (2018)" data-en="Part 1 (2018)">الجزء الأول (2018)</h2></div>
-    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/The Nun 2.jpeg');"><h2 class="card-title" data-ar="الجزء الثاني (2023)" data-en="Part 2 (2023)">الجزء الثاني (2023)</h2></div>
-    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2></div>
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+    <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/The Nun.jpg');">
+      <h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2>
+    </div>
+    <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/The Nun.jpg');">
+      <h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
+    </div>
   </div>
 </div>
 
 <div id="playScreen" class="play-screen">
-  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ddd;">✝️ كويز الراهبة ✝️</h1>
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ccc;">✝️ كويز الراهبة ✝️</h1>
   <div class="progress"><div class="progress-bar" id="progress"></div></div>
   <div class="timer" id="timer">⏱️ 20</div>
   <div id="question" class="question"></div>
@@ -32,20 +51,29 @@
   <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
 </div>
 
-<div id="leaderboardModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; justify-content:center; align-items:center;">
-    <div style="background:#111; border:2px solid #ccc; border-radius:15px; padding:20px; width:90%; max-width:400px; max-height:80vh; overflow-y:auto; box-shadow: 0 0 30px rgba(255,255,255,0.2);">
-        <h3 style="color:#ccc; text-align:center; margin-bottom:15px;">🏆 لوحة الصدارة / Leaderboard</h3>
-        <div id="leaderboardList"></div>
-        <button onclick="document.getElementById('leaderboardModal').style.display='none'" style="margin-top:15px; width:100%; padding:10px; background:#333; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">إغلاق / Close</button>
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal-box">
+    <h2 id="modal-title"></h2>
+    <div id="challengeOptions">
+      <button id="btnCreateRoom" class="btn-create" onclick="createRoom()"></button>
+      <input type="text" id="roomCodeInput" maxlength="6" style="margin-top: 15px;">
+      <button id="btnJoinRoom" class="btn-join" onclick="joinRoom()"></button>
     </div>
+    <div id="waitingRoom" style="display: none;">
+      <p id="sendCodeText" style="color:#fff; margin-bottom: 10px;"></p>
+      <div class="room-code-display" id="displayRoomCode">------</div>
+      <p class="status-text" id="waitingStatus"></p>
+    </div>
+    <button id="btnCloseModal" class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; window.query = query; window.orderByChild = orderByChild; window.limitToLast = limitToLast;
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove;
 </script>
 
 <script src="questions.js"></script>
@@ -56,11 +84,30 @@
   const quizData = allQuizzesData.TheNun;
 
   const translations = {
-    ar: { title: "✝️ كويز الراهبة ✝️", subtitle: "اختر الجزء اللي عايز تلعب فيه", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! ✝️", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:" },
-    en: { title: "✝️ The Nun Quiz ✝️", subtitle: "Choose the part you want to play", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! ✝️", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:" }
+    ar: { 
+      title: "✝️ كويز الراهبة ✝️", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", 
+      scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! ✝️", 
+      endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", 
+      youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", 
+      waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة.",
+      roomTitle: "تحدي الأصدقاء ⚔️", createRoomBtn: "إنشاء غرفة جديدة", joinRoomBtn: "انضمام لغرفة",
+      roomCodePlaceholder: "اكتب كود الغرفة هنا", sendCodeText: "ابعت الكود ده لصاحبك:",
+      waitJoinText: "في انتظار انضمام صديقك...", closeBtn: "إغلاق"
+    },
+    en: { 
+      title: "✝️ The Nun Quiz ✝️", subtitle: "Choose game mode", nextBtn: "Next Question →", 
+      scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! ✝️", 
+      endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", 
+      youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", 
+      waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.",
+      roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room",
+      roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:",
+      waitJoinText: "Waiting for your friend to join...", closeBtn: "Close"
+    }
   };
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+  let isChallengeMode = false; let myRoomCode = null; let myRole = null;
 
   function applyLanguage() {
     const t = translations[currentLang];
@@ -74,15 +121,87 @@
     });
     const backBtn = document.getElementById('backBtn');
     if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
+
+    document.getElementById('modal-title').innerText = t.roomTitle;
+    document.getElementById('btnCreateRoom').innerText = t.createRoomBtn;
+    document.getElementById('btnJoinRoom').innerText = t.joinRoomBtn;
+    document.getElementById('roomCodeInput').placeholder = t.roomCodePlaceholder;
+    document.getElementById('sendCodeText').innerText = t.sendCodeText;
+    document.getElementById('waitingStatus').innerText = t.waitJoinText;
+    document.getElementById('btnCloseModal').innerText = t.closeBtn;
   }
 
-  function startGame(part) {
-    if (part === 'part1') { currentQuestions = [...quizData.part1]; currentSaveKey = 'nun_part1_HighScore'; }
-    else if (part === 'part2') { currentQuestions = [...quizData.part2]; currentSaveKey = 'nun_part2_HighScore'; }
-    else { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'nun_all_HighScore'; }
+  function openChallengeModal() {
+    document.getElementById('challengeModal').style.display = 'flex';
+    document.getElementById('challengeOptions').style.display = 'block';
+    document.getElementById('waitingRoom').style.display = 'none';
+  }
 
+  function closeChallengeModal() {
+    document.getElementById('challengeModal').style.display = 'none';
+    if (myRoomCode && myRole === 'player1') {
+      window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
+      myRoomCode = null;
+    }
+  }
+
+  function createRoom() {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    myRoomCode = code; myRole = 'player1'; isChallengeMode = true;
+    document.getElementById('displayRoomCode').innerText = code;
+    document.getElementById('challengeOptions').style.display = 'none';
+    document.getElementById('waitingRoom').style.display = 'block';
+
+    window.set(window.ref(window.db, 'rooms/' + code), {
+      player1_score: null, player2_score: null, status: 'waiting', created_at: Date.now()
+    }).then(() => {
+      window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) {
+           document.getElementById('challengeModal').style.display = 'none';
+           startChallengeQuiz();
+        }
+      });
+    });
+  }
+
+  function joinRoom() {
+    const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+    if (!code) { alert("اكتب كود الغرفة الأول!"); return; }
+    myRole = 'player2'; myRoomCode = code; isChallengeMode = true;
+
+    window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.status === 'waiting') {
+          window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => {
+             document.getElementById('challengeModal').style.display = 'none';
+             startChallengeQuiz();
+          });
+        } else {
+          alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل.");
+        }
+      } else {
+        alert("كود الغرفة غير صحيح.");
+      }
+    });
+  }
+
+  function startChallengeQuiz() {
+    document.getElementById('playScreen').classList.add('active-play');
+    currentQuestions = [...quizData.comprehensive]; 
+    document.getElementById('selectionScreen').style.display = 'none';
+    document.getElementById('playScreen').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'none';
+    current = 0; score = 0; loadQuestion();
+  }
+
+  function startGame(mode) {
+    isChallengeMode = false;
+    currentQuestions = [...quizData.comprehensive];
+    currentQuestions.sort(() => Math.random() - 0.5); 
+    currentSaveKey = 'nun_HighScore';
     highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
-    currentQuestions.sort(() => Math.random() - 0.5);
     document.getElementById('selectionScreen').style.display = 'none';
     document.getElementById('playScreen').style.display = 'block';
     document.getElementById('backBtn').style.display = 'none';
@@ -137,50 +256,65 @@
 
   function showFinal() {
     clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
-    if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-    const t = translations[currentLang]; const isEnglish = currentLang === 'en';
-    const playerName = localStorage.getItem('loggedInUser') || (isEnglish ? 'Anonymous Player' : 'لاعب مجهول');
-    if(window.db && window.push) {
-        try {
-            const quizName = currentSaveKey.split('_')[0]; 
-            window.push(window.ref(window.db, 'leaderboard/' + quizName), { user: playerName, score: score, total: currentQuestions.length, time: new Date().toISOString() });
-        } catch(e) { console.log("Error saving score", e); }
-    }
-    document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-      <h2 style="color:#ccc; font-size:36px;">${t.endTitle}</h2>
-      <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
-      <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
-      <button onclick="showLeaderboard('${currentSaveKey.split('_')[0]}')" style="margin-top:15px; padding:12px 20px; background:#ffcc00; color:#000; border:none; border-radius:8px; cursor:pointer; font-size:16px; font-weight:bold; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${isEnglish ? '🏆 View Leaderboard' : '🏆 عرض لوحة الصدارة'}</button>
-      <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
-    </div>`;
-    document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
-    document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
-    document.getElementById('backBtn').style.display = 'flex'; 
-  }
+    
+    if (isChallengeMode && myRoomCode) {
+      let updateData = {};
+      if (myRole === 'player1') updateData.player1_score = score;
+      else updateData.player2_score = score;
+      
+      window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
+        document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+          <h2 style="color:#ccc; font-size:30px; margin-bottom:15px;">${translations[currentLang].waiting}</h2>
+          <p style="color:#aaa; font-size:18px;">${translations[currentLang].waitingDesc}</p>
+        </div>`;
+        document.getElementById('options').innerHTML = ''; 
+        document.getElementById('timer').style.display = 'none';
+        document.getElementById('score').innerText = ''; 
+        document.getElementById('next').style.display = 'none';
 
-  function showLeaderboard(quizName) {
-    const modal = document.getElementById('leaderboardModal'); const list = document.getElementById('leaderboardList');
-    const isEnglish = localStorage.getItem('lang') === 'en';
-    modal.style.display = 'flex';
-    list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'Loading...' : 'جاري التحميل...'}</p>`;
-    if(!window.db) return;
-    try {
-        const lbRef = window.query(window.ref(window.db, 'leaderboard/' + quizName), window.orderByChild('score'), window.limitToLast(10));
-        window.onValue(lbRef, (snapshot) => {
-            const data = snapshot.val(); list.innerHTML = '';
-            if(!data) { list.innerHTML = `<p style="color:#888; text-align:center;">${isEnglish ? 'No scores yet!' : 'مفيش نتائج لحد دلوقتي!'}</p>`; return; }
-            const arr = Object.values(data).sort((a,b) => b.score - a.score);
-            arr.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.style.cssText = 'display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #333; color:#fff;';
-                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
-                div.innerHTML = `<span>${medal} 👤 ${item.user}</span> <span style="color:#ffcc00; font-weight:bold;">${item.score} / ${item.total}</span>`;
-                list.appendChild(div);
-            });
+        window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
+          const data = snapshot.val();
+          
+          if (data && data.player1_score !== null && data.player2_score !== null) {
+            const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
+            const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
+            
+            let resultMsg = "";
+            if (myScore > opScore) resultMsg = translations[currentLang].youWon;
+            else if (myScore < opScore) resultMsg = translations[currentLang].youLost;
+            else resultMsg = translations[currentLang].draw;
+
+            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+              <h2 style="color:#ccc; font-size:36px;">${resultMsg}</h2>
+              <p style="color:#fff; font-size:22px;">نتيجتك: ${myScore} | نتيجة صديقك: ${opScore}</p>
+              <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button>
+            </div>`;
+            document.getElementById('backBtn').style.display = 'flex';
+            window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
+          }
         });
-    } catch(e) { list.innerHTML = 'Error loading leaderboard'; }
+      });
+    } else {
+      if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+      const t = translations[currentLang];
+      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+        <h2 style="color:#ccc; font-size:36px;">${t.endTitle}</h2>
+        <p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p>
+        <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p>
+        <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#333; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button>
+      </div>`;
+      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'flex'; 
+    }
   }
 
+  window.startGame = startGame;
+  window.nextQuestion = nextQuestion;
+  window.openChallengeModal = openChallengeModal;
+  window.closeChallengeModal = closeChallengeModal;
+  window.createRoom = createRoom;
+  window.joinRoom = joinRoom;
   window.onload = applyLanguage;
 </script>
 </body>
