@@ -21,9 +21,8 @@
   .btn-close:hover { background: #555; }
   .room-code-display { font-size: 32px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #ff3333; margin-bottom: 15px; letter-spacing: 5px; }
   .status-text { color: #aaa; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
-  
-  .challenge-btn { margin-top: 30px; padding: 15px 40px; background: #ff3333; color: #fff; border: 2px solid #fff; border-radius: 10px; font-family: 'Cairo'; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(255,51,51,0.6); }
-  .challenge-btn:hover { background: #fff; color: #ff3333; transform: scale(1.05); }
+  .challenge-btn { margin-top: 30px; padding: 15px 40px; background: #8b0000; color: #fff; border: 2px solid #ff3333; border-radius: 10px; font-family: 'Cairo'; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(139,0,0,0.6); }
+  .challenge-btn:hover { background: #ff3333; color: #fff; transform: scale(1.05); }
 </style>
 </head>
 <body>
@@ -34,7 +33,6 @@
   <h1 id="main-title" class="main-title">🎃 كويز أنابيل 🎃</h1>
   <p class="subtitle" id="subtitle-text">اختر الجزء اللي عايز تلعب فيه</p>
 
-  <!-- كروت الأجزاء للعب الفردي -->
   <div class="grid-container">
     <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/A. 2014.jpeg');"><h2 class="card-title" data-ar="الجزء الأول (2014)" data-en="Part 1 (2014)">الجزء الأول (2014)</h2></div>
     <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Creation.jpeg');"><h2 class="card-title" data-ar="الجزء الثاني (2017)" data-en="Part 2 (2017)">الجزء الثاني (2017)</h2></div>
@@ -42,7 +40,6 @@
     <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2></div>
   </div>
 
-  <!-- زرار التحدي -->
   <button class="challenge-btn" onclick="openChallengeModal()" id="challengeBtn">⚔️ تحدي صديق (الشامل)</button>
 </div>
 
@@ -72,6 +69,12 @@
     <button id="btnCloseModal" class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
   </div>
 </div>
+
+<script>
+  // تعريف الأصوات
+  const correctSound = new Audio('sounds/the_nun.mp3'); 
+  const wrongSound = new Audio('sounds/laugh-annabelle.mp3'); 
+</script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -107,12 +110,24 @@
       waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.",
       roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room",
       roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:",
-      waitJoinText: "Waiting for your friend to join...", closeBtn: "Close", challengeBtnText: "⚔️ Challenge Friend"
+      waitJoinText: "Waiting for your friend to join...", closeBtn: "Close", challengeBtnText: "⚔️ Challenge Friend (All)"
     }
   };
 
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
   let isChallengeMode = false; let myRoomCode = null; let myRole = null;
+
+  // دالة عشان نفك قفل الصوت في المتصفح عند أول دوسة
+  document.body.addEventListener('click', function initAudio() {
+      correctSound.volume = 0; wrongSound.volume = 0;
+      correctSound.play().then(() => {
+          correctSound.pause(); correctSound.volume = 1;
+          wrongSound.play().then(() => {
+              wrongSound.pause(); wrongSound.volume = 1;
+          }).catch(()=>{});
+      }).catch(()=>{});
+      document.body.removeEventListener('click', initAudio);
+  });
 
   function applyLanguage() {
     const t = translations[currentLang];
@@ -257,7 +272,17 @@
     const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
     const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
     allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-    if (isCorrect) { score++; } else { el.classList.add('wrong'); }
+    
+    if (isCorrect) { 
+        score++; 
+        correctSound.currentTime = 0; 
+        correctSound.play(); 
+    } else { 
+        el.classList.add('wrong'); 
+        wrongSound.currentTime = 0; 
+        wrongSound.play(); 
+    }
+    
     document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
     document.getElementById('next').style.display = 'inline-block';
   }
