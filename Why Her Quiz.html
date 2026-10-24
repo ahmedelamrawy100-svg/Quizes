@@ -32,8 +32,8 @@
   <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
   <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
     <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/Why Her.jpg');"><h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2></div>
+    <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/Why Her.jpg');"><h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2></div>
   </div>
-  <button class="challenge-btn" onclick="openChallengeModal()" id="challengeBtn">⚔️ تحدي صديق (الشامل)</button>
 </div>
 <div id="playScreen" class="play-screen">
   <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#d4b87a;">⚖️ كويز لماذا هي؟ ⚖️</h1>
@@ -62,10 +62,10 @@
 </div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, get, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove;
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove; window.push = push;
 </script>
 <script src="questions.js"></script>
 <script>
@@ -73,8 +73,8 @@
   let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'whyher';
   const quizData = allQuizzesData.whyher;
   const translations = {
-    ar: { title: "⚖️ كويز لماذا هي؟ ⚖️", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! ⚖️", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة.", roomTitle: "تحدي الأصدقاء ⚔️", createRoomBtn: "إنشاء غرفة جديدة", joinRoomBtn: "انضمام لغرفة", roomCodePlaceholder: "اكتب كود الغرفة هنا", sendCodeText: "ابعت الكود ده لصاحبك:", waitJoinText: "في انتظار انضمام صديقك...", closeBtn: "إغلاق", challengeBtnText: "⚔️ تحدي صديق (الشامل)" },
-    en: { title: "⚖️ Why Her? Quiz ⚖️", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! ⚖️", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.", roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room", roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:", waitJoinText: "Waiting for your friend to join...", closeBtn: "Close", challengeBtnText: "⚔️ Challenge Friend (All)" }
+    ar: { title: "⚖️ كويز لماذا هي؟ ⚖️", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى التحقيق! ⚖️", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة.", roomTitle: "تحدي الأصدقاء ⚔️", createRoomBtn: "إنشاء غرفة جديدة", joinRoomBtn: "انضمام لغرفة", roomCodePlaceholder: "اكتب كود الغرفة هنا", sendCodeText: "ابعت الكود ده لصاحبك:", waitJoinText: "في انتظار انضمام صديقك...", closeBtn: "إغلاق", challengeBtnText: "⚔️ تحدي صديق" },
+    en: { title: "⚖️ Why Her? Quiz ⚖️", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Investigation Over! ⚖️", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.", roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room", roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:", waitJoinText: "Waiting for your friend to join...", closeBtn: "Close", challengeBtnText: "⚔️ Challenge Friend" }
   };
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
   let isChallengeMode = false; let myRoomCode = null; let myRole = null;
@@ -85,7 +85,6 @@
     document.getElementById('subtitle-text').innerText = t.subtitle;
     document.getElementById('quiz-title').innerText = t.title;
     document.getElementById('next').innerText = t.nextBtn;
-    document.getElementById('challengeBtn').innerText = t.challengeBtnText;
     document.querySelectorAll('.card-title').forEach(card => { card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar'); });
     const backBtn = document.getElementById('backBtn'); if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
     document.getElementById('modal-title').innerText = t.roomTitle;
@@ -118,9 +117,8 @@
     window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        if (data.status === 'waiting') {
-          window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); });
-        } else { alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
+        if (data.status === 'waiting') { window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); }); } 
+        else { alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
       } else { alert("كود الغرفة غير صحيح."); }
     });
   }
@@ -196,6 +194,8 @@
         });
       });
     } else {
+      const playerName = localStorage.getItem('loggedInUser') || 'Unknown';
+      if(window.db && window.push) { try { window.push(window.ref(window.db, 'scores/' + playerName + '/' + currentSaveKey.split('_')[0]), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); } catch(e) { console.log("Error saving score", e); } }
       if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
       const t = translations[currentLang];
       document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#d4b87a; font-size:36px;">${t.endTitle}</h2><p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p><p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p><button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button></div>`;
