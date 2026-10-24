@@ -249,7 +249,6 @@
         window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
           const data = snapshot.val();
           
-          // النتيجة متظهرش نهائي غير لما الاتنين يكونوا سجلوا
           if (data && data.player1_score !== null && data.player2_score !== null) {
             const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
             const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
