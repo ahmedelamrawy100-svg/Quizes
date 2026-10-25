@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎬 منصة الكويزات - Quiz Hub</title>
+<title>منصة الكويزات - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -18,50 +18,77 @@
       --nav-bg: rgba(255, 255, 255, 0.95); 
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; overflow-x: hidden; }
   
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  @keyframes glowPulse { 0% { text-shadow: 0 0 10px #ff0000; } 50% { text-shadow: 0 0 25px #ff0000, 0 0 35px #ff0000; } 100% { text-shadow: 0 0 10px #ff0000; } }
+
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
   .toast { background: var(--card-bg); border-right: 5px solid var(--accent); color: var(--text-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s forwards; font-weight: bold; }
-  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-  #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 10px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; }
+  #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 10px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; animation: fadeInUp 0.5s; }
 
-  .navbar { width: 100%; max-width: 1200px; background: var(--nav-bg); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 15px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 1000; flex-wrap: wrap; gap: 15px; }
+  .navbar { width: 100%; max-width: 1200px; background: var(--nav-bg); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 15px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: sticky; top: 10px; z-index: 1000; flex-wrap: wrap; gap: 15px; animation: fadeInUp 0.6s; }
   .nav-brand { font-size: 24px; font-weight: 900; color: var(--accent); text-decoration: none; }
   .nav-right { display: flex; gap: 8px; align-items: center; }
-  .icon-btn { background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; }
+  .icon-btn { background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; transition: 0.3s; }
+  .icon-btn:hover { transform: scale(1.1); background: var(--accent); border-color: var(--accent); }
   .btn-menu { background: var(--accent) !important; color: #fff !important; border: none; font-size: 20px; padding: 5px 15px; }
   .btn-messages { background: #0088cc !important; color: #fff !important; }
   .btn-profile { background: #ffd700 !important; color: #000 !important; }
+  .btn-lang { background: #333 !important; color: #fff !important; border-color: #555 !important; font-weight: bold; }
 
-  .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100vh; background: #111; border-left: 2px solid #333; z-index: 2000; transition: 0.3s; display: flex; flex-direction: column; padding-top: 20px; }
+  .side-menu { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: #111; border-left: 2px solid #333; z-index: 2000; transition: 0.3s ease-in-out; display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; }
   .side-menu.open { right: 0; }
   .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1999; display: none; }
   .menu-overlay.open { display: block; }
   .menu-title { text-align: center; color: var(--accent); font-size: 24px; font-weight: bold; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #333; }
   .menu-item { padding: 15px 20px; color: #fff; text-decoration: none; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; border-right: 4px solid transparent; transition: 0.2s; cursor: pointer; }
-  .menu-item:hover, .menu-item.active { background: rgba(255,0,0,0.1); border-right-color: var(--accent); color: var(--accent); }
-  .menu-item.admin-link { color: #0088cc; }
-  .menu-item.owner-link { color: #ffd700; }
+  .menu-item:hover, .menu-item.active { background: rgba(255,0,0,0.1); border-right-color: var(--accent); color: var(--accent); padding-right: 30px; }
+  .social-wa { color: #25D366 !important; }
+  .social-tg { color: #0088cc !important; }
 
-  #authScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; }
+  /* شاشة تسجيل الدخول */
+  #authScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; animation: fadeInUp 0.5s; position: relative;}
+  
+  /* زرار الترجمة في شاشة الدخول */
+  .auth-lang-btn {
+      position: absolute; top: -50px; right: 0; background: #333; color: #fff; border: 2px solid #555;
+      padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold;
+      transition: 0.3s; font-size: 14px;
+  }
+  .auth-lang-btn:hover { background: var(--accent); border-color: var(--accent); transform: scale(1.05); }
+
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: #111; color: #fff; font-family: 'Cairo'; outline: none; }
-  .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+  .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.3s; }
+  .auth-btn:hover { background: #cc0000; }
   
   #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
-  .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
-  #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; }
-  .ai-btn { background: var(--accent); color: #fff; border: none; border-radius: 25px; padding: 0 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
-  
-  .tabs-container { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+  #mainTitle { animation: glowPulse 3s infinite; }
+
+  .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; animation: fadeInUp 0.7s; }
+  #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; transition: 0.3s; }
+  #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+  .ai-btn { background: var(--accent); color: #fff; border: none; border-radius: 25px; padding: 0 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; white-space: nowrap; transition: 0.3s; }
+  .ai-btn:hover { transform: scale(1.05); }
+
+  .tabs-container { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; animation: fadeInUp 0.8s; }
   .tab-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); border-radius: 20px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo'; font-weight: 700; font-size: 14px; transition: 0.3s; }
-  .tab-btn.active, .tab-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .tab-btn.active, .tab-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(1.05); }
   
   .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-  .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; text-align: center; height: 320px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; overflow: hidden; background-size: cover; background-position: center; transition: 0.3s; }
+  .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; text-align: center; height: 320px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; overflow: hidden; background-size: cover; background-position: center; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); animation: fadeInUp 0.8s backwards; }
+  
+  .quiz-card:nth-child(1) { animation-delay: 0.1s; }
+  .quiz-card:nth-child(2) { animation-delay: 0.15s; }
+  .quiz-card:nth-child(3) { animation-delay: 0.2s; }
+  .quiz-card:nth-child(4) { animation-delay: 0.25s; }
+  .quiz-card:nth-child(5) { animation-delay: 0.3s; }
+
   .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
   .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; padding: 10px; width: 100%; text-shadow: 0 0 10px #000; }
-  .quiz-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+  .quiz-card:hover { border-color: var(--accent); transform: translateY(-10px) scale(1.02); box-shadow: 0 10px 30px rgba(255,0,0,0.3); }
 
   @media (max-width: 768px) {
     .quiz-card { height: 250px; }
@@ -77,56 +104,73 @@
 <!-- Side Menu -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
-  <div class="menu-title">👑 القائمة</div>
-  <a href="index.html" class="menu-item active">🏠 الرئيسية</a>
-  <a href="leaderboard.html" class="menu-item">🏆 المتصدرين</a>
-  <a href="comments.html" class="menu-item">💬 المجتمع</a>
-  <a href="users.html" class="menu-item">👥 اللاعبين</a>
-  <a href="inbox.html" class="menu-item">📩 صندوق الرسائل</a>
-  <a href="profile.html" class="menu-item">👤 بروفايلي</a>
+  <div class="menu-title" data-ar="القائمة" data-en="Menu">القائمة</div>
+  <a href="index.html" class="menu-item active" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+  <a href="leaderboard.html" class="menu-item" data-ar="المتصدرين" data-en="Leaderboard">المتصدرين</a>
+  <a href="badges.html" class="menu-item" data-ar="البادجات والرتب" data-en="Badges & Ranks">البادجات والرتب</a>
+  <a href="comments.html" class="menu-item" data-ar="المجتمع" data-en="Community">المجتمع</a>
+  <a href="users.html" class="menu-item" data-ar="اللاعبين" data-en="Players">اللاعبين</a>
+  <a href="inbox.html" class="menu-item" data-ar="صندوق الرسائل" data-en="Inbox">صندوق الرسائل</a>
+  <a href="profile.html" class="menu-item" data-ar="بروفايلي" data-en="Profile">بروفايلي</a>
+  
   <hr style="border-color:#333; margin: 10px 0;">
-  <a href="admin.html" class="menu-item admin-link" id="menuAdminBtn" style="display:none;">🛡️ لوحة التحكم (Admin)</a>
-  <a href="owner.html" class="menu-item owner-link" id="menuOwnerBtn" style="display:none;">👑 مركز العمليات (Owner)</a>
-  <a href="#" class="menu-item" onclick="logoutUser()" style="color:#ff0000; margin-top:auto;">🚪 تسجيل الخروج</a>
+  
+  <a href="owner.html" class="menu-item" id="menuOwnerBtn" style="display:none; background: #ffd700; color: #000; border-radius: 8px; margin: 5px 15px; text-align: center; justify-content: center; font-weight: 900; box-shadow: 0 0 10px rgba(255,215,0,0.5);" data-ar="مركز العمليات (Owner)" data-en="Owner Panel">مركز العمليات (Owner)</a>
+  
+  <a href="admin.html" class="menu-item" id="menuAdminBtn" style="display:none; background: #0088cc; color: #fff; border-radius: 8px; margin: 5px 15px; text-align: center; justify-content: center; font-weight: 900; box-shadow: 0 0 10px rgba(0,136,204,0.5);" data-ar="لوحة التحكم (Admin)" data-en="Admin Panel">لوحة التحكم (Admin)</a>
+  
+  <hr style="border-color:#333; margin: 10px 0;">
+
+  <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="menu-item social-wa" data-ar="واتساب" data-en="WhatsApp">واتساب</a>
+  <a href="https://t.me/quiz_hub001" target="_blank" class="menu-item social-tg" data-ar="تليجرام" data-en="Telegram">تليجرام</a>
+  
+  <hr style="border-color:#333; margin: 10px 0;">
+  
+  <a href="#" class="menu-item" onclick="logoutUser()" style="color:#ff0000; margin-top:auto;" data-ar="تسجيل الخروج" data-en="Logout">تسجيل الخروج</a>
 </div>
 
-<div id="announcement-bar">📢 مرحباً بكم في Quiz Hub!</div>
+<div id="announcement-bar" data-ar="مرحباً بكم في Quiz Hub!" data-en="Welcome to Quiz Hub!">مرحباً بكم في Quiz Hub!</div>
 
+<!-- شاشة تسجيل الدخول -->
 <div id="authScreen">
-  <h1 style="color:var(--accent); margin-bottom:20px;">🎬 أهلاً بيك</h1>
-  <input type="text" id="usernameInput" class="auth-input" placeholder="اسم المستخدم">
-  <input type="password" id="passwordInput" class="auth-input" placeholder="كلمة المرور">
-  <button id="loginBtn" class="auth-btn" onclick="loginUser()">تسجيل الدخول</button>
-  <button id="signupBtn" class="auth-btn" onclick="signupUser()" style="display:none;">إنشاء حساب</button>
-  <span style="cursor:pointer; color:#aaa;" onclick="toggleAuthMode()" id="switchAuth">ليس لديك حساب؟ سجل الآن</span>
+  <!-- زرار الترجمة الجديد -->
+  <button class="auth-lang-btn" onclick="toggleLanguage()" id="authLangBtn">EN</button>
+
+  <h1 style="color:var(--accent); margin-bottom:20px;" id="authTitle" data-ar="أهلاً بيك" data-en="Welcome">أهلاً بيك</h1>
+  <input type="text" id="usernameInput" class="auth-input" placeholder="اسم المستخدم" data-ar="اسم المستخدم" data-en="Username">
+  <input type="password" id="passwordInput" class="auth-input" placeholder="كلمة المرور" data-ar="كلمة المرور" data-en="Password">
+  <button id="loginBtn" class="auth-btn" onclick="loginUser()" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</button>
+  <button id="signupBtn" class="auth-btn" onclick="signupUser()" style="display:none;" data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</button>
+  <span style="cursor:pointer; color:#aaa;" onclick="toggleAuthMode()" id="switchAuth" data-ar="ليس لديك حساب؟ سجل الآن" data-en="Don't have an account? Sign up">ليس لديك حساب؟ سجل الآن</span>
 </div>
 
 <div id="mainContent">
   <div class="navbar">
     <a href="index.html" class="nav-brand">Quiz Hub</a>
     <div class="nav-right">
+      <button class="icon-btn btn-lang" onclick="toggleLanguage()" id="langBtn">EN</button>
       <button class="icon-btn btn-menu" onclick="toggleMenu()">☰</button>
-      <a href="inbox.html" class="icon-btn btn-messages">💬</a>
-      <a href="profile.html" class="icon-btn btn-profile">👤</a>
+      <a href="inbox.html" class="icon-btn btn-messages" data-ar="الرسائل" data-en="Messages">الرسائل</a>
+      <a href="profile.html" class="icon-btn btn-profile" data-ar="بروفايلي" data-en="Profile">بروفايلي</a>
     </div>
   </div>
 
   <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1000px; margin-bottom:20px;">
-    <h1 style="font-size:32px;">🎬 مكتبة الكويزات</h1>
-    <button class="icon-btn" onclick="playRandom()" style="background:var(--accent);">🎲 كويز عشوائي</button>
+    <h1 style="font-size:32px;" id="mainTitle" data-ar="مكتبة الكويزات" data-en="Quiz Library">مكتبة الكويزات</h1>
+    <button class="icon-btn" onclick="playRandom()" style="background:var(--accent);" data-ar="كويز عشوائي" data-en="Random Quiz">كويز عشوائي</button>
   </div>
 
   <div class="search-container">
-    <input type="text" id="searchInput" placeholder="ابحث عن كويز..." onkeyup="searchQuizzes()">
-    <a href="assistant.html" class="ai-btn">🤖 مساعد</a>
+    <input type="text" id="searchInput" placeholder="ابحث عن كويز..." onkeyup="searchQuizzes()" data-ar="ابحث عن كويز..." data-en="Search for a quiz...">
+    <a href="assistant.html" class="ai-btn" data-ar="مساعد" data-en="Assistant">مساعد</a>
   </div>
 
   <div class="tabs-container">
-    <button class="tab-btn active" onclick="filterCards('all', this)">الكل</button>
-    <button class="tab-btn" onclick="filterCards('horror', this)">رعب 🎃</button>
-    <button class="tab-btn" onclick="filterCards('kdrama', this)">دراما 💖</button>
-    <button class="tab-btn" onclick="filterCards('action', this)">أكشن 💥</button>
-    <button class="tab-btn" onclick="filterCards('mystery', this)">غموض 🕵️</button>
+    <button class="tab-btn active" onclick="filterCards('all', this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="tab-btn" onclick="filterCards('horror', this)" data-ar="رعب" data-en="Horror">رعب</button>
+    <button class="tab-btn" onclick="filterCards('kdrama', this)" data-ar="دراما" data-en="K-Drama">دراما</button>
+    <button class="tab-btn" onclick="filterCards('action', this)" data-ar="أكشن" data-en="Action">أكشن</button>
+    <button class="tab-btn" onclick="filterCards('mystery', this)" data-ar="غموض" data-en="Mystery">غموض</button>
   </div>
 
   <div class="grid-container" id="cards-container">
@@ -151,19 +195,50 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
   window.db = db; window.ref = ref; window.get = get; window.set = set; window.onValue = onValue; window.remove = remove;
   window.auth = auth; window.createUserWithEmailAndPassword = createUserWithEmailAndPassword; window.signInWithEmailAndPassword = signInWithEmailAndPassword; window.signOut = signOut;
 
+  let currentLang = localStorage.getItem('lang') || 'ar';
+
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
+
+  function applyLanguage() {
+      const elements = document.querySelectorAll('[data-ar]');
+      elements.forEach(el => {
+          if(el.tagName === 'INPUT') {
+              el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          } else {
+              el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          }
+      });
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      
+      // تحديث زرار اللغة في النافبار
+      const langBtn = document.getElementById('langBtn');
+      if (langBtn) langBtn.innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      
+      // تحديث زرار اللغة في شاشة الدخول
+      const authLangBtn = document.getElementById('authLangBtn');
+      if (authLangBtn) authLangBtn.innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  }
+  
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  applyLanguage();
+
   function showToast(msg, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div'); toast.className = 'toast';
       if(type === 'error') toast.style.borderRightColor = '#ff0000';
       toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
-      container.appendChild(toast); setTimeout(() => { toast.remove(); }, 5000); // 5 ثواني عشان تقراها
+      container.appendChild(toast); setTimeout(() => { toast.remove(); }, 3000);
   }
   window.showToast = showToast;
 
@@ -196,31 +271,32 @@
       isSignupMode = !isSignupMode;
       document.getElementById('loginBtn').style.display = isSignupMode ? 'none' : 'block';
       document.getElementById('signupBtn').style.display = isSignupMode ? 'block' : 'none';
-      document.getElementById('switchAuth').innerText = isSignupMode ? 'لديك حساب؟ سجل دخول' : 'ليس لديك حساب؟ سجل الآن';
+      document.getElementById('switchAuth').innerText = isSignupMode ? (currentLang === 'en' ? 'Already have an account? Login' : 'لديك حساب؟ سجل دخول') : (currentLang === 'en' ? "Don't have an account? Sign up" : 'ليس لديك حساب؟ سجل الآن');
   }
   window.signupUser = async function() {
       const u = document.getElementById('usernameInput').value.trim();
       const p = document.getElementById('passwordInput').value.trim();
-      if(!u || !p) return showToast('اكتب الاسم والباسورد', 'error');
+      if(!u || !p) return showToast(currentLang === 'en' ? 'Enter username and password' : 'اكتب الاسم والباسورد', 'error');
       try {
           await window.createUserWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
           await window.set(window.ref(window.db, 'usernames/' + u), true);
-          showToast('تم إنشاء الحساب بنجاح!');
+          await window.set(window.ref(window.db, 'roles/users/' + u), '👤 Player'); 
+          showToast(currentLang === 'en' ? 'Account created!' : 'تم إنشاء الحساب بنجاح!');
       } catch(e) { showToast('خطأ: ' + e.message, 'error'); }
   }
   window.loginUser = async function() {
       const u = document.getElementById('usernameInput').value.trim();
       const p = document.getElementById('passwordInput').value.trim();
-      if(!u || !p) return showToast('اكتب الاسم والباسورد', 'error');
+      if(!u || !p) return showToast(currentLang === 'en' ? 'Enter username and password' : 'اكتب الاسم والباسورد', 'error');
       try {
           await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
-          showToast('أهلاً بك مجدداً!');
-      } catch(e) { showToast('بيانات الدخول خاطئة', 'error'); }
+          showToast(currentLang === 'en' ? 'Welcome back!' : 'أهلاً بك مجدداً!');
+      } catch(e) { showToast(currentLang === 'en' ? 'Invalid credentials' : 'بيانات الدخول خاطئة', 'error'); }
   }
   window.logoutUser = function() {
       window.signOut(window.auth);
       localStorage.removeItem('loggedInUser');
-      showToast('تم تسجيل الخروج');
+      showToast(currentLang === 'en' ? 'Logged out' : 'تم تسجيل الخروج');
   }
 
   window.auth.onAuthStateChanged((user) => {
@@ -237,6 +313,7 @@
 
           if (isOwner) { 
               menuOwnerBtn.style.display = 'flex'; 
+              menuAdminBtn.style.display = 'none'; 
           } else {
               window.get(window.ref(window.db, 'roles/admins')).then(snap => {
                   let isUserAdmin = false;
@@ -253,63 +330,39 @@
               });
           }
 
-          // تسجيل الأونلاين
           const presenceRef = window.ref(window.db, 'presence/' + currentUser);
           window.set(presenceRef, { status: 'online', last_seen: Date.now() });
           setInterval(() => { window.set(presenceRef, { status: 'online', last_seen: Date.now() }); }, 60000);
           window.addEventListener('beforeunload', () => { window.set(presenceRef, { status: 'offline', last_seen: Date.now() }); });
 
-          // فحص الصيانة
           window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
               const isM = snap.exists() ? snap.val() : false;
               if (isM && currentUser.toLowerCase() !== 'ahmed') {
                   document.getElementById('mainContent').style.display = 'none';
-                  showToast('الموقع تحت الصيانة!', 'error');
+                  showToast(currentLang === 'en' ? 'Under maintenance!' : 'الموقع تحت الصيانة!', 'error');
               } else {
                   document.getElementById('mainContent').style.display = 'flex';
               }
           });
 
-          // فحص الحظر
           window.onValue(window.ref(window.db, 'banned_users/' + currentUser), snap => {
               if (snap.exists() && currentUser.toLowerCase() !== 'ahmed') {
-                  showToast('أنت محظور من الموقع!', 'error');
+                  showToast(currentLang === 'en' ? 'You are banned!' : 'أنت محظور من الموقع!', 'error');
                   setTimeout(() => window.logoutUser(), 2000);
               }
           });
           
-          // فحص الطرد
           window.onValue(window.ref(window.db, 'kick_signals/' + currentUser), snap => {
               if (snap.exists() && snap.val() > Date.now() - 10000 && currentUser.toLowerCase() !== 'ahmed') {
-                  showToast('تم طردك من الموقع!', 'error');
+                  showToast(currentLang === 'en' ? 'You have been kicked!' : 'تم طردك من الموقع!', 'error');
                   setTimeout(() => window.logoutUser(), 2000);
               }
           });
 
-          // فحص التحذيرات (مراقبة مستمرة)
-          window.onValue(window.ref(window.db, 'warnings/' + currentUser), snap => {
-              if (snap.exists()) {
-                  const warnData = snap.val();
-                  showToast(`⚠️ تحذير من الإدارة: ${warnData.text}`, 'error');
-              }
-          });
-
-          // مراقبة الإشعارات المنبثقة (Broadcast) الجديدة
-          window.onValue(window.ref(window.db, 'site_settings/broadcast'), snap => {
-              if (snap.exists()) {
-                  const bcData = snap.val();
-                  // عشان م يظهرش لنفسه لو الأونر هو اللي باعت، ونمنع التكرار
-                  if (bcData.time > Date.now() - 10000 && currentUser.toLowerCase() !== 'ahmed') {
-                      showToast(`📢 إشعار عام: ${bcData.text}`, 'success');
-                  }
-              }
-          });
-
-          // الإعلانات العلوية
           window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
               if(snap.exists() && snap.val() !== '') {
                   document.getElementById('announcement-bar').style.display = 'block';
-                  document.getElementById('announcement-bar').innerText = '📢 ' + snap.val();
+                  document.getElementById('announcement-bar').innerText = snap.val();
               } else { document.getElementById('announcement-bar').style.display = 'none'; }
           });
 
