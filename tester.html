@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛸 مركز القيادة المتقدم - Quiz Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #000; --panel: #0a0a0a; --border: #222; --text: #fff; --accent: #00ffcc; --danger: #ff0033; --warning: #ffcc00; --success: #00ff66; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  
+  .hud { height: 60px; background: var(--panel); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+  .hud-title { font-size: 20px; font-weight: 900; color: var(--accent); text-shadow: 0 0 10px rgba(0,255,204,0.5); }
+  .hud-stats { display: flex; gap: 20px; }
+  .hud-item { font-size: 14px; font-weight: bold; }
+  .hud-item span { color: var(--accent); }
+
+  .main-layout { display: flex; flex: 1; overflow: hidden; }
+  
+  .sidebar { width: 250px; background: var(--panel); border-left: 2px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; gap: 5px; }
+  .nav-btn { padding: 15px 20px; background: transparent; border: none; border-right: 4px solid transparent; color: #888; font-family: 'Cairo'; font-size: 16px; font-weight: bold; text-align: right; cursor: pointer; transition: 0.2s; }
+  .nav-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .nav-btn.active { border-right-color: var(--accent); color: var(--accent); background: rgba(0,255,204,0.05); }
+
+  .content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
+  .content.active { display: block; animation: fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card h3 { color: var(--warning); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  
+  .console { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 15px; font-family: monospace; font-size: 13px; height: 300px; overflow-y: auto; direction: ltr; text-align: left; color: #ccc; }
+  .log-success { color: var(--success); }
+  .log-error { color: var(--danger); }
+  .log-info { color: var(--accent); }
+  .log-warn { color: var(--warning); }
+
+  .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+  .input-group input, .input-group select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; outline: none; }
+  .btn { padding: 12px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-accent { background: var(--accent); color: #000; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn:hover { opacity: 0.8; transform: scale(1.02); }
+
+  .badge-status { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+  .bg-green { background: rgba(0,255,102,0.2); color: var(--success); border: 1px solid var(--success); }
+  .bg-red { background: rgba(255,0,51,0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+  #lockScreen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  #lockScreen h1 { color: var(--danger); font-size: 40px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div id="lockScreen" style="display: none;">
+  <h1>🚫 وصول مرفوض</h1>
+  <p>هذه المنطقة مخصصة لمالك الموقع فقط.</p>
+  <a href="index.html" style="margin-top:20px; color:var(--accent);">العودة للرئيسية</a>
+</div>
+
+<div id="app" style="display: none; width: 100%; height: 100%; flex-direction: column;">
+  
+  <div class="hud">
+    <div class="hud-title">🛸 مركز القيادة المتقدم</div>
+    <div class="hud-stats">
+      <div class="hud-item">الاتصال: <span id="hud-conn">جاري الفحص</span></div>
+      <div class="hud-item">المستخدم: <span id="hud-user">-</span></div>
+      <div class="hud-item">الرتبة: <span id="hud-role">-</span></div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="sidebar">
+      <button class="nav-btn active" onclick="openTab('radar')">📡 الرادار (النبض)</button>
+      <button class="nav-btn" onclick="openTab('doctor')">🩺 الطبيب (الفحص)</button>
+      <button class="nav-btn" onclick="openTab('data')">📊 البيانات الحية</button>
+      <button class="nav-btn" onclick="openTab('console')">💻 الكونسول السري</button>
+      <button class="nav-btn" onclick="openTab('clean')">🧹 المنشار (تنظيف)</button>
+      <button class="nav-btn" onclick="openTab('backup')">💾 نسخة احتياطية</button>
+      <button class="nav-btn" style="margin-top: auto; color: var(--danger);" onclick="location.href='index.html'">⬅ خروج للموقع</button>
+    </div>
+
+    <div style="flex: 1; overflow-y: auto; padding: 20px;">
+      
+      <div id="tab-radar" class="content active">
+        <h2 style="color:var(--accent); margin-bottom:20px;">📡 مراقبة النظام (Live)</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>سرعة استجابة فايربيز</h3>
+            <div id="pingResult" style="font-size:30px; font-weight:bold; color:var(--success);">- ms</div>
+            <button class="btn btn-accent" style="margin-top:15px; width:100%;" onclick="testPing()">اختبار السرعة</button>
+          </div>
+          <div class="card">
+            <h3>مراقب الأخطاء (Live Errors)</h3>
+            <div class="console" id="errorConsole">مراقب الأخطاء جاهز...</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-doctor" class="content">
+        <h2 style="color:var(--accent); margin-bottom:20px;">🩺 فحص شامل للموقع</h2>
+        <button class="btn btn-accent" style="width:100%; margin-bottom:20px;" onclick="runFullDoctor()">🚀 ابدأ الفحص الشامل</button>
+        <div class="grid">
+          <div class="card">
+            <h3>فحص المسارات</h3>
+            <div class="console" id="doctorConsole"></div>
+          </div>
+          <div class="card">
+            <h3>حالة الصور</h3>
+            <div id="imagesStatus" style="display:flex; flex-direction:column; gap:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-data" class="content">
+        <h2 style="color:var(--accent); margin-bottom:20px;">📊 البيانات الحية (Realtime)</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>👥 اللاعبين المتصلين (<span id="data-online-count">0</span>)</h3>
+            <div id="data-online-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
+          </div>
+          <div class="card">
+            <h3>🚪 الغرف النشطة (<span id="data-rooms-count">0</span>)</h3>
+            <div id="data-rooms-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
+          </div>
+          <div class="card">
+            <h3>⚠️ التحذيرات (<span id="data-warns-count">0</span>)</h3>
+            <div id="data-warns-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-console" class="content">
+        <h2 style="color:var(--accent); margin-bottom:20px;">💻 أوامر مباشرة</h2>
+        <div class="card">
+          <div class="console" id="cmdConsole" style="height: 200px; margin-bottom: 15px;">الكونسول جاهز...</div>
+          <div class="input-group">
+            <input type="text" id="cmdInput" placeholder="اكتب الأمر هنا..." onkeypress="if(event.key==='Enter') runCmd()">
+            <button class="btn btn-accent" onclick="runCmd()">تنفيذ</button>
+          </div>
+          <p style="font-size:12px; color:#888;">أمثلة: <code>clear_user Ahmed1</code> | <code>kick_user Ahmed1</code> | <code>clear_rooms</code> | <code>block Ahmed1</code></p>
+        </div>
+      </div>
+
+      <div id="tab-clean" class="content">
+        <h2 style="color:var(--danger); margin-bottom:20px;">🧹 أدوات التنظيف (خطيرة)</h2>
+        <div class="card" style="margin-bottom:15px;">
+          <h3>مسح البيانات العالقة</h3>
+          <button class="btn btn-danger" style="width:100%;" onclick="cleanOrphanData()">مسح كل الرسائل القديمة</button>
+        </div>
+        <div class="card" style="margin-bottom:15px;">
+          <h3>مسح التحذيرات</h3>
+          <button class="btn btn-danger" style="width:100%;" onclick="clearWarnings()">مسح كل التحذيرات المسجلة</button>
+        </div>
+      </div>
+
+      <div id="tab-backup" class="content">
+        <h2 style="color:var(--accent); margin-bottom:20px;">💾 النسخ الاحتياطي</h2>
+        <div class="card">
+          <h3>تحميل نسخة كاملة</h3>
+          <button class="btn btn-accent" style="width:100%;" onclick="downloadBackup()">📥 تحميل كل بيانات الموقع (JSON)</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, get, set, remove, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.remove = remove; window.onValue = onValue; window.update = update;
+
+  const currentUser = localStorage.getItem('loggedInUser');
+
+  if (!currentUser || currentUser.toLowerCase() !== 'ahmed') {
+      document.getElementById('lockScreen').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+  } else {
+      document.getElementById('app').style.display = 'flex';
+      document.getElementById('hud-user').innerText = currentUser;
+      document.getElementById('hud-role').innerText = '👑 Owner';
+      initSystem();
+  }
+
+  function logTo(id, text, type='info') {
+      const el = document.getElementById(id); if(!el) return;
+      const div = document.createElement('div');
+      div.className = 'log-' + type;
+      div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+  }
+
+  window.openTab = function(id) {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      event.target.classList.add('active');
+  }
+
+  function initSystem() {
+      // 1. HUD Connection Check (تم تعديلها عشان متبقاش مفصولة)
+      const connRef = ref(db, '.info/connected');
+      onValue(connRef, (snap) => {
+          if (snap.val() === true) {
+              document.getElementById('hud-conn').innerText = 'متصل ✅';
+              document.getElementById('hud-conn').style.color = 'var(--success)';
+          } else {
+              document.getElementById('hud-conn').innerText = 'مفصول ❌';
+              document.getElementById('hud-conn').style.color = 'var(--danger)';
+          }
+      });
+
+      // 2. Live Error Tracker
+      window.onerror = function(msg, url, line) {
+          logTo('errorConsole', `${msg} at line ${line}`, 'error');
+      };
+      console.error = function(...args) {
+          logTo('errorConsole', args.join(' '), 'error');
+      };
+
+      // 3. Live Data Sync
+      onValue(ref(db, 'presence'), (snap) => {
+          const data = snap.val() || {};
+          const online = Object.keys(data).filter(k => data[k].status === 'online');
+          document.getElementById('data-online-count').innerText = online.length;
+          document.getElementById('data-online-list').innerHTML = online.map(u => `<span class="badge-status bg-green">${u}</span>`).join(' ');
+      });
+
+      onValue(ref(db, 'rooms'), (snap) => {
+          const data = snap.val() || {};
+          document.getElementById('data-rooms-count').innerText = Object.keys(data).length;
+          document.getElementById('data-rooms-list').innerHTML = Object.keys(data).map(r => `<span class="badge-status bg-red">${r}</span>`).join(' ');
+      });
+
+      onValue(ref(db, 'warnings'), (snap) => {
+          const data = snap.val() || {};
+          document.getElementById('data-warns-count').innerText = Object.keys(data).length;
+          document.getElementById('data-warns-list').innerHTML = Object.keys(data).map(w => `<span class="badge-status bg-red">${w}</span>`).join(' ');
+      });
+  }
+
+  window.testPing = async () => {
+      const start = Date.now();
+      await get(ref(db, '.info/connected'));
+      const ms = Date.now() - start;
+      document.getElementById('pingResult').innerText = ms + ' ms';
+      document.getElementById('pingResult').style.color = ms < 500 ? 'var(--success)' : 'var(--warning)';
+  }
+
+  window.runFullDoctor = async () => {
+      const consoleBox = document.getElementById('doctorConsole'); consoleBox.innerHTML = '';
+      logTo('doctorConsole', 'بدء الفحص الشامل...', 'info');
+      
+      const paths = ['usernames', 'users_data', 'roles/admins', 'badges', 'rooms', 'warnings', 'messages', 'site_settings', 'custom_quizzes'];
+      for (let p of paths) {
+          try {
+              await set(ref(db, p + '/_test_'), "ok");
+              await remove(ref(db, p + '/_test_'));
+              logTo('doctorConsole', `✅ ${p} (شغال)`, 'success');
+          } catch(e) {
+              logTo('doctorConsole', `❌ ${p} (مقفول: ${e.message})`, 'error');
+          }
+      }
+
+      const imgBox = document.getElementById('imagesStatus'); imgBox.innerHTML = '';
+      const imgs = ['pic/Logo.png', 'pic/The Conjuring.jpg', 'pic/FNAF.jpg', 'pic/Wednesday.jpg'];
+      imgs.forEach(src => {
+          const img = new Image();
+          img.onload = () => imgBox.innerHTML += `<div style="color:var(--success);">✅ ${src}</div>`;
+          img.onerror = () => imgBox.innerHTML += `<div style="color:var(--danger);">❌ ${src} (مكسورة)</div>`;
+          img.src = src;
+      });
+  }
+
+  window.runCmd = async () => {
+      const cmd = document.getElementById('cmdInput').value.trim();
+      if(!cmd) return;
+      logTo('cmdConsole', '> ' + cmd, 'info');
+      document.getElementById('cmdInput').value = '';
+
+      const parts = cmd.split(' ');
+      const action = parts[0];
+      const target = parts[1];
+
+      try {
+          if (action === 'clear_user' && target) {
+              await remove(ref(db, 'scores/' + target));
+              await remove(ref(db, 'users_data/' + target + '/xp'));
+              await remove(ref(db, 'badges/' + target));
+              logTo('cmdConsole', `تم مسح كل بيانات اللاعب ${target}`, 'success');
+          } else if (action === 'kick_user' && target) {
+              await set(ref(db, 'kick_signals/' + target), Date.now());
+              logTo('cmdConsole', `تم طرد ${target}`, 'success');
+          } else if (action === 'clear_rooms') {
+              await remove(ref(db, 'rooms'));
+              logTo('cmdConsole', `تم مسح كل الغرف`, 'success');
+          } else if (action === 'block' && target) {
+              await set(ref(db, 'banned_users/' + target), { status: true, reason: 'أمر مباشر من الأونر' });
+              logTo('cmdConsole', `تم حظر ${target}`, 'success');
+          } else {
+              logTo('cmdConsole', 'أمر غير معروف', 'warn');
+          }
+      } catch(e) { logTo('cmdConsole', 'خطأ: ' + e.message, 'error'); }
+  }
+
+  window.cleanOrphanData = async () => {
+      if(confirm('مسح كل الرسائل القديمة؟')) {
+          await remove(ref(db, 'messages'));
+          alert('تم المسح');
+      }
+  }
+  window.clearWarnings = async () => {
+      if(confirm('مسح كل التحذيرات؟')) {
+          await remove(ref(db, 'warnings'));
+          alert('تم المسح');
+      }
+  }
+
+  window.downloadBackup = async () => {
+      const snapshot = await get(ref(db, '/'));
+      const data = JSON.stringify(snapshot.val(), null, 2);
+      const blob = new Blob([data], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `quizhub_backup_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
