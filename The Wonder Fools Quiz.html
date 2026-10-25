@@ -7,59 +7,114 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
+  #stars-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: transparent; overflow: hidden; pointer-events: none; }
+  #stars-bg .star { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8); animation: twinkle infinite ease-in-out alternate; }
+  body.light-mode #stars-bg .star { background: #f5c542; box-shadow: 0 0 10px 2px rgba(245, 197, 66, 0.4); }
+  @keyframes twinkle { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+  @keyframes fall { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
+  .falling-star { position: absolute; width: 2px; height: 2px; background: #f5c542; border-radius: 50%; animation: fall linear infinite; box-shadow: 0 0 8px 2px rgba(245, 197, 66, 0.6); pointer-events: none; }
+
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
-  .modal-box { background: #111; border: 2px solid #f5c542; border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(245,197,66,0.4); }
-  .modal-box h2 { color: #f5c542; margin-bottom: 20px; }
-  .modal-box input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #555; background: #222; color: #fff; font-family: 'Cairo'; font-size: 18px; text-align: center; letter-spacing: 2px; }
-  .modal-box button { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .modal-box { background: #111; border: 2px solid #f5c542; border-radius: 15px; padding: 30px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 0 30px rgba(245, 197, 66, 0.4); }
+  .modal-box h2 { color: #f5c542; margin-bottom: 20px; font-size: 22px; }
+  .modal-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+  .modal-tab { flex: 1; padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+  .modal-tab.active { background: #f5c542; color: #000; border-color: #f5c542; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .friends-list-container { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
+  .friend-select-btn { padding: 10px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.3s; }
+  .friend-select-btn:hover { background: #f5c542; color: #000; border-color: #f5c542; }
+  .room-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #555; background: #222; color: #fff; font-family: 'Cairo'; font-size: 16px; text-align: center; letter-spacing: 2px; }
+  .room-btn { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
   .btn-create { background: #f5c542; color: #000; }
   .btn-create:hover { background: #fff; }
-  .btn-join { background: #a88c5a; color: #fff; }
-  .btn-join:hover { background: #f5c542; color: #000; }
-  .btn-close { background: #333; color: #fff; }
-  .btn-close:hover { background: #555; }
+  .btn-join { background: #444; color: #fff; }
+  .btn-join:hover { background: #666; }
+  .btn-close { background: #222; color: #fff; border: 1px solid #444; }
+  .btn-close:hover { background: #333; }
   .room-code-display { font-size: 32px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #f5c542; margin-bottom: 15px; letter-spacing: 5px; }
   .status-text { color: #aaa; font-size: 14px; margin-bottom: 15px; min-height: 20px; }
-  .challenge-btn { margin-top: 30px; padding: 15px 40px; background: #a88c5a; color: #fff; border: 2px solid #f5c542; border-radius: 10px; font-family: 'Cairo'; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(168,140,90,0.6); }
-  .challenge-btn:hover { background: #f5c542; color: #000; transform: scale(1.05); }
+  .speedrun-btn { margin-top: 20px; padding: 12px 30px; background: #a88c5a; color: #fff; border: 2px solid #f5c542; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .speedrun-btn:hover { background: #f5c542; color: #000; }
+  .quiz-card { width: 100%; height: 340px; background-size: cover; background-position: center; border-radius: 15px; border: 2px solid #333; cursor: pointer; position: relative; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; transition: 0.3s; }
+  .quiz-card:hover { border-color: #f5c542; transform: translateY(-5px); box-shadow: 0 0 20px rgba(245, 197, 66, 0.5); }
+  .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
+  .quiz-card h2 { position: relative; z-index: 2; color: #fff; font-size: 20px; margin-bottom: 15px; text-shadow: 0 0 10px #000; }
+  .share-container { margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; }
+  .share-title { color: #aaa; font-size: 15px; margin-bottom: 15px; font-weight: bold; }
+  .share-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .share-btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 14px; color: #fff; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
+  .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .share-wa { background: #25D366; }
+  .share-tg { background: #0088cc; }
+  .share-fb { background: #1877F2; }
+  .share-tw { background: #1DA1F2; }
+  .share-other { background: #444; border: 1px solid #666; }
 </style>
 </head>
 <body>
-<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
+
+<div id="stars-bg"></div>
+
+<a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع / Back" data-en="⬅ Back">⬅ رجوع / Back</a>
+
 <div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-  <h1 id="main-title" class="main-title">🦸 كويز الحمقى الخارقون 🦸</h1>
-  <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
-  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
-    <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/The Wonder Fools.jpeg');"><h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2></div>
-    <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/The Wonder Fools.jpeg');"><h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2></div>
+  <h1 id="main-title" class="main-title" data-ar="🦸 كويز الحمقى الخارقون 🦸" data-en="🦸 The WONDERfools Quiz 🦸">🦸 كويز الحمقى الخارقون 🦸</h1>
+  <p class="subtitle" id="subtitle-text" data-ar="اختر طريقة اللعب" data-en="Choose game mode">اختر طريقة اللعب</p>
+  
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 600px; width: 100%; gap: 20px;">
+    <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/The Wonder Fools.jpeg');">
+        <h2 class="card-title" data-ar="العب لوحدك" data-en="Play Solo">العب لوحدك</h2>
+    </div>
+    <div class="quiz-card" onclick="openChallengeModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/The Wonder Fools.jpeg');">
+        <h2 class="card-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
+    </div>
   </div>
+  
+  <button class="speedrun-btn" onclick="startSpeedrun()" data-ar="⚡ العب في وضع السرعة (Speedrun)" data-en="⚡ Play Speedrun">⚡ العب في وضع السرعة (Speedrun)</button>
 </div>
+
 <div id="playScreen" class="play-screen">
-  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#f5c542;">🦸 كويز الحمقى الخارقون 🦸</h1>
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#f5c542;" data-ar="🦸 كويز الحمقى الخارقون 🦸" data-en="🦸 The WONDERfools Quiz 🦸">🦸 كويز الحمقى الخارقون 🦸</h1>
   <div class="progress"><div class="progress-bar" id="progress"></div></div>
   <div class="timer" id="timer">⏱️ 20</div>
   <div id="question" class="question"></div>
   <div id="options"></div>
   <div id="score"></div>
-  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+  <button id="next" onclick="nextQuestion()" data-ar="السؤال التالي ←" data-en="Next Question →">السؤال التالي ←</button>
 </div>
+
 <div class="modal-overlay" id="challengeModal">
   <div class="modal-box">
-    <h2 id="modal-title"></h2>
-    <div id="challengeOptions">
-      <button id="btnCreateRoom" class="btn-create" onclick="createRoom()"></button>
-      <input type="text" id="roomCodeInput" maxlength="6" style="margin-top: 15px;">
-      <button id="btnJoinRoom" class="btn-join" onclick="joinRoom()"></button>
+    <h2 id="modal-title" data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchTab('friends')" id="tabFriends" data-ar="👥 الأصدقاء" data-en="👥 Friends">👥 الأصدقاء</button>
+      <button class="modal-tab" onclick="switchTab('rooms')" id="tabRooms" data-ar="🔑 الغرف (كود)" data-en="🔑 Rooms (Code)">🔑 الغرف (كود)</button>
     </div>
-    <div id="waitingRoom" style="display: none;">
-      <p id="sendCodeText" style="color:#fff; margin-bottom: 10px;"></p>
-      <div class="room-code-display" id="displayRoomCode">------</div>
-      <p class="status-text" id="waitingStatus"></p>
+    <div class="tab-content active" id="contentFriends">
+      <div class="friends-list-container" id="friendsListContainer">
+        <p style="color:#fff;" data-ar="جاري تحميل الأصدقاء..." data-en="Loading friends...">جاري تحميل الأصدقاء...</p>
+      </div>
     </div>
-    <button id="btnCloseModal" class="btn-close" onclick="closeChallengeModal()" style="margin-top: 10px;"></button>
+    <div class="tab-content" id="contentRooms">
+      <div id="roomOptions">
+        <button class="room-btn btn-create" onclick="createRoom()" data-ar="إنشاء غرفة جديدة" data-en="Create New Room">إنشاء غرفة جديدة</button>
+        <input type="text" id="roomCodeInput" class="room-input" maxlength="6" placeholder="اكتب كود الغرفة هنا" data-ar="اكتب كود الغرفة هنا" data-en="Enter room code here">
+        <button class="room-btn btn-join" onclick="joinRoom()" data-ar="انضمام لغرفة" data-en="Join Room">انضمام لغرفة</button>
+      </div>
+      <div id="waitingRoom" style="display: none;">
+        <p class="status-text" data-ar="ابعت الكود ده لصاحبك:" data-en="Send this code to your friend:">ابعت الكود ده لصاحبك:</p>
+        <div class="room-code-display" id="displayRoomCode">------</div>
+        <p class="status-text" id="waitingStatus" data-ar="في انتظار انضمام صديقك..." data-en="Waiting for your friend to join...">في انتظار انضمام صديقك...</p>
+      </div>
+    </div>
+    <button class="room-btn btn-close" onclick="closeChallengeModal()" style="margin-top: 15px;" data-ar="إغلاق" data-en="Close">إغلاق</button>
   </div>
 </div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, get, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -67,142 +122,268 @@
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove; window.push = push;
 </script>
+
 <script src="questions.js"></script>
+
 <script>
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-  let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'wonderfools';
-  const quizData = allQuizzesData.wonderfools;
-  const translations = {
-    ar: { title: "🦸 كويز الحمقى الخارقون 🦸", subtitle: "اختر طريقة اللعب", nextBtn: "السؤال التالي ←", scoreText: "السؤال {c} من {t} | النقاط: {s}", endTitle: "انتهى الكويز! 🦸", endScore: "نتيجتك: {s} / {t}", playAgain: "🔄 العب تاني", highScore: "🏆 أعلى نتيجة:", youWon: "🎉 أنت الفائز!", youLost: "😢 خسرت التحدي!", draw: "🤝 تعادل!", waiting: "في انتظار صديقك... ⏳", waitingDesc: "رجاءً استنى لحد ما يخلص الكويز عشان تظهر النتيجة.", roomTitle: "تحدي الأصدقاء ⚔️", createRoomBtn: "إنشاء غرفة جديدة", joinRoomBtn: "انضمام لغرفة", roomCodePlaceholder: "اكتب كود الغرفة هنا", sendCodeText: "ابعت الكود ده لصاحبك:", waitJoinText: "في انتظار انضمام صديقك...", closeBtn: "إغلاق", challengeBtnText: "⚔️ تحدي صديق" },
-    en: { title: "🦸 The WONDERfools Quiz 🦸", subtitle: "Choose game mode", nextBtn: "Next Question →", scoreText: "Question {c} of {t} | Score: {s}", endTitle: "Quiz Over! 🦸", endScore: "Your Score: {s} / {t}", playAgain: "🔄 Play Again", highScore: "🏆 High Score:", youWon: "🎉 You Won!", youLost: "😢 You Lost!", draw: "🤝 Draw!", waiting: "Waiting for your friend... ⏳", waitingDesc: "Please wait until they finish the quiz to see the final result.", roomTitle: "Challenge Friend ⚔️", createRoomBtn: "Create New Room", joinRoomBtn: "Join Room", roomCodePlaceholder: "Enter room code here", sendCodeText: "Send this code to your friend:", waitJoinText: "Waiting for your friend to join...", closeBtn: "Close", challengeBtnText: "⚔️ Challenge Friend" }
-  };
+  let currentLang = localStorage.getItem('lang') || 'ar'; 
+  let highestScore = 0; 
+  
+  let currentSaveKey = 'wonderfools'; 
+  const quizData = allQuizzesData.wonderfools; 
+
+  const currentUser = localStorage.getItem('loggedInUser') || 'Unknown';
+  const sndCorrect = new Audio('sounds/click.wav');
+  const sndWrong = new Audio('sounds/scare.wav');
+  const sndTick = new Audio('sounds/click.wav');
+
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
-  let isChallengeMode = false; let myRoomCode = null; let myRole = null;
+  let isChallengeMode = false; let isSpeedrun = false;
+  let myRoomCode = null; let myRole = null;
+
   function applyLanguage() {
-    const t = translations[currentLang];
+    const elements = document.querySelectorAll('[data-ar]');
+    elements.forEach(el => {
+      if(el.tagName === 'INPUT') {
+        el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      } else {
+        el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      }
+    });
     document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-    document.getElementById('main-title').innerText = t.title;
-    document.getElementById('subtitle-text').innerText = t.subtitle;
-    document.getElementById('quiz-title').innerText = t.title;
-    document.getElementById('next').innerText = t.nextBtn;
-    document.querySelectorAll('.card-title').forEach(card => { card.innerText = currentLang === 'en' ? card.getAttribute('data-en') : card.getAttribute('data-ar'); });
-    const backBtn = document.getElementById('backBtn'); if(backBtn) backBtn.innerText = currentLang === 'en' ? '⬅ Back' : '⬅ رجوع / Back';
-    document.getElementById('modal-title').innerText = t.roomTitle;
-    document.getElementById('btnCreateRoom').innerText = t.createRoomBtn;
-    document.getElementById('btnJoinRoom').innerText = t.joinRoomBtn;
-    document.getElementById('roomCodeInput').placeholder = t.roomCodePlaceholder;
-    document.getElementById('sendCodeText').innerText = t.sendCodeText;
-    document.getElementById('waitingStatus').innerText = t.waitJoinText;
-    document.getElementById('btnCloseModal').innerText = t.closeBtn;
   }
-  function openChallengeModal() { document.getElementById('challengeModal').style.display = 'flex'; document.getElementById('challengeOptions').style.display = 'block'; document.getElementById('waitingRoom').style.display = 'none'; }
+
+  function openChallengeModal() { document.getElementById('challengeModal').style.display = 'flex'; switchTab('friends'); loadFriends(); }
   function closeChallengeModal() { document.getElementById('challengeModal').style.display = 'none'; if (myRoomCode && myRole === 'player1') { window.remove(window.ref(window.db, 'rooms/' + myRoomCode)); myRoomCode = null; } }
+  function switchTab(tab) {
+    document.getElementById('tabFriends').classList.remove('active'); document.getElementById('tabRooms').classList.remove('active');
+    document.getElementById('contentFriends').classList.remove('active'); document.getElementById('contentRooms').classList.remove('active');
+    if (tab === 'friends') { document.getElementById('tabFriends').classList.add('active'); document.getElementById('contentFriends').classList.add('active'); } 
+    else { document.getElementById('tabRooms').classList.add('active'); document.getElementById('contentRooms').classList.add('active'); document.getElementById('roomOptions').style.display = 'block'; document.getElementById('waitingRoom').style.display = 'none'; }
+  }
+
+  function loadFriends() {
+    const container = document.getElementById('friendsListContainer');
+    window.get(window.ref(window.db, 'friends/' + currentUser)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const friends = Object.keys(snapshot.val()); container.innerHTML = '';
+        friends.forEach(friend => {
+          const btn = document.createElement('button'); btn.className = 'friend-select-btn'; btn.innerText = `👤 ${friend}`;
+          btn.onclick = () => sendChallenge(friend); container.appendChild(btn);
+        });
+      } else { container.innerHTML = `<p style="color:#fff;">${currentLang === 'en' ? 'No friends. Add friends first!' : 'لا يوجد أصدقاء. أضف أصدقاء أولاً!'}</p>`; }
+    });
+  }
+
+  function sendChallenge(friendName) { closeChallengeModal(); alert(currentLang === 'en' ? `Challenge sent to ${friendName}!` : `تم إرسال الدعوة لـ ${friendName}!`); startGame('challenge'); }
+
   function createRoom() {
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-    myRoomCode = code; myRole = 'player1'; isChallengeMode = true;
-    document.getElementById('displayRoomCode').innerText = code;
-    document.getElementById('challengeOptions').style.display = 'none';
-    document.getElementById('waitingRoom').style.display = 'block';
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase(); myRoomCode = code; myRole = 'player1'; isChallengeMode = true;
+    document.getElementById('displayRoomCode').innerText = code; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block';
     window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', created_at: Date.now() }).then(() => {
       window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => {
         const data = snapshot.val();
-        if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); }
+        if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) { document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); }
       });
     });
   }
+
   function joinRoom() {
     const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
-    if (!code) { alert("اكتب كود الغرفة الأول!"); return; }
+    if (!code) { alert(currentLang === 'en' ? "Enter room code first!" : "اكتب كود الغرفة الأول!"); return; }
     myRole = 'player2'; myRoomCode = code; isChallengeMode = true;
     window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.val();
-        if (data.status === 'waiting') { window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startChallengeQuiz(); }); } 
-        else { alert("هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
-      } else { alert("كود الغرفة غير صحيح."); }
+        if (data.status === 'waiting') {
+          window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); });
+        } else { alert(currentLang === 'en' ? "Room is full or game started." : "هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); }
+      } else { alert(currentLang === 'en' ? "Invalid room code." : "كود الغرفة غير صحيح."); }
     });
   }
-  function startChallengeQuiz() {
-    document.getElementById('playScreen').classList.add('active-play');
-    currentQuestions = [...quizData.comprehensive]; 
-    document.getElementById('selectionScreen').style.display = 'none';
-    document.getElementById('playScreen').style.display = 'block';
-    document.getElementById('backBtn').style.display = 'none';
-    current = 0; score = 0; loadQuestion();
-  }
+
   function startGame(mode) {
-    isChallengeMode = false;
-    currentQuestions = [...quizData.comprehensive];
+    isSpeedrun = false;
+    isChallengeMode = (mode === 'challenge');
+    currentQuestions = [...quizData.comprehensive]; 
     currentQuestions.sort(() => Math.random() - 0.5); 
-    currentSaveKey = 'wonderfools_HighScore';
-    highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
-    document.getElementById('selectionScreen').style.display = 'none';
-    document.getElementById('playScreen').style.display = 'block';
-    document.getElementById('backBtn').style.display = 'none';
+    
+    highestScore = 0; 
+    
+    document.getElementById('selectionScreen').style.display = 'none'; document.getElementById('playScreen').style.display = 'block'; document.getElementById('backBtn').style.display = 'none';
     current = 0; score = 0; loadQuestion();
   }
+
+  function startSpeedrun() { startGame('solo'); isSpeedrun = true; }
+
   function loadQuestion() {
-    answered = false; timeLeft = 20;
+    answered = false; timeLeft = isSpeedrun ? 5 : 20; 
     const q = currentQuestions[current];
-    document.getElementById('question').innerText = currentLang === 'ar' ? q.q_ar : q.q_en;
+    let qText = currentLang === 'ar' ? q.q_ar : q.q_en;
+    if (!qText && currentLang === 'ar') qText = q.q_en;
+    document.getElementById('question').innerText = qText;
+    let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+    if (!opts && currentLang === 'ar') opts = q.options_en;
+    
     const optEl = document.getElementById('options'); optEl.innerHTML = '';
-    const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
-    let optionsWithAnswers = currentOptions.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+    let optionsWithAnswers = opts.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
     optionsWithAnswers.sort(() => Math.random() - 0.5); 
-    optionsWithAnswers.forEach((opt) => { const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text; div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div); });
-    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    optionsWithAnswers.forEach((opt) => {
+      const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+      div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
+    });
+    
+    document.getElementById('score').innerText = currentLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
     document.getElementById('next').style.display = 'none';
     document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
     clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
   }
+
   function updateTimer() {
     const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
-    if (timeLeft <= 5) timerEl.style.color = '#f44336';
+    if (timeLeft <= 5) { timerEl.style.color = '#f44336'; sndTick.play(); } else { timerEl.style.color = ''; }
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
-      if (!answered) { answered = true; document.querySelectorAll('.option').forEach(o => o.classList.add('disabled')); const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en; document.querySelectorAll('.option').forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); }); document.getElementById('next').style.display = 'inline-block'; }
+      if (!answered) {
+        answered = true; document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+        const q = currentQuestions[current]; let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+        if (!opts && currentLang === 'ar') opts = q.options_en;
+        document.querySelectorAll('.option').forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); });
+        document.getElementById('next').style.display = 'inline-block';
+      }
     }
     timeLeft--;
   }
+
   function checkAnswer(isCorrect, el) {
     if (answered) return; answered = true; clearInterval(timerInterval);
-    const q = currentQuestions[current]; const currentOptions = currentLang === 'ar' ? q.options_ar : q.options_en;
+    const q = currentQuestions[current]; let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+    if (!opts && currentLang === 'ar') opts = q.options_en;
     const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
-    allOpts.forEach(o => { if(o.innerText === currentOptions[q.answer]) o.classList.add('correct'); });
-    if (isCorrect) { score++; } else { el.classList.add('wrong'); }
-    document.getElementById('score').innerText = translations[currentLang].scoreText.replace('{c}', current + 1).replace('{t}', currentQuestions.length).replace('{s}', score);
+    allOpts.forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); });
+    if (isCorrect) { score += isSpeedrun ? 2 : 1; sndCorrect.play(); } 
+    else { el.classList.add('wrong'); sndWrong.play(); document.getElementById('playScreen').classList.add('shake-animation'); setTimeout(() => document.getElementById('playScreen').classList.remove('shake-animation'), 400); }
+    document.getElementById('score').innerText = currentLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
     document.getElementById('next').style.display = 'inline-block';
   }
+
   function nextQuestion() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
-  function showFinal() {
+
+  async function showFinal() {
     clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+    
+    if (score > (currentQuestions.length / 2)) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }
+
     if (isChallengeMode && myRoomCode) {
-      let updateData = {};
-      if (myRole === 'player1') updateData.player1_score = score; else updateData.player2_score = score;
+      let updateData = {}; if (myRole === 'player1') updateData.player1_score = score; else updateData.player2_score = score;
       window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => {
-        document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#f5c542; font-size:30px; margin-bottom:15px;">${translations[currentLang].waiting}</h2><p style="color:#aaa; font-size:18px;">${translations[currentLang].waitingDesc}</p></div>`;
+        document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#f5c542; font-size:30px; margin-bottom:15px;">${currentLang === 'en' ? 'Waiting for friend... ⏳' : 'في انتظار صديقك... ⏳'}</h2><p style="color:#aaa; font-size:18px;">${currentLang === 'en' ? 'Please wait for them to finish.' : 'رجاءً استنى لحد ما يخلص الكويز.'}</p></div>`;
         document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none'; document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
         window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
           const data = snapshot.val();
           if (data && data.player1_score !== null && data.player2_score !== null) {
             const myScore = myRole === 'player1' ? data.player1_score : data.player2_score;
             const opScore = myRole === 'player1' ? data.player2_score : data.player1_score;
-            let resultMsg = ""; if (myScore > opScore) resultMsg = translations[currentLang].youWon; else if (myScore < opScore) resultMsg = translations[currentLang].youLost; else resultMsg = translations[currentLang].draw;
-            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#f5c542; font-size:36px;">${resultMsg}</h2><p style="color:#fff; font-size:22px;">نتيجتك: ${myScore} | نتيجة صديقك: ${opScore}</p><button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">العودة للرئيسية</button></div>`;
-            document.getElementById('backBtn').style.display = 'flex'; window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
+            let resultMsg = "";
+            if (myScore > opScore) resultMsg = currentLang === 'en' ? "🎉 You Won!" : "🎉 أنت الفائز!";
+            else if (myScore < opScore) resultMsg = currentLang === 'en' ? "😢 You Lost!" : "😢 خسرت التحدي!";
+            else resultMsg = currentLang === 'en' ? "🤝 Draw!" : "🤝 تعادل!";
+            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#f5c542; font-size:36px;">${resultMsg}</h2><p style="color:var(--text-color); font-size:22px;">${currentLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${myScore} | ${currentLang === 'en' ? 'Friend Score' : 'نتيجة صديقك'}: ${opScore}</p><button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold;">${currentLang === 'en' ? 'Back to Home' : 'العودة للرئيسية'}</button></div>`;
+            document.getElementById('backBtn').style.display = 'flex';
+            window.remove(window.ref(window.db, 'rooms/' + myRoomCode));
           }
         });
       });
+    } else if (isChallengeMode && !myRoomCode) {
+        setTimeout(() => { window.location.href = 'index.html'; }, 3000);
     } else {
-      const playerName = localStorage.getItem('loggedInUser') || 'Unknown';
-      if(window.db && window.push) { try { window.push(window.ref(window.db, 'scores/' + playerName + '/' + currentSaveKey.split('_')[0]), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); } catch(e) { console.log("Error saving score", e); } }
-      if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
-      const t = translations[currentLang];
-      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#f5c542; font-size:36px;">${t.endTitle}</h2><p style="color:#fff; font-size:22px;">${t.endScore.replace('{s}', score).replace('{t}', currentQuestions.length)}</p><p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${t.highScore} ${highestScore}</p><button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${t.playAgain}</button></div>`;
-      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none'; document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none'; document.getElementById('backBtn').style.display = 'flex'; 
+      let realHighScore = highestScore;
+
+      if (window.db && currentUser !== 'Unknown') {
+          await window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() });
+          try {
+              const snap = await window.get(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey));
+              if (snap.exists()) {
+                  const data = snap.val();
+                  let maxScore = 0;
+                  for (let key in data) {
+                      if (data[key].score > maxScore) maxScore = data[key].score;
+                  }
+                  realHighScore = maxScore;
+              }
+          } catch(e) { console.error("Error fetching highscore", e); }
+          
+          window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => {
+              let xp = snap.exists() ? snap.val() : 0;
+              window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score);
+          });
+      }
+
+      if (realHighScore > highestScore) { localStorage.setItem(currentSaveKey, realHighScore); }
+      
+      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+        <h2 style="color:#f5c542; font-size:36px;">${currentLang === 'en' ? 'Quiz Over! 🦸' : 'انتهى الكويز! 🦸'}</h2>
+        <p style="color:var(--text-color); font-size:22px;">${currentLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p>
+        <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${currentLang === 'en' ? 'High Score' : 'أعلى نتيجة'}: ${realHighScore}</p>
+        
+        <div class="share-container">
+            <div class="share-title">${currentLang === 'en' ? 'Share your result with friends!' : 'شارك نتيجتك مع أصحابك!'}</div>
+            <div class="share-buttons">
+                <button class="share-btn share-wa" onclick="shareResult('whatsapp')">📱 WhatsApp</button>
+                <button class="share-btn share-tg" onclick="shareResult('telegram')">✈️ Telegram</button>
+                <button class="share-btn share-fb" onclick="shareResult('facebook')">📘 Facebook</button>
+                <button class="share-btn share-tw" onclick="shareResult('twitter')">🐦 Twitter</button>
+                <button class="share-btn share-other" onclick="shareResult('native')">📤 ${currentLang === 'en' ? 'Other Apps' : 'تطبيقات تانية'}</button>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#a88c5a; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${currentLang === 'en' ? 'Play Again' : 'العب تاني'}</button>
+      </div>`;
+      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'flex'; 
     }
   }
-  window.startGame = startGame; window.nextQuestion = nextQuestion; window.openChallengeModal = openChallengeModal; window.closeChallengeModal = closeChallengeModal; window.createRoom = createRoom; window.joinRoom = joinRoom; window.onload = applyLanguage;
+
+  window.shareResult = function(platform) {
+    const quizName = currentSaveKey.split('_')[0].toUpperCase();
+    const text = currentLang === 'en' ? `I scored ${score}/${currentQuestions.length} on the ${quizName} quiz on Quiz Hub! Can you beat my score? 🏆` : `لقد حصلت على ${score}/${currentQuestions.length} في كويز ${quizName} على Quiz Hub! هل يمكنك التغلب علي؟ 🏆`;
+    const url = window.location.href;
+    const encodedText = encodeURIComponent(text);
+    const encodedUrl = encodeURIComponent(url);
+
+    if (platform === 'whatsapp') window.open(`https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`, '_blank');
+    else if (platform === 'telegram') window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank');
+    else if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank');
+    else if (platform === 'twitter') window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank');
+    else if (platform === 'native' && navigator.share) navigator.share({ title: 'Quiz Hub', text: text, url: url }).catch(console.error);
+    else alert(currentLang === 'en' ? "Sharing is not supported on this browser." : "المشاركة غير مدعومة في هذا المتصفح.");
+  }
+
+  function generateStars() {
+    const container = document.getElementById('stars-bg');
+    if(!container) return;
+    for (let i = 0; i < 50; i++) {
+      let star = document.createElement('div'); star.className = 'star';
+      star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+      let size = Math.random() * 3 + 1; star.style.width = size + 'px'; star.style.height = size + 'px';
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's'; star.style.animationDelay = Math.random() * 2 + 's';
+      container.appendChild(star);
+    }
+    for (let i = 0; i < 20; i++) {
+      let star = document.createElement('div'); star.className = 'falling-star';
+      star.style.left = Math.random() * 100 + '%'; star.style.top = '-10px';
+      let duration = Math.random() * 10 + 5; star.style.animationDuration = duration + 's'; star.style.animationDelay = Math.random() * 5 + 's';
+      container.appendChild(star);
+    }
+  }
+
+  window.startGame = startGame; window.startSpeedrun = startSpeedrun; window.nextQuestion = nextQuestion;
+  window.openChallengeModal = openChallengeModal; window.closeChallengeModal = closeChallengeModal;
+  window.createRoom = createRoom; window.joinRoom = joinRoom; window.switchTab = switchTab;
+
+  window.onload = () => { applyLanguage(); generateStars(); };
 </script>
 </body>
 </html>
