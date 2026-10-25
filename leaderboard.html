@@ -26,6 +26,12 @@
   .header-title { text-align: center; font-size: 40px; color: gold; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
 
+  /* --- الفلاتر --- */
+  .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+  .filter-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+  .filter-btn.active { background: gold; color: #000; border-color: gold; }
+  .filter-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: gold; }
+
   .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 40px; height: 200px; }
   .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; }
   .podium-avatar { font-size: 40px; margin-bottom: 10px; }
@@ -67,6 +73,14 @@
   <h1 class="header-title" data-ar="🏆 قاعة المشاهير" data-en="🏆 Hall of Fame">🏆 قاعة المشاهير</h1>
   <p class="header-subtitle" data-ar="أفضل 10 لاعبين في منصة Quiz Hub" data-en="Top 10 Players in Quiz Hub">أفضل 10 لاعبين في منصة Quiz Hub</p>
 
+  <!-- الفلاتر -->
+  <div class="filters">
+    <button class="filter-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="filter-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+    <button class="filter-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
+    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+  </div>
+
   <div class="podium-container" id="podiumContainer"></div>
   <div class="leaderboard-list" id="leaderboardList">
     <div class="no-data" data-ar="جاري تحميل البيانات..." data-en="Loading...">جاري تحميل البيانات...</div>
@@ -91,6 +105,14 @@
   const db = getDatabase(app);
   let currentLang = localStorage.getItem('lang') || 'ar';
 
+  // ======== الأسماء الصح للكويزات عشان الفلترة تشتغل ========
+  const horrorQuizzes = ['conjuring', 'fnaf', 'TheNun', 'annabelle', 'TrainToBusan'];
+  const actionQuizzes = ['SquidGame', 'wonderfools'];
+  const kdramaQuizzes = ['family', 'beauty', 'dream', 'whyher'];
+  const mysteryQuizzes = ['Wednesday'];
+
+  let allScoresData = null;
+
   function applyLanguage() {
     const elements = document.querySelectorAll('[data-ar]');
     elements.forEach(el => {
@@ -104,20 +126,39 @@
   const podiumContainer = document.getElementById('podiumContainer');
   const leaderboardList = document.getElementById('leaderboardList');
 
-  onValue(ref(db, 'scores'), (snapshot) => {
-    const allScores = snapshot.val();
-    if (!allScores) { 
+  window.onValue(ref(db, 'scores'), (snapshot) => {
+    allScoresData = snapshot.val();
+    filterLeaderboard('all', document.querySelector('.filter-btn'));
+  });
+
+  window.filterLeaderboard = function(category, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if (!allScoresData) { 
         leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No results yet. Play a quiz!' : 'مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!'}</div>`; 
         return; 
     }
     
     let players = [];
-    for (let username in allScores) {
+    for (let username in allScoresData) {
       if (username.toLowerCase() === 'ahmed') continue; 
       let playerTotal = 0;
-      for (let quiz in allScores[username]) {
-        const bestScore = Math.max(...Object.values(allScores[username][quiz]).map(entry => entry.score));
-        playerTotal += bestScore;
+      
+      for (let quiz in allScoresData[username]) {
+        let shouldCount = false;
+        
+        // بنقارن أسماء الكويزات بالظبط زي ما هي متسجلة في الفايربيز
+        if (category === 'all') shouldCount = true;
+        else if (category === 'horror' && horrorQuizzes.includes(quiz)) shouldCount = true;
+        else if (category === 'action' && actionQuizzes.includes(quiz)) shouldCount = true;
+        else if (category === 'kdrama' && kdramaQuizzes.includes(quiz)) shouldCount = true;
+        else if (category === 'mystery' && mysteryQuizzes.includes(quiz)) shouldCount = true;
+
+        if (shouldCount) {
+            const bestScore = Math.max(...Object.values(allScoresData[username][quiz]).map(entry => entry.score));
+            playerTotal += bestScore;
+        }
       }
       players.push({ username, total: playerTotal });
     }
@@ -161,7 +202,7 @@
             leaderboardList.appendChild(div);
         });
     }
-  });
+  }
 
   window.onload = () => {
     applyLanguage();
