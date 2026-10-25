@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ لوحة الإدارة - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; }
+  
+  #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+  .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; display: flex; align-items: center; gap: 10px;}
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+  .sidebar { width: 260px; background: var(--sidebar); border-left: 1px solid var(--border); padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; overflow-y: auto; }
+  .sidebar-logo { text-align: center; font-size: 22px; font-weight: 900; color: var(--blue); margin-bottom: 30px; }
+  .nav-item { padding: 12px 20px; cursor: pointer; font-weight: bold; color: #888; border-right: 3px solid transparent; transition: 0.3s; }
+  .nav-item:hover, .nav-item.active { background: rgba(0,136,204,0.1); color: var(--blue); border-right-color: var(--blue); }
+  
+  .main { margin-right: 260px; padding: 30px; width: calc(100% - 260px); }
+  .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; }
+  .header h1 { color: var(--blue); }
+
+  .tab { display: none; animation: fadeIn 0.3s; }
+  .tab.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+  .stat-card { background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .stat-card h3 { color: #aaa; font-size: 14px; margin-bottom: 8px; }
+  .stat-card .num { font-size: 32px; font-weight: bold; color: var(--blue); }
+
+  .list-container { display: flex; flex-direction: column; gap: 10px; }
+  .item { background: var(--sidebar); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  
+  .btn { padding: 6px 12px; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
+  .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-red { background: var(--accent); color: #fff; }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-blue { background: var(--blue); color: #fff; }
+
+  .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 10px; outline: none; font-family: 'Cairo'; }
+  
+  #noPermissionScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%; text-align: center; }
+  #noPermissionScreen h1 { color: var(--accent); font-size: 40px; margin-bottom: 20px; }
+  #noPermissionScreen a { background: var(--accent); color: #fff; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+  @media (max-width: 900px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; }
+    .main { margin-right: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- No Permission Screen -->
+<div id="noPermissionScreen">
+    <h1>🚫 ليس لديك صلاحيات</h1>
+    <p>هذه الصفحة مخصصة للأدمن فقط.</p>
+    <br>
+    <a href="index.html">العودة للرئيسية</a>
+</div>
+
+<!-- Admin UI -->
+<div id="adminUI" style="display: none; width: 100%;">
+    <div class="sidebar">
+      <div class="sidebar-logo" id="panelTitle">🛡️ لوحة الإدارة</div>
+      <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 الإحصائيات</div>
+      <div class="nav-item" onclick="switchTab('users', this)">👥 إدارة اللاعبين</div>
+      <div class="nav-item" onclick="switchTab('content', this)">📝 إدارة المحتوى</div>
+      <div class="nav-item" onclick="switchTab('rooms', this)">🚪 إدارة الغرف</div>
+      <div class="nav-item" style="margin-top: auto;"><a href="index.html" style="color: inherit; text-decoration: none;">⬅ العودة للرئيسية</a></div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1 id="pageTitle">📊 الإحصائيات</h1>
+        <button class="btn btn-green" onclick="exportData()">تصدير البيانات 📥</button>
+      </div>
+
+      <!-- Dashboard -->
+      <div id="tab-dashboard" class="tab active">
+        <div class="stats-grid">
+          <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
+          <div class="stat-card"><h3>🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
+          <div class="stat-card"><h3>🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
+          <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--blue);">0</div></div>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="tab-users" class="tab">
+        <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
+        <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
+      </div>
+
+      <!-- Content -->
+      <div id="tab-content" class="tab">
+        <h3 style="color:var(--accent); margin-bottom:10px;">💬 التعليقات</h3>
+        <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
+        <h3 style="color:var(--accent); margin-bottom:10px;">💡 الاقتراحات</h3>
+        <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
+        <h3 style="color:var(--accent); margin-bottom:10px;">🎬 طلبات الكويزات</h3>
+        <div class="list-container" id="requestsList" style="margin-bottom: 20px;"></div>
+        <h3 style="color:var(--gold); margin-bottom:10px;">✨ الكويزات المضافة</h3>
+        <div class="list-container" id="customQuizzesList"></div>
+      </div>
+
+      <!-- Rooms -->
+      <div id="tab-rooms" class="tab">
+        <h3 style="color:var(--blue); margin-bottom:10px;">🚪 الغرف النشطة حالياً</h3>
+        <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
+      </div>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push;
+
+  const currentUser = localStorage.getItem('loggedInUser');
+  
+  if (!currentUser) {
+      document.getElementById('noPermissionScreen').style.display = 'flex';
+  } else {
+      window.get(window.ref(window.db, 'roles/admins')).then(snap => {
+          const isOwner = currentUser.toLowerCase() === 'ahmed';
+          let isAdmin = false;
+          if (snap.exists()) {
+              const admins = snap.val();
+              for (let adminName in admins) {
+                  if (adminName.toLowerCase() === currentUser.toLowerCase()) { isAdmin = true; break; }
+              }
+          }
+          if (isAdmin || isOwner) {
+              document.getElementById('adminUI').style.display = 'flex';
+              document.getElementById('panelTitle').innerText = `🛡️ أهلاً ${currentUser}`;
+              initData();
+          } else {
+              document.getElementById('noPermissionScreen').style.display = 'flex';
+          }
+      }).catch(err => { document.getElementById('noPermissionScreen').style.display = 'flex'; });
+  }
+
+  function showToast(msg, type='success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div'); toast.className = 'toast';
+      if(type === 'error') toast.style.borderRightColor = 'var(--accent)';
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
+      container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
+  }
+  window.showToast = showToast;
+
+  window.switchTab = function(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
+    const titles = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف' };
+    document.getElementById('pageTitle').innerText = titles[id];
+  };
+
+  let allUsers = {}, allPresence = {}, allScores = {}, allRooms = {};
+
+  function initData() {
+      // Stats (1, 7)
+      window.onValue(window.ref(window.db, 'usernames'), snap => { 
+          allUsers = snap.val() || {}; 
+          document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
+          window.renderUsers(); 
+      });
+      window.onValue(window.ref(window.db, 'presence'), snap => { 
+          allPresence = snap.val() || {}; 
+          document.getElementById('statOnline').innerText = Object.values(allPresence).filter(p => p.status === 'online').length; 
+          window.renderUsers(); 
+      });
+      window.onValue(window.ref(window.db, 'scores'), snap => {
+        allScores = snap.val() || {}; let plays = 0;
+        for (let u in allScores) { for (let q in allScores[u]) { plays += Object.keys(allScores[u][q]).length; } }
+        document.getElementById('statPlays').innerText = plays;
+      });
+      
+      // Rooms (4)
+      window.onValue(window.ref(window.db, 'rooms'), snap => {
+          allRooms = snap.val() || {};
+          document.getElementById('statRooms').innerText = Object.keys(allRooms).length;
+          window.renderRooms();
+      });
+
+      // Content (5, 10)
+      loadContent('comments', 'commentsList', 'user', 'text');
+      loadContent('suggestions', 'suggestionsList', 'user', 'text');
+      loadContent('quiz_requests', 'requestsList', 'user', 'text');
+      loadContent('custom_quizzes', 'customQuizzesList', 'name', 'link');
+  }
+
+  // 8, 9
+  window.renderUsers = function() {
+    const container = document.getElementById('usersList'); if(!container) return;
+    container.innerHTML = '';
+    const search = document.getElementById('searchUser').value.toLowerCase();
+    
+    Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
+      const isOnline = allPresence[u] && allPresence[u].status === 'online';
+      let userXP = 0; if(allScores[u]) { for(let q in allScores[u]) { for(let att in allScores[u][q]) { userXP += allScores[u][q][att].score; } } }
+
+      const div = document.createElement('div'); div.className = 'item';
+      div.innerHTML = `
+        <div>
+          <h3>${u}</h3>
+          <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 متصل' : '⚪ غير متصل'} | XP: ${userXP}</p>
+        </div>
+        <div style="display:flex; gap:5px; flex-wrap:wrap;">
+          <button class="btn btn-blue" onclick="editXP('${u}')">تعديل XP</button>
+          <button class="btn btn-gold" onclick="sendDMPrompt('${u}')">رسالة</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  };
+
+  // 4
+  window.renderRooms = function() {
+      const list = document.getElementById('roomsList'); if(!list) return;
+      list.innerHTML = '';
+      if(Object.keys(allRooms).length === 0) { list.innerHTML = '<div class="item">لا توجد غرف نشطة.</div>'; return; }
+      for(let room in allRooms) {
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `<div><p>كود الغرفة: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">الحالة: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="deleteRoom('${room}')">مسح 🗑️</button>`;
+          list.appendChild(div);
+      }
+  };
+
+  // 5, 10
+  function loadContent(node, elId, userField, textField) {
+    window.onValue(window.ref(window.db, node), snap => {
+      const list = document.getElementById(elId); if(!list) return;
+      list.innerHTML = '';
+      if (!snap.exists()) { list.innerHTML = '<div class="item">لا يوجد محتوى.</div>'; return; }
+      
+      Object.keys(snap.val()).reverse().forEach(key => {
+        const c = snap.val()[key]; const div = document.createElement('div'); div.className = 'item';
+        div.innerHTML = `
+          <div>
+            <p style="color:var(--gold); font-size:12px;">👤 ${c[userField]}</p>
+            <p>${c[textField]}</p>
+          </div>
+          <button class="btn btn-red" onclick="deleteItem('${node}', '${key}')">مسح 🗑️</button>
+        `;
+        list.appendChild(div);
+      });
+    });
+  }
+
+  // Actions
+  window.editXP = async (u) => {
+      const xpSnap = await window.get(window.ref(window.db, 'users_data/' + u + '/xp'));
+      const xp = xpSnap.exists() ? xpSnap.val() : 0;
+      const newXp = prompt(`تعديل نقاط (XP) للاعب ${u}:`, xp);
+      if (newXp !== null && !isNaN(newXp)) {
+          await window.set(window.ref(window.db, 'users_data/' + u + '/xp'), parseInt(newXp));
+          showToast('تم تعديل النقاط بنجاح');
+      }
+  }
+
+  // 3
+  window.sendDMPrompt = (u) => {
+      const msg = prompt(`اكتب رسالتك لـ ${u}:`);
+      if(msg) {
+          window.push(window.ref(window.db, 'messages/' + u), { from: 'الإدارة', text: msg, time: Date.now() });
+          showToast('تم إرسال الرسالة!');
+      }
+  }
+
+  window.deleteRoom = (room) => {
+      if(confirm(`مسح غرفة ${room}؟`)) {
+          window.remove(window.ref(window.db, 'rooms/' + room));
+          showToast('تم مسح الغرفة');
+      }
+  }
+
+  window.deleteItem = (node, key) => {
+    if(confirm('متأكد من المسح؟')) {
+      window.remove(window.ref(window.db, node + '/' + key));
+      showToast('تم المسح');
+    }
+  }
+
+  // 6
+  window.exportData = () => {
+      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users: allUsers, scores: allScores }));
+      const a = document.createElement('a'); a.href = str; a.download = "quizhub_data.json"; a.click();
+      showToast('تم تصدير البيانات!');
+  }
+</script>
+</body>
+</html>
