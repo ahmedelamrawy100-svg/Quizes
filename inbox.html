@@ -7,20 +7,16 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { 
-      --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-      --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --accent: #ff0000; 
-  }
-  body.light-mode { 
-      --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
-      --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
-  }
+  :root { --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --accent: #ff0000; }
+  body.light-mode { --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%); --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; }
-  
-  .inbox-container { width: 100%; max-width: 600px; margin-top: 60px; }
+  .top-bar { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; }
+
+  .inbox-container { width: 100%; max-width: 600px; }
   .header-title { text-align: center; color: var(--accent); font-size: 32px; margin-bottom: 20px; }
   
   .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--card-border); }
@@ -33,32 +29,34 @@
   .card-list { display: flex; flex-direction: column; gap: 15px; }
   .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
   .btn-msg { background: #0088cc; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
-  
-  .admin-msg { background: var(--card-bg); border-right: 5px solid var(--accent); border-radius: 10px; padding: 15px 20px; margin-bottom: 10px; }
-  .admin-msg h4 { color: var(--accent); margin-bottom: 5px; }
-  .admin-msg p { font-size: 16px; font-weight: bold; }
-
-  .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; font-weight: bold; }
+  .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
 </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
 
 <div class="inbox-container">
-  <h1 class="header-title">💬 صندوق الرسائل</h1>
+  <h1 class="header-title" id="pageTitle">💬 صندوق الرسائل</h1>
   
   <div class="tabs">
-    <div class="tab" onclick="switchTab('friends', this)">👥 الأصدقاء</div>
-    <div class="tab active" onclick="switchTab('admin', this)">📩 رسائل الإدارة</div>
+    <div class="tab active" onclick="switchTab('friends', this)" id="tabFriends">👥 الأصدقاء</div>
+    <div class="tab" onclick="switchTab('admin', this)" id="tabAdmin">📩 رسائل الإدارة</div>
   </div>
 
-  <div id="tab-friends" class="tab-content">
-    <div class="card-list" id="friendsList"><div class="no-data">جاري التحميل...</div></div>
+  <div id="tab-friends" class="tab-content active">
+    <div class="card-list" id="friendsList">
+      <div class="no-data" id="loadingFriends">جاري تحميل الأصدقاء...</div>
+    </div>
   </div>
 
-  <div id="tab-admin" class="tab-content active">
-    <div id="adminMessagesList"><div class="no-data">جاري تحميل الرسائل...</div></div>
+  <div id="tab-admin" class="tab-content">
+    <div id="adminMessagesList">
+      <div class="no-data" id="loadingAdmin">جاري تحميل الرسائل...</div>
+    </div>
   </div>
 </div>
 
@@ -66,14 +64,35 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingUserId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.onValue = onValue;
 
-  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-  
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
+
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  const translations = {
+    ar: { back: "⬅ رجوع", title: "💬 صندوق الرسائل", tabFriends: "👥 الأصدقاء", tabAdmin: "📩 رسائل الإدارة", loadingFriends: "جاري تحميل الأصدقاء...", loadingAdmin: "جاري تحميل الرسائل...", noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", msg: "💬 محادثة", fromAdmin: "👑 من: " },
+    en: { back: "⬅ Back", title: "💬 Inbox", tabFriends: "👥 Friends", tabAdmin: "📩 Admin Messages", loadingFriends: "Loading friends...", loadingAdmin: "Loading messages...", noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", msg: "💬 Chat", fromAdmin: "👑 From: " }
+  };
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('pageTitle').innerText = t.title;
+    document.getElementById('tabFriends').innerText = t.tabFriends;
+    document.getElementById('tabAdmin').innerText = t.tabAdmin;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    loadFriends(); loadAdminMessages();
+  }
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+  }
 
   window.switchTab = function(tabName, el) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -82,70 +101,46 @@
       document.getElementById('tab-' + tabName).classList.add('active');
   }
 
-  // الأصدقاء
-  window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
-    const data = snapshot.val();
-    const friendsList = document.getElementById('friendsList');
-    friendsList.innerHTML = '';
-    if (!data) { friendsList.innerHTML = '<div class="no-data">ليس لديك أصدقاء.</div>'; return; }
-    
-    for (let friend in data) {
-      const div = document.createElement('div');
-      div.className = 'friend-card';
-      div.innerHTML = `<b>${friend}</b> <a href="messages.html?to=${friend}" class="btn-msg">💬 محادثة</a>`;
-      friendsList.appendChild(div);
-    }
-  });
-
-  // رسائل الإدارة - معالجة مشكلة الحروف الكبيرة والصغيرة
-  function loadAdminMessages() {
-      const adminList = document.getElementById('adminMessagesList');
+  function loadFriends() {
+    window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
+      const data = snapshot.val();
+      const friendsList = document.getElementById('friendsList');
+      const t = translations[currentLang];
+      friendsList.innerHTML = '';
+      if (!data) { friendsList.innerHTML = `<div class="no-data">${t.noFriends}</div>`; return; }
       
-      // بنجرب المسار بالاسم اللي في اللوكال ستوريج
-      window.onValue(window.ref(window.db, 'messages/' + currentUser), (snapshot) => {
-        let data = snapshot.val();
-        
-        // لو مفيش رسائل بالاسم ده، بنجرب نجيب كل الرسائل ونفلترها
-        if (!data) {
-            window.onValue(window.ref(window.db, 'messages'), (allSnap) => {
-                const allData = allSnap.val() || {};
-                let foundMessages = null;
-                
-                // بندور على الاسم مهما كانت حالة الحروف
-                for (let key in allData) {
-                    if (key.toLowerCase() === currentUser.toLowerCase()) {
-                        foundMessages = allData[key];
-                        break;
-                    }
-                }
-
-                if (foundMessages) {
-                    renderMessages(foundMessages);
-                } else {
-                    adminList.innerHTML = `<div class="no-data">لا توجد رسائل للإدارة موجهة للحساب (${currentUser}).</div>`;
-                }
-            });
-        } else {
-            renderMessages(data);
-        }
-      });
+      for (let friend in data) {
+        const div = document.createElement('div');
+        div.className = 'friend-card';
+        div.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div style="width:40px; height:40px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold;">${friend.charAt(0).toUpperCase()}</div> <b>${friend}</b></div> <a href="messages.html?to=${friend}" class="btn-msg">${t.msg}</a>`;
+        friendsList.appendChild(div);
+      }
+    });
   }
 
-  function renderMessages(data) {
+  function loadAdminMessages() {
+    window.onValue(window.ref(window.db, 'messages/' + currentUser), (snapshot) => {
+      const data = snapshot.val();
       const adminList = document.getElementById('adminMessagesList');
+      const t = translations[currentLang];
       adminList.innerHTML = '';
-      const msgsArray = Object.keys(data).map(key => data[key]);
-      msgsArray.sort((a, b) => b.time - a.time);
-
-      msgsArray.forEach(msg => {
+      
+      if (!data) { adminList.innerHTML = `<div class="no-data">${t.noAdmin}</div>`; return; }
+      
+      const msgs = Object.values(data).reverse();
+      msgs.forEach(msg => {
         const div = document.createElement('div');
-        div.className = 'admin-msg';
-        div.innerHTML = `<h4>👑 من: ${msg.from}</h4><p>${msg.text}</p>`;
+        div.style.cssText = "background: var(--card-bg); border-right: 5px solid var(--accent); border-radius: 10px; padding: 15px; margin-bottom: 10px;";
+        div.innerHTML = `<h4 style="color:var(--accent); margin-bottom:5px;">${t.fromAdmin}${msg.from}</h4><p>${msg.text}</p>`;
         adminList.appendChild(div);
       });
+    });
   }
 
-  loadAdminMessages();
+  window.onload = () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+    applyLanguage();
+  };
 </script>
 </body>
 </html>
