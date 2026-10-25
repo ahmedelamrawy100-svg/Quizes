@@ -163,7 +163,7 @@
       const toast = document.createElement('div'); toast.className = 'toast';
       if(type === 'error') toast.style.borderRightColor = '#ff0000';
       toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
-      container.appendChild(toast); setTimeout(() => { toast.remove(); }, 4000);
+      container.appendChild(toast); setTimeout(() => { toast.remove(); }, 5000); // 5 ثواني عشان تقراها
   }
   window.showToast = showToast;
 
@@ -286,15 +286,26 @@
               }
           });
 
-          // فحص التحذيرات (الإضافة الجديدة)
+          // فحص التحذيرات (مراقبة مستمرة)
           window.onValue(window.ref(window.db, 'warnings/' + currentUser), snap => {
               if (snap.exists()) {
                   const warnData = snap.val();
-                  showToast(`⚠️ تنبيه من الإدارة: ${warnData.text}`, 'error');
+                  showToast(`⚠️ تحذير من الإدارة: ${warnData.text}`, 'error');
               }
           });
 
-          // الإعلانات
+          // مراقبة الإشعارات المنبثقة (Broadcast) الجديدة
+          window.onValue(window.ref(window.db, 'site_settings/broadcast'), snap => {
+              if (snap.exists()) {
+                  const bcData = snap.val();
+                  // عشان م يظهرش لنفسه لو الأونر هو اللي باعت، ونمنع التكرار
+                  if (bcData.time > Date.now() - 10000 && currentUser.toLowerCase() !== 'ahmed') {
+                      showToast(`📢 إشعار عام: ${bcData.text}`, 'success');
+                  }
+              }
+          });
+
+          // الإعلانات العلوية
           window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
               if(snap.exists() && snap.val() !== '') {
                   document.getElementById('announcement-bar').style.display = 'block';
