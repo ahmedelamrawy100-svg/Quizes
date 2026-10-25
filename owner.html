@@ -7,37 +7,60 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --orange: #ff9800; --pink: #e91e63; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; }
+  /* --- المتغيرات (الوضع الليلي والنهاري) --- */
+  :root { 
+      --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; 
+      --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; 
+      --purple: #9c27b0; --orange: #ff9800; --pink: #e91e63; --cyan: #00bcd4; 
+      --input-bg: #000;
+  }
+  body.light-mode {
+      --bg: #f4f4f4; --sidebar: #fff; --text: #111; --border: #ccc; 
+      --gold: #b8860b; --input-bg: #fff;
+  }
   
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; transition: 0.3s; }
+  
+  /* --- التنبيهات (Toast) --- */
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
   .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; display: flex; align-items: center; gap: 8px;}
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
+  /* --- القائمة الجانبية --- */
   .sidebar { width: 260px; background: var(--sidebar); border-left: 1px solid var(--border); padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; overflow-y: auto; }
-  .sidebar-logo { text-align: center; font-size: 22px; font-weight: 900; color: var(--gold); margin-bottom: 30px; }
-  .nav-item { padding: 12px 20px; cursor: pointer; font-weight: bold; color: #888; border-right: 3px solid transparent; transition: 0.3s; }
+  .sidebar-logo { text-align: center; font-size: 20px; font-weight: 900; color: var(--gold); margin-bottom: 30px; padding: 0 10px;}
+  .nav-item { padding: 10px 20px; cursor: pointer; font-weight: bold; color: #888; border-right: 3px solid transparent; transition: 0.3s; font-size: 13px; display: flex; align-items: center; gap: 8px; }
   .nav-item:hover, .nav-item.active { background: rgba(255,51,51,0.1); color: var(--accent); border-right-color: var(--accent); }
   
+  /* --- المحتوى الرئيسي --- */
   .main { margin-right: 260px; padding: 30px; width: calc(100% - 260px); }
   .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; }
-  .header h1 { color: var(--gold); }
-  .header button { margin-left: 5px; }
+  .header h1 { color: var(--gold); font-size: 28px; }
+  
+  .icon-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; margin-left: 5px; font-size: 14px;}
+  .icon-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  body.light-mode .icon-btn { background: #ddd; color: #111; border-color: #aaa; }
+  body.light-mode .icon-btn:hover { background: var(--accent); color: #fff; }
 
+  /* --- التبويبات --- */
   .tab { display: none; animation: fadeIn 0.3s; }
   .tab.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+  /* --- كروت الإحصائيات --- */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
   .stat-card { background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; }
-  .stat-card h3 { color: #aaa; font-size: 13px; margin-bottom: 8px; }
+  .stat-card h3 { color: #888; font-size: 13px; margin-bottom: 8px; }
   .stat-card .num { font-size: 24px; font-weight: bold; color: var(--accent); }
 
+  /* --- القوائم والكروت --- */
   .list-container { display: flex; flex-direction: column; gap: 10px; }
   .item { background: var(--sidebar); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
   .item h3 { color: var(--gold); font-size: 16px;}
+  .item p { font-size: 14px; }
   
+  /* --- الأزرار --- */
   .btn { padding: 6px 12px; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; margin: 2px; }
   .btn:hover { transform: translateY(-2px); opacity: 0.9; }
   .btn-gold { background: var(--gold); color: #000; }
@@ -46,19 +69,26 @@
   .btn-blue { background: var(--blue); color: #fff; }
   .btn-purple { background: var(--purple); color: #fff; }
   .btn-orange { background: var(--orange); color: #fff; }
-  .btn-pink { background: var(--pink); color: #fff; }
+  .btn-cyan { background: var(--cyan); color: #000; }
 
-  .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 10px; outline: none; font-family: 'Cairo'; }
+  /* --- حقول الإدخال --- */
+  .form-control { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); margin-bottom: 10px; outline: none; font-family: 'Cairo'; }
+  .form-control:focus { border-color: var(--accent); }
   
-  .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
-  .badge-item { background: #222; border: 1px solid #444; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
+  /* --- شبكة البادجات --- */
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .badge-item { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: 0.3s; }
   .badge-item:hover { border-color: var(--gold); transform: scale(1.05); }
-  .badge-icon { font-size: 30px; margin-bottom: 5px; }
+  .badge-icon { font-size: 24px; margin-bottom: 5px; }
   
+  /* --- الموبايل --- */
   @media (max-width: 900px) {
     body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; }
-    .main { margin-right: 0; width: 100%; }
+    .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; padding: 10px; }
+    .sidebar-logo { display: none; }
+    .nav-item { border-right: none; border-bottom: 3px solid transparent; white-space: nowrap; padding: 10px 15px; }
+    .nav-item.active { border-bottom-color: var(--accent); border-right: none; }
+    .main { margin-right: 0; width: 100%; padding: 15px; }
   }
 </style>
 </head>
@@ -66,110 +96,140 @@
 
 <div id="toast-container"></div>
 
+<!-- القائمة الجانبية -->
 <div class="sidebar">
-  <div class="sidebar-logo">👑 لوحة الأونر</div>
-  <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 الإحصائيات</div>
-  <div class="nav-item" onclick="switchTab('users', this)">👥 إدارة اللاعبين</div>
-  <div class="nav-item" onclick="switchTab('badges', this)">🏅 توزيع البادجات</div>
-  <div class="nav-item" onclick="switchTab('content', this)">📝 إدارة المحتوى</div>
-  <div class="nav-item" onclick="switchTab('quizzes', this)">🎬 إدارة الكويزات</div>
-  <div class="nav-item" onclick="switchTab('system', this)">⚙️ إعدادات النظام</div>
+  <div class="sidebar-logo" id="panelTitle" data-ar="👑 لوحة الأونر" data-en="👑 Owner Panel">👑 لوحة الأونر</div>
+  <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
+  <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</div>
+  <div class="nav-item" onclick="switchTab('ranks', this)" data-ar="🎖️ إدارة الرتب" data-en="🎖️ Ranks">🎖️ إدارة الرتب</div>
+  <div class="nav-item" onclick="switchTab('badges', this)" data-ar="🏅 البادجات" data-en="🏅 Badges">🏅 البادجات</div>
+  <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
+  <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</div>
+  <div class="nav-item" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</div>
+  <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</div>
+  <div class="nav-item" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</div>
+  <div class="nav-item" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</div>
+  <div class="nav-item" onclick="switchTab('admins', this)" data-ar="🛡️ الأدمنز" data-en="🛡️ Admins">🛡️ الأدمنز</div>
+  <div class="nav-item" onclick="switchTab('security', this)" data-ar="🔒 الأمان" data-en="🔒 Security">🔒 الأمان</div>
+  <div class="nav-item" onclick="switchTab('developer', this)" data-ar="🔧 المطور" data-en="🔧 Developer">🔧 المطور</div>
 </div>
 
+<!-- المحتوى الرئيسي -->
 <div class="main">
+  <!-- الهيدر -->
   <div class="header">
     <h1 id="pageTitle">📊 الإحصائيات</h1>
     <div>
-        <button class="btn btn-green" onclick="exportData()">تصدير شامل 📥</button>
-        <button class="btn btn-red" onclick="logoutUser()">تسجيل خروج 🚪</button>
+        <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
+        <button class="icon-btn" onclick="window.toggleLanguage()" id="langBtn">EN</button>
+        <button class="btn btn-red" onclick="window.logoutUser()" data-ar="تسجيل خروج 🚪" data-en="Logout 🚪" style="padding: 10px 15px; font-size:14px;">تسجيل خروج 🚪</button>
     </div>
   </div>
 
-  <!-- 1. Dashboard -->
+  <!-- 1. لوحة الإحصائيات (نفس الصورة) -->
   <div id="tab-dashboard" class="tab active">
     <div class="stats-grid">
-      <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-      <div class="stat-card"><h3>🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
-      <div class="stat-card"><h3>✨ إجمالي XP</h3><div class="num" id="statXP" style="color:var(--blue);">0</div></div>
-      <div class="stat-card"><h3>🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-      <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
-      <div class="stat-card"><h3>💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
-      <div class="stat-card"><h3>💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
-      <div class="stat-card"><h3>🎬 طلبات</h3><div class="num" id="statRequests">0</div></div>
-      <div class="stat-card"><h3>✨ كويزات مخصصة</h3><div class="num" id="statCustom">0</div></div>
-      <div class="stat-card"><h3>👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
-      <div class="stat-card" style="grid-column: span 2;">
-          <h3>نسبة الاتصال</h3>
-          <div style="width:100%; background:#333; height:10px; border-radius:5px; margin-top:10px;">
-              <div id="onlineBar" style="height:100%; background:var(--green); width:0%; border-radius:5px; transition:0.5s;"></div>
-          </div>
-      </div>
+      <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
+      <div class="stat-card"><h3 data-ar="🟢 متصل الآن" data-en="🟢 Online">🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
+      <div class="stat-card"><h3 data-ar="✨ إجمالي XP" data-en="✨ Total XP">✨ إجمالي XP</h3><div class="num" id="statXP" style="color:var(--blue);">0</div></div>
+      <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
+      <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Active Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
+      <div class="stat-card"><h3 data-ar="💬 تعليقات" data-en="💬 Comments">💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
+      <div class="stat-card"><h3 data-ar="💡 اقتراحات" data-en="💡 Suggestions">💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
+      <div class="stat-card"><h3 data-ar="🎬 طلبات" data-en="🎬 Requests">🎬 طلبات</h3><div class="num" id="statRequests">0</div></div>
+      <div class="stat-card"><h3 data-ar="✨ كويزات مخصصة" data-en="✨ Custom Quizzes">✨ كويزات مخصصة</h3><div class="num" id="statCustom">0</div></div>
+      <div class="stat-card"><h3 data-ar="👀 زوار اليوم" data-en="👀 Visitors">👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
     </div>
   </div>
 
-  <!-- 2. Users -->
+  <!-- 2. اللاعبين -->
   <div id="tab-users" class="tab">
-    <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
-        <button class="btn btn-blue" onclick="sortUsers()">فرز حسب XP ⬇️</button>
-    </div>
+    <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
     <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
   </div>
 
-  <!-- 3. Badges -->
+  <!-- 3. إدارة الرتب -->
+  <div id="tab-ranks" class="tab">
+    <div class="item" style="display:block; margin-bottom:20px;">
+        <h3 style="color:var(--gold); margin-bottom:15px;" data-ar="🎖️ إعطاء رتبة للاعب" data-en="🎖️ Assign Rank">🎖️ إعطاء رتبة للاعب</h3>
+        <select id="rankUserSelect" class="form-control"></select>
+        <select id="rankSelect" class="form-control">
+            <option value="Owner" data-ar="الأونر" data-en="Owner">الأونر</option>
+            <option value="Player" data-ar="لاعب عادي" data-en="Player">لاعب عادي</option>
+            <option value="VIP" data-ar="VIP" data-en="VIP">VIP</option>
+            <option value="Pro Player" data-ar="محترف" data-en="Pro Player">محترف</option>
+            <option value="Legend" data-ar="أسطورة" data-en="Legend">أسطورة</option>
+            <option value="King" data-ar="ملك" data-en="King">ملك</option>
+            <option value="Admin" data-ar="أدمن" data-en="Admin">أدمن</option>
+            <option value="Star" data-ar="نجم" data-en="Star">نجم</option>
+        </select>
+        <button class="btn btn-green" onclick="window.setRank()" style="width:100%;" data-ar="حفظ الرتبة ✅" data-en="Save Rank ✅">حفظ الرتبة ✅</button>
+    </div>
+    <h3 style="color:var(--gold); margin-bottom:10px;" data-ar="📋 قائمة الرتب الحالية" data-en="📋 Current Ranks">📋 قائمة الرتب الحالية</h3>
+    <div class="list-container" id="ranksList"></div>
+  </div>
+
+  <!-- 4. البادجات -->
   <div id="tab-badges" class="tab">
     <div class="item" style="display:block; margin-bottom:20px;">
-        <h3 style="color:var(--pink); margin-bottom:15px;">🎯 اختر اللاعب وامنحه بادج</h3>
-        <select id="badgeUserSelect" class="form-control">
-            <option value="">-- اختر اللاعب --</option>
-        </select>
-        
+        <h3 style="color:var(--pink); margin-bottom:15px;" data-ar="🎯 اختر اللاعب وامنحه بادج" data-en="🎯 Give Badge">🎯 اختر اللاعب وامنحه بادج</h3>
+        <select id="badgeUserSelect" class="form-control"></select>
         <div class="badge-grid" id="badgeGrid">
-            <div class="badge-item" onclick="giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
-            <div class="badge-item" onclick="giveBadge('⭐ VIP')"><div class="badge-icon">⭐</div><div>VIP</div></div>
-            <div class="badge-item" onclick="giveBadge('🔥 Pro')"><div class="badge-icon">🔥</div><div>Pro</div></div>
-            <div class="badge-item" onclick="giveBadge('🚀 Speedrun')"><div class="badge-icon">🚀</div><div>Speedrun</div></div>
-            <div class="badge-item" onclick="giveBadge('🎃 Horror')"><div class="badge-icon">🎃</div><div>Horror</div></div>
-            <div class="badge-item" onclick="giveBadge('💖 K-Drama')"><div class="badge-icon">💖</div><div>K-Drama</div></div>
-            <div class="badge-item" onclick="giveBadge('💥 Action')"><div class="badge-icon">💥</div><div>Action</div></div>
-            <div class="badge-item" onclick="giveBadge('🕵️ Detective')"><div class="badge-icon">🕵️</div><div>Detective</div></div>
-            <div class="badge-item" onclick="giveBadge('🎯 Sniper')"><div class="badge-icon">🎯</div><div>Sniper</div></div>
-            <div class="badge-item" onclick="giveBadge('💎 Legend')"><div class="badge-icon">💎</div><div>Legend</div></div>
+            <div class="badge-item" onclick="window.giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
+            <div class="badge-item" onclick="window.giveBadge('⭐ VIP')"><div class="badge-icon">⭐</div><div>VIP</div></div>
+            <div class="badge-item" onclick="window.giveBadge('🔥 Pro')"><div class="badge-icon">🔥</div><div>Pro</div></div>
+            <div class="badge-item" onclick="window.giveBadge('🎃 Horror')"><div class="badge-icon">🎃</div><div>Horror</div></div>
+            <div class="badge-item" onclick="window.giveBadge('💖 K-Drama')"><div class="badge-icon">💖</div><div>K-Drama</div></div>
+            <div class="badge-item" onclick="window.giveBadge('💥 Action')"><div class="badge-icon">💥</div><div>Action</div></div>
+            <div class="badge-item" onclick="window.giveBadge('🎯 Sniper')"><div class="badge-icon">🎯</div><div>Sniper</div></div>
+            <div class="badge-item" onclick="window.giveBadge('🧠 Genius')"><div class="badge-icon">🧠</div><div>Genius</div></div>
         </div>
     </div>
-    <h3 style="color:var(--pink); margin-bottom:10px;">📋 اللاعبين المميزين بالبادجات</h3>
+    <h3 style="color:var(--pink); margin-bottom:10px;" data-ar="📋 اللاعبين المميزين بالبادجات" data-en="📋 Players with Badges">📋 اللاعبين المميزين بالبادجات</h3>
     <div class="list-container" id="badgesList"></div>
   </div>
 
-  <!-- 4. Content -->
+  <!-- 5. التحذيرات -->
+  <div id="tab-warnings" class="tab">
+    <div class="item" style="display:block; margin-bottom:20px;">
+        <h3 style="color:var(--accent); margin-bottom:15px;" data-ar="⚠️ إرسال تحذير" data-en="⚠️ Send Warning">⚠️ إرسال تحذير</h3>
+        <select id="warnUserSelect" class="form-control"></select>
+        <input type="text" id="warnReason" class="form-control" placeholder="سبب التحذير...">
+        <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;" data-ar="إرسال التحذير ⚠️" data-en="Send Warning ⚠️">إرسال التحذير ⚠️</button>
+    </div>
+    <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="📋 التحذيرات المسجلة" data-en="📋 Current Warnings">📋 التحذيرات المسجلة</h3>
+    <div class="list-container" id="warningsList"></div>
+  </div>
+
+  <!-- 6. المحتوى -->
   <div id="tab-content" class="tab">
     <div class="item" style="margin-bottom:15px; display:block;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="color:var(--accent);">💬 التعليقات</h3>
-            <button class="btn btn-red" onclick="clearAll('comments')">مسح الكل 🗑️</button>
+            <h3 style="color:var(--accent);" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
+            <button class="btn btn-red" onclick="window.clearAll('comments')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
         </div>
         <div class="list-container" id="commentsList"></div>
     </div>
     <div class="item" style="margin-bottom:15px; display:block;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="color:var(--accent);">💡 الاقتراحات</h3>
-            <button class="btn btn-red" onclick="clearAll('suggestions')">مسح الكل 🗑️</button>
+            <h3 style="color:var(--accent);" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
+            <button class="btn btn-red" onclick="window.clearAll('suggestions')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
         </div>
         <div class="list-container" id="suggestionsList"></div>
     </div>
     <div class="item" style="display:block;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h3 style="color:var(--accent);">🎬 طلبات الكويزات</h3>
-            <button class="btn btn-red" onclick="clearAll('quiz_requests')">مسح الكل 🗑️</button>
+            <h3 style="color:var(--accent);" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
+            <button class="btn btn-red" onclick="window.clearAll('quiz_requests')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
         </div>
         <div class="list-container" id="requestsList"></div>
     </div>
   </div>
 
-  <!-- 5. Quizzes -->
+  <!-- 7. الكويزات المخصصة -->
   <div id="tab-quizzes" class="tab">
     <div class="item" style="display:block; margin-bottom:20px;">
-        <h3 style="color:var(--gold); margin-bottom:15px;">➕ إضافة كويز مخصص</h3>
+        <h3 style="color:var(--gold); margin-bottom:15px;" data-ar="➕ إضافة كويز مخصص" data-en="➕ Add Custom Quiz">➕ إضافة كويز مخصص</h3>
         <input type="text" id="qName" class="form-control" placeholder="اسم الكويز">
         <input type="text" id="qImage" class="form-control" placeholder="رابط الصورة">
         <input type="text" id="qLink" class="form-control" placeholder="رابط صفحة الكويز">
@@ -179,28 +239,78 @@
             <option value="action">أكشن 💥</option>
             <option value="mystery">غموض 🕵️</option>
         </select>
-        <button class="btn btn-green" onclick="addQuiz()" style="width:100%;">إضافة ✅</button>
+        <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;" data-ar="إضافة الكويز ✅" data-en="Add Quiz ✅">إضافة الكويز ✅</button>
     </div>
-    <h3 style="color:var(--gold); margin-bottom:10px;">✨ الكويزات المضافة</h3>
+    <h3 style="color:var(--gold); margin-bottom:10px;" data-ar="✨ الكويزات المضافة" data-en="✨ Added Quizzes">✨ الكويزات المضافة</h3>
     <div class="list-container" id="customQuizzesList"></div>
   </div>
 
-  <!-- 6. System -->
+  <!-- 8. الغرف -->
+  <div id="tab-rooms" class="tab">
+    <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة" data-en="🚪 Active Rooms">🚪 الغرف النشطة</h3>
+    <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
+  </div>
+
+  <!-- 9. النظام -->
   <div id="tab-system" class="tab">
     <div class="item" style="margin-bottom:15px;">
-      <div><h3 style="color:var(--accent);">🚧 وضع الصيانة</h3></div>
-      <button class="btn btn-red" id="maintenanceBtn" onclick="toggleMaintenance()">تفعيل الصيانة</button>
+      <div><h3 style="color:var(--accent);" data-ar="🚧 وضع الصيانة" data-en="🚧 Maintenance">🚧 وضع الصيانة</h3></div>
+      <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()" data-ar="تفعيل الصيانة" data-en="Enable Maintenance">تفعيل الصيانة</button>
     </div>
     <div class="item" style="margin-bottom:15px;">
       <div style="width:100%;">
-        <h3 style="color:var(--gold);">📢 إعلان عام</h3>
+        <h3 style="color:var(--gold);" data-ar="📢 إعلان عام" data-en="📢 Announcement">📢 إعلان عام</h3>
         <textarea id="announcementInput" class="form-control" rows="2" placeholder="اكتب إعلان..."></textarea>
-        <button class="btn btn-green" onclick="publishAnnouncement()">نشر 🚀</button>
+        <button class="btn btn-green" onclick="window.publishAnnouncement()" data-ar="نشر 🚀" data-en="Publish 🚀">نشر 🚀</button>
       </div>
     </div>
     <div class="item" style="margin-bottom:15px;">
-      <div><h3 style="color:var(--orange);">👀 تصفير عداد الزوار</h3></div>
-      <button class="btn btn-orange" onclick="resetVisitors()">تصفير 🔄</button>
+      <div style="width:100%;">
+        <h3 style="color:var(--blue);" data-ar="📡 إرسال إشعار منبثق" data-en="📡 Broadcast">📡 إرسال إشعار منبثق</h3>
+        <input type="text" id="broadcastInput" class="form-control" placeholder="اكتب الإشعار هنا...">
+        <button class="btn btn-blue" onclick="window.sendBroadcast()" data-ar="إرسال 📨" data-en="Send 📨">إرسال 📨</button>
+      </div>
+    </div>
+    <div class="item" style="margin-bottom:15px;">
+      <div><h3 style="color:var(--orange);" data-ar="👀 تصفير عداد الزوار" data-en="👀 Reset Visitors">👀 تصفير عداد الزوار</h3></div>
+      <button class="btn btn-orange" onclick="window.resetVisitors()" data-ar="تصفير 🔄" data-en="Reset 🔄">تصفير 🔄</button>
+    </div>
+  </div>
+
+  <!-- 10. الرسائل -->
+  <div id="tab-messages" class="tab">
+    <div class="item" style="margin-bottom:15px;">
+      <div style="width:100%;">
+        <h3 style="color:var(--cyan);" data-ar="📩 إرسال رسالة خاصة" data-en="📩 Send Message">📩 إرسال رسالة خاصة</h3>
+        <input type="text" id="dmUser" class="form-control" placeholder="اسم اللاعب...">
+        <textarea id="dmText" class="form-control" rows="3" placeholder="نص الرسالة..."></textarea>
+        <button class="btn btn-cyan" onclick="window.sendDM()" data-ar="إرسال 📨" data-en="Send 📨">إرسال 📨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. الأدمنز -->
+  <div id="tab-admins" class="tab">
+    <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🛡️ إدارة الأدمنز" data-en="🛡️ Admins">🛡️ إدارة الأدمنز</h3>
+    <div class="list-container" id="adminsList"><p>جاري التحميل...</p></div>
+  </div>
+
+  <!-- 12. الأمان -->
+  <div id="tab-security" class="tab">
+    <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🔒 قائمة المحظورين" data-en="🔒 Banned Users">🔒 قائمة المحظورين</h3>
+    <div class="list-container" id="bannedList"><p>جاري التحميل...</p></div>
+  </div>
+
+  <!-- 13. المطور -->
+  <div id="tab-developer" class="tab">
+    <h3 style="color:var(--purple); margin-bottom:10px;" data-ar="🔧 أدوات المطور" data-en="🔧 Developer Tools">🔧 أدوات المطور</h3>
+    <div class="item" style="margin-bottom:15px;">
+      <div><h3 style="color:var(--accent);" data-ar="⚠️ إعادة ضبط الموقع بالكامل" data-en="⚠️ Reset Site">⚠️ إعادة ضبط الموقع بالكامل</h3></div>
+      <button class="btn btn-red" onclick="window.resetSite()" data-ar="إعادة ضبط 💥" data-en="Reset 💥">إعادة ضبط 💥</button>
+    </div>
+    <div class="item" style="margin-bottom:15px;">
+      <div><h3 style="color:var(--gold);" data-ar="📤 استعادة نسخة احتياطية" data-en="📤 Restore Backup">📤 استعادة نسخة احتياطية</h3></div>
+      <input type="file" id="restoreFile" class="form-control" accept=".json" onchange="window.restoreData(event)">
     </div>
   </div>
 
@@ -215,43 +325,93 @@
   const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push; window.signOut = signOut; window.auth = auth;
 
+  // --- حماية الصفحة ---
   const currentUser = localStorage.getItem('loggedInUser');
-  if (!currentUser || currentUser.toLowerCase() !== 'ahmed') { alert("هذه الصفحة للأونر فقط!"); window.location.href = 'index.html'; }
+  if (!currentUser || currentUser.toLowerCase() !== 'ahmed') { 
+      alert("هذه الصفحة للأونر فقط!"); 
+      window.location.href = 'index.html'; 
+  }
 
-  function showToast(msg, type='success') {
+  // --- الوضع الليلي ---
+  if (localStorage.getItem('theme') === 'light') { 
+      document.body.classList.add('light-mode'); 
+      document.getElementById('themeBtn').innerText = '🌙';
+  } else {
+      document.getElementById('themeBtn').innerText = '☀️';
+  }
+
+  window.toggleTheme = function() {
+      const body = document.body; const btn = document.getElementById('themeBtn');
+      body.classList.toggle('light-mode');
+      if (body.classList.contains('light-mode')) { 
+          btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); 
+      } else { 
+          btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); 
+      }
+  }
+
+  // --- الترجمة ---
+  let currentLang = localStorage.getItem('lang') || 'ar';
+
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
+
+  function applyLanguage() {
+      document.querySelectorAll('[data-ar]').forEach(el => {
+          if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          } else {
+              el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          }
+      });
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      document.getElementById('panelTitle').innerText = currentLang === 'ar' ? '👑 لوحة الأونر' : '👑 Owner Panel';
+  }
+
+  applyLanguage();
+
+  // --- التنبيهات ---
+  window.showToast = function(msg, type='success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div'); toast.className = 'toast';
       if(type === 'error') toast.style.borderRightColor = 'var(--accent)';
       toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
       container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
   }
-  window.showToast = showToast;
 
+  // --- التبويبات ---
   window.switchTab = function(id, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
-    const titles = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', badges: '🏅 توزيع البادجات', content: '📝 إدارة المحتوى', quizzes: '🎬 إدارة الكويزات', system: '⚙️ إعدادات النظام' };
-    document.getElementById('pageTitle').innerText = titles[id];
+    const titlesAr = { 
+        dashboard: '📊 الإحصائيات', users: '👥 اللاعبين', ranks: '🎖️ إدارة الرتب', badges: '🏅 البادجات', 
+        warnings: '⚠️ التحذيرات', content: '📝 المحتوى', quizzes: '🎬 الكويزات', 
+        rooms: '🚪 الغرف', system: '⚙️ النظام', messages: '📩 الرسائل', 
+        admins: '🛡️ الأدمنز', security: '🔒 الأمان', developer: '🔧 المطور'
+    };
+    const titlesEn = { 
+        dashboard: '📊 Dashboard', users: '👥 Players', ranks: '🎖️ Ranks', badges: '🏅 Badges', 
+        warnings: '⚠️ Warnings', content: '📝 Content', quizzes: '🎬 Quizzes', 
+        rooms: '🚪 Rooms', system: '⚙️ System', messages: '📩 Messages', 
+        admins: '🛡️ Admins', security: '🔒 Security', developer: '🔧 Developer'
+    };
+    document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
   };
 
-  let allUsers = {}, allPresence = {}, allScores = {}, allRoles = {}, allXP = {}, allRooms = {}, allBadges = {};
-  let sortDesc = false;
+  // --- البيانات ---
+  let allUsers = {}, allPresence = {}, allScores = {}, allRoles = {}, allXP = {}, allRooms = {}, allBadges = {}, allUserRanks = {};
 
   function initData() {
       window.onValue(window.ref(window.db, 'usernames'), snap => { 
-          allUsers = snap.val() || {}; 
-          document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
-          window.renderUsers(); 
-          window.populateBadgeSelect();
+          allUsers = snap.val() || {}; document.getElementById('statUsers').innerText = Object.keys(allUsers).length; window.renderUsers(); window.populateRankSelect(); window.populateBadgeSelect(); window.populateWarnSelect();
       });
       window.onValue(window.ref(window.db, 'presence'), snap => { 
-          allPresence = snap.val() || {}; 
-          let on = Object.values(allPresence).filter(p => p.status === 'online').length;
-          document.getElementById('statOnline').innerText = on; 
-          let total = Object.keys(allUsers).length;
-          document.getElementById('onlineBar').style.width = total > 0 ? (on / total * 100) + '%' : '0%';
-          window.renderUsers(); 
+          allPresence = snap.val() || {}; document.getElementById('statOnline').innerText = Object.values(allPresence).filter(p => p.status === 'online').length; window.renderUsers(); 
       });
       window.onValue(window.ref(window.db, 'scores'), snap => {
         allScores = snap.val() || {}; let plays = 0;
@@ -263,112 +423,144 @@
         for (let u in allXP) { if (allXP[u].xp) total += allXP[u].xp; }
         document.getElementById('statXP').innerText = total;
       });
-      window.onValue(window.ref(window.db, 'roles/admins'), snap => { allRoles = snap.val() || {}; window.renderUsers(); });
+      window.onValue(window.ref(window.db, 'roles/admins'), snap => { allRoles = snap.val() || {}; window.renderUsers(); window.renderAdmins(); });
+      window.onValue(window.ref(window.db, 'roles/users'), snap => { allUserRanks = snap.val() || {}; window.renderRanksList(); window.renderUsers(); });
       window.onValue(window.ref(window.db, 'badges'), snap => { allBadges = snap.val() || {}; window.renderBadgesList(); });
-      
-      window.onValue(window.ref(window.db, 'rooms'), snap => { allRooms = snap.val() || {}; document.getElementById('statRooms').innerText = Object.keys(allRooms).length; });
-      window.onValue(window.ref(window.db, 'comments'), snap => { document.getElementById('statComments').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; });
-      window.onValue(window.ref(window.db, 'suggestions'), snap => { document.getElementById('statSuggestions').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; });
-      window.onValue(window.ref(window.db, 'quiz_requests'), snap => { document.getElementById('statRequests').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; });
-      window.onValue(window.ref(window.db, 'custom_quizzes'), snap => { document.getElementById('statCustom').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; });
+      window.onValue(window.ref(window.db, 'rooms'), snap => { 
+          allRooms = snap.val() || {}; document.getElementById('statRooms').innerText = Object.keys(allRooms).length; window.renderRooms(); 
+      });
+      window.onValue(window.ref(window.db, 'comments'), snap => { 
+          document.getElementById('statComments').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
+          window.renderContent('comments', snap.val(), 'commentsList'); 
+      });
+      window.onValue(window.ref(window.db, 'suggestions'), snap => { 
+          document.getElementById('statSuggestions').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
+          window.renderContent('suggestions', snap.val(), 'suggestionsList'); 
+      });
+      window.onValue(window.ref(window.db, 'quiz_requests'), snap => { 
+          document.getElementById('statRequests').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
+          window.renderContent('quiz_requests', snap.val(), 'requestsList'); 
+      });
+      window.onValue(window.ref(window.db, 'custom_quizzes'), snap => { 
+          document.getElementById('statCustom').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
+          window.renderCustomQuizzes(snap.val()); 
+      });
       window.onValue(window.ref(window.db, 'site_stats/visitors'), snap => { document.getElementById('statVisitors').innerText = snap.exists() ? snap.val() : 0; });
-
+      window.onValue(window.ref(window.db, 'warnings'), snap => { window.renderWarnings(snap.val()); });
+      window.onValue(window.ref(window.db, 'banned_users'), snap => { window.renderBanned(snap.val()); });
+      
       window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
         const isM = snap.exists() ? snap.val() : false;
-        document.getElementById('maintenanceBtn').innerText = isM ? 'إلغاء الصيانة' : 'تفعيل الصيانة';
+        document.getElementById('maintenanceBtn').innerText = isM ? (currentLang === 'ar' ? 'إلغاء الصيانة' : 'Disable Maintenance') : (currentLang === 'ar' ? 'تفعيل الصيانة' : 'Enable Maintenance');
         document.getElementById('maintenanceBtn').className = isM ? 'btn btn-green' : 'btn btn-red';
       });
-
-      loadContent('comments', 'commentsList', 'user', 'text');
-      loadContent('suggestions', 'suggestionsList', 'user', 'text');
-      loadContent('quiz_requests', 'requestsList', 'user', 'text');
-      loadContent('custom_quizzes', 'customQuizzesList', 'name', 'link');
   }
   initData();
 
-  // Users UI
+  // --- عرض اللاعبين ---
   window.renderUsers = function() {
     const container = document.getElementById('usersList'); if(!container) return;
     container.innerHTML = '';
     const search = document.getElementById('searchUser').value.toLowerCase();
     
-    let usersArray = Object.keys(allUsers).filter(u => u.toLowerCase().includes(search));
-    if (sortDesc) {
-        usersArray.sort((a, b) => (allXP[b]?.xp || 0) - (allXP[a]?.xp || 0));
-    }
-
-    usersArray.forEach(u => {
+    Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
       const isOnline = allPresence[u] && allPresence[u].status === 'online';
       const userXP = allXP[u] ? allXP[u].xp || 0 : 0;
+      const userRank = allUserRanks[u] || 'Player';
+
+      let roleTag = `<span style="color:#aaa; font-size:12px; background:#222; padding:2px 6px; border-radius:4px;">${userRank}</span>`;
       
-      let roleTag = '';
-      if (u.toLowerCase() === 'ahmed') roleTag = '<span style="color:#ffd700; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">👑 Owner</span>';
-      else if (allRoles[u]) roleTag = '<span style="color:#0088cc; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">🛡️ Admin</span>';
+      let isAdmin = false;
+      for (let adminName in allRoles) {
+          if (adminName.toLowerCase() === u.toLowerCase()) { isAdmin = true; break; }
+      }
+
+      if (u.toLowerCase() === 'ahmed') {
+          roleTag = '<span style="color:#ffd700; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">👑 Owner</span>';
+      } else if (isAdmin) {
+          roleTag = '<span style="color:#0088cc; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">🛡️ Admin</span>';
+      }
 
       const div = document.createElement('div'); div.className = 'item';
       div.innerHTML = `
         <div>
           <h3>${u} ${roleTag}</h3>
-          <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 متصل' : '⚪ غير متصل'} | XP: ${userXP}</p>
+          <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 Online' : '⚪ Offline'} | XP: ${userXP}</p>
         </div>
         <div style="display:flex; gap:5px; flex-wrap:wrap;">
-          <button class="btn btn-blue" onclick="window.editXP('${u}')">تعديل XP</button>
-          <button class="btn btn-gold" onclick="window.sendDMPrompt('${u}')">رسالة</button>
-          <button class="btn btn-orange" onclick="window.warnUser('${u}')">تحذير ⚠️</button>
-          ${u.toLowerCase() !== 'ahmed' ? `
-            ${allRoles[u] 
-                ? `<button class="btn btn-red" onclick="window.removeAdmin('${u}')">❌ إزالة أدمن</button>` 
-                : `<button class="btn btn-green" onclick="window.makeAdmin('${u}')">👑 تعيين أدمن</button>`
-            }
-          ` : ''}
+          <button class="btn btn-blue" onclick="window.editXP('${u}')" data-ar="تعديل XP" data-en="Edit XP">تعديل XP</button>
+          <button class="btn btn-gold" onclick="window.sendDMPrompt('${u}')" data-ar="رسالة" data-en="Message">رسالة</button>
+          ${u.toLowerCase() !== 'ahmed' ? `<button class="btn btn-red" onclick="window.banUser('${u}')" data-ar="حظر 🚫" data-en="Ban 🚫">حظر 🚫</button>` : ''}
         </div>
       `;
       container.appendChild(div);
     });
   };
 
-  window.sortUsers = function() {
-      sortDesc = !sortDesc;
-      window.renderUsers();
+  window.populateRankSelect = function() {
+      const sel = document.getElementById('rankUserSelect'); if(!sel) return;
+      sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
+      Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
   };
 
-  // Badges Logic
+  window.setRank = async function() {
+      const user = document.getElementById('rankUserSelect').value;
+      const rank = document.getElementById('rankSelect').value;
+      if(!user) return window.showToast('اختر اللاعب أولاً!', 'error');
+      await window.set(window.ref(window.db, 'roles/users/' + user), rank);
+      window.showToast(`Rank (${rank}) assigned to ${user}`);
+  };
+
+  window.renderRanksList = function() {
+      const list = document.getElementById('ranksList'); if(!list) return;
+      list.innerHTML = '';
+      if(Object.keys(allUserRanks).length === 0) { list.innerHTML = '<div class="item">لا يوجد لاعبين لديهم رتب حالياً.</div>'; return; }
+      
+      for(let user in allUserRanks) {
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `
+              <div>
+                  <h3>👤 ${user}</h3>
+                  <p style="color:var(--gold); font-weight:bold;">${allUserRanks[user]}</p>
+              </div>
+              <button class="btn btn-red" onclick="window.removeRank('${user}')">إزالة الرتبة 🗑️</button>
+          `;
+          list.appendChild(div);
+      }
+  };
+
+  window.removeRank = async (user) => {
+      if(confirm(`إزالة رتبة ${user}؟`)) {
+          await window.set(window.ref(window.db, 'roles/users/' + user), 'Player');
+          window.showToast('Rank reset to Player');
+      }
+  };
+
   window.populateBadgeSelect = function() {
       const sel = document.getElementById('badgeUserSelect'); if(!sel) return;
-      sel.innerHTML = '<option value="">-- اختر اللاعب --</option>';
-      Object.keys(allUsers).forEach(u => {
-          sel.innerHTML += `<option value="${u}">${u}</option>`;
-      });
+      sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
+      Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
   };
 
   window.giveBadge = async (badgeName) => {
       const sel = document.getElementById('badgeUserSelect'); if(!sel) return;
       const user = sel.value;
-      if(!user) return showToast('اختر اللاعب الأول!', 'error');
-      
-      try {
-          await window.set(window.ref(window.db, 'badges/' + user + '/' + badgeName), true);
-          showToast(`تم منح بادج (${badgeName}) لـ ${user}`);
-      } catch(e) { showToast('خطأ: ' + e.message, 'error'); }
+      if(!user) return window.showToast('اختر اللاعب الأول!', 'error');
+      await window.set(window.ref(window.db, 'badges/' + user + '/' + badgeName), true);
+      window.showToast(`Badge (${badgeName}) given to ${user}`);
   };
 
   window.renderBadgesList = function() {
       const list = document.getElementById('badgesList'); if(!list) return;
       list.innerHTML = '';
       let hasData = false;
-      
       for(let user in allBadges) {
           const badges = Object.keys(allBadges[user]);
           if(badges.length > 0) {
               hasData = true;
               const div = document.createElement('div'); div.className = 'item';
-              div.innerHTML = `
-                  <div>
-                      <h3>👤 ${user}</h3>
-                      <p style="font-size:12px; color:var(--gold);">${badges.join(' | ')}</p>
-                  </div>
-                  <button class="btn btn-red" onclick="window.removeAllBadges('${user}')">مسح بادجات اللاعب 🗑️</button>
-              `;
+              div.innerHTML = `<div><h3>👤 ${user}</h3><p style="font-size:12px; color:var(--gold);">${badges.join(' | ')}</p></div>
+              <button class="btn btn-red" onclick="window.removeAllBadges('${user}')">Clear Badges 🗑️</button>`;
               list.appendChild(div);
           }
       }
@@ -378,82 +570,99 @@
   window.removeAllBadges = async (user) => {
       if(confirm(`مسح كل بادجات ${user}؟`)) {
           await window.remove(window.ref(window.db, 'badges/' + user));
-          showToast('تم مسح البادجات');
+          window.showToast('Badges cleared');
       }
   };
 
-  // Actions
-  window.editXP = async (u) => {
-      const xpSnap = await window.get(window.ref(window.db, 'users_data/' + u + '/xp'));
-      const xp = xpSnap.exists() ? xpSnap.val() : 0;
-      const newXp = prompt(`تعديل نقاط (XP) للاعب ${u}:`, xp);
-      if (newXp !== null && !isNaN(newXp)) {
-          await window.set(window.ref(window.db, 'users_data/' + u + '/xp'), parseInt(newXp));
-          showToast('تم تعديل النقاط بنجاح');
-      }
-  }
+  window.populateWarnSelect = function() {
+      const sel = document.getElementById('warnUserSelect'); if(!sel) return;
+      sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
+      Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
+  };
 
-  window.sendDMPrompt = (u) => {
-      const msg = prompt(`اكتب رسالتك لـ ${u}:`);
-      if(msg) {
-          window.push(window.ref(window.db, 'messages/' + u), { from: 'الإدارة', text: msg, time: Date.now() });
-          showToast('تم إرسال الرسالة!');
-      }
-  }
+  window.sendWarning = async function() {
+      const user = document.getElementById('warnUserSelect').value;
+      const reason = document.getElementById('warnReason').value.trim();
+      if(!user || !reason) return window.showToast('اختر اللاعب واكتب السبب', 'error');
+      await window.set(window.ref(window.db, 'warnings/' + user), { text: reason, date: Date.now() });
+      window.showToast(`Warning sent to ${user}`);
+      document.getElementById('warnReason').value = '';
+  };
 
-  window.warnUser = async (u) => {
-      const msg = prompt(`اكتب سبب التحذير لـ ${u}:`);
-      if(msg) {
-          await window.set(window.ref(window.db, 'warnings/' + u), { text: msg, date: Date.now() });
-          showToast(`تم إرسال تحذير لـ ${u}`);
-      }
-  }
-
-  window.makeAdmin = async (u) => {
-      if(confirm(`تعيين ${u} كأدمن؟`)) {
-          await window.set(window.ref(window.db, 'roles/admins/' + u), { status: true });
-          showToast(`تم تعيين ${u} كأدمن`);
-      }
-  }
-
-  window.removeAdmin = async (u) => {
-      if(confirm(`إزالة ${u} من الأدمن؟`)) {
-          await window.remove(window.ref(window.db, 'roles/admins/' + u));
-          showToast(`تم إزالة ${u} من الأدمن`);
-      }
-  }
-
-  function loadContent(node, elId, userField, textField) {
-    window.onValue(window.ref(window.db, node), snap => {
-      const list = document.getElementById(elId); if(!list) return;
+  window.renderWarnings = function(data) {
+      const list = document.getElementById('warningsList'); if(!list) return;
       list.innerHTML = '';
-      if (!snap.exists()) { list.innerHTML = '<div class="item">لا يوجد محتوى.</div>'; return; }
+      if(!data) { list.innerHTML = '<div class="item">لا توجد تحذيرات مسجلة.</div>'; return; }
       
-      Object.keys(snap.val()).reverse().forEach(key => {
-        const c = snap.val()[key]; const div = document.createElement('div'); div.className = 'item';
+      Object.keys(data).forEach(user => {
+          const warn = data[user];
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `
+              <div>
+                  <h3 style="color:var(--gold);">👤 ${user}</h3>
+                  <p>Reason: ${warn.text}</p>
+                  <p style="font-size:12px; color:#aaa;">${new Date(warn.date).toLocaleString()}</p>
+              </div>
+              <button class="btn btn-red" onclick="window.removeWarning('${user}')">Remove Warning 🗑️</button>
+          `;
+          list.appendChild(div);
+      });
+  };
+
+  window.removeWarning = async (user) => {
+      if(confirm(`إزالة التحذير عن ${user}؟`)) {
+          await window.remove(window.ref(window.db, 'warnings/' + user));
+          window.showToast('Warning removed');
+      }
+  };
+
+  window.renderContent = function(node, data, containerId) {
+      const container = document.getElementById(containerId); if(!container) return;
+      container.innerHTML = '';
+      if (!data) { container.innerHTML = '<div class="item">لا يوجد محتوى.</div>'; return; }
+      
+      Object.keys(data).reverse().forEach(key => {
+        const c = data[key]; const div = document.createElement('div'); div.className = 'item';
         div.innerHTML = `
           <div>
-            <p style="color:var(--gold); font-size:12px;">👤 ${c[userField]}</p>
-            <p>${c[textField]}</p>
+            <p style="color:var(--gold); font-size:12px;">👤 ${c.user}</p>
+            <p>${c.text}</p>
           </div>
-          <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">مسح 🗑️</button>
+          <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">Delete 🗑️</button>
         `;
-        list.appendChild(div);
+        container.appendChild(div);
       });
-    });
-  }
+  };
 
-  window.deleteItem = (node, key) => {
+  window.renderCustomQuizzes = function(data) {
+      const container = document.getElementById('customQuizzesList'); if(!container) return;
+      container.innerHTML = '';
+      if (!data) { container.innerHTML = '<div class="item">لا توجد كويزات مخصصة.</div>'; return; }
+      
+      Object.keys(data).forEach(key => {
+        const q = data[key]; const div = document.createElement('div'); div.className = 'item';
+        div.innerHTML = `
+          <div>
+            <p style="color:var(--gold); font-weight:bold;">${q.name}</p>
+            <p style="font-size:12px; color:#aaa;">${q.cat}</p>
+          </div>
+          <button class="btn btn-red" onclick="window.deleteItem('custom_quizzes', '${key}')">Delete 🗑️</button>
+        `;
+        container.appendChild(div);
+      });
+  };
+
+  window.deleteItem = async (node, key) => {
     if(confirm('متأكد من المسح؟')) {
-      window.remove(window.ref(window.db, node + '/' + key));
-      showToast('تم المسح');
+      await window.remove(window.ref(window.db, node + '/' + key));
+      window.showToast('Deleted');
     }
   }
 
-  window.clearAll = (node) => {
+  window.clearAll = async (node) => {
       if(confirm('متأكد من مسح كل المحتوى في هذا القسم؟')) {
-          window.remove(window.ref(window.db, node));
-          showToast('تم مسح الكل');
+          await window.remove(window.ref(window.db, node));
+          window.showToast('All cleared');
       }
   }
 
@@ -462,46 +671,171 @@
       const img = document.getElementById('qImage').value.trim();
       const link = document.getElementById('qLink').value.trim();
       const cat = document.getElementById('qCategory').value;
-      if(!name || !img || !link) return showToast('املأ كل الحقول', 'error');
+      if(!name || !img || !link) return window.showToast('املأ كل الحقول', 'error');
       
-      await window.push(window.ref(window.db, 'custom_quizzes'), { name, img, link, cat, addedBy: currentUser });
-      showToast('تمت إضافة الكويز بنجاح!');
+      await window.push(window.ref(window.db, 'custom_quizzes'), { name, img, link, cat, addedBy: currentUser, time: Date.now() });
+      window.showToast('Quiz added successfully!');
       document.getElementById('qName').value = '';
       document.getElementById('qImage').value = '';
       document.getElementById('qLink').value = '';
   }
 
-  window.publishAnnouncement = async () => {
-      const t = document.getElementById('announcementInput').value.trim();
-      if(!t) return;
-      await window.set(window.ref(window.db, 'site_settings/announcement'), t);
-      showToast('تم نشر الإعلان!');
-      document.getElementById('announcementInput').value = '';
-  }
+  window.renderRooms = function() {
+      const list = document.getElementById('roomsList'); if(!list) return;
+      list.innerHTML = '';
+      if(Object.keys(allRooms).length === 0) { list.innerHTML = '<div class="item">لا توجد غرف نشطة.</div>'; return; }
+      for(let room in allRooms) {
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `<div><p>Room Code: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">Status: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">Delete 🗑️</button>`;
+          list.appendChild(div);
+      }
+  };
+
+  window.deleteRoom = async (room) => {
+      if(confirm(`مسح غرفة ${room}؟`)) {
+          await window.remove(window.ref(window.db, 'rooms/' + room));
+          window.showToast('Room deleted');
+      }
+  };
+
+  window.editXP = async (u) => {
+      const xpSnap = await window.get(window.ref(window.db, 'users_data/' + u + '/xp'));
+      const xp = xpSnap.exists() ? xpSnap.val() : 0;
+      const newXp = prompt(`تعديل نقاط (XP) للاعب ${u}:`, xp);
+      if (newXp !== null && !isNaN(newXp)) {
+          await window.set(window.ref(window.db, 'users_data/' + u + '/xp'), parseInt(newXp));
+          window.showToast('XP updated successfully');
+      }
+  };
+
+  window.sendDMPrompt = (u) => {
+      const msg = prompt(`اكتب رسالتك لـ ${u}:`);
+      if(msg) {
+          window.push(window.ref(window.db, 'messages/' + u), { from: 'الإدارة', text: msg, time: Date.now() });
+          window.showToast('Message sent!');
+      }
+  };
+
+  window.banUser = async (user) => {
+      const reason = prompt(`سبب حظر ${user}:`);
+      if(reason !== null) {
+          await window.set(window.ref(window.db, 'banned_users/' + user), { status: true, reason: reason || 'مخالفة' });
+          window.showToast('User banned');
+      }
+  };
+
+  window.renderAdmins = function() {
+      const list = document.getElementById('adminsList'); if(!list) return;
+      list.innerHTML = '';
+      let hasData = false;
+      for(let user in allRoles) {
+          hasData = true;
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `<div><h3>🛡️ ${user}</h3></div>
+          <button class="btn btn-red" onclick="window.removeAdmin('${user}')">Remove Admin 🗑️</button>`;
+          list.appendChild(div);
+      }
+      if(!hasData) list.innerHTML = '<div class="item">لا يوجد أدمنز حالياً.</div>';
+  };
+
+  window.removeAdmin = async (user) => {
+      if(confirm(`إزالة ${user} من الأدمن؟`)) {
+          await window.remove(window.ref(window.db, 'roles/admins/' + user));
+          window.showToast('Admin removed');
+      }
+  };
+
+  window.renderBanned = function(data) {
+      const list = document.getElementById('bannedList'); if(!list) return;
+      list.innerHTML = '';
+      if(!data) { list.innerHTML = '<div class="item">لا يوجد لاعبين محظورين.</div>'; return; }
+      
+      Object.keys(data).forEach(user => {
+          const div = document.createElement('div'); div.className = 'item';
+          div.innerHTML = `
+              <div>
+                  <h3 style="color:var(--accent);">🚫 ${user}</h3>
+                  <p style="font-size:12px; color:#aaa;">Reason: ${data[user].reason || 'غير محدد'}</p>
+              </div>
+              <button class="btn btn-green" onclick="window.unbanUser('${user}')">Unban ✅</button>
+          `;
+          list.appendChild(div);
+      });
+  };
+
+  window.unbanUser = async (user) => {
+      if(confirm(`فك الحظر عن ${user}؟`)) {
+          await window.remove(window.ref(window.db, 'banned_users/' + user));
+          window.showToast('User unbanned');
+      }
+  };
 
   window.toggleMaintenance = async () => {
     const snap = await window.get(window.ref(window.db, 'site_settings/maintenance'));
     const isM = snap.exists() ? snap.val() : false;
     await window.set(window.ref(window.db, 'site_settings/maintenance'), !isM);
-    showToast(isM ? 'تم إلغاء الصيانة' : 'تم تفعيل الصيانة');
-  }
+    window.showToast(isM ? 'Maintenance disabled' : 'Maintenance enabled');
+  };
+
+  window.publishAnnouncement = async () => {
+      const t = document.getElementById('announcementInput').value.trim();
+      if(!t) return;
+      await window.set(window.ref(window.db, 'site_settings/announcement'), t);
+      window.showToast('Announcement published!');
+      document.getElementById('announcementInput').value = '';
+  };
+
+  window.sendBroadcast = async () => {
+      const t = document.getElementById('broadcastInput').value.trim();
+      if(!t) return;
+      await window.set(window.ref(window.db, 'site_settings/broadcast'), { text: t, time: Date.now() });
+      window.showToast('Broadcast sent to all!');
+      document.getElementById('broadcastInput').value = '';
+  };
 
   window.resetVisitors = async () => {
       await window.set(window.ref(window.db, 'site_stats/visitors'), 0);
-      showToast('تم تصفير العداد');
-  }
+      window.showToast('Visitor counter reset');
+  };
 
-  window.exportData = () => {
-      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users: allUsers, scores: allScores, xp: allXP }));
-      const a = document.createElement('a'); a.href = str; a.download = "quizhub_full_backup.json"; a.click();
-      showToast('تم تصدير البيانات!');
-  }
+  window.sendDM = async () => {
+      const u = document.getElementById('dmUser').value.trim();
+      const msg = document.getElementById('dmText').value.trim();
+      if(!u || !msg) return window.showToast('اكتب الاسم والرسالة', 'error');
+      await window.push(window.ref(window.db, 'messages/' + u), { from: 'الإدارة', text: msg, time: Date.now() });
+      window.showToast('Message sent successfully!');
+      document.getElementById('dmUser').value = '';
+      document.getElementById('dmText').value = '';
+  };
 
-  window.logoutUser = () => {
-      window.signOut(window.auth);
-      localStorage.removeItem('loggedInUser');
-      window.location.href = 'index.html';
-  }
+  window.resetSite = async () => {
+      if(prompt('اكتب "RESET" لتأكيد مسح كل البيانات:') === 'RESET') {
+          await window.remove(window.ref(window.db, 'scores'));
+          await window.remove(window.ref(window.db, 'users_data'));
+          await window.remove(window.ref(window.db, 'custom_quizzes'));
+          await window.remove(window.ref(window.db, 'comments'));
+          await window.remove(window.ref(window.db, 'suggestions'));
+          window.showToast('Site reset successfully', 'error');
+      }
+  };
+
+  window.restoreData = (event) => {
+      const file = event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+          try {
+              const data = JSON.parse(e.target.result);
+              if(confirm('هل أنت متأكد من استعادة هذه النسخة؟ سيتم مسح البيانات الحالية.')) {
+                  await window.set(window.ref(window.db, '/'), data);
+                  window.showToast('Backup restored successfully!');
+              }
+          } catch(err) { window.showToast('Invalid file', 'error'); }
+      };
+      reader.readAsText(file);
+  };
+
+  window.logoutUser = () => { window.signOut(window.auth); localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; };
 </script>
 </body>
 </html>
