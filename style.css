@@ -1,12 +1,4 @@
-/* =========================================
-   إعدادات عامة (General Settings)
-   ========================================= */
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  -webkit-tap-highlight-color: transparent; 
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body { 
   background: #050505; 
@@ -19,7 +11,6 @@ body {
   padding: 40px 20px; 
   flex-direction: column; 
   transition: background 0.3s, color 0.3s; 
-  overflow-x: hidden;
 }
 
 h1.main-title { 
@@ -37,9 +28,6 @@ p.subtitle {
   font-size: 18px; 
 }
 
-/* =========================================
-   كروت الكويزات (Quiz Cards) - مع التأثيرات الجديدة
-   ========================================= */
 .grid-container { 
   display: grid; 
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
@@ -55,7 +43,7 @@ p.subtitle {
   text-decoration: none; 
   color: #fff; 
   text-align: center; 
-  transition: all 0.4s ease; /* تم تعديل سرعة الانتقال */
+  transition: 0.3s; 
   display: flex; 
   flex-direction: column; 
   justify-content: flex-end; 
@@ -63,55 +51,17 @@ p.subtitle {
   height: 320px; 
   position: relative; 
   overflow: hidden; 
-  cursor: pointer; 
-  background-size: 100% 100%; /* عشان الزووم يشتغل صح */
+  background-size: cover; 
   background-position: center; 
+  cursor: pointer; 
 }
 
-/* طبقة التظليل السفلية */
 .quiz-card::after { 
   content: ''; 
   position: absolute; 
   inset: 0; 
-  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 50%); 
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); 
   z-index: 1; 
-  transition: 0.4s;
-}
-
-/* تأثير الزووم للخلفية */
-.quiz-card:hover { 
-  border-color: #ff3333; 
-  transform: translateY(-10px); /* رفع الكارت لفوق */
-  box-shadow: 0 15px 30px rgba(255,0,0,0.4); /* توهج أحمر */
-  background-size: 115% 115%; /* زووم للصورة */
-}
-
-/* زرار "العب الآن" اللي بيظهر */
-.quiz-card::before {
-  content: '▶ العب الآن';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.5);
-  background: #ff3333;
-  color: #fff;
-  padding: 10px 25px;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 18px;
-  opacity: 0;
-  z-index: 3;
-  transition: all 0.4s ease;
-  box-shadow: 0 0 20px rgba(255,51,51,0.8);
-}
-
-.quiz-card:hover::before {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-
-.quiz-card:hover::after {
-  background: linear-gradient(to top, rgba(139,0,0,0.9) 0%, rgba(0,0,0,0.5) 100%);
 }
 
 .quiz-card h2 { 
@@ -122,17 +72,14 @@ p.subtitle {
   text-shadow: 0 0 10px #000; 
   width: 100%; 
   padding: 10px; 
-  transition: 0.3s;
 }
 
-.quiz-card:hover h2 {
-  transform: translateY(10px); /* العنوان ينزل شوية عشان الزرار يبان */
-  opacity: 0.7;
+.quiz-card:hover { 
+  border-color: #ff3333; 
+  transform: translateY(-5px); 
+  box-shadow: 0 0 20px rgba(255,0,0,0.6); 
 }
 
-/* =========================================
-   شاشة اللعب (Play Screen)
-   ========================================= */
 .play-screen { 
   display: none; 
   width: 100%; 
@@ -229,9 +176,6 @@ p.subtitle {
   font-weight: 700; 
 }
 
-/* =========================================
-   زر الرجوع (Back Button)
-   ========================================= */
 .back-btn { 
   position: fixed; 
   top: 20px; 
@@ -257,9 +201,6 @@ p.subtitle {
   border-color: #ff0000; 
 }
 
-/* =========================================
-   الوضع النهاري (Light Mode)
-   ========================================= */
 body.light-mode { 
   background: #f4f4f4; 
   color: #111; 
@@ -312,9 +253,6 @@ body.light-mode .option.wrong {
   border-color: #f44336 !important; 
 }
 
-/* =========================================
-   الأنيميشن (Animations)
-   ========================================= */
 @keyframes shake {
   0% { transform: translateX(0); }
   25% { transform: translateX(-10px); }
@@ -337,56 +275,19 @@ body.light-mode .option.wrong {
   animation: glow 0.5s ease-in-out; 
 }
 
-/* =========================================
-   الموبايل والتابلت (Media Queries)
-   ========================================= */
 @media (max-width: 768px) {
-  .top-bar { flex-direction: column; align-items: flex-start; gap: 15px; padding: 0 10px; }
-  .controls { width: 100%; justify-content: flex-start; }
-  .control-btn { flex: 1; justify-content: center; font-size: 14px; padding: 8px; }
-  #authScreen h1 { font-size: 32px; }
-  .auth-input { font-size: 16px; }
   h1.main-title { font-size: 28px; }
   p.subtitle { font-size: 16px; margin-bottom: 25px; }
-  
   .grid-container { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 10px; }
   .quiz-card { height: 220px; }
   .quiz-card h2 { font-size: 16px; margin-bottom: 8px; }
-  
-  /* إخفاء زرار العب الآن في الموبايل عشان المساحة */
-  .quiz-card::before { display: none; }
-  .quiz-card:hover h2 { transform: none; opacity: 1; }
-
   .play-screen { padding: 15px; border-radius: 10px; }
   .question { font-size: 17px; margin-bottom: 15px; }
   .option { font-size: 14px; padding: 12px; margin: 8px 0; }
   .timer { font-size: 16px; }
-  .assistant-container { height: 85vh; margin-top: 20px; border-radius: 10px; }
-  .chat-header { font-size: 16px; padding: 12px; }
-  .msg { font-size: 14px; padding: 10px; }
-  .chat-input-container input { font-size: 14px; padding: 10px; }
-  .chat-input-container button { font-size: 14px; padding: 10px; }
-  .search-container { flex-direction: column; width: 100%; padding: 0 10px; }
-  #searchInput { font-size: 14px; padding: 10px 15px; }
-  .ai-btn { padding: 10px; width: 100%; border-radius: 25px; }
-  .tabs-container { padding: 0 10px; gap: 8px; }
-  .tab-btn { font-size: 13px; padding: 6px 12px; }
-  .header-card { padding: 20px; }
-  .avatar { width: 80px; height: 80px; font-size: 40px; }
-  .username { font-size: 24px; }
-  .history-item, .lb-item { padding: 10px 15px; font-size: 14px; }
-  .badges-grid { grid-template-columns: repeat(2, 1fr); }
-  .badge { padding: 12px; }
-  .badge-icon { font-size: 30px; }
-  .badge-name { font-size: 13px; }
-  .challenge-btn { padding: 12px 20px; font-size: 18px; margin-top: 20px; width: 90%; }
-  .modal-box { padding: 20px; width: 95%; }
-  .modal-box h2 { font-size: 20px; }
-  .room-code-display { font-size: 24px; }
 }
 
 @media (max-width: 480px) {
   .grid-container { grid-template-columns: 1fr; }
   .quiz-card { height: 200px; }
-  .control-btn { font-size: 12px; }
 }
