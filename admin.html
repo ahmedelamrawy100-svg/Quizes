@@ -12,7 +12,7 @@
   body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; }
   
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-  .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; display: flex; align-items: center; gap: 10px;}
+  .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
   .sidebar { width: 260px; background: var(--sidebar); border-left: 1px solid var(--border); padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; overflow-y: auto; }
@@ -42,6 +42,7 @@
   .btn-red { background: var(--accent); color: #fff; }
   .btn-green { background: var(--green); color: #fff; }
   .btn-blue { background: var(--blue); color: #fff; }
+  .btn-orange { background: #ff9800; color: #fff; }
 
   .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; margin-bottom: 10px; outline: none; font-family: 'Cairo'; }
   
@@ -76,47 +77,51 @@
       <div class="nav-item" onclick="switchTab('users', this)">👥 إدارة اللاعبين</div>
       <div class="nav-item" onclick="switchTab('content', this)">📝 إدارة المحتوى</div>
       <div class="nav-item" onclick="switchTab('rooms', this)">🚪 إدارة الغرف</div>
+      <div class="nav-item" onclick="switchTab('warnings', this)">⚠️ التحذيرات</div>
       <div class="nav-item" style="margin-top: auto;"><a href="index.html" style="color: inherit; text-decoration: none;">⬅ العودة للرئيسية</a></div>
     </div>
 
     <div class="main">
       <div class="header">
         <h1 id="pageTitle">📊 الإحصائيات</h1>
-        <button class="btn btn-green" onclick="exportData()">تصدير البيانات 📥</button>
       </div>
 
-      <!-- Dashboard -->
+      <!-- 1. Dashboard -->
       <div id="tab-dashboard" class="tab active">
         <div class="stats-grid">
           <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
           <div class="stat-card"><h3>🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
           <div class="stat-card"><h3>🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-          <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--blue);">0</div></div>
+          <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
         </div>
       </div>
 
-      <!-- Users -->
+      <!-- 2. Users -->
       <div id="tab-users" class="tab">
         <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
         <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
       </div>
 
-      <!-- Content -->
+      <!-- 3. Content -->
       <div id="tab-content" class="tab">
         <h3 style="color:var(--accent); margin-bottom:10px;">💬 التعليقات</h3>
         <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
         <h3 style="color:var(--accent); margin-bottom:10px;">💡 الاقتراحات</h3>
         <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
         <h3 style="color:var(--accent); margin-bottom:10px;">🎬 طلبات الكويزات</h3>
-        <div class="list-container" id="requestsList" style="margin-bottom: 20px;"></div>
-        <h3 style="color:var(--gold); margin-bottom:10px;">✨ الكويزات المضافة</h3>
-        <div class="list-container" id="customQuizzesList"></div>
+        <div class="list-container" id="requestsList"></div>
       </div>
 
-      <!-- Rooms -->
+      <!-- 4. Rooms -->
       <div id="tab-rooms" class="tab">
         <h3 style="color:var(--blue); margin-bottom:10px;">🚪 الغرف النشطة حالياً</h3>
         <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
+      </div>
+
+      <!-- 5. Warnings -->
+      <div id="tab-warnings" class="tab">
+        <h3 style="color:var(--accent); margin-bottom:10px;">⚠️ التحذيرات المسجلة</h3>
+        <div class="list-container" id="warningsList"><p>جاري التحميل...</p></div>
       </div>
     </div>
 </div>
@@ -157,8 +162,8 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div'); toast.className = 'toast';
       if(type === 'error') toast.style.borderRightColor = 'var(--accent)';
-      toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
-      container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
+      toast.innerText = msg; container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
   }
   window.showToast = showToast;
 
@@ -166,14 +171,13 @@
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
-    const titles = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف' };
+    const titles = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف', warnings: '⚠️ التحذيرات' };
     document.getElementById('pageTitle').innerText = titles[id];
   };
 
-  let allUsers = {}, allPresence = {}, allScores = {}, allRooms = {};
+  let allUsers = {}, allPresence = {}, allScores = {}, allXP = {}, allRooms = {};
 
   function initData() {
-      // Stats (1, 7)
       window.onValue(window.ref(window.db, 'usernames'), snap => { 
           allUsers = snap.val() || {}; 
           document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
@@ -189,22 +193,21 @@
         for (let u in allScores) { for (let q in allScores[u]) { plays += Object.keys(allScores[u][q]).length; } }
         document.getElementById('statPlays').innerText = plays;
       });
+      window.onValue(window.ref(window.db, 'users_data'), snap => { allXP = snap.val() || {}; window.renderUsers(); });
       
-      // Rooms (4)
       window.onValue(window.ref(window.db, 'rooms'), snap => {
           allRooms = snap.val() || {};
           document.getElementById('statRooms').innerText = Object.keys(allRooms).length;
           window.renderRooms();
       });
 
-      // Content (5, 10)
       loadContent('comments', 'commentsList', 'user', 'text');
       loadContent('suggestions', 'suggestionsList', 'user', 'text');
       loadContent('quiz_requests', 'requestsList', 'user', 'text');
-      loadContent('custom_quizzes', 'customQuizzesList', 'name', 'link');
+      loadWarnings();
   }
 
-  // 8, 9
+  // Render Users
   window.renderUsers = function() {
     const container = document.getElementById('usersList'); if(!container) return;
     container.innerHTML = '';
@@ -212,7 +215,7 @@
     
     Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
       const isOnline = allPresence[u] && allPresence[u].status === 'online';
-      let userXP = 0; if(allScores[u]) { for(let q in allScores[u]) { for(let att in allScores[u][q]) { userXP += allScores[u][q][att].score; } } }
+      const userXP = allXP[u] ? allXP[u].xp || 0 : 0;
 
       const div = document.createElement('div'); div.className = 'item';
       div.innerHTML = `
@@ -221,27 +224,28 @@
           <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 متصل' : '⚪ غير متصل'} | XP: ${userXP}</p>
         </div>
         <div style="display:flex; gap:5px; flex-wrap:wrap;">
-          <button class="btn btn-blue" onclick="editXP('${u}')">تعديل XP</button>
-          <button class="btn btn-gold" onclick="sendDMPrompt('${u}')">رسالة</button>
+          <button class="btn btn-blue" onclick="window.editXP('${u}')">تعديل XP</button>
+          <button class="btn btn-gold" onclick="window.sendDM('${u}')">رسالة</button>
+          <button class="btn btn-orange" onclick="window.warnUser('${u}')">تحذير ⚠️</button>
         </div>
       `;
       container.appendChild(div);
     });
   };
 
-  // 4
+  // Render Rooms
   window.renderRooms = function() {
       const list = document.getElementById('roomsList'); if(!list) return;
       list.innerHTML = '';
       if(Object.keys(allRooms).length === 0) { list.innerHTML = '<div class="item">لا توجد غرف نشطة.</div>'; return; }
       for(let room in allRooms) {
           const div = document.createElement('div'); div.className = 'item';
-          div.innerHTML = `<div><p>كود الغرفة: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">الحالة: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="deleteRoom('${room}')">مسح 🗑️</button>`;
+          div.innerHTML = `<div><p>كود الغرفة: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">الحالة: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">مسح 🗑️</button>`;
           list.appendChild(div);
       }
   };
 
-  // 5, 10
+  // Load Content
   function loadContent(node, elId, userField, textField) {
     window.onValue(window.ref(window.db, node), snap => {
       const list = document.getElementById(elId); if(!list) return;
@@ -255,11 +259,44 @@
             <p style="color:var(--gold); font-size:12px;">👤 ${c[userField]}</p>
             <p>${c[textField]}</p>
           </div>
-          <button class="btn btn-red" onclick="deleteItem('${node}', '${key}')">مسح 🗑️</button>
+          <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">مسح 🗑️</button>
         `;
         list.appendChild(div);
       });
     });
+  }
+
+  // Load Warnings (التاب الجديد)
+  function loadWarnings() {
+      window.onValue(window.ref(window.db, 'warnings'), snap => {
+          const list = document.getElementById('warningsList'); if(!list) return;
+          list.innerHTML = '';
+          if(!snap.exists()) {
+              list.innerHTML = '<div class="item">لا توجد تحذيرات مسجلة حالياً.</div>';
+              return;
+          }
+          const data = snap.val();
+          Object.keys(data).forEach(user => {
+              const warn = data[user];
+              const div = document.createElement('div'); div.className = 'item';
+              div.innerHTML = `
+                  <div>
+                      <h3 style="color:var(--gold);">👤 ${user}</h3>
+                      <p>السبب: ${warn.text}</p>
+                      <p style="font-size:12px; color:#aaa;">التاريخ: ${new Date(warn.date).toLocaleString()}</p>
+                  </div>
+                  <button class="btn btn-red" onclick="window.removeWarning('${user}')">إزالة التحذير 🗑️</button>
+              `;
+              list.appendChild(div);
+          });
+      });
+  }
+
+  window.removeWarning = (user) => {
+      if(confirm(`إزالة التحذير عن ${user}؟`)) {
+          window.remove(window.ref(window.db, 'warnings/' + user));
+          showToast('تم إزالة التحذير');
+      }
   }
 
   // Actions
@@ -273,12 +310,19 @@
       }
   }
 
-  // 3
-  window.sendDMPrompt = (u) => {
+  window.sendDM = (u) => {
       const msg = prompt(`اكتب رسالتك لـ ${u}:`);
       if(msg) {
           window.push(window.ref(window.db, 'messages/' + u), { from: 'الإدارة', text: msg, time: Date.now() });
           showToast('تم إرسال الرسالة!');
+      }
+  }
+
+  window.warnUser = async (u) => {
+      const msg = prompt(`اكتب سبب التحذير لـ ${u}:`);
+      if(msg) {
+          await window.set(window.ref(window.db, 'warnings/' + u), { text: msg, date: Date.now() });
+          showToast(`تم إرسال تحذير لـ ${u}`);
       }
   }
 
@@ -294,13 +338,6 @@
       window.remove(window.ref(window.db, node + '/' + key));
       showToast('تم المسح');
     }
-  }
-
-  // 6
-  window.exportData = () => {
-      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ users: allUsers, scores: allScores }));
-      const a = document.createElement('a'); a.href = str; a.download = "quizhub_data.json"; a.click();
-      showToast('تم تصدير البيانات!');
   }
 </script>
 </body>
