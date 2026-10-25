@@ -26,19 +26,16 @@
   .back-btn:hover { background: #ff0000; border-color: #ff0000; }
   body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
 
-  /* شريط الأزرار العلوي */
   .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }
   .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
   .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
   body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
-  body.light-mode .ctrl-btn:hover { background: #ff0000; color: #fff; border-color: #ff0000; }
 
   .community-container { width: 100%; max-width: 800px; }
   .header-title { text-align: center; color: #ffd700; font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.5); }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; }
 
-  /* التبويبات (Tabs) */
-  .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+  .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
   .tab-btn { background: transparent; color: var(--text-color); border: 2px solid var(--card-border); border-radius: 25px; padding: 10px 30px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 18px; transition: 0.3s; }
   .tab-btn.active { background: #ffd700; color: #000; border-color: #ffd700; }
   .tab-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: #ffd700; }
@@ -58,8 +55,36 @@
 
   .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
 </style>
+</head>
+<body>
 
-<!-- استدعاء فايربيز -->
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+
+<div class="top-bar">
+  <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div class="community-container">
+  <h1 class="header-title" id="mainTitle">💬 مجتمع Quiz Hub</h1>
+  <p class="header-subtitle" id="mainSubtitle">شاركنا رأيك واقتراحاتك لتطوير المنصة!</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('comments')" id="tabComments">💬 تعليقات</button>
+    <button class="tab-btn" onclick="switchTab('suggestions')" id="tabSuggestions">💡 اقتراحات</button>
+    <button class="tab-btn" onclick="switchTab('requests')" id="tabRequests">🎬 اقترح كويز</button>
+  </div>
+
+  <div class="input-area">
+    <textarea id="postInput" placeholder="اكتب رسالتك هنا..."></textarea>
+    <button onclick="submitPost()" id="postBtn">نشر</button>
+  </div>
+
+  <div class="posts-list" id="postsList">
+    <div class="no-data">جاري التحميل...</div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -79,91 +104,19 @@
   
   window.db = db; window.ref = ref; window.push = push; window.onValue = onValue;
 </script>
-</head>
-<body>
-
-<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
-
-<div class="top-bar">
-  <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
-  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
-</div>
-
-<div class="community-container">
-  <h1 class="header-title" id="mainTitle">💬 مجتمع Quiz Hub</h1>
-  <p class="header-subtitle" id="mainSubtitle">شاركنا رأيك واقتراحاتك لتطوير المنصة!</p>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('comments')" id="tabComments">💬 تعليقات</button>
-    <button class="tab-btn" onclick="switchTab('suggestions')" id="tabSuggestions">💡 اقتراحات</button>
-  </div>
-
-  <div class="input-area">
-    <textarea id="postInput" placeholder="اكتب رسالتك هنا..."></textarea>
-    <button onclick="submitPost()" id="postBtn">نشر</button>
-  </div>
-
-  <div class="posts-list" id="postsList">
-    <div class="no-data">جاري التحميل...</div>
-  </div>
-</div>
 
 <script>
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+
+  let currentUser = localStorage.getItem('loggedInUser') || 'زائر';
   let currentLang = localStorage.getItem('lang') || 'ar';
   let currentTab = 'comments'; 
-  let currentUser = localStorage.getItem('loggedInUser') || 'زائر';
+  let unsubscribe = null;
 
-  // دالة الوضع الليلي والنهاري
-  function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeBtn');
-    body.classList.toggle('light-mode');
-    
-    if (body.classList.contains('light-mode')) {
-      btn.innerText = '🌙 Dark';
-      localStorage.setItem('theme', 'light');
-    } else {
-      btn.innerText = '☀️ Light';
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-
-  // دالة ترجمة النصوص
   const translations = {
-    ar: {
-      back: "⬅ رجوع",
-      mainTitle: "💬 مجتمع Quiz Hub",
-      mainSubtitle: "شاركنا رأيك واقتراحاتك لتطوير المنصة!",
-      tabComments: "💬 تعليقات",
-      tabSuggestions: "💡 اقتراحات",
-      placeholderComment: "اكتب تعليقك هنا...",
-      placeholderSuggestion: "اكتب اقتراحك هنا...",
-      btnPost: "نشر",
-      noData: "لا يوجد مشاركات بعد. كن الأول!",
-      loading: "جاري التحميل...",
-      guest: "زائر"
-    },
-    en: {
-      back: "⬅ Back",
-      mainTitle: "💬 Quiz Hub Community",
-      mainSubtitle: "Share your thoughts and suggestions to improve the platform!",
-      tabComments: "💬 Comments",
-      tabSuggestions: "💡 Suggestions",
-      placeholderComment: "Write your comment here...",
-      placeholderSuggestion: "Write your suggestion here...",
-      btnPost: "Post",
-      noData: "No posts yet. Be the first!",
-      loading: "Loading...",
-      guest: "Guest"
-    }
+    ar: { back: "⬅ رجوع", mainTitle: "💬 مجتمع Quiz Hub", mainSubtitle: "شاركنا رأيك واقتراحاتك لتطوير المنصة!", tabComments: "💬 تعليقات", tabSuggestions: "💡 اقتراحات", tabRequests: "🎬 اقترح كويز", placeholderComment: "اكتب تعليقك هنا...", placeholderSuggestion: "اكتب اقتراحك هنا...", placeholderRequest: "اكتب اسم فيلم أو مسلسل عايز كويز ليه...", btnPost: "نشر", noData: "لا يوجد مشاركات بعد. كن الأول!", loading: "جاري التحميل...", guest: "زائر" },
+    en: { back: "⬅ Back", mainTitle: "💬 Quiz Hub Community", mainSubtitle: "Share your thoughts and suggestions to improve the platform!", tabComments: "💬 Comments", tabSuggestions: "💡 Suggestions", tabRequests: "🎬 Request Quiz", placeholderComment: "Write your comment here...", placeholderSuggestion: "Write your suggestion here...", placeholderRequest: "Write a movie or series name to request a quiz...", btnPost: "Post", noData: "No posts yet. Be the first!", loading: "Loading...", guest: "Guest" }
   };
-
-  function toggleLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', currentLang);
-    applyLanguage();
-    loadPosts();
-  }
 
   function applyLanguage() {
     const t = translations[currentLang];
@@ -173,17 +126,45 @@
     document.getElementById('mainSubtitle').innerText = t.mainSubtitle;
     document.getElementById('tabComments').innerText = t.tabComments;
     document.getElementById('tabSuggestions').innerText = t.tabSuggestions;
-    document.getElementById('postInput').placeholder = currentTab === 'comments' ? t.placeholderComment : t.placeholderSuggestion;
-    document.getElementById('postBtn').innerText = t.btnPost;
+    document.getElementById('tabRequests').innerText = t.tabRequests;
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    
+    if(currentTab === 'comments') document.getElementById('postInput').placeholder = t.placeholderComment;
+    else if(currentTab === 'suggestions') document.getElementById('postInput').placeholder = t.placeholderSuggestion;
+    else document.getElementById('postInput').placeholder = t.placeholderRequest;
+    
+    document.getElementById('postBtn').innerText = t.btnPost;
+    
+    if (localStorage.getItem('theme') === 'light') document.getElementById('themeBtn').innerText = '🌙 Dark';
+  }
+
+  function toggleLanguage() { 
+    currentLang = currentLang === 'ar' ? 'en' : 'ar'; 
+    localStorage.setItem('lang', currentLang); 
+    applyLanguage(); 
+    loadPosts(); 
+  }
+
+  function toggleTheme() {
+    const body = document.body; const btn = document.getElementById('themeBtn');
+    body.classList.toggle('light-mode');
+    if (body.classList.contains('light-mode')) { btn.innerText = '🌙 Dark'; localStorage.setItem('theme', 'light'); } 
+    else { btn.innerText = '☀️ Light'; localStorage.setItem('theme', 'dark'); }
   }
 
   function switchTab(tab) {
     currentTab = tab;
     document.getElementById('tabComments').classList.remove('active');
     document.getElementById('tabSuggestions').classList.remove('active');
-    document.getElementById(tab === 'comments' ? 'tabComments' : 'tabSuggestions').classList.add('active');
-    document.getElementById('postInput').placeholder = tab === 'comments' ? translations[currentLang].placeholderComment : translations[currentLang].placeholderSuggestion;
+    document.getElementById('tabRequests').classList.remove('active');
+    
+    document.getElementById(tab === 'comments' ? 'tabComments' : tab === 'suggestions' ? 'tabSuggestions' : 'tabRequests').classList.add('active');
+    
+    const t = translations[currentLang];
+    if(tab === 'comments') document.getElementById('postInput').placeholder = t.placeholderComment;
+    else if(tab === 'suggestions') document.getElementById('postInput').placeholder = t.placeholderSuggestion;
+    else document.getElementById('postInput').placeholder = t.placeholderRequest;
+    
     loadPosts();
   }
 
@@ -192,16 +173,13 @@
     const text = input.value.trim();
     if (!text) return;
 
-    const dbNode = currentTab === 'comments' ? 'comments' : 'suggestions';
+    if (!window.db) { alert("مشكلة في الاتصال بقاعدة البيانات!"); return; }
+
+    const dbNode = currentTab === 'comments' ? 'comments' : currentTab === 'suggestions' ? 'suggestions' : 'quiz_requests';
     const displayUser = currentUser === 'زائر' ? translations[currentLang].guest : currentUser;
 
     try {
-      window.push(window.ref(window.db, dbNode), { 
-        user: displayUser, 
-        originalUser: currentUser,
-        text: text, 
-        time: new Date().toLocaleString(currentLang === 'en' ? 'en-US' : 'ar-EG') 
-      });
+      window.push(window.ref(window.db, dbNode), { user: displayUser, originalUser: currentUser, text: text, time: new Date().toLocaleString(currentLang === 'en' ? 'en-US' : 'ar-EG') });
       input.value = '';
     } catch (e) { alert("Error: " + e.message); }
   }
@@ -211,16 +189,21 @@
     const t = translations[currentLang];
     list.innerHTML = `<div class="no-data">${t.loading}</div>`;
 
-    const dbNode = currentTab === 'comments' ? 'comments' : 'suggestions';
+    if (!window.db || !window.onValue) {
+        list.innerHTML = `<div class="no-data" style="color:red;">خطأ في الاتصال بقاعدة البيانات. تأكد من اتصالك بالإنترنت.</div>`;
+        return;
+    }
 
-    window.onValue(window.ref(window.db, dbNode), (snapshot) => {
+    const dbNode = currentTab === 'comments' ? 'comments' : currentTab === 'suggestions' ? 'suggestions' : 'quiz_requests';
+
+    // إلغاء الـ listener القديم عشان ميحصلش تعارض
+    if (unsubscribe) unsubscribe();
+
+    unsubscribe = window.onValue(window.ref(window.db, dbNode), (snapshot) => {
       const data = snapshot.val();
       list.innerHTML = '';
       
-      if (!data) { 
-        list.innerHTML = `<div class="no-data">${t.noData}</div>`; 
-        return; 
-      }
+      if (!data) { list.innerHTML = `<div class="no-data">${t.noData}</div>`; return; }
       
       const posts = Object.values(data).reverse(); 
       posts.forEach(post => {
@@ -244,14 +227,7 @@
     });
   }
 
-  // تشغيل الدوال أول ما الصفحة تفتح
   window.onload = () => {
-    // التحقق من الوضع الليلي
-    if (localStorage.getItem('theme') === 'light') {
-      document.body.classList.add('light-mode');
-      document.getElementById('themeBtn').innerText = '🌙 Dark';
-    }
-    
     applyLanguage();
     loadPosts();
   };
