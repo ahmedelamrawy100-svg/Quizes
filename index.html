@@ -128,7 +128,7 @@
   
   <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
   
-  <!-- لينكات السوشيال ميديا (تم تصحيح التليجرام) -->
+  <!-- لينكات السوشيال ميديا -->
   <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="menu-item" style="color: #25D366;" data-ar="📱 جروب الواتساب" data-en="📱 WhatsApp Group">📱 جروب الواتساب</a>
   <a href="https://t.me/quiz_hub001" target="_blank" class="menu-item" style="color: #0088cc;" data-ar="✈️ قناة التليجرام" data-en="✈️ Telegram Channel">✈️ قناة التليجرام</a>
 
@@ -200,7 +200,7 @@
     <button class="tab-btn" onclick="filterCategory('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
   </div>
   
-  <!-- كروت الكويزات (اللينكات القديمة المنفصلة) -->
+  <!-- كروت الكويزات -->
   <div class="grid-container" id="cards-container">
     <a href="Conjuring Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title">The Conjuring</h2></a>
     <a href="FNAF Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title">FNAF</h2></a>
@@ -268,6 +268,17 @@
                   bar.style.display = 'block'; 
               } else { 
                   bar.style.display = 'none'; 
+              }
+          });
+
+          // كود استقبال الإشعارات المنبثقة (Broadcast)
+          window.onValue(window.ref(window.db, 'site_settings/broadcast'), snap => {
+              if (snap.exists()) {
+                  const data = snap.val();
+                  // لو الإشعار جديد (مثلاً في آخر 10 ثواني) عشان ميفضلش يطلع كل شوية
+                  if (Date.now() - data.time < 10000) { 
+                      window.showToast("📡 " + data.text);
+                  }
               }
           });
 
@@ -455,7 +466,8 @@
       window.showToast(currentLang === 'en' ? 'Thanks for rating!' : 'شكراً لتقييمك! 🌟');
       closeRatingModal();
     } catch(e) {
-      window.showToast('Error saving rating', 'error');
+      console.error(e);
+      window.showToast('Error: ' + e.message, 'error');
     }
   }
 </script>
