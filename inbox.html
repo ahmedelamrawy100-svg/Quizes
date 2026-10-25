@@ -19,8 +19,8 @@
   .inbox-container { width: 100%; max-width: 600px; }
   .header-title { text-align: center; color: var(--accent); font-size: 32px; margin-bottom: 20px; }
   
-  .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--card-border); }
-  .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: var(--subtitle-color); border-bottom: 3px solid transparent; }
+  .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--card-border); overflow-x: auto; }
+  .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: var(--subtitle-color); border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   
   .tab-content { display: none; }
@@ -29,6 +29,11 @@
   .card-list { display: flex; flex-direction: column; gap: 15px; }
   .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
   .btn-msg { background: #0088cc; color: #fff; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  
+  .request-actions { display: flex; gap: 10px; }
+  .btn-accept { background: #4caf50; color: #fff; padding: 8px 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
+  .btn-reject { background: #f44336; color: #fff; padding: 8px 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
+
   .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
 </style>
 </head>
@@ -45,36 +50,46 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('friends', this)" id="tabFriends">👥 الأصدقاء</div>
     <div class="tab" onclick="switchTab('admin', this)" id="tabAdmin">📩 رسائل الإدارة</div>
+    <div class="tab" onclick="switchTab('requests', this)" id="tabRequests">🤝 طلبات الصداقة</div>
   </div>
 
+  <!-- تاب الأصدقاء -->
   <div id="tab-friends" class="tab-content active">
     <div class="card-list" id="friendsList">
       <div class="no-data" id="loadingFriends">جاري تحميل الأصدقاء...</div>
     </div>
   </div>
 
+  <!-- تاب رسائل الإدارة -->
   <div id="tab-admin" class="tab-content">
-    <div id="adminMessagesList">
+    <div class="card-list" id="adminMessagesList">
       <div class="no-data" id="loadingAdmin">جاري تحميل الرسائل...</div>
+    </div>
+  </div>
+
+  <!-- تاب طلبات الصداقة -->
+  <div id="tab-requests" class="tab-content">
+    <div class="card-list" id="requestsList">
+      <div class="no-data" id="loadingRequests">جاري تحميل الطلبات...</div>
     </div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingUserId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.remove = remove;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   const translations = {
-    ar: { back: "⬅ رجوع", title: "💬 صندوق الرسائل", tabFriends: "👥 الأصدقاء", tabAdmin: "📩 رسائل الإدارة", loadingFriends: "جاري تحميل الأصدقاء...", loadingAdmin: "جاري تحميل الرسائل...", noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", msg: "💬 محادثة", fromAdmin: "👑 من: " },
-    en: { back: "⬅ Back", title: "💬 Inbox", tabFriends: "👥 Friends", tabAdmin: "📩 Admin Messages", loadingFriends: "Loading friends...", loadingAdmin: "Loading messages...", noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", msg: "💬 Chat", fromAdmin: "👑 From: " }
+    ar: { back: "⬅ رجوع", title: "💬 صندوق الرسائل", tabFriends: "👥 الأصدقاء", tabAdmin: "📩 رسائل الإدارة", tabRequests: "🤝 طلبات الصداقة", noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", noRequests: "لا توجد طلبات صداقة جديدة.", msg: "💬 محادثة", accept: "قبول", reject: "رفض", fromAdmin: "👑 من: " },
+    en: { back: "⬅ Back", title: "💬 Inbox", tabFriends: "👥 Friends", tabAdmin: "📩 Admin Messages", tabRequests: "🤝 Friend Requests", noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", noRequests: "No new friend requests.", msg: "💬 Chat", accept: "Accept", reject: "Reject", fromAdmin: "👑 From: " }
   };
 
   function applyLanguage() {
@@ -84,8 +99,9 @@
     document.getElementById('pageTitle').innerText = t.title;
     document.getElementById('tabFriends').innerText = t.tabFriends;
     document.getElementById('tabAdmin').innerText = t.tabAdmin;
+    document.getElementById('tabRequests').innerText = t.tabRequests;
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-    loadFriends(); loadAdminMessages();
+    loadFriends(); loadAdminMessages(); loadRequests();
   }
 
   window.toggleLanguage = function() {
@@ -101,6 +117,7 @@
       document.getElementById('tab-' + tabName).classList.add('active');
   }
 
+  // 1. تحميل الأصدقاء
   function loadFriends() {
     window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
       const data = snapshot.val();
@@ -118,6 +135,7 @@
     });
   }
 
+  // 2. تحميل رسائل الإدارة (الرسائل اللي جاية من messages/username)
   function loadAdminMessages() {
     window.onValue(window.ref(window.db, 'messages/' + currentUser), (snapshot) => {
       const data = snapshot.val();
@@ -135,6 +153,46 @@
         adminList.appendChild(div);
       });
     });
+  }
+
+  // 3. تحميل طلبات الصداقة
+  function loadRequests() {
+    window.onValue(window.ref(window.db, 'friend_requests/' + currentUser), (snapshot) => {
+      const data = snapshot.val();
+      const requestsList = document.getElementById('requestsList');
+      const t = translations[currentLang];
+      requestsList.innerHTML = '';
+      if (!data) { requestsList.innerHTML = `<div class="no-data">${t.noRequests}</div>`; return; }
+      
+      for (let sender in data) {
+        const div = document.createElement('div');
+        div.className = 'friend-card';
+        div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:40px; height:40px; background:#ffd700; border-radius:50%; display:flex; justify-content:center; align-items:center; color:#000; font-weight:bold;">${sender.charAt(0).toUpperCase()}</div> 
+                <b>${sender}</b>
+            </div> 
+            <div class="request-actions">
+                <button class="btn-accept" onclick="acceptRequest('${sender}')">${t.accept}</button>
+                <button class="btn-reject" onclick="rejectRequest('${sender}')">${t.reject}</button>
+            </div>
+        `;
+        requestsList.appendChild(div);
+      }
+    });
+  }
+
+  // 4. دوال قبول ورفض الطلبات
+  window.acceptRequest = async function(sender) {
+    await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + sender), true);
+    await window.set(window.ref(window.db, 'friends/' + sender + '/' + currentUser), true);
+    await window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+    alert(currentLang === 'en' ? 'Friend request accepted!' : 'تم قبول طلب الصداقة!');
+  }
+
+  window.rejectRequest = async function(sender) {
+    await window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+    alert(currentLang === 'en' ? 'Friend request rejected.' : 'تم رفض طلب الصداقة.');
   }
 
   window.onload = () => {
