@@ -15,17 +15,26 @@
       --bg-color: #f4f4f4; --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; 
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; }
+  .back-btn { position: fixed; top: 20px; left: 20px; background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; font-family: 'Cairo'; cursor: pointer; transition: 0.3s; }
+  .back-btn:hover { background: var(--accent); border-color: var(--accent); }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
   
-  .profile-container { width: 100%; max-width: 800px; margin-top: 50px; display: flex; flex-direction: column; gap: 30px; }
+  /* أزرار التحكم العلوية */
+  .top-controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 999; }
+  .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
+  .ctrl-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  body.light-mode .ctrl-btn { background: #ddd; color: #111; border-color: #aaa; }
+  body.light-mode .ctrl-btn:hover { background: var(--accent); color: #fff; }
+
+  .profile-container { width: 100%; max-width: 800px; margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
 
   /* --- كارت الرأس --- */
   .header-card { 
       background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; 
       text-align: center; display: flex; flex-direction: column; align-items: center; position: relative;
-      box-shadow: 0 10px 30px rgba(255,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(255,0,0,0.1); transition: 0.3s;
   }
   
   .avatar { 
@@ -83,7 +92,12 @@
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع</a>
+<!-- أزرار الرجوع واللغة والوضع الليلي -->
+<a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+<div class="top-controls">
+  <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
 
 <div class="profile-container">
   <div class="header-card">
@@ -92,13 +106,13 @@
     
     <!-- مربع الرتبة -->
     <div class="rank-box" id="rankBox" style="display: none;">
-        <span class="rank-label">الرتبة:</span>
+        <span class="rank-label" id="rankLabel" data-ar="الرتبة:" data-en="Rank:">الرتبة:</span>
         <span class="rank-value" id="userRankValue">-</span>
     </div>
 
     <!-- الإحصائيات -->
     <div class="stats-row">
-      <div class="stat-badge score-badge">🏆 <span id="totalScoreDisplay">0</span> نقطة</div>
+      <div class="stat-badge score-badge">🏆 <span id="totalScoreDisplay">0</span> <span data-ar="نقطة" data-en="Points">نقطة</span></div>
       <div class="stat-badge xp-badge">✨ <span id="xpDisplay">0</span> XP</div>
     </div>
 
@@ -107,22 +121,22 @@
 
     <!-- البادجات -->
     <div class="badges-section" id="badgesSection" style="display: none;">
-        <div class="badges-title">الإنجازات (Badges)</div>
+        <div class="badges-title" data-ar="الإنجازات (Badges)" data-en="Achievements (Badges)">الإنجازات (Badges)</div>
         <div class="badges-container" id="badgesContainer"></div>
     </div>
 
     <!-- رفع الصورة (يظهر بس لو بتشوف بروفايلك) -->
     <div class="upload-section" id="uploadSection" style="display: none;">
-      <label for="imageUpload" class="upload-label">📷 اختر صورة</label>
+      <label for="imageUpload" class="upload-label" data-ar="📷 اختر صورة" data-en="📷 Choose Image">📷 اختر صورة</label>
       <input type="file" id="imageUpload" accept="image/*" onchange="window.previewImage(event)">
-      <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()">حفظ الصورة</button>
+      <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()" data-ar="حفظ الصورة" data-en="Save Image">حفظ الصورة</button>
     </div>
   </div>
 
   <div>
-    <h2 class="section-title">👥 أصدقاء <span id="friendsNameDisplay"></span></h2>
+    <h2 class="section-title"><span data-ar="👥 أصدقاء" data-en="👥 Friends">👥 أصدقاء</span> <span id="friendsNameDisplay"></span></h2>
     <div id="friendsList" class="friends-container">
-      <div class="no-data">جاري التحميل...</div>
+      <div class="no-data" data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</div>
     </div>
   </div>
 </div>
@@ -135,7 +149,6 @@
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set;
 
-  // مفتاح API لرفع الصور
   const IMGBB_API_KEY = "3e7c71a0a091350d70363ef5909198d7";
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -144,13 +157,11 @@
 
   if (!profileUser) { window.location.href = 'index.html'; }
 
-  // هل أنا صاحب البروفايل ده؟
   const isMyProfile = (profileUser.toLowerCase() === loggedInUser.toLowerCase());
 
   document.getElementById('userName').innerText = profileUser;
   document.getElementById('friendsNameDisplay').innerText = profileUser;
   
-  // إظهار زر رفع الصورة لو ده بروفايلي
   if (isMyProfile) {
       document.getElementById('uploadSection').style.display = 'flex';
   }
@@ -179,7 +190,8 @@
       }
 
       window.get(window.ref(window.db, 'roles/users')).then(rankSnap => {
-          let rankText = '👤 لاعب عادي';
+          let currentLang = localStorage.getItem('lang') || 'ar';
+          let rankText = currentLang === 'en' ? '👤 Normal Player' : '👤 لاعب عادي';
           const ranks = rankSnap.val() || {};
           
           for (let user in ranks) {
@@ -189,8 +201,8 @@
               }
           }
 
-          if (isOwner) rankText = '👑 الأونر';
-          else if (isAdmin && rankText === '👤 لاعب عادي') rankText = '🛡️ أدمن';
+          if (isOwner) rankText = currentLang === 'en' ? '👑 Owner' : '👑 الأونر';
+          else if (isAdmin && rankText.includes('Player')) rankText = currentLang === 'en' ? '🛡️ Admin' : '🛡️ أدمن';
 
           document.getElementById('rankBox').style.display = 'inline-flex';
           document.getElementById('userRankValue').innerText = rankText;
@@ -227,7 +239,12 @@
     const data = snapshot.val();
     const list = document.getElementById('friendsList');
     list.innerHTML = '';
-    if (!data) { list.innerHTML = `<div class="no-data">${profileUser} لسه مفيش أصدقاء.</div>`; return; }
+    let currentLang = localStorage.getItem('lang') || 'ar';
+    
+    if (!data) { 
+        list.innerHTML = `<div class="no-data">${currentLang === 'en' ? profileUser + ' has no friends yet.' : profileUser + ' لسه مفيش أصدقاء.'}</div>`; 
+        return; 
+    }
     for (let friend in data) {
       const div = document.createElement('div'); div.className = 'friend-card';
       div.innerHTML = `
@@ -235,7 +252,7 @@
           <div class="friend-avatar">${friend.charAt(0).toUpperCase()}</div>
           <div class="friend-name">${friend}</div>
         </div>
-        <div><a href="profile.html?user=${friend}" class="action-btn">زيارة البروفايل</a></div>
+        <div><a href="profile.html?user=${friend}" class="action-btn" data-ar="زيارة البروفايل" data-en="Visit Profile">${currentLang === 'en' ? 'Visit Profile' : 'زيارة البروفايل'}</a></div>
       `;
       list.appendChild(div);
     }
@@ -244,9 +261,10 @@
   // --- التحذيرات ---
   window.onValue(window.ref(window.db, 'warnings/' + profileUser), (snapshot) => {
     const warnData = snapshot.val();
+    let currentLang = localStorage.getItem('lang') || 'ar';
     if (warnData) {
         document.getElementById('warningBox').style.display = 'block';
-        document.getElementById('warningText').innerText = `⚠️ تحذير: ${warnData.text}`;
+        document.getElementById('warningText').innerText = currentLang === 'en' ? `⚠️ Warning: ${warnData.text}` : `⚠️ تحذير: ${warnData.text}`;
     } else {
         document.getElementById('warningBox').style.display = 'none';
     }
@@ -271,6 +289,7 @@
 
   window.uploadProfilePic = async function() {
     if (!selectedFile || !isMyProfile) return;
+    let currentLang = localStorage.getItem('lang') || 'ar';
     const btn = document.getElementById('saveImgBtn');
     btn.innerText = '...'; btn.disabled = true;
     
@@ -283,17 +302,67 @@
       
       if (data.success) {
         await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), data.data.url);
-        alert("تم رفع الصورة بنجاح! 🎉");
+        alert(currentLang === 'en' ? "Image uploaded successfully! 🎉" : "تم رفع الصورة بنجاح! 🎉");
         btn.style.display = 'none';
       } else {
-        alert("فشل رفع الصورة، حاول تاني.");
+        alert(currentLang === 'en' ? "Failed to upload image." : "فشل رفع الصورة، حاول تاني.");
       }
     } catch (error) { alert("Error: " + error.message); }
     
-    btn.innerText = 'حفظ الصورة'; btn.disabled = false;
+    btn.innerText = currentLang === 'en' ? 'Save Image' : 'حفظ الصورة'; btn.disabled = false;
+  }
+</script>
+
+<!-- سكريبت الترجمة والوضع الليلي -->
+<script>
+  // 1. تفعيل الوضع الليلي لو كان متحفظ
+  if (localStorage.getItem('theme') === 'light') { 
+    document.body.classList.add('light-mode'); 
   }
 
-  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  let currentLang = localStorage.getItem('lang') || 'ar';
+
+  // 2. دالة تغيير الوضع الليلي
+  window.toggleTheme = function() {
+    const body = document.body;
+    const isLight = body.classList.toggle('light-mode');
+    const btn = document.getElementById('themeBtn');
+    btn.innerText = isLight ? '🌙' : '☀️';
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  }
+
+  // 3. دالة الترجمة
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+    window.location.reload(); // إعادة تحميل عشان البيانات اللي جاية من الفايربيز تتحدث باللغة الجديدة
+  }
+
+  function applyLanguage() {
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    
+    const langBtn = document.getElementById('langBtn');
+    if(langBtn) langBtn.innerText = currentLang === 'ar' ? 'EN' : 'AR';
+
+    const themeBtn = document.getElementById('themeBtn');
+    if(themeBtn) {
+       const isLight = document.body.classList.contains('light-mode');
+       themeBtn.innerText = isLight ? '🌙' : '☀️';
+    }
+
+    const elements = document.querySelectorAll('[data-ar]');
+    elements.forEach(el => {
+      if(el.tagName === 'INPUT') {
+        el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      } else {
+        el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      }
+    });
+  }
+
+  // تشغيل الترجمة فوراً
+  applyLanguage();
 </script>
 </body>
 </html>
