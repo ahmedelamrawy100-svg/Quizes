@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎖️ الرتب والبادجات - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { 
+      --bg-color: #080808; --text-color: #fff; --card-bg: #111; --card-border: #333; --gold: #ffd700; --subtitle-color: #aaa; --accent: #ff0000;
+      --c-common: #4caf50; --c-uncommon: #8bc34a; --c-rare: #2196f3; --c-epic: #9c27b0; --c-legendary: #ff9800;
+      --c-mythic: #f44336; --c-divine: #ffeb3b; --c-celestial: #00bcd4; --c-secret: #455a64; --c-transcendent: #e91e63;
+  }
+  body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --card-bg: #fff; --card-border: #ccc; --subtitle-color: #555; --c-secret: #b0bec5; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  
+  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 16px; }
+  
+  .header-title { text-align: center; color: var(--gold); font-size: 40px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+  .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
+
+  .tabs-container { display: flex; width: 100%; max-width: 600px; border-bottom: 2px solid var(--card-border); margin-bottom: 30px; }
+  .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: var(--subtitle-color); font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; border-bottom: 4px solid transparent; transition: 0.3s; }
+  .tab-btn:hover { color: var(--text-color); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  
+  .section-container { display: none; width: 100%; max-width: 1000px; }
+  .section-container.active { display: block; }
+
+  .tier-title { width: 100%; font-size: 20px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid var(--card-border); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; width: 100%; margin-bottom: 30px; }
+  
+  .rank-card, .badge-card { background: var(--card-bg); border: 3px solid var(--card-border); padding: 20px 15px; text-align: center; transition: 0.3s; position: relative; }
+  .rank-card { border-radius: 50% 50% 10px 10px / 40% 40% 10px 10px; }
+  .badge-card { border-radius: 15px; }
+  .rank-card:hover, .badge-card:hover { transform: translateY(-5px); }
+  
+  .rank-icon, .badge-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+  .rank-name, .badge-name { font-size: 15px; font-weight: bold; color: var(--text-color); margin-bottom: 5px; }
+  .rank-type, .badge-type { font-size: 11px; color: var(--subtitle-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .rank-count, .badge-count { font-size: 12px; color: var(--subtitle-color); margin-bottom: 10px; }
+  .rank-count span, .badge-count span { color: var(--gold); font-weight: bold; }
+
+  /* زرار عرض اللاعبين */
+  .view-users-btn { width: 100%; padding: 8px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-family: 'Cairo'; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .view-users-btn:hover { background: var(--gold); color: #000; border-color: var(--gold); }
+
+  /* ألوان التصنيفات */
+  .c-common { border-color: var(--c-common); } .c-common .rank-name, .c-common .badge-name { color: var(--c-common); }
+  .c-uncommon { border-color: var(--c-uncommon); } .c-uncommon .rank-name, .c-uncommon .badge-name { color: var(--c-uncommon); }
+  .c-rare { border-color: var(--c-rare); } .c-rare .rank-name, .c-rare .badge-name { color: var(--c-rare); }
+  .c-epic { border-color: var(--c-epic); } .c-epic .rank-name, .c-epic .badge-name { color: var(--c-epic); }
+  .c-legendary { border-color: var(--c-legendary); } .c-legendary .rank-name, .c-legendary .badge-name { color: var(--c-legendary); }
+  .c-mythic { border-color: var(--c-mythic); } .c-mythic .rank-name, .c-mythic .badge-name { color: var(--c-mythic); }
+  .c-divine { border-color: var(--c-divine); } .c-divine .rank-name, .c-divine .badge-name { color: var(--c-divine); }
+  .c-celestial { border-color: var(--c-celestial); } .c-celestial .rank-name, .c-celestial .badge-name { color: var(--c-celestial); }
+  .c-secret { border-color: var(--c-secret); } .c-secret .rank-name, .c-secret .badge-name { color: #fff; }
+  body.light-mode .c-secret .rank-name, body.light-mode .c-secret .badge-name { color: #000; }
+  .c-transcendent { border-color: var(--c-transcendent); } .c-transcendent .rank-name, .c-transcendent .badge-name { color: var(--c-transcendent); }
+
+  .t-transcendent { color: var(--c-transcendent); border-bottom-color: var(--c-transcendent); }
+  .t-secret { color: #fff; border-bottom-color: #666; }
+  .t-celestial { color: var(--c-celestial); border-bottom-color: var(--c-celestial); }
+  .t-divine { color: var(--c-divine); border-bottom-color: var(--c-divine); }
+  .t-mythic { color: var(--c-mythic); border-bottom-color: var(--c-mythic); }
+  .t-legendary { color: var(--c-legendary); border-bottom-color: var(--c-legendary); }
+  .t-epic { color: var(--c-epic); border-bottom-color: var(--c-epic); }
+  .t-rare { color: var(--c-rare); border-bottom-color: var(--c-rare); }
+  .t-uncommon { color: var(--c-uncommon); border-bottom-color: var(--c-uncommon); }
+  .t-common { color: var(--c-common); border-bottom-color: var(--c-common); }
+
+  /* نافذة اللاعبين (Modal) */
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+  .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-title { color: var(--gold); font-size: 22px; margin-bottom: 20px; text-align: center; }
+  .close-modal { position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+  .user-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-border); }
+  .user-list-name { font-weight: bold; font-size: 16px; }
+  .visit-btn { background: #0088cc; color: #fff; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; font-weight: bold; }
+
+  @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع للرئيسية</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<h1 class="header-title" id="mainTitle">🎖️ الرتب والبادجات</h1>
+<p class="header-subtitle" id="subtitle">استكشف مستواك وإنجازاتك</p>
+
+<div class="tabs-container">
+    <button class="tab-btn active" onclick="switchTab('ranks')" id="tabRanks">🛡️ الرتب (Ranks)</button>
+    <button class="tab-btn" onclick="switchTab('badges')" id="tabBadges">🏅 البادجات (Badges)</button>
+</div>
+
+<div id="section-ranks" class="section-container active">
+    <div id="ranksArea"></div>
+</div>
+
+<div id="section-badges" class="section-container">
+    <div id="badgesArea"></div>
+</div>
+
+<!-- النافذة المنبثقة -->
+<div class="modal" id="usersModal">
+    <div class="modal-box">
+        <button class="close-modal" onclick="closeUsersModal()">&times;</button>
+        <h3 class="modal-title" id="modalTitle">اللاعبين</h3>
+        <div id="modalUsersList"></div>
+    </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+
+  let currentLang = localStorage.getItem('lang') || 'ar';
+
+  const translations = {
+    ar: { back: "⬅ رجوع للرئيسية", title: "🎖️ الرتب والبادجات", subtitle: "استكشف مستواك وإنجازاتك", 
+          tabRanks: "🛡️ الرتب (Ranks)", tabBadges: "🏅 البادجات (Badges)",
+          playerCount: "لاعب", rankLabel: "رتبة", badgeLabel: "إنجاز", viewUsers: "عرض اللاعبين", visit: "زيارة", noUsers: "لا يوجد لاعبين" },
+    en: { back: "⬅ Back to Home", title: "🎖️ Ranks & Badges", subtitle: "Explore your level and achievements", 
+          tabRanks: "🛡️ Ranks", tabBadges: "🏅 Badges",
+          playerCount: "Players", rankLabel: "Rank", badgeLabel: "Achievement", viewUsers: "View Players", visit: "Visit", noUsers: "No players" }
+  };
+
+  const tiers = [
+    { key: 'transcendent', title_ar: "🔥 متعالي (Transcendent)", title_en: "🔥 Transcendent", items: [ { id: 'Owner', icon: '👑', ar: 'الأونر', en: 'Owner' } ]},
+    { key: 'secret', title_ar: "🕵️ سري (Secret)", title_en: "🕵️ Secret", items: [ { id: 'Admin', icon: '🛡️', ar: 'أدمن', en: 'Admin' }, { id: 'Spy', icon: '🕵️', ar: 'جاسوس', en: 'Spy' } ]},
+    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: 'Star', icon: '🌟', ar: 'نجم', en: 'Star' }, { id: 'Genius', icon: '🧠', ar: 'عبقري', en: 'Genius' } ]},
+    { key: 'divine', title_ar: "😇 إلهي (Divine)", title_en: "😇 Divine", items: [ { id: 'Divine', icon: '⚡', ar: 'إلهي', en: 'Divine' }, { id: 'Angel', icon: '👼', ar: 'ملاك', en: 'Angel' } ]},
+    { key: 'mythic', title_ar: "🐉 خرافي (Mythic)", title_en: "🐉 Mythic", items: [ { id: 'Dragon', icon: '🐉', ar: 'تنين', en: 'Dragon' }, { id: 'King', icon: '👑', ar: 'ملك', en: 'King' } ]},
+    { key: 'legendary', title_ar: "🦅 أسطوري (Legendary)", title_en: "🦅 Legendary", items: [ { id: 'Legend', icon: '🦅', ar: 'أسطورة', en: 'Legend' }, { id: 'Lion', icon: '🦁', ar: 'ليث', en: 'Lion' } ]},
+    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: 'VIP', icon: '💎', ar: 'VIP', en: 'VIP' } ]},
+    { key: 'rare', title_ar: "💙 نادر (Rare)", title_en: "💙 Rare", items: [ { id: 'Pro Player', icon: '🔥', ar: 'محترف', en: 'Pro Player' } ]},
+    { key: 'uncommon', title_ar: "💚 غير عادي (Uncommon)", title_en: "💚 Uncommon", items: [ { id: 'Knight', icon: '🛡️', ar: 'فارس', en: 'Knight' }, { id: 'Ninja', icon: '🥷', ar: 'نينجا', en: 'Ninja' } ]},
+    { key: 'common', title_ar: "💚 عادي (Common)", title_en: "💚 Common", items: [ { id: 'Player', icon: '👤', ar: 'لاعب عادي', en: 'Player' } ]}
+  ];
+
+  const badgesData = [
+    { key: 'transcendent', title_ar: "🔥 متعالي (Transcendent)", title_en: "🔥 Transcendent", items: [ { id: '👑 Founder', icon: '👑', ar: 'المؤسس', en: 'Founder' } ]},
+    { key: 'secret', title_ar: "🕵️ سري (Secret)", title_en: "🕵️ Secret", items: [ { id: '👽 Alien', icon: '👽', ar: 'فضائي', en: 'Alien' } ]},
+    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: '🦸 Hero', icon: '🦸', ar: 'بطل', en: 'Hero' } ]},
+    { key: 'divine', title_ar: "😇 إلهي (Divine)", title_en: "😇 Divine", items: [ { id: '🎯 Sniper', icon: '🎯', ar: 'قناص', en: 'Sniper' } ]},
+    { key: 'mythic', title_ar: "🐉 خرافي (Mythic)", title_en: "🐉 Mythic", items: [ { id: '💥 Action', icon: '💥', ar: 'أكشن', en: 'Action' } ]},
+    { key: 'legendary', title_ar: "🦅 أسطوري (Legendary)", title_en: "🦅 Legendary", items: [ { id: '⭐ VIP', icon: '⭐', ar: 'VIP', en: 'VIP' } ]},
+    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: '🔥 Pro', icon: '🔥', ar: 'محترف', en: 'Pro' } ]},
+    { key: 'rare', title_ar: "💙 نادر (Rare)", title_en: "💙 Rare", items: [ { id: '🕵️ Detective', icon: '🕵️', ar: 'محقق', en: 'Detective' } ]},
+    { key: 'uncommon', title_ar: "💚 غير عادي (Uncommon)", title_en: "💚 Uncommon", items: [ { id: '🎃 Horror', icon: '🎃', ar: 'رعب', en: 'Horror' }, { id: '💖 K-Drama', icon: '💖', ar: 'دراما', en: 'K-Drama' } ]},
+    { key: 'common', title_ar: "💚 عادي (Common)", title_en: "💚 Common", items: [ { id: '🎮 Gamer', icon: '🎮', ar: 'جيمر', en: 'Gamer' } ]}
+  ];
+
+  let userRanksData = {}, adminsData = {}, badgeCounts = {}, allUsersNames = {};
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+  }
+
+  window.switchTab = function(tab) {
+      document.getElementById('section-ranks').classList.remove('active');
+      document.getElementById('section-badges').classList.remove('active');
+      document.getElementById('tabRanks').classList.remove('active');
+      document.getElementById('tabBadges').classList.remove('active');
+      
+      if(tab === 'ranks') {
+          document.getElementById('section-ranks').classList.add('active');
+          document.getElementById('tabRanks').classList.add('active');
+      } else {
+          document.getElementById('section-badges').classList.add('active');
+          document.getElementById('tabBadges').classList.add('active');
+      }
+  }
+
+  window.closeUsersModal = function() {
+      document.getElementById('usersModal').style.display = 'none';
+  }
+
+  // دالة عرض اللاعبين اللي معاهم رتبة أو بادج
+  window.showUsersWith = function(type, itemId, itemName) {
+      const modal = document.getElementById('usersModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const list = document.getElementById('modalUsersList');
+      
+      modalTitle.innerText = itemName;
+      list.innerHTML = '';
+      let found = false;
+
+      if (type === 'rank') {
+          for (let user in allUsersNames) {
+              const rank = userRanksData[user];
+              const isOwner = user.toLowerCase() === 'ahmed';
+              const isAdmin = adminsData[user];
+
+              if ((itemId === 'Owner' && isOwner) || (itemId === 'Admin' && isAdmin) || rank === itemId) {
+                  found = true;
+                  list.innerHTML += `
+                      <div class="user-list-item">
+                          <span class="user-list-name">👤 ${user}</span>
+                          <a href="profile.html?user=${user}" class="visit-btn">${translations[currentLang].visit}</a>
+                      </div>
+                  `;
+              }
+          }
+      } else if (type === 'badge') {
+          for (let user in allUsersNames) {
+              // لو اللاعب ده عنده البادج ده في مساره
+              // محتاجين نجيب داتا البادجات كلها، بس للتبسيط هنا هدور على اللي في الذاكرة
+              const userBadges = window.allBadgesData[user] || {};
+              if (userBadges[itemId]) {
+                  found = true;
+                  list.innerHTML += `
+                      <div class="user-list-item">
+                          <span class="user-list-name">👤 ${user}</span>
+                          <a href="profile.html?user=${user}" class="visit-btn">${translations[currentLang].visit}</a>
+                      </div>
+                  `;
+              }
+          }
+      }
+
+      if (!found) {
+          list.innerHTML = `<p style="text-align:center; color:var(--subtitle-color);">${translations[currentLang].noUsers}</p>`;
+      }
+
+      modal.style.display = 'flex';
+  }
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('mainTitle').innerText = t.title;
+    document.getElementById('subtitle').innerText = t.subtitle;
+    document.getElementById('tabRanks').innerText = t.tabRanks;
+    document.getElementById('tabBadges').innerText = t.tabBadges;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    renderAll();
+  }
+
+  function renderAll() {
+    const t = translations[currentLang];
+    const ranksArea = document.getElementById('ranksArea');
+    const badgesArea = document.getElementById('badgesArea');
+    ranksArea.innerHTML = '';
+    badgesArea.innerHTML = '';
+
+    // 1. رسم الرتب
+    tiers.forEach(tier => {
+        let gridHTML = '';
+        tier.items.forEach(rank => {
+            let count = 0;
+            if (rank.id === 'Owner') count = 1;
+            else if (rank.id === 'Admin') count = Object.keys(adminsData).length;
+            else { for (let u in userRanksData) { if (userRanksData[u] === rank.id) count++; } }
+
+            const rankName = currentLang === 'ar' ? rank.ar : rank.en;
+            gridHTML += `
+                <div class="rank-card c-${tier.key}">
+                    <span class="rank-icon">${rank.icon}</span>
+                    <div class="rank-name">${rankName}</div>
+                    <div class="rank-type">${t.rankLabel}</div>
+                    <div class="rank-count">👤 <span>${count}</span> ${t.playerCount}</div>
+                    <button class="view-users-btn" onclick="window.showUsersWith('rank', '${rank.id}', '${rankName}')">${t.viewUsers}</button>
+                </div>
+            `;
+        });
+        const title = currentLang === 'ar' ? tier.title_ar : tier.title_en;
+        ranksArea.innerHTML += `<h2 class="tier-title t-${tier.key}">${title}</h2><div class="grid">${gridHTML}</div>`;
+    });
+
+    // 2. رسم البادجات
+    badgesData.forEach(tier => {
+        let gridHTML = '';
+        tier.items.forEach(badge => {
+            let count = badgeCounts[badge.id] || 0;
+            const badgeName = currentLang === 'ar' ? badge.ar : badge.en;
+            gridHTML += `
+                <div class="badge-card c-${tier.key}">
+                    <span class="badge-icon">${badge.icon}</span>
+                    <div class="badge-name">${badgeName}</div>
+                    <div class="badge-type">${t.badgeLabel}</div>
+                    <div class="badge-count">👤 <span>${count}</span> ${t.playerCount}</div>
+                    <button class="view-users-btn" onclick="window.showUsersWith('badge', '${badge.id}', '${badgeName}')">${t.viewUsers}</button>
+                </div>
+            `;
+        });
+        const title = currentLang === 'ar' ? tier.title_ar : tier.title_en;
+        badgesArea.innerHTML += `<h2 class="tier-title t-${tier.key}">${title}</h2><div class="grid">${gridHTML}</div>`;
+    });
+  }
+
+  window.allBadgesData = {};
+
+  window.onload = () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+
+    onValue(ref(db, 'usernames'), (snapshot) => { allUsersNames = snapshot.val() || {}; renderAll(); });
+    onValue(ref(db, 'roles/users'), (snapshot) => { userRanksData = snapshot.val() || {}; renderAll(); });
+    onValue(ref(db, 'roles/admins'), (snapshot) => { adminsData = snapshot.val() || {}; renderAll(); });
+    onValue(ref(db, 'badges'), (snapshot) => {
+        window.allBadgesData = snapshot.val() || {};
+        badgeCounts = {};
+        for (let user in window.allBadgesData) { for (let b in window.allBadgesData[user]) { if (!badgeCounts[b]) badgeCounts[b] = 0; badgeCounts[b]++; } }
+        renderAll();
+    });
+
+    applyLanguage();
+  };
+</script>
+</body>
+</html>
