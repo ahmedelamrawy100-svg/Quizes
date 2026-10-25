@@ -7,27 +7,17 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-    --text-color: #fff; --card-bg: #111; --border-color: #333;
-  }
-  body.light-mode {
-    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
-    --text-color: #111; --card-bg: #fff; --border-color: #ccc;
-  }
+  :root { --bg-color: #000; --text-color: #fff; --card-bg: #111; --border-color: #333; }
+  body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --card-bg: #fff; --border-color: #ccc; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); 
-    font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-  }
+  body { background: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+  .back-btn { background: #222; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
+  .lang-btn { background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
 
-  .chat-container { width: 100%; max-width: 600px; height: 100%; background: var(--card-bg); display: flex; flex-direction: column; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); margin: 0 auto; }
-  
-  .chat-header { background: #ff0000; color: #fff; padding: 15px; font-weight: bold; display: flex; align-items: center; gap: 10px; font-size: 20px; z-index: 10; }
+  .chat-container { width: 100%; max-width: 600px; height: calc(100vh - 60px); background: var(--card-bg); display: flex; flex-direction: column; margin: 0 auto; }
+  .chat-header { background: #ff0000; color: #fff; padding: 15px; font-weight: bold; font-size: 20px; z-index: 10; text-align: center;}
   
   .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
   .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; font-size: 16px; line-height: 1.5; }
@@ -42,59 +32,68 @@
 </head>
 <body>
 
-<a href="profile.html" class="back-btn">⬅ رجوع للبروفايل</a>
+<div class="top-bar">
+  <a href="inbox.html" class="back-btn" id="backBtn">⬅ رجوع للرسائل</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">💬 جاري التحميل...</div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-container">
     <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
-    <button onclick="sendMessage()">إرسال</button>
+    <button onclick="sendMessage()" id="sendBtn">إرسال</button>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
-    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
-    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
-    projectId: "quiz-hub-app-f4cd0",
-    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
-    messagingSenderId: "282772179392",
-    appId: "1:282772179392:web:64646d757592b29ff3a025"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.push = push; window.onValue = onValue;
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 
+  let currentLang = localStorage.getItem('lang') || 'ar';
   const currentUser = localStorage.getItem('loggedInUser');
   const urlParams = new URLSearchParams(window.location.search);
-  const otherUser = urlParams.get('to'); // اسم صاحبك
+  const otherUser = urlParams.get('to');
 
-  if (!currentUser || !otherUser) { window.location.href = 'profile.html'; }
+  if (!currentUser || !otherUser) { window.location.href = 'inbox.html'; }
 
-  document.getElementById('chatHeader').innerText = `💬 محادثة مع: ${otherUser}`;
+  const translations = {
+      ar: { back: "⬅ رجوع للرسائل", placeholder: "اكتب رسالتك هنا...", send: "إرسال", chatWith: "محادثة مع:" },
+      en: { back: "⬅ Back to Inbox", placeholder: "Type your message...", send: "Send", chatWith: "Chat with:" }
+  };
 
-  // عشان نضمن إن الشات ثابت للطرفين، بنرتب الأسماء أبجدياً
+  function applyLanguage() {
+      const t = translations[currentLang];
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      document.getElementById('backBtn').innerText = t.back;
+      document.getElementById('msgInput').placeholder = t.placeholder;
+      document.getElementById('sendBtn').innerText = t.send;
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      document.getElementById('chatHeader').innerText = `💬 ${t.chatWith} ${otherUser}`;
+  }
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
+
+  applyLanguage();
+
   const roomId = [currentUser, otherUser].sort().join("_");
-
   const chatRef = window.ref(window.db, 'chats/' + roomId);
 
-  // تحميل الرسائل
   window.onValue(chatRef, (snapshot) => {
     const data = snapshot.val();
     const container = document.getElementById('chatMessages');
     container.innerHTML = '';
     
     if (data) {
-      // تحويل الأوبجكت لمصفوفة وترتيبها حسب الوقت
       const messages = Object.values(data);
       messages.forEach(msg => {
         const div = document.createElement('div');
@@ -102,23 +101,15 @@
         div.innerText = msg.text;
         container.appendChild(div);
       });
-      // النزول لآخر رسالة
       container.scrollTop = container.scrollHeight;
     }
   });
 
-  // إرسال رسالة
   window.sendMessage = function() {
     const input = document.getElementById('msgInput');
     const text = input.value.trim();
     if (!text) return;
-
-    window.push(chatRef, {
-      sender: currentUser,
-      text: text,
-      time: Date.now()
-    });
-    
+    window.push(chatRef, { sender: currentUser, text: text, time: Date.now() });
     input.value = '';
   };
 </script>
