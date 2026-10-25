@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 كويز [اسم الكويز]</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+  .modal-box { background: #111; border: 2px solid #ff0000; border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
+  .modal-box h2 { color: #ff0000; margin-bottom: 20px; }
+  .modal-box button { width: 100%; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-close { background: #333; color: #fff; }
+  .btn-close:hover { background: #555; }
+  .friends-list-container { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; margin-bottom: 15px; }
+  .friend-select-btn { padding: 10px; background: #333; color: #fff; border: 1px solid #555; border-radius: 8px; cursor: pointer; text-align: right; transition: 0.3s; }
+  .friend-select-btn:hover { background: #ff0000; border-color: #ff0000; }
+  .speedrun-btn { margin-top: 20px; padding: 12px 30px; background: #ff3333; color: #fff; border: 2px solid #fff; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .speedrun-btn:hover { background: #fff; color: #ff3333; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn" id="backBtn">⬅ رجوع / Back</a>
+
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title" class="main-title">🎬 كويز [اسم الكويز] 🎬</h1>
+  <p class="subtitle" id="subtitle-text">اختر طريقة اللعب</p>
+  
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));">
+    <!-- هنا تحط كروت الأجزاء -->
+    <div class="quiz-card" onclick="startGame('solo')" style="background-image: url('pic/[صورة الكويز].jpg');">
+        <h2 class="card-title">العب لوحدك</h2>
+    </div>
+    <div class="quiz-card" onclick="openFriendListModal()" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('pic/[صورة الكويز].jpg');">
+        <h2 class="card-title">تحدي صديق ⚔️</h2>
+    </div>
+  </div>
+  
+  <button class="speedrun-btn" onclick="startSpeedrun()">⚡ العب في وضع السرعة (Speedrun)</button>
+</div>
+
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ff0000;">🎬 كويز [اسم الكويز] 🎬</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+</div>
+
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal-box">
+    <h2 id="modal-title">اختر صديقاً للتحدي</h2>
+    <div class="friends-list-container" id="friendsListContainer">
+      <p style="color:#fff;">جاري تحميل الأصدقاء...</p>
+    </div>
+    <button id="btnCloseModal" class="btn-close" onclick="closeChallengeModal()">إلغاء</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, update, get, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025", measurementId: "G-02K0TEPE31" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove; window.push = push;
+</script>
+
+<script src="questions.js"></script>
+
+<script>
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; 
+  
+  // ================== غير السطرين دول بس ==================
+  let currentSaveKey = 'fnaf'; // غير ده لاسم الكويز في questions.js (مثلاً: annabelle, conjuring)
+  const quizData = allQuizzesData.FNAF; // غير FNAF لاسم الكويز في questions.js
+  // ==========================================================
+
+  const currentUser = localStorage.getItem('loggedInUser') || 'Unknown';
+  const sndCorrect = new Audio('sounds/click.wav');
+  const sndWrong = new Audio('sounds/scare.wav');
+  const sndTick = new Audio('sounds/click.wav');
+
+  let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
+  let isChallengeMode = false; let isSpeedrun = false;
+
+  function openFriendListModal() { document.getElementById('challengeModal').style.display = 'flex'; loadFriends(); }
+  function closeChallengeModal() { document.getElementById('challengeModal').style.display = 'none'; }
+
+  function loadFriends() {
+    const container = document.getElementById('friendsListContainer');
+    window.get(window.ref(window.db, 'friends/' + currentUser)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const friends = Object.keys(snapshot.val());
+        container.innerHTML = '';
+        friends.forEach(friend => {
+          const btn = document.createElement('button');
+          btn.className = 'friend-select-btn';
+          btn.innerText = `👤 ${friend}`;
+          btn.onclick = () => sendChallenge(friend);
+          container.appendChild(btn);
+        });
+      } else { container.innerHTML = '<p style="color:#fff;">لا يوجد أصدقاء. أضف أصدقاء أولاً!</p>'; }
+    });
+  }
+
+  function sendChallenge(friendName) {
+    closeChallengeModal();
+    alert(`تم إرسال الدعوة لـ ${friendName}!`);
+    startGame('challenge');
+  }
+
+  function startGame(mode) {
+    isChallengeMode = (mode === 'challenge');
+    isSpeedrun = false;
+    
+    // لو الكويز فيه أجزاء (part1, part2) هنختار الشامل
+    currentQuestions = quizData.comprehensive ? [...quizData.comprehensive] : [...quizData.part1];
+    
+    currentQuestions.sort(() => Math.random() - 0.5); 
+    if (mode === 'solo') currentSaveKey = currentSaveKey + '_HighScore';
+    highestScore = parseInt(localStorage.getItem(currentSaveKey)) || 0;
+    document.getElementById('selectionScreen').style.display = 'none';
+    document.getElementById('playScreen').style.display = 'block';
+    document.getElementById('backBtn').style.display = 'none';
+    current = 0; score = 0; loadQuestion();
+  }
+
+  function startSpeedrun() {
+    startGame('solo');
+    isSpeedrun = true;
+  }
+
+  function loadQuestion() {
+    answered = false; timeLeft = isSpeedrun ? 5 : 20; 
+    const q = currentQuestions[current];
+    
+    let qText = currentLang === 'ar' ? q.q_ar : q.q_en;
+    if (!qText && currentLang === 'ar') qText = q.q_en;
+    document.getElementById('question').innerText = qText;
+
+    let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+    if (!opts && currentLang === 'ar') opts = q.options_en;
+    
+    const optEl = document.getElementById('options'); optEl.innerHTML = '';
+    let optionsWithAnswers = opts.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+    optionsWithAnswers.sort(() => Math.random() - 0.5); 
+    
+    optionsWithAnswers.forEach((opt) => {
+      const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
+      div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div);
+    });
+    
+    document.getElementById('score').innerText = `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
+    document.getElementById('next').style.display = 'none';
+    document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%';
+    clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer();
+  }
+
+  function updateTimer() {
+    const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`;
+    if (timeLeft <= 5) { timerEl.style.color = '#f44336'; sndTick.play(); } else { timerEl.style.color = ''; }
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) {
+        answered = true;
+        document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+        const q = currentQuestions[current]; 
+        let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+        if (!opts && currentLang === 'ar') opts = q.options_en;
+        document.querySelectorAll('.option').forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); });
+        document.getElementById('next').style.display = 'inline-block';
+      }
+    }
+    timeLeft--;
+  }
+
+  function checkAnswer(isCorrect, el) {
+    if (answered) return; answered = true; clearInterval(timerInterval);
+    const q = currentQuestions[current]; 
+    let opts = currentLang === 'ar' ? q.options_ar : q.options_en;
+    if (!opts && currentLang === 'ar') opts = q.options_en;
+    
+    const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled'));
+    allOpts.forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); });
+    
+    if (isCorrect) { 
+      score += isSpeedrun ? 2 : 1; 
+      sndCorrect.play(); 
+    } else { 
+      el.classList.add('wrong'); 
+      sndWrong.play();
+      document.getElementById('playScreen').classList.add('shake-animation');
+      setTimeout(() => document.getElementById('playScreen').classList.remove('shake-animation'), 400);
+    }
+    document.getElementById('score').innerText = `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
+    document.getElementById('next').style.display = 'inline-block';
+  }
+
+  function nextQuestion() { 
+    current++; 
+    if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } 
+  }
+
+  function showFinal() {
+    clearInterval(timerInterval); document.getElementById('progress').style.width = '100%';
+    
+    if (score > (currentQuestions.length / 2)) {
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+
+    if (isChallengeMode) {
+       setTimeout(() => { window.location.href = 'index.html'; }, 3000);
+    } else {
+      if (window.db && currentUser !== 'Unknown') {
+          window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey.split('_')[0] + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() });
+          
+          window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => {
+              let xp = snap.exists() ? snap.val() : 0;
+              window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score);
+          });
+
+          window.set(window.ref(window.db, 'badges/' + currentUser + '/starter-1'), true);
+          if (isSpeedrun) window.set(window.ref(window.db, 'badges/' + currentUser + '/speed-1'), true);
+          
+          if (score === currentQuestions.length) {
+              // هنا تحط اسم تصنيف البادج (horror-1, kdrama-1, action-1)
+              window.set(window.ref(window.db, 'badges/' + currentUser + '/horror-1'), true); 
+          }
+      }
+
+      if (score > highestScore) { highestScore = score; localStorage.setItem(currentSaveKey, highestScore); }
+      
+      document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+        <h2 style="color:#ff0000; font-size:36px;">انتهى الكويز! 🎬</h2>
+        <p style="color:#fff; font-size:22px;">نتيجتك: ${score} / ${currentQuestions.length}</p>
+        <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">أعلى نتيجة: ${highestScore}</p>
+        <button onclick="location.reload()" style="margin-top:10px; padding:12px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">العب تاني</button>
+      </div>`;
+      document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none';
+      document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none';
+      document.getElementById('backBtn').style.display = 'flex'; 
+    }
+  }
+
+  window.startGame = startGame;
+  window.startSpeedrun = startSpeedrun;
+  window.nextQuestion = nextQuestion;
+  window.openFriendListModal = openFriendListModal;
+  window.closeChallengeModal = closeChallengeModal;
+</script>
+</body>
+</html>
