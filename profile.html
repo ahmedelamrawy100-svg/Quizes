@@ -29,34 +29,47 @@
   .profile-container { width: 100%; max-width: 800px; margin-top: 50px; display: flex; flex-direction: column; gap: 30px; }
 
   .header-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center;}
-  
-  .avatar { 
-    width: 120px; height: 120px; background: var(--accent); border-radius: 50%; 
-    display: flex; justify-content: center; align-items: center; font-size: 60px; 
-    color: #fff; margin: 0 auto 15px auto; font-weight: bold; border: 4px solid #fff; 
-    background-size: cover; background-position: center; overflow: hidden;
-  }
+  .avatar { width: 120px; height: 120px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin: 0 auto 15px auto; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; overflow: hidden; }
   body.light-mode .avatar { border-color: #111; }
-  
-  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; }
-  .total-score { color: var(--text-color); font-size: 18px; background: rgba(255,0,0,0.1); padding: 10px 20px; border-radius: 20px; display: inline-block; margin-bottom: 15px;}
+  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .stats-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;}
+  .score-badge { color: #ffd700; font-size: 18px; background: rgba(255, 215, 0, 0.1); padding: 10px 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #ffd700;}
+  .xp-badge { color: #4caf50; font-size: 18px; background: rgba(76, 175, 80, 0.1); padding: 10px 20px; border-radius: 20px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid #4caf50;}
 
-  .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); }
+  .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px;}
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
   .upload-label:hover { background: var(--accent); }
   .upload-btn { background: #4caf50; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; display: none;}
   .upload-btn:hover { background: #388e3c; }
 
-  .history-section h2 { color: var(--accent); margin-bottom: 15px; font-size: 24px; }
+  .section-title { color: var(--accent); margin-bottom: 15px; font-size: 24px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
+  .friends-container { display: flex; flex-direction: column; gap: 15px; }
+  .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+  .friend-info { display: flex; align-items: center; gap: 15px; }
+  .friend-avatar { width: 50px; height: 50px; background: #ffd700; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #000; font-weight: bold; }
+  .friend-name { font-weight: bold; font-size: 18px; }
+  .action-btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; text-decoration: none; display: flex; align-items: center; justify-content: center;}
+  .btn-accept { background: #4caf50; color: #fff; }
+  .btn-accept:hover { background: #388e3c; }
+  .btn-reject { background: #f44336; color: #fff; }
+  .btn-reject:hover { background: #d32f2f; }
+  .btn-msg { background: #0088cc; color: #fff; }
+  .btn-msg:hover { background: #006699; }
+  .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; background: var(--card-bg); border-radius: 15px; }
+
   .history-list { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; overflow: hidden; }
   .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--card-border); }
   .history-item:last-child { border-bottom: none; }
   .history-item .q-name { font-weight: bold; color: var(--text-color); }
   .history-item .q-score { color: var(--accent); font-weight: bold; }
   
-  .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; }
+  /* تنسيقات البادجات والتحذير */
   .owner-badge { color: #ffd700; font-size: 14px; background: #333; padding: 4px 10px; border-radius: 10px; }
+  .badges-container { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .custom-badge { background: rgba(255,0,0,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+  
+  #warningBox { display: none; background: rgba(255,0,0,0.1); border: 2px solid var(--accent); color: var(--accent); padding: 15px; border-radius: 10px; width: 100%; margin-top: 15px; text-align: center; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -68,7 +81,25 @@
   <div class="header-card">
     <div class="avatar" id="userAvatar">A</div>
     <div class="username" id="userName">Ahmed</div>
-    <div class="total-score" data-ar="🏆 مجموع النقاط:" data-en="🏆 Total Score:">🏆 مجموع النقاط: <span id="totalScoreDisplay">0</span></div>
+    
+    <!-- مربع التحذير الجديد -->
+    <div id="warningBox">
+      ⚠️ <span id="warningText"></span>
+    </div>
+
+    <!-- مكان البادجات -->
+    <div class="badges-container" id="badgesContainer">
+        <!-- البادجات هتظهر هنا -->
+    </div>
+
+    <div class="stats-row" style="margin-top: 15px;">
+      <div class="score-badge">
+        🏆 <span data-ar="مجموع النقاط:" data-en="Total Score:">مجموع النقاط:</span> <span id="totalScoreDisplay">0</span>
+      </div>
+      <div class="xp-badge">
+        ✨ <span data-ar="الخبرة (XP):" data-en="XP:">الخبرة (XP):</span> <span id="xpDisplay">0</span>
+      </div>
+    </div>
 
     <div class="upload-section">
       <label for="imageUpload" class="upload-label" data-ar="📷 اختر صورة" data-en="📷 Choose Image">📷 اختر صورة</label>
@@ -77,17 +108,35 @@
     </div>
   </div>
 
-  <div class="history-section">
-    <h2 data-ar="📜 سجل كويزاتك" data-en="📜 Quiz History">📜 سجل كويزاتك</h2>
+  <!-- طلبات الصداقة -->
+  <div>
+    <h2 class="section-title" data-ar="🔔 طلبات الصداقة" data-en="🔔 Friend Requests">🔔 طلبات الصداقة</h2>
+    <div id="requestsList" class="friends-container">
+      <div class="no-data" data-ar="لا يوجد طلبات جديدة." data-en="No new requests.">لا يوجد طلبات جديدة.</div>
+    </div>
+  </div>
+
+  <!-- قائمة الأصدقاء -->
+  <div>
+    <h2 class="section-title" data-ar="👥 أصدقائي" data-en="👥 My Friends">👥 أصدقائي</h2>
+    <div id="friendsList" class="friends-container">
+      <div class="no-data" data-ar="لسه مفيش أصدقاء." data-en="No friends yet.">لسه مفيش أصدقاء.</div>
+    </div>
+  </div>
+
+  <!-- سجل الكويزات -->
+  <div>
+    <h2 class="section-title" data-ar="📜 سجل كويزاتك" data-en="📜 Quiz History">📜 سجل كويزاتك</h2>
     <div class="history-list" id="historyList">
       <div class="no-data" data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</div>
     </div>
   </div>
+  
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, get, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
@@ -102,7 +151,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   
-  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
@@ -111,7 +160,6 @@
   let currentLang = localStorage.getItem('lang') || 'ar';
   const avatarEl = document.getElementById('userAvatar');
 
-  // دالة الترجمة
   function applyLanguage() {
     const elements = document.querySelectorAll('[data-ar]');
     elements.forEach(el => {
@@ -120,7 +168,7 @@
     document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
   }
 
-  // جلب بيانات المستخدم
+  // جلب بيانات المستخدم (الصورة)
   window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snapshot) => {
     const userData = snapshot.val();
     if (userData && userData.profilePic) {
@@ -132,12 +180,40 @@
     }
   });
 
+  // عرض الاسم
   if (currentUser.toLowerCase() === 'ahmed') {
       document.getElementById('userName').innerHTML = `${currentUser} <span class="owner-badge">👑 Owner</span>`;
   } else {
       document.getElementById('userName').innerText = currentUser;
   }
 
+  // جلب البادجات (الإضافة الجديدة)
+  window.onValue(window.ref(window.db, 'badges/' + currentUser), (snapshot) => {
+    const data = snapshot.val();
+    const container = document.getElementById('badgesContainer');
+    container.innerHTML = '';
+    if (data) {
+        Object.keys(data).forEach(badge => {
+            const span = document.createElement('span');
+            span.className = 'custom-badge';
+            span.innerText = badge;
+            container.appendChild(span);
+        });
+    }
+  });
+
+  // جلب التحذيرات (الإضافة الجديدة)
+  window.onValue(window.ref(window.db, 'warnings/' + currentUser), (snapshot) => {
+    const warnData = snapshot.val();
+    if (warnData) {
+        document.getElementById('warningBox').style.display = 'block';
+        document.getElementById('warningText').innerText = `لقد تلقيت تحذيراً من الإدارة: ${warnData.text}`;
+    } else {
+        document.getElementById('warningBox').style.display = 'none';
+    }
+  });
+
+  // رفع الصورة
   let selectedFile = null;
   window.previewImage = function(event) {
     selectedFile = event.target.files[0];
@@ -155,32 +231,90 @@
   window.uploadProfilePic = async function() {
     if (!selectedFile) return;
     const btn = document.getElementById('saveImgBtn');
-    btn.innerText = currentLang === 'en' ? 'Uploading...' : 'جاري الرفع...';
-    btn.disabled = true;
-
+    btn.innerText = '...'; btn.disabled = true;
     const formData = new FormData();
     formData.append('image', selectedFile);
-
     try {
       const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
       const data = await response.json();
-      
       if (data.success) {
-        const imageUrl = data.data.url;
-        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/profilePic'), imageUrl);
-        alert(currentLang === 'en' ? "Image uploaded successfully! 🎉" : "تم رفع الصورة بنجاح! 🎉");
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/profilePic'), data.data.url);
+        alert(currentLang === 'en' ? "Image uploaded!" : "تم رفع الصورة بنجاح! 🎉");
         btn.style.display = 'none';
-      } else {
-        alert(currentLang === 'en' ? "Upload failed. Check API Key." : "فشل رفع الصورة. اتأكد من مفتاح الـ API.");
       }
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
-    
-    btn.innerText = currentLang === 'en' ? 'Save Image' : 'حفظ الصورة';
-    btn.disabled = false;
+    } catch (error) { alert("Error: " + error.message); }
+    btn.innerText = currentLang === 'en' ? 'Save Image' : 'حفظ الصورة'; btn.disabled = false;
   }
 
+  // 1. طلبات الصداقة
+  window.onValue(window.ref(window.db, 'friend_requests/' + currentUser), (snapshot) => {
+    const data = snapshot.val();
+    const list = document.getElementById('requestsList');
+    list.innerHTML = '';
+
+    if (!data) { 
+        list.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No new requests.' : 'لا يوجد طلبات جديدة.'}</div>`; 
+        return; 
+    }
+
+    for (let sender in data) {
+      const div = document.createElement('div');
+      div.className = 'friend-card';
+      div.innerHTML = `
+        <div class="friend-info">
+          <div class="friend-avatar">${sender.charAt(0).toUpperCase()}</div>
+          <div class="friend-name">${sender}</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="action-btn btn-accept" onclick="acceptRequest('${sender}')">${currentLang === 'en' ? 'Accept' : 'قبول'}</button>
+          <button class="action-btn btn-reject" onclick="rejectRequest('${sender}')">${currentLang === 'en' ? 'Reject' : 'رفض'}</button>
+        </div>
+      `;
+      list.appendChild(div);
+    }
+  });
+
+  window.acceptRequest = async function(sender) {
+    try {
+      await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + sender), true);
+      await window.set(window.ref(window.db, 'friends/' + sender + '/' + currentUser), true);
+      await window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+      alert(currentLang === 'en' ? "Friend request accepted!" : "تم قبول الصداقة! 🎉");
+    } catch(e) { alert(e.message); }
+  }
+
+  window.rejectRequest = function(sender) {
+    window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+  }
+
+  // 2. قائمة الأصدقاء
+  window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
+    const data = snapshot.val();
+    const list = document.getElementById('friendsList');
+    list.innerHTML = '';
+
+    if (!data) { 
+        list.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No friends yet.' : 'لسه مفيش أصدقاء.'}</div>`; 
+        return; 
+    }
+
+    for (let friend in data) {
+      const div = document.createElement('div');
+      div.className = 'friend-card';
+      div.innerHTML = `
+        <div class="friend-info">
+          <div class="friend-avatar">${friend.charAt(0).toUpperCase()}</div>
+          <div class="friend-name">${friend}</div>
+        </div>
+        <div>
+          <a href="messages.html?to=${friend}" class="action-btn btn-msg">${currentLang === 'en' ? '💬 Message' : '💬 رسالة'}</a>
+        </div>
+      `;
+      list.appendChild(div);
+    }
+  });
+
+  // 3. سجل الكويزات والنقاط
   const historyList = document.getElementById('historyList');
   const quizNames = {
     "annabelle": "أنابيل", "conjuring": "الكونجورينج", "nun": "الراهبة", "fnaf": "FNAF", "squid": "لعبة الحبار",
@@ -222,7 +356,12 @@
     document.getElementById('totalScoreDisplay').innerText = totalScore;
   });
 
-  // تشغيل الترجمة أول ما الصفحة تفتح
+  // جلب الـ XP
+  window.onValue(window.ref(window.db, 'users_data/' + currentUser + '/xp'), (snapshot) => {
+    let xp = snapshot.exists() ? snapshot.val() : 0;
+    document.getElementById('xpDisplay').innerText = xp;
+  });
+
   window.onload = () => {
     if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
     applyLanguage();
