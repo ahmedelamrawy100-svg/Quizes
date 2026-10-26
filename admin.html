@@ -7,12 +7,30 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --input-bg: #000; }
+  :root { 
+      --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; 
+      --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; 
+      --input-bg: #000;
+  }
   body.light-mode { --bg: #f4f4f4; --sidebar: #fff; --text: #111; --border: #ccc; --gold: #b8860b; --input-bg: #fff; }
   
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; transition: 0.3s; }
-  
+
+  /* --- شاشة القفل --- */
+  #passwordLock { position: fixed; inset: 0; background: var(--bg); z-index: 99999; display: flex; justify-content: center; align-items: center; }
+  .lock-box { background: var(--sidebar); border: 2px solid var(--blue); border-radius: 15px; padding: 40px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(0, 136, 204, 0.2); }
+  .lock-box h2 { color: var(--blue); margin-bottom: 10px; font-size: 24px; }
+  .lock-box p { color: #888; margin-bottom: 20px; font-size: 14px; }
+  .lock-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: 'Cairo'; font-size: 16px; text-align: center; letter-spacing: 2px; margin-bottom: 20px; outline: none; }
+  .lock-input:focus { border-color: var(--blue); }
+  .lock-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; background: var(--blue); color: #fff; margin-bottom: 10px; }
+  .lock-btn:hover { background: #006699; }
+  .lock-btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--text); }
+  .lock-btn-cancel:hover { background: rgba(255,255,255,0.1); }
+  #errorMsg { color: var(--accent); font-weight: bold; font-size: 14px; margin-bottom: 10px; display: none; }
+
+  /* --- التصميم --- */
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
   .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -66,105 +84,100 @@
 </head>
 <body>
 
-<div id="toast-container"></div>
-
-<div id="noPermissionScreen">
-    <h1 id="noPermTitle" data-ar="🚫 ليس لديك صلاحيات" data-en="🚫 No Permission">🚫 ليس لديك صلاحيات</h1>
-    <p id="noPermMsg" data-ar="هذه الصفحة مخصصة للأدمن فقط." data-en="This page is for admins only.">هذه الصفحة مخصصة للأدمن فقط.</p>
-    <a href="index.html" id="backHomeBtn" data-ar="العودة للرئيسية" data-en="Back to Home">العودة للرئيسية</a>
+<!-- شاشة القفل -->
+<div id="passwordLock">
+    <div class="lock-box">
+        <h2>🛡️ لوحة الإدارة</h2>
+        <p>مخصصة للأدمنز فقط. أدخل كلمة المرور للمتابعة.</p>
+        <div id="errorMsg">كلمة المرور غير صحيحة!</div>
+        <input type="password" id="adminPasswordInput" class="lock-input" placeholder="Password" onkeypress="if(event.key==='Enter') window.checkPassword()">
+        <button class="lock-btn" onclick="window.checkPassword()">فتح القفل (Unlock)</button>
+        <button class="lock-btn lock-btn-cancel" onclick="location.href='index.html'">إلغاء (Cancel)</button>
+    </div>
 </div>
 
-<div id="adminUI" style="display: none; width: 100%;">
-    <div class="sidebar">
-      <div class="sidebar-logo" id="panelTitle" data-ar="🛡️ أهلاً " data-en="🛡️ Welcome ">🛡️ أهلاً </div>
-      <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
-      <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 إدارة اللاعبين" data-en="👥 Players">👥 إدارة اللاعبين</div>
-      <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 إدارة المحتوى" data-en="📝 Content">📝 إدارة المحتوى</div>
-      <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 إدارة الغرف" data-en="🚪 Rooms">🚪 إدارة الغرف</div>
-      <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
-      <div class="nav-item" style="margin-top: auto; color: var(--accent);" onclick="location.href='index.html'" data-ar="⬅ العودة للرئيسية" data-en="⬅ Back to Home">⬅ العودة للرئيسية</div>
-    </div>
+<!-- المحتوى الأساسي -->
+<div id="adminContent" style="display: none; width: 100%;">
+  <div id="toast-container"></div>
 
-    <div class="main">
-      <div class="header">
-        <h1 id="pageTitle" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</h1>
-        <div>
-            <button class="header-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
-            <button class="header-btn" onclick="window.toggleLanguage()" id="langBtn">AR</button>
-        </div>
-      </div>
+  <div class="sidebar">
+    <div class="sidebar-logo" id="panelTitle" data-ar="🛡️ أهلاً " data-en="🛡️ Welcome ">🛡️ أهلاً </div>
+    <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
+    <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 إدارة اللاعبين" data-en="👥 Players">👥 إدارة اللاعبين</div>
+    <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 إدارة المحتوى" data-en="📝 Content">📝 إدارة المحتوى</div>
+    <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 إدارة الغرف" data-en="🚪 Rooms">🚪 إدارة الغرف</div>
+    <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
+    <div class="nav-item" style="margin-top: auto; color: var(--accent);" onclick="location.href='index.html'" data-ar="⬅ العودة للرئيسية" data-en="⬅ Back to Home">⬅ العودة للرئيسية</div>
+  </div>
 
-      <!-- 1. Dashboard -->
-      <div id="tab-dashboard" class="tab active">
-        <div class="stats-grid">
-          <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-          <!-- شيلنا كارت متصل الآن -->
-          <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-          <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
-        </div>
-      </div>
-
-      <!-- 2. Users -->
-      <div id="tab-users" class="tab">
-        <input type="text" id="searchUser" class="form-control" data-ar="🔍 ابحث عن لاعب..." data-en="🔍 Search for a player..." placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
-        <div class="list-container" id="usersList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
-      </div>
-
-      <!-- 3. Content -->
-      <div id="tab-content" class="tab">
-        <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
-        <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
-        
-        <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
-        <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
-        
-        <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
-        <div class="list-container" id="requestsList"></div>
-      </div>
-
-      <!-- 4. Rooms -->
-      <div id="tab-rooms" class="tab">
-        <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة حالياً" data-en="🚪 Active Rooms">🚪 الغرف النشطة حالياً</h3>
-        <div class="list-container" id="roomsList"></div>
-      </div>
-
-      <!-- 5. Warnings -->
-      <div id="tab-warnings" class="tab">
-        <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="⚠️ التحذيرات المسجلة" data-en="⚠️ Warnings">⚠️ التحذيرات المسجلة</h3>
-        <div class="list-container" id="warningsList"></div>
+  <div class="main">
+    <div class="header">
+      <h1 id="pageTitle" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</h1>
+      <div>
+          <button class="header-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
+          <button class="header-btn" onclick="window.toggleLanguage()" id="langBtn">AR</button>
       </div>
     </div>
+
+    <div id="tab-dashboard" class="tab active">
+      <div class="stats-grid">
+        <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
+        <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
+        <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
+      </div>
+    </div>
+
+    <div id="tab-users" class="tab">
+      <input type="text" id="searchUser" class="form-control" data-ar="🔍 ابحث عن لاعب..." data-en="🔍 Search for a player..." placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
+      <div class="list-container" id="usersList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+    </div>
+
+    <div id="tab-content" class="tab">
+      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
+      <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
+      
+      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
+      <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
+      
+      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
+      <div class="list-container" id="requestsList"></div>
+    </div>
+
+    <div id="tab-rooms" class="tab">
+      <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة حالياً" data-en="🚪 Active Rooms">🚪 الغرف النشطة حالياً</h3>
+      <div class="list-container" id="roomsList"></div>
+    </div>
+
+    <div id="tab-warnings" class="tab">
+      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="⚠️ التحذيرات المسجلة" data-en="⚠️ Warnings">⚠️ التحذيرات المسجلة</h3>
+      <div class="list-container" id="warningsList"></div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push;
 
-  const currentUser = localStorage.getItem('loggedInUser');
-  
-  if (!currentUser) {
-      document.getElementById('noPermissionScreen').style.display = 'flex';
-  } else {
-      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(rankSnap => {
-          let rank = 'Player';
-          if (rankSnap.exists()) rank = rankSnap.val();
-          
-          const isOwner = currentUser.toLowerCase() === 'ahmed' || rank.toLowerCase() === 'owner';
-          const isAdmin = rank.toLowerCase() === 'admin';
-
-          if (isOwner || isAdmin) {
-              document.getElementById('adminUI').style.display = 'flex';
-              let currentLang = localStorage.getItem('lang') || 'ar';
-              document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${currentUser}` : `🛡️ Welcome ${currentUser}`;
-              initData();
-          } else {
-              document.getElementById('noPermissionScreen').style.display = 'flex';
-          }
-      }).catch(err => { document.getElementById('noPermissionScreen').style.display = 'flex'; });
+  // التحقق من الباسورد (لازم تكون عامل حساب admin@quizhub.com في الفايربيز)
+  window.checkPassword = async function() {
+      const input = document.getElementById('adminPasswordInput').value;
+      
+      try {
+          await signInWithEmailAndPassword(auth, "admin@quizhub.com", input);
+          document.getElementById('passwordLock').style.display = 'none';
+          document.getElementById('adminContent').style.display = 'flex';
+          initData();
+      } catch (error) {
+          document.getElementById('errorMsg').style.display = 'block';
+          document.getElementById('adminPasswordInput').value = '';
+          document.getElementById('adminPasswordInput').focus();
+      }
   }
 
   window.showToast = function(msg, type='success') {
@@ -196,7 +209,6 @@
 
   function applyLanguage() {
       let currentLang = localStorage.getItem('lang') || 'ar';
-      
       document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
       
@@ -229,16 +241,18 @@
 
   applyLanguage();
 
-  // البيانات (شيلنا allPresence)
   let allUsers = {}, allScores = {}, allRooms = {};
+  let isDataLoaded = false;
 
   function initData() {
+      if(isDataLoaded) return;
+      isDataLoaded = true;
+
       window.onValue(window.ref(window.db, 'usernames'), snap => { 
           allUsers = snap.val() || {}; 
           document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
           window.renderUsers(); 
       });
-      // شيلنا قراءة الـ presence
       window.onValue(window.ref(window.db, 'scores'), snap => {
         allScores = snap.val() || {}; let plays = 0;
         for (let u in allScores) { for (let q in allScores[u]) { plays += Object.keys(allScores[u][q]).length; } }
@@ -256,7 +270,6 @@
       loadWarnings();
   }
 
-  // شيلنا الأونلاين من هنا
   window.renderUsers = function() {
     const container = document.getElementById('usersList'); if(!container) return;
     container.innerHTML = '';
