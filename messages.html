@@ -61,9 +61,7 @@
   document.getElementById('chatHeader').innerText = `💬 محادثة مع: ${otherUser}`;
 
   // حل مشكلة الحروف الكبيرة والصغيرة
-  // بنرتب الأسماء عشان الغرفة تبقى واحدة سواء أنت اللي بدأت أو هو
   const roomId = [currentUser.toLowerCase(), otherUser.toLowerCase()].sort().join("_");
-
   const chatRef = window.ref(window.db, 'chats/' + roomId);
 
   window.onValue(chatRef, (snapshot) => {
@@ -75,7 +73,6 @@
       const messages = Object.values(data);
       messages.forEach(msg => {
         const div = document.createElement('div');
-        // بنقارن الأسماء بالسمول عشان نعرف مين اللي باعت
         div.className = `msg ${msg.sender.toLowerCase() === currentUser.toLowerCase() ? 'me' : 'them'}`;
         div.innerText = msg.text;
         container.appendChild(div);
