@@ -53,6 +53,7 @@
   </div>
   <button class="speedrun-btn" onclick="startSpeedrun()" data-ar="⚡ العب في وضع السرعة" data-en="⚡ Play Speedrun">⚡ العب في وضع السرعة</button>
   <button class="speedrun-btn" style="background: #222; border-color: #f0d9b5; margin-top: 10px;" onclick="openChallengeModal()" data-ar="⚔️ تحدي صديق" data-en="⚔️ Challenge Friend">⚔️ تحدي صديق</button>
+  <button class="speedrun-btn" style="background: #ff9800; border-color: #ffd700; margin-top: 10px; color: #000;" onclick="startRandomMatch()" data-ar="🎲 تحدي عشوائي" data-en="🎲 Random Match">🎲 تحدي عشوائي</button>
 </div>
 
 <div id="playScreen" class="play-screen">
@@ -91,17 +92,78 @@
   window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.get = get; window.remove = remove; window.push = push;
 </script>
 <script src="questions.js"></script>
+<script src="notifications.js"></script>
 <script>
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
   let currentLang = localStorage.getItem('lang') || 'ar'; let highestScore = 0; let currentSaveKey = 'family'; const quizData = allQuizzesData.family; const currentUser = localStorage.getItem('loggedInUser') || 'Unknown';
   const sndCorrect = new Audio('sounds/click.wav'); const sndWrong = new Audio('sounds/scare.wav'); const sndTick = new Audio('sounds/click.wav');
   let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20; let isChallengeMode = false; let isSpeedrun = false; let myRoomCode = null; let myRole = null;
+  
   function toggleLanguage() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', currentLang); applyLanguage(); }
   function applyLanguage() { const elements = document.querySelectorAll('[data-ar]'); elements.forEach(el => { if(el.tagName === 'INPUT') { el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar'); } else { el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar'); } }); document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl'; document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR'; }
   function openChallengeModal() { document.getElementById('challengeModal').style.display = 'flex'; document.getElementById('roomOptions').style.display = 'block'; document.getElementById('waitingRoom').style.display = 'none'; }
   function closeChallengeModal() { document.getElementById('challengeModal').style.display = 'none'; if (myRoomCode && myRole === 'player1') { window.remove(window.ref(window.db, 'rooms/' + myRoomCode)); myRoomCode = null; } }
-  function createRoom() { const code = Math.random().toString(36).substring(2, 8).toUpperCase(); myRoomCode = code; myRole = 'player1'; isChallengeMode = true; document.getElementById('displayRoomCode').innerText = code; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block'; window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', created_at: Date.now() }).then(() => { window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => { const data = snapshot.val(); if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) { document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); } }); }); }
-  function joinRoom() { const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if (!code) { alert(currentLang === 'en' ? "Enter room code first!" : "اكتب كود الغرفة الأول!"); return; } myRole = 'player2'; myRoomCode = code; isChallengeMode = true; window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => { if (snapshot.exists()) { const data = snapshot.val(); if (data.status === 'waiting') { window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); }); } else { alert(currentLang === 'en' ? "Room is full or game started." : "هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); } } else { alert(currentLang === 'en' ? "Invalid room code." : "كود الغرفة غير صحيح."); } }); }
+  
+  function createRoom() { 
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase(); myRoomCode = code; myRole = 'player1'; isChallengeMode = true; 
+      document.getElementById('displayRoomCode').innerText = code; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block'; 
+      window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', quizType: currentSaveKey, created_at: Date.now() }).then(() => { 
+          window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => { 
+              const data = snapshot.val(); 
+              if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) { 
+                  document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); 
+              } 
+          }); 
+      }); 
+  }
+  
+  function joinRoom() { 
+      const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if (!code) { alert(currentLang === 'en' ? "Enter room code first!" : "اكتب كود الغرفة الأول!"); return; } 
+      myRole = 'player2'; myRoomCode = code; isChallengeMode = true; 
+      window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => { 
+          if (snapshot.exists()) { 
+              const data = snapshot.val(); 
+              if (data.status === 'waiting') { 
+                  window.update(window.ref(window.db, 'rooms/' + code), { status: 'playing' }).then(() => { document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); }); 
+              } else { alert(currentLang === 'en' ? "Room is full or game started." : "هذه الغرفة ممتلئة أو اللعبة بدأت بالفعل."); } 
+          } else { alert(currentLang === 'en' ? "Invalid room code." : "كود الغرفة غير صحيح."); } 
+      }); 
+  }
+
+  async function startRandomMatch() {
+      isChallengeMode = true;
+      const roomsSnap = await window.get(window.ref(window.db, 'rooms'));
+      if (roomsSnap.exists()) {
+          const rooms = roomsSnap.val();
+          let foundRoom = null;
+          for (let code in rooms) {
+              if (rooms[code].status === 'waiting' && rooms[code].quizType === currentSaveKey) {
+                  foundRoom = code; break;
+              }
+          }
+          if (foundRoom) {
+              myRoomCode = foundRoom; myRole = 'player2';
+              await window.update(window.ref(window.db, 'rooms/' + myRoomCode), { status: 'playing' });
+              startGame('challenge');
+          } else { createRandomRoom(); }
+      } else { createRandomRoom(); }
+  }
+
+  async function createRandomRoom() {
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase(); 
+      myRoomCode = code; myRole = 'player1';
+      await window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', quizType: currentSaveKey, created_at: Date.now() });
+      document.getElementById('challengeModal').style.display = 'flex'; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block';
+      document.getElementById('displayRoomCode').innerText = code;
+      document.getElementById('waitingStatus').innerText = currentLang === 'en' ? "Waiting for a random player..." : "في انتظار لاعب عشوائي...";
+      window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => { 
+          const data = snapshot.val(); 
+          if (data && data.status === 'playing' && myRole === 'player1' && !document.getElementById('playScreen').classList.contains('active-play')) { 
+              document.getElementById('challengeModal').style.display = 'none'; startGame('challenge'); 
+          } 
+      }); 
+  }
+
   function startGame(part) { isSpeedrun = false; if (part === 'challenge') { currentQuestions = [...quizData.comprehensive]; isChallengeMode = true; document.getElementById('playScreen').classList.add('active-play'); } else if (part === 'all') { currentQuestions = [...quizData.comprehensive]; currentSaveKey = 'family_all'; } currentQuestions.sort(() => Math.random() - 0.5); highestScore = 0; document.getElementById('selectionScreen').style.display = 'none'; document.getElementById('playScreen').style.display = 'block'; document.getElementById('backBtn').style.display = 'none'; current = 0; score = 0; loadQuestion(); }
   function startSpeedrun() { startGame('all'); isSpeedrun = true; }
   function loadQuestion() { answered = false; timeLeft = isSpeedrun ? 5 : 20; const q = currentQuestions[current]; let qText = currentLang === 'ar' ? q.q_ar : q.q_en; if (!qText && currentLang === 'ar') qText = q.q_en; document.getElementById('question').innerText = qText; let opts = currentLang === 'ar' ? q.options_ar : q.options_en; if (!opts && currentLang === 'ar') opts = q.options_en; const optEl = document.getElementById('options'); optEl.innerHTML = ''; let optionsWithAnswers = opts.map((opt, index) => ({ text: opt, isCorrect: index === q.answer })); optionsWithAnswers.sort(() => Math.random() - 0.5); optionsWithAnswers.forEach((opt) => { const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text; div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div); }); document.getElementById('score').innerText = currentLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; document.getElementById('next').style.display = 'none'; document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%'; clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer(); }
