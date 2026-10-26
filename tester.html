@@ -74,7 +74,7 @@
   <div class="main-layout">
     <div class="sidebar">
       <button class="nav-btn active" onclick="openTab('radar')">📡 الرادار (النبض)</button>
-      <button class="nav-btn" onclick="openTab('doctor')">🩺 الطبيب (الفحص)</button>
+      <button class="nav-btn" onclick="openTab('doctor')">🩺 الطبيب (الفحص الشامل)</button>
       <button class="nav-btn" onclick="openTab('data')">📊 البيانات الحية</button>
       <button class="nav-btn" onclick="openTab('console')">💻 الكونسول السري</button>
       <button class="nav-btn" onclick="openTab('clean')">🧹 المنشار (تنظيف)</button>
@@ -101,15 +101,20 @@
 
       <div id="tab-doctor" class="content">
         <h2 style="color:var(--accent); margin-bottom:20px;">🩺 فحص شامل للموقع</h2>
-        <button class="btn btn-accent" style="width:100%; margin-bottom:20px;" onclick="runFullDoctor()">🚀 ابدأ الفحص الشامل</button>
+        <button class="btn btn-accent" style="width:100%; margin-bottom:20px;" onclick="runMasterCheck()">🚀 ابدأ الفحص الشامل (Master Check)</button>
+        
         <div class="grid">
           <div class="card">
-            <h3>فحص المسارات</h3>
-            <div class="console" id="doctorConsole"></div>
+            <h3>حالة الملفات الأساسية</h3>
+            <div id="fileStatus" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
           <div class="card">
-            <h3>حالة الصور</h3>
-            <div id="imagesStatus" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <h3>حالة صور الكويزات</h3>
+            <div id="imageStatus" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;"></div>
+          </div>
+          <div class="card" style="grid-column: 1 / -1;">
+            <h3>سجل الفحص (Console Log)</h3>
+            <div class="console" id="masterConsole" style="height: 250px;"></div>
           </div>
         </div>
       </div>
@@ -205,7 +210,7 @@
   }
 
   function initSystem() {
-      // 1. HUD Connection Check (تم تعديلها عشان متبقاش مفصولة)
+      // 1. HUD Connection Check
       const connRef = ref(db, '.info/connected');
       onValue(connRef, (snap) => {
           if (snap.val() === true) {
@@ -254,29 +259,75 @@
       document.getElementById('pingResult').style.color = ms < 500 ? 'var(--success)' : 'var(--warning)';
   }
 
-  window.runFullDoctor = async () => {
-      const consoleBox = document.getElementById('doctorConsole'); consoleBox.innerHTML = '';
-      logTo('doctorConsole', 'بدء الفحص الشامل...', 'info');
-      
-      const paths = ['usernames', 'users_data', 'roles/admins', 'badges', 'rooms', 'warnings', 'messages', 'site_settings', 'custom_quizzes'];
-      for (let p of paths) {
+  // 🚀 دالة الفحص الشامل الجديدة
+  window.runMasterCheck = async () => {
+      const consoleBox = document.getElementById('masterConsole');
+      consoleBox.innerHTML = '';
+      const fileBox = document.getElementById('fileStatus');
+      const imgBox = document.getElementById('imageStatus');
+      fileBox.innerHTML = ''; imgBox.innerHTML = '';
+
+      logTo('masterConsole', '🚀 بدء الفحص الشامل للموقع...', 'info');
+
+      // 1. فحص الملفات الأساسية
+      logTo('masterConsole', '📂 جاري فحص الملفات الأساسية...', 'info');
+      const requiredFiles = [
+          { name: 'style.css', path: 'style.css' },
+          { name: 'questions.js', path: 'questions.js' },
+          { name: 'notifications.js', path: 'notifications.js' }
+      ];
+
+      for (let file of requiredFiles) {
           try {
-              await set(ref(db, p + '/_test_'), "ok");
-              await remove(ref(db, p + '/_test_'));
-              logTo('doctorConsole', `✅ ${p} (شغال)`, 'success');
+              const res = await fetch(file.path, { method: 'HEAD' });
+              if (res.ok) {
+                  fileBox.innerHTML += `<div style="color:var(--success);">✅ ${file.name} موجود</div>`;
+                  logTo('masterConsole', `✅ ${file.name} موجود`, 'success');
+              } else {
+                  fileBox.innerHTML += `<div style="color:var(--danger);">❌ ${file.name} غير موجود</div>`;
+                  logTo('masterConsole', `❌ ${file.name} غير موجود`, 'error');
+              }
           } catch(e) {
-              logTo('doctorConsole', `❌ ${p} (مقفول: ${e.message})`, 'error');
+              fileBox.innerHTML += `<div style="color:var(--danger);">❌ ${file.name} (خطأ في التحميل)</div>`;
+              logTo('masterConsole', `❌ ${file.name} (خطأ في التحميل)`, 'error');
           }
       }
 
-      const imgBox = document.getElementById('imagesStatus'); imgBox.innerHTML = '';
-      const imgs = ['pic/Logo.png', 'pic/The Conjuring.jpg', 'pic/FNAF.jpg', 'pic/Wednesday.jpg'];
-      imgs.forEach(src => {
+      // 2. فحص صور الكويزات (من مجلد pic)
+      logTo('masterConsole', '🖼️ جاري فحص صور الكويزات...', 'info');
+      const quizImages = [
+          'pic/Logo.png', 'pic/The Conjuring 1.jpg', 'pic/The Conjuring 2.jpeg', 'pic/The Conjuring 3.jpeg',
+          'pic/FNAF 1.jpeg', 'pic/FNAF 2.jpeg', 'pic/Squid Game 1.jpeg', 'pic/Squid Game 2.jpg',
+          'pic/Wednesday 1.jpg', 'pic/Wednesday 2.jpg', 'pic/True Beauty.jpg', 'pic/Dream To You.jpeg',
+          'pic/Family By Choice.avif', 'pic/Why Her.jpg', 'pic/busan1.jpeg', 'pic/busan2.jpeg'
+      ];
+
+      for (let src of quizImages) {
           const img = new Image();
-          img.onload = () => imgBox.innerHTML += `<div style="color:var(--success);">✅ ${src}</div>`;
-          img.onerror = () => imgBox.innerHTML += `<div style="color:var(--danger);">❌ ${src} (مكسورة)</div>`;
+          img.onload = () => {
+              imgBox.innerHTML += `<div style="color:var(--success);">✅ ${src.split('/').pop()}</div>`;
+          };
+          img.onerror = () => {
+              imgBox.innerHTML += `<div style="color:var(--danger);">❌ ${src.split('/').pop()} (مكسورة)</div>`;
+              logTo('masterConsole', `❌ الصورة ${src} مكسورة أو غير موجودة!`, 'error');
+          };
           img.src = src;
-      });
+      }
+
+      // 3. فحص مسارات الفايربيز
+      logTo('masterConsole', '🗄️ جاري فحص مسارات قاعدة البيانات...', 'info');
+      const dbNodes = ['usernames', 'users_data', 'scores', 'badges', 'rooms', 'warnings', 'custom_quizzes', 'global_chat', 'site_settings', 'friend_requests', 'friends'];
+
+      for (let node of dbNodes) {
+          try {
+              await get(ref(db, node));
+              logTo('masterConsole', `✅ مسار (${node}) متاح`, 'success');
+          } catch(e) {
+              logTo('masterConsole', `❌ مسار (${node}) غير متاح: ${e.message}`, 'error');
+          }
+      }
+
+      logTo('masterConsole', '🎉 الفحص الشامل انتهى!', 'success');
   }
 
   window.runCmd = async () => {
