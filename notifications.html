@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔔 الإشعارات - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg-color: #000; --text-color: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; --gold: #ffd700; --danger: #f44336; }
+  body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --card-bg: #fff; --border: #ccc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  
+  .top-bar { width: 100%; max-width: 600px; display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  
+  .container { width: 100%; max-width: 600px; }
+  .header-title { text-align: center; color: var(--accent); font-size: 32px; margin-bottom: 30px; font-weight: bold; }
+  
+  .notif-list { display: flex; flex-direction: column; gap: 15px; }
+  .notif-item { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .notif-info { display: flex; align-items: center; gap: 15px; }
+  .notif-icon { font-size: 24px; }
+  .notif-text { font-weight: bold; font-size: 16px; }
+  .notif-time { font-size: 14px; color: #aaa; margin-top: 5px; }
+  
+  .action-btn { padding: 8px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; font-size: 14px; border: none; cursor: pointer; font-family: 'Cairo'; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  
+  .no-data { text-align: center; color: #aaa; padding: 30px; background: var(--card-bg); border-radius: 15px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
+</div>
+
+<div class="container">
+  <h1 class="header-title">🔔 مركز الإشعارات</h1>
+  
+  <div class="notif-list" id="notificationsList">
+    <div class="no-data">جاري تحميل الإشعارات...</div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+
+  const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) { window.location.href = 'index.html'; }
+
+  const list = document.getElementById('notificationsList');
+  let totalNotifs = 0;
+
+  // 1. تحميل طلبات الصداقة
+  onValue(ref(db, 'friend_requests'), (snapshot) => {
+    const data = snapshot.val();
+    let myRequests = {};
+    if (data) {
+        for (let key in data) {
+            if (key.toLowerCase() === currentUser.toLowerCase()) { myRequests = data[key]; break; }
+        }
+    }
+    
+    // بنمسح القديم ونرجع نضيف
+    list.innerHTML = '';
+    totalNotifs = 0;
+
+    for (let sender in myRequests) {
+        totalNotifs++;
+        const div = document.createElement('div');
+        div.className = 'notif-item';
+        div.innerHTML = `
+            <div class="notif-info">
+                <div class="notif-icon">👤</div>
+                <div>
+                    <div class="notif-text">طلب صداقة من ${sender}</div>
+                    <div class="notif-time">في انتظار الموافقة</div>
+                </div>
+            </div>
+            <a href="inbox.html" class="action-btn btn-gold">عرض الطلب</a>
+        `;
+        list.appendChild(div);
+    }
+
+    // 2. تحميل التحذيرات
+    onValue(ref(db, 'warnings'), (warnSnapshot) => {
+        const warnData = warnSnapshot.val();
+        let myWarning = null;
+        if (warnData) {
+            for (let key in warnData) {
+                if (key.toLowerCase() === currentUser.toLowerCase()) { myWarning = warnData[key]; break; }
+            }
+        }
+
+        if (myWarning) {
+            totalNotifs++;
+            const div = document.createElement('div');
+            div.className = 'notif-item';
+            div.style.borderColor = 'var(--danger)'; // لون أحمر للتحذير
+            div.innerHTML = `
+                <div class="notif-info">
+                    <div class="notif-icon">⚠️</div>
+                    <div>
+                        <div class="notif-text" style="color: var(--danger);">تحذير من الإدارة</div>
+                        <div class="notif-time">السبب: ${myWarning.text}</div>
+                    </div>
+                </div>
+                <div class="action-btn btn-danger">تحذير</div>
+            `;
+            list.appendChild(div);
+        }
+
+        // لو مفيش أي إشعارات خالص
+        if (totalNotifs === 0) {
+            list.innerHTML = `<div class="no-data">لا توجد إشعارات جديدة حالياً.</div>`;
+        }
+    });
+  });
+</script>
+</body>
+</html>
