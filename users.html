@@ -67,8 +67,8 @@
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   const translations = {
-    ar: { back: "⬅ رجوع", title: "👥 كل اللاعبين", placeholder: "ابحث عن لاعب بالاسم...", loading: "جاري تحميل اللاعبين...", noUsers: "مفيش مستخدمين تانيين متاحين حالياً.", add: "➕ إضافة صديق", msg: "💬 رسالة", pending: "⏳ في انتظار الموافقة", you: "👤 أنت", owner: "👑 Owner" },
-    en: { back: "⬅ Back", title: "👥 All Players", placeholder: "Search by username...", loading: "Loading players...", noUsers: "No other players available.", add: "➕ Add Friend", msg: "💬 Message", pending: "⏳ Pending", you: "👤 You", owner: "👑 Owner" }
+    ar: { back: "⬅ رجوع", title: "👥 كل اللاعبين", placeholder: "ابحث عن لاعب بالاسم...", noUsers: "مفيش مستخدمين تانيين متاحين حالياً.", add: "➕ إضافة صديق", msg: "💬 رسالة", pending: "⏳ في انتظار الموافقة", you: "👤 أنت", owner: "👑 Owner" },
+    en: { back: "⬅ Back", title: "👥 All Players", placeholder: "Search by username...", noUsers: "No other players available.", add: "➕ Add Friend", msg: "💬 Message", pending: "⏳ Pending", you: "👤 You", owner: "👑 Owner" }
   };
 
   function applyLanguage() {
@@ -78,7 +78,7 @@
     document.getElementById('pageTitle').innerText = t.title;
     document.getElementById('searchInput').placeholder = t.placeholder;
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-    window.renderUsers(); // عشان الأزرار تتحدث
+    window.renderUsers();
   }
 
   window.toggleLanguage = function() {
@@ -89,17 +89,33 @@
 
   let allUsers = [], myFriends = {}, sentRequests = {};
 
-  window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
-    myFriends = snapshot.val() || {};
+  // قراءة الأصدقاء بطريقة ذكية (بتتجاهل الحروف الكبيرة والصغيرة)
+  window.onValue(window.ref(window.db, 'friends'), (snapshot) => {
+    const allFriends = snapshot.val();
+    myFriends = {};
+    if (allFriends) {
+        for (let key in allFriends) {
+            if (key.toLowerCase() === currentUser.toLowerCase()) {
+                myFriends = allFriends[key];
+                break;
+            }
+        }
+    }
     window.renderUsers();
   });
 
+  // قراءة الطلبات بطريقة ذكية (بتتجاهل الحروف الكبيرة والصغيرة)
   window.onValue(window.ref(window.db, 'friend_requests'), (snapshot) => {
     const data = snapshot.val();
     sentRequests = {};
     if (data) {
       for (let targetUser in data) {
-        if (data[targetUser][currentUser]) sentRequests[targetUser] = true;
+        // لو المستخدم اللي إحنا بنبعتله موجود في الطلبات
+        for (let sender in data[targetUser]) {
+            if (sender.toLowerCase() === currentUser.toLowerCase()) {
+                sentRequests[targetUser] = true;
+            }
+        }
       }
     }
     window.renderUsers();
@@ -126,9 +142,14 @@
     }
 
     displayUsers.forEach(user => {
-      const isFriend = myFriends[user] === true;
+      // بنشوف هل المستخدم ده صاحبنا (سواء بحروف كبيرة أو صغيرة)
+      let isFriend = false;
+      for(let f in myFriends) { if(f.toLowerCase() === user.toLowerCase()) { isFriend = true; break; } }
+
       const isOwner = (user.toLowerCase() === 'ahmed'); 
-      const isPending = sentRequests[user] === true;
+      
+      let isPending = false;
+      for(let p in sentRequests) { if(p.toLowerCase() === user.toLowerCase()) { isPending = true; break; } }
 
       const div = document.createElement('div');
       div.className = `user-card ${isOwner ? 'owner-card' : ''}`;
@@ -156,16 +177,16 @@
 
   window.addFriend = async function(targetUser, btnElement) {
     if (targetUser.toLowerCase() === currentUser.toLowerCase()) return;
-    
-    btnElement.innerText = '...';
-    btnElement.disabled = true;
+    btnElement.innerText = '...'; btnElement.disabled = true;
 
     try {
         if (currentUser.toLowerCase() === 'ahmed') {
+            // الأونر يضيف فوراً
             await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + targetUser), true);
             await window.set(window.ref(window.db, 'friends/' + targetUser + '/' + currentUser), true);
             alert(currentLang === 'en' ? `Added ${targetUser} as friend!` : `تمت إضافة ${targetUser} كصديق فوراً!`);
         } else {
+            // أي حد تاني يبعت طلب (بنستخدم الاسم الحقيقي targetUser)
             await window.set(window.ref(window.db, 'friend_requests/' + targetUser + '/' + currentUser), "pending");
             alert(currentLang === 'en' ? `Friend request sent to ${targetUser}.` : `تم إرسال طلب صداقة لـ ${targetUser}.`);
         }
