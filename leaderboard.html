@@ -9,39 +9,52 @@
 <style>
   :root {
     --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333;
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --gold: #ffd700;
   }
   body.light-mode {
     --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
-    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; --gold: #b8860b;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
-  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+  .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; text-decoration: none; transition: 0.3s; }
+  .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
 
   .leaderboard-container { width: 100%; max-width: 800px; margin-top: 60px; }
-  .header-title { text-align: center; font-size: 40px; color: gold; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
+  .header-title { text-align: center; font-size: 40px; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
 
-  .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+  .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+  .tab-btn { padding: 10px 25px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+  .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+  .tab-btn:hover:not(.active) { border-color: var(--gold); }
+
+  .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
   .filter-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
-  .filter-btn.active { background: gold; color: #000; border-color: gold; }
-  .filter-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: gold; }
+  .filter-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+  .filter-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: var(--gold); }
 
-  .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 40px; height: 200px; }
-  .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; }
-  .podium-avatar { width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 2px solid #fff; }
+  .podium-wrapper { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin-bottom: 40px; min-height: 200px; flex-wrap: wrap; }
+  .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; animation: fadeInUp 0.5s ease-out; }
+  .podium-avatar { width: 70px; height: 70px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 3px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
   .podium-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; text-align: center; word-break: break-all; }
-  .podium-score { font-size: 14px; color: gold; font-weight: bold; margin-bottom: 10px; }
-  .podium-base { width: 100%; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; font-size: 24px; padding-top: 10px; color: #000; }
-  .p1 .podium-base { height: 130px; background: linear-gradient(to top, #b8860b, #ffd700); font-size: 36px; }
-  .p2 .podium-base { height: 100px; background: linear-gradient(to top, #708090, #c0c0c0); }
-  .p3 .podium-base { height: 80px; background: linear-gradient(to top, #8b4513, #cd7f32); }
+  .podium-score { font-size: 14px; color: var(--gold); font-weight: bold; margin-bottom: 10px; }
+  .podium-base { width: 100%; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; font-size: 26px; padding-top: 15px; color: #000; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
+  
+  .rank-1 { order: 2; }
+  .rank-2 { order: 1; }
+  .rank-3 { order: 3; }
 
-  .leaderboard-list { background: var(--card-bg); border: 2px solid gold; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .rank-1 .podium-base { height: 140px; background: linear-gradient(to top, #b8860b, #ffd700); }
+  .rank-2 .podium-base { height: 110px; background: linear-gradient(to top, #708090, #c0c0c0); }
+  .rank-3 .podium-base { height: 90px; background: linear-gradient(to top, #8b4513, #cd7f32); }
+  
+  .podium-wrapper.single { justify-content: center; }
+  .podium-wrapper.single .podium-item { order: 0; }
+
+  .leaderboard-list { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .lb-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-bottom: 1px solid var(--card-border); font-size: 18px; transition: 0.3s; }
   .lb-item:hover { background: rgba(255, 215, 0, 0.1); }
   .lb-item:last-child { border-bottom: none; }
@@ -51,15 +64,17 @@
   .lb-score { color: #ff0000; font-weight: 900; font-size: 20px; background: rgba(255,0,0,0.1); padding: 5px 15px; border-radius: 20px; }
   .no-data { text-align: center; color: var(--subtitle-color); padding: 40px; font-size: 18px; }
   
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  
   @media (max-width: 600px) {
     .header-title { font-size: 30px; }
     .podium-item { width: 90px; }
-    .podium-avatar { width: 50px; height: 50px; font-size: 20px; }
+    .podium-avatar { width: 60px; height: 60px; font-size: 24px; }
     .podium-name { font-size: 14px; }
     .podium-score { font-size: 12px; }
-    .p1 .podium-base { height: 110px; }
-    .p2 .podium-base { height: 80px; }
-    .p3 .podium-base { height: 60px; }
+    .rank-1 .podium-base { height: 120px; }
+    .rank-2 .podium-base { height: 90px; }
+    .rank-3 .podium-base { height: 70px; }
     .lb-item { padding: 12px 15px; font-size: 16px; }
     .lb-score { font-size: 16px; padding: 4px 10px; }
   }
@@ -67,22 +82,33 @@
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
+<div class="top-controls">
+  <a href="index.html" class="ctrl-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
 
 <div class="leaderboard-container">
-  <h1 class="header-title">🏆 قاعة المشاهير</h1>
-  <p class="header-subtitle">أفضل 10 لاعبين في منصة Quiz Hub</p>
+  <h1 class="header-title" id="mainTitle" data-ar="🏆 قاعة المشاهير" data-en="🏆 Hall of Fame">🏆 قاعة المشاهير</h1>
+  <p class="header-subtitle" id="subtitle" data-ar="أفضل 10 لاعبين في منصة Quiz Hub" data-en="Top 10 players on Quiz Hub">أفضل 10 لاعبين في منصة Quiz Hub</p>
 
-  <div class="filters">
-    <button class="filter-btn active" onclick="filterLeaderboard('all', this)">الكل</button>
-    <button class="filter-btn" onclick="filterLeaderboard('horror', this)">رعب 🎃</button>
-    <button class="filter-btn" onclick="filterLeaderboard('action', this)">أكشن 💥</button>
-    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)">دراما كورية 💖</button>
+  <div class="tabs-container">
+    <button class="tab-btn active" onclick="switchTimeFilter('all', this)" id="tabAll" data-ar="👑 كل الأوقات" data-en="👑 All Time">👑 كل الأوقات</button>
+    <button class="tab-btn" onclick="switchTimeFilter('week', this)" id="tabWeek" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
   </div>
 
-  <div class="podium-container" id="podiumContainer"></div>
+  <!-- تم إضافة زرار الغموض هنا -->
+  <div class="filters" id="categoryFilters">
+    <button class="filter-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="filter-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+    <button class="filter-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
+    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+    <button class="filter-btn" onclick="filterLeaderboard('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+  </div>
+
+  <div class="podium-wrapper" id="podiumContainer"></div>
+  
   <div class="leaderboard-list" id="leaderboardList">
-    <div class="no-data">جاري تحميل البيانات...</div>
+    <div class="no-data" id="loadingText" data-ar="جاري تحميل البيانات..." data-en="Loading data...">جاري تحميل البيانات...</div>
   </div>
 </div>
 
@@ -105,36 +131,69 @@
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get;
 
   let allScoresData = null;
-  let allUsersData = {}; // عشان نخزن صور البروفايل
+  let allUsersData = {}; 
+  let currentTimeFilter = 'all';
+  let currentCategory = 'all';
+  let currentLang = localStorage.getItem('lang') || 'ar';
 
-  // جلب كل صور البروفايل مرة واحدة
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
+
+  function applyLanguage() {
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      
+      document.querySelectorAll('[data-ar]').forEach(el => {
+          el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      });
+      
+      if (allScoresData) renderLeaderboard();
+  }
+
   window.onValue(window.ref(window.db, 'users_data'), (snapshot) => {
       allUsersData = snapshot.val() || {};
-      if (allScoresData) {
-          filterLeaderboard('all', document.querySelector('.filter-btn'));
-      }
+      if (allScoresData) renderLeaderboard();
   });
 
   window.onValue(window.ref(window.db, 'scores'), (snapshot) => {
     allScoresData = snapshot.val();
-    filterLeaderboard('all', document.querySelector('.filter-btn'));
+    renderLeaderboard();
   });
+
+  window.switchTimeFilter = function(timeType, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTimeFilter = timeType;
+      renderLeaderboard();
+  }
 
   window.filterLeaderboard = function(category, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    currentCategory = category;
+    renderLeaderboard();
+  }
 
+  function renderLeaderboard() {
+    const podiumContainer = document.getElementById('podiumContainer');
+    const leaderboardList = document.getElementById('leaderboardList');
+    
     if (!allScoresData) { 
-        document.getElementById('leaderboardList').innerHTML = `<div class="no-data">مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!</div>`; 
+        leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No data yet. Play a quiz!' : 'مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!'}</div>`; 
         return; 
     }
     
     let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan'];
     let actionKeys = ['squidgame', 'wonderfools'];
     let kdramaKeys = ['family', 'beauty', 'dream', 'whyher'];
-    let mysteryKeys = ['wednesday'];
+    let mysteryKeys = ['wednesday']; // مفاتيح كويز الغموض
 
     let players = [];
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+
     for (let username in allScoresData) {
       if (username.toLowerCase() === 'ahmed') continue; 
       let playerTotal = 0;
@@ -143,19 +202,31 @@
         let shouldCount = false;
         let quizLower = quiz.toLowerCase();
         
-        if (category === 'all') shouldCount = true;
-        else if (category === 'horror' && horrorKeys.some(k => quizLower.includes(k))) shouldCount = true;
-        else if (category === 'action' && actionKeys.some(k => quizLower.includes(k))) shouldCount = true;
-        else if (category === 'kdrama' && kdramaKeys.some(k => quizLower.includes(k))) shouldCount = true;
-        else if (category === 'mystery' && mysteryKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        if (currentCategory === 'all') shouldCount = true;
+        else if (currentCategory === 'horror' && horrorKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (currentCategory === 'action' && actionKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (currentCategory === 'kdrama' && kdramaKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (currentCategory === 'mystery' && mysteryKeys.some(k => quizLower.includes(k))) shouldCount = true;
 
         if (shouldCount) {
-            const bestScore = Math.max(...Object.values(allScoresData[username][quiz]).map(entry => entry.score));
-            playerTotal += bestScore;
+            const attempts = Object.values(allScoresData[username][quiz]);
+            
+            let validAttempts = attempts;
+            if (currentTimeFilter === 'week') {
+                validAttempts = attempts.filter(entry => {
+                    const entryTime = new Date(entry.time).getTime();
+                    return entryTime >= oneWeekAgo;
+                });
+            }
+
+            if (validAttempts.length > 0) {
+                const bestScore = Math.max(...validAttempts.map(entry => entry.score));
+                playerTotal += bestScore;
+            }
         }
       }
       
-      if (playerTotal > 0 || category === 'all') {
+      if (playerTotal > 0 || (currentCategory === 'all' && currentTimeFilter === 'all')) {
           players.push({ username, total: playerTotal });
       }
     }
@@ -165,36 +236,37 @@
     const top3 = top10.slice(0, 3);
     const rest = top10.slice(3);
 
-    const podiumContainer = document.getElementById('podiumContainer');
     podiumContainer.innerHTML = '';
-    const podiumOrder = [top3[1], top3[0], top3[2]];
-    const podiumClasses = ['p2', 'p1', 'p3'];
+    if (top3.length === 1) podiumContainer.classList.add('single'); else podiumContainer.classList.remove('single');
+
+    const displayOrder = [top3[1], top3[0], top3[2]];
+    const classes = ['rank-2', 'rank-1', 'rank-3'];
     const medals = ['🥈', '🥇', '🥉'];
 
-    podiumOrder.forEach((player, index) => {
+    displayOrder.forEach((player, index) => {
         if (!player) return;
         const div = document.createElement('div');
-        div.className = `podium-item ${podiumClasses[index]}`;
+        div.className = `podium-item ${classes[index]}`;
         
-        // جلب صورة اللاعب
         let avatarHTML = index === 1 ? '👑' : '👤';
         if (allUsersData[player.username] && allUsersData[player.username].profilePic) {
             avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
         }
 
+        const ptsText = currentLang === 'en' ? 'pts' : 'نقطة';
+
         div.innerHTML = `
             <div class="podium-avatar">${avatarHTML}</div>
             <div class="podium-name">${player.username}</div>
-            <div class="podium-score">${player.total} نقطة</div>
+            <div class="podium-score">${player.total} ${ptsText}</div>
             <div class="podium-base">${medals[index]}</div>
         `;
         podiumContainer.appendChild(div);
     });
 
-    const leaderboardList = document.getElementById('leaderboardList');
     leaderboardList.innerHTML = '';
     if (rest.length === 0) {
-        leaderboardList.innerHTML = `<div class="no-data">محتاجين لاعبين أكتر عشان نكمل القائمة!</div>`;
+        leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'Need more players to fill the list!' : 'محتاجين لاعبين أكتر عشان نكمل القائمة!'}</div>`;
     } else {
         rest.forEach((player, index) => {
             const actualRank = index + 4;
@@ -206,15 +278,22 @@
                 avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
             }
 
+            const ptsText = currentLang === 'en' ? 'pts' : 'نقطة';
+
             div.innerHTML = `
                 <span class="lb-rank">#${actualRank}</span>
                 <span class="lb-name"><div class="lb-avatar">${avatarHTML}</div> ${player.username}</span>
-                <span class="lb-score">${player.total} نقطة</span>
+                <span class="lb-score">${player.total} ${ptsText}</span>
             `;
             leaderboardList.appendChild(div);
         });
     }
   }
+
+  window.onload = () => {
+      applyLanguage();
+  };
+
 </script>
 </body>
 </html>
