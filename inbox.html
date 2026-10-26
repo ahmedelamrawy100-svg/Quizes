@@ -53,21 +53,18 @@
     <div class="tab" onclick="switchTab('requests', this)" id="tabRequests">🤝 طلبات الصداقة</div>
   </div>
 
-  <!-- تاب الأصدقاء -->
   <div id="tab-friends" class="tab-content active">
     <div class="card-list" id="friendsList">
       <div class="no-data" id="loadingFriends">جاري تحميل الأصدقاء...</div>
     </div>
   </div>
 
-  <!-- تاب رسائل الإدارة -->
   <div id="tab-admin" class="tab-content">
     <div class="card-list" id="adminMessagesList">
       <div class="no-data" id="loadingAdmin">جاري تحميل الرسائل...</div>
     </div>
   </div>
 
-  <!-- تاب طلبات الصداقة -->
   <div id="tab-requests" class="tab-content">
     <div class="card-list" id="requestsList">
       <div class="no-data" id="loadingRequests">جاري تحميل الطلبات...</div>
@@ -117,16 +114,30 @@
       document.getElementById('tab-' + tabName).classList.add('active');
   }
 
-  // 1. تحميل الأصدقاء
   function loadFriends() {
-    window.onValue(window.ref(window.db, 'friends/' + currentUser), (snapshot) => {
-      const data = snapshot.val();
-      const friendsList = document.getElementById('friendsList');
-      const t = translations[currentLang];
+    const friendsList = document.getElementById('friendsList');
+    const t = translations[currentLang];
+    
+    window.onValue(window.ref(window.db, 'friends'), (snapshot) => {
+      const allFriendsData = snapshot.val();
+      let myFriends = {};
+
+      if (allFriendsData) {
+        for (let userKey in allFriendsData) {
+          if (userKey.toLowerCase() === currentUser.toLowerCase()) {
+            myFriends = allFriendsData[userKey];
+            break; 
+          }
+        }
+      }
+
       friendsList.innerHTML = '';
-      if (!data) { friendsList.innerHTML = `<div class="no-data">${t.noFriends}</div>`; return; }
+      if (!myFriends || Object.keys(myFriends).length === 0) { 
+        friendsList.innerHTML = `<div class="no-data">${t.noFriends}</div>`; 
+        return; 
+      }
       
-      for (let friend in data) {
+      for (let friend in myFriends) {
         const div = document.createElement('div');
         div.className = 'friend-card';
         div.innerHTML = `<div style="display:flex; align-items:center; gap:10px;"><div style="width:40px; height:40px; background:var(--accent); border-radius:50%; display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold;">${friend.charAt(0).toUpperCase()}</div> <b>${friend}</b></div> <a href="messages.html?to=${friend}" class="btn-msg">${t.msg}</a>`;
@@ -135,16 +146,13 @@
     });
   }
 
-  // 2. تحميل رسائل الإدارة (الرسائل اللي جاية من messages/username)
   function loadAdminMessages() {
     window.onValue(window.ref(window.db, 'messages/' + currentUser), (snapshot) => {
       const data = snapshot.val();
       const adminList = document.getElementById('adminMessagesList');
       const t = translations[currentLang];
       adminList.innerHTML = '';
-      
       if (!data) { adminList.innerHTML = `<div class="no-data">${t.noAdmin}</div>`; return; }
-      
       const msgs = Object.values(data).reverse();
       msgs.forEach(msg => {
         const div = document.createElement('div');
@@ -155,16 +163,33 @@
     });
   }
 
-  // 3. تحميل طلبات الصداقة
   function loadRequests() {
-    window.onValue(window.ref(window.db, 'friend_requests/' + currentUser), (snapshot) => {
-      const data = snapshot.val();
-      const requestsList = document.getElementById('requestsList');
-      const t = translations[currentLang];
+    const requestsList = document.getElementById('requestsList');
+    const t = translations[currentLang];
+
+    window.onValue(window.ref(window.db, 'friend_requests'), (snapshot) => {
+      const allRequests = snapshot.val();
+      let myRequests = {};
+      let myKeyInDB = null;
+
+      if (allRequests) {
+        // بندور على الطلبات اللي جاية لاسمنا (بنتجاهل الحروف الكبيرة والصغيرة)
+        for (let userKey in allRequests) {
+          if (userKey.toLowerCase() === currentUser.toLowerCase()) {
+            myRequests = allRequests[userKey];
+            myKeyInDB = userKey;
+            break;
+          }
+        }
+      }
+
       requestsList.innerHTML = '';
-      if (!data) { requestsList.innerHTML = `<div class="no-data">${t.noRequests}</div>`; return; }
+      if (!myRequests || Object.keys(myRequests).length === 0) { 
+        requestsList.innerHTML = `<div class="no-data">${t.noRequests}</div>`; 
+        return; 
+      }
       
-      for (let sender in data) {
+      for (let sender in myRequests) {
         const div = document.createElement('div');
         div.className = 'friend-card';
         div.innerHTML = `
@@ -173,8 +198,8 @@
                 <b>${sender}</b>
             </div> 
             <div class="request-actions">
-                <button class="btn-accept" onclick="acceptRequest('${sender}')">${t.accept}</button>
-                <button class="btn-reject" onclick="rejectRequest('${sender}')">${t.reject}</button>
+                <button class="btn-accept" onclick="acceptRequest('${sender}', '${myKeyInDB}')">${t.accept}</button>
+                <button class="btn-reject" onclick="rejectRequest('${sender}', '${myKeyInDB}')">${t.reject}</button>
             </div>
         `;
         requestsList.appendChild(div);
@@ -182,16 +207,18 @@
     });
   }
 
-  // 4. دوال قبول ورفض الطلبات
-  window.acceptRequest = async function(sender) {
+  window.acceptRequest = async function(sender, myKey) {
+    // 1. إضافة الصداقة للطرفين
     await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + sender), true);
     await window.set(window.ref(window.db, 'friends/' + sender + '/' + currentUser), true);
-    await window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+    // 2. مسح الطلب تماماً
+    await window.remove(window.ref(window.db, 'friend_requests/' + myKey + '/' + sender));
     alert(currentLang === 'en' ? 'Friend request accepted!' : 'تم قبول طلب الصداقة!');
   }
 
-  window.rejectRequest = async function(sender) {
-    await window.remove(window.ref(window.db, 'friend_requests/' + currentUser + '/' + sender));
+  window.rejectRequest = async function(sender, myKey) {
+    // مسح الطلب تماماً
+    await window.remove(window.ref(window.db, 'friend_requests/' + myKey + '/' + sender));
     alert(currentLang === 'en' ? 'Friend request rejected.' : 'تم رفض طلب الصداقة.');
   }
 
