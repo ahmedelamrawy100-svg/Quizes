@@ -69,7 +69,7 @@
   #warningBox { display: none; background: rgba(255,0,0,0.1); border: 2px solid var(--accent); color: var(--accent); padding: 15px; border-radius: 10px; width: 100%; margin-top: 15px; text-align: center; font-weight: bold; }
 
   /* --- رفع الصورة --- */
-  .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px; }
+  .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px; flex-wrap: wrap; }
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
   .upload-label:hover { background: var(--accent); }
@@ -129,6 +129,9 @@
       <label for="imageUpload" class="upload-label">📷 اختر صورة</label>
       <input type="file" id="imageUpload" accept="image/*" onchange="window.previewImage(event)">
       <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()">حفظ الصورة</button>
+      
+      <!-- زرار مسح الصورة -->
+      <button class="upload-btn" style="background: #ff3333; display: none;" id="removeImgBtn" onclick="window.removeProfilePic()">🗑️ مسح</button>
     </div>
   </div>
 
@@ -172,9 +175,15 @@
     if (userData && userData.profilePic) {
       avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
       avatarEl.innerText = '';
+      if (isMyProfile) {
+        document.getElementById('removeImgBtn').style.display = 'block';
+      }
     } else {
       avatarEl.style.backgroundImage = 'none';
       avatarEl.innerText = profileUser.charAt(0).toUpperCase();
+      if (isMyProfile) {
+        document.getElementById('removeImgBtn').style.display = 'none';
+      }
     }
   });
 
@@ -302,6 +311,7 @@
         avatarEl.style.backgroundImage = `url('${e.target.result}')`;
         avatarEl.innerText = '';
         document.getElementById('saveImgBtn').style.display = 'block';
+        document.getElementById('removeImgBtn').style.display = 'block'; // إظهار زرار المسح
       }
       reader.readAsDataURL(selectedFile);
     }
@@ -329,6 +339,27 @@
     } catch (error) { alert("Error: " + error.message); }
     
     btn.innerText = 'حفظ الصورة'; btn.disabled = false;
+  }
+
+  // دالة مسح الصورة
+  window.removeProfilePic = async function() {
+    if (!isMyProfile) return;
+    if (confirm("هل أنت متأكد من مسح صورتك؟")) {
+      try {
+        await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), null);
+        
+        const avatarEl = document.getElementById('userAvatar');
+        avatarEl.style.backgroundImage = 'none';
+        avatarEl.innerText = profileUser.charAt(0).toUpperCase();
+        
+        document.getElementById('saveImgBtn').style.display = 'none';
+        document.getElementById('removeImgBtn').style.display = 'none';
+        
+        alert("تم مسح الصورة بنجاح! 🗑️");
+      } catch(e) {
+        alert("Error: " + e.message);
+      }
+    }
   }
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
