@@ -26,7 +26,6 @@
   .header-title { text-align: center; font-size: 40px; color: gold; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
 
-  /* --- الفلاتر --- */
   .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
   .filter-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
   .filter-btn.active { background: gold; color: #000; border-color: gold; }
@@ -34,7 +33,7 @@
 
   .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin-bottom: 40px; height: 200px; }
   .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; }
-  .podium-avatar { font-size: 40px; margin-bottom: 10px; }
+  .podium-avatar { width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 2px solid #fff; }
   .podium-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; text-align: center; word-break: break-all; }
   .podium-score { font-size: 14px; color: gold; font-weight: bold; margin-bottom: 10px; }
   .podium-base { width: 100%; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; font-size: 24px; padding-top: 10px; color: #000; }
@@ -48,13 +47,14 @@
   .lb-item:last-child { border-bottom: none; }
   .lb-rank { font-size: 20px; font-weight: bold; width: 50px; text-align: center; color: var(--subtitle-color); }
   .lb-name { flex: 1; text-align: right; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+  .lb-avatar { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; color: #000; font-weight: bold; background-size: cover; background-position: center; }
   .lb-score { color: #ff0000; font-weight: 900; font-size: 20px; background: rgba(255,0,0,0.1); padding: 5px 15px; border-radius: 20px; }
   .no-data { text-align: center; color: var(--subtitle-color); padding: 40px; font-size: 18px; }
   
   @media (max-width: 600px) {
     .header-title { font-size: 30px; }
     .podium-item { width: 90px; }
-    .podium-avatar { font-size: 30px; }
+    .podium-avatar { width: 50px; height: 50px; font-size: 20px; }
     .podium-name { font-size: 14px; }
     .podium-score { font-size: 12px; }
     .p1 .podium-base { height: 110px; }
@@ -67,29 +67,28 @@
 </head>
 <body>
 
-<a href="index.html" class="back-btn" data-ar="⬅ رجوع للرئيسية" data-en="⬅ Back to Home">⬅ رجوع للرئيسية</a>
+<a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
 
 <div class="leaderboard-container">
-  <h1 class="header-title" data-ar="🏆 قاعة المشاهير" data-en="🏆 Hall of Fame">🏆 قاعة المشاهير</h1>
-  <p class="header-subtitle" data-ar="أفضل 10 لاعبين في منصة Quiz Hub" data-en="Top 10 Players in Quiz Hub">أفضل 10 لاعبين في منصة Quiz Hub</p>
+  <h1 class="header-title">🏆 قاعة المشاهير</h1>
+  <p class="header-subtitle">أفضل 10 لاعبين في منصة Quiz Hub</p>
 
-  <!-- الفلاتر -->
   <div class="filters">
-    <button class="filter-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
-    <button class="filter-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
-    <button class="filter-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
-    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+    <button class="filter-btn active" onclick="filterLeaderboard('all', this)">الكل</button>
+    <button class="filter-btn" onclick="filterLeaderboard('horror', this)">رعب 🎃</button>
+    <button class="filter-btn" onclick="filterLeaderboard('action', this)">أكشن 💥</button>
+    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)">دراما كورية 💖</button>
   </div>
 
   <div class="podium-container" id="podiumContainer"></div>
   <div class="leaderboard-list" id="leaderboardList">
-    <div class="no-data" data-ar="جاري تحميل البيانات..." data-en="Loading...">جاري تحميل البيانات...</div>
+    <div class="no-data">جاري تحميل البيانات...</div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
@@ -103,30 +102,20 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  let currentLang = localStorage.getItem('lang') || 'ar';
-
-  // ======== الأسماء الصح للكويزات عشان الفلترة تشتغل ========
-  const horrorQuizzes = ['conjuring', 'fnaf', 'TheNun', 'annabelle', 'TrainToBusan'];
-  const actionQuizzes = ['SquidGame', 'wonderfools'];
-  const kdramaQuizzes = ['family', 'beauty', 'dream', 'whyher'];
-  const mysteryQuizzes = ['Wednesday'];
+  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get;
 
   let allScoresData = null;
+  let allUsersData = {}; // عشان نخزن صور البروفايل
 
-  function applyLanguage() {
-    const elements = document.querySelectorAll('[data-ar]');
-    elements.forEach(el => {
-      el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-    });
-    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-  }
+  // جلب كل صور البروفايل مرة واحدة
+  window.onValue(window.ref(window.db, 'users_data'), (snapshot) => {
+      allUsersData = snapshot.val() || {};
+      if (allScoresData) {
+          filterLeaderboard('all', document.querySelector('.filter-btn'));
+      }
+  });
 
-  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-
-  const podiumContainer = document.getElementById('podiumContainer');
-  const leaderboardList = document.getElementById('leaderboardList');
-
-  window.onValue(ref(db, 'scores'), (snapshot) => {
+  window.onValue(window.ref(window.db, 'scores'), (snapshot) => {
     allScoresData = snapshot.val();
     filterLeaderboard('all', document.querySelector('.filter-btn'));
   });
@@ -136,10 +125,15 @@
     btn.classList.add('active');
 
     if (!allScoresData) { 
-        leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No results yet. Play a quiz!' : 'مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!'}</div>`; 
+        document.getElementById('leaderboardList').innerHTML = `<div class="no-data">مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!</div>`; 
         return; 
     }
     
+    let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan'];
+    let actionKeys = ['squidgame', 'wonderfools'];
+    let kdramaKeys = ['family', 'beauty', 'dream', 'whyher'];
+    let mysteryKeys = ['wednesday'];
+
     let players = [];
     for (let username in allScoresData) {
       if (username.toLowerCase() === 'ahmed') continue; 
@@ -147,20 +141,23 @@
       
       for (let quiz in allScoresData[username]) {
         let shouldCount = false;
+        let quizLower = quiz.toLowerCase();
         
-        // بنقارن أسماء الكويزات بالظبط زي ما هي متسجلة في الفايربيز
         if (category === 'all') shouldCount = true;
-        else if (category === 'horror' && horrorQuizzes.includes(quiz)) shouldCount = true;
-        else if (category === 'action' && actionQuizzes.includes(quiz)) shouldCount = true;
-        else if (category === 'kdrama' && kdramaQuizzes.includes(quiz)) shouldCount = true;
-        else if (category === 'mystery' && mysteryQuizzes.includes(quiz)) shouldCount = true;
+        else if (category === 'horror' && horrorKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (category === 'action' && actionKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (category === 'kdrama' && kdramaKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (category === 'mystery' && mysteryKeys.some(k => quizLower.includes(k))) shouldCount = true;
 
         if (shouldCount) {
             const bestScore = Math.max(...Object.values(allScoresData[username][quiz]).map(entry => entry.score));
             playerTotal += bestScore;
         }
       }
-      players.push({ username, total: playerTotal });
+      
+      if (playerTotal > 0 || category === 'all') {
+          players.push({ username, total: playerTotal });
+      }
     }
     
     players.sort((a, b) => b.total - a.total);
@@ -168,6 +165,7 @@
     const top3 = top10.slice(0, 3);
     const rest = top10.slice(3);
 
+    const podiumContainer = document.getElementById('podiumContainer');
     podiumContainer.innerHTML = '';
     const podiumOrder = [top3[1], top3[0], top3[2]];
     const podiumClasses = ['p2', 'p1', 'p3'];
@@ -177,36 +175,46 @@
         if (!player) return;
         const div = document.createElement('div');
         div.className = `podium-item ${podiumClasses[index]}`;
+        
+        // جلب صورة اللاعب
+        let avatarHTML = index === 1 ? '👑' : '👤';
+        if (allUsersData[player.username] && allUsersData[player.username].profilePic) {
+            avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+
         div.innerHTML = `
-            <div class="podium-avatar">${index === 1 ? '👑' : '👤'}</div>
+            <div class="podium-avatar">${avatarHTML}</div>
             <div class="podium-name">${player.username}</div>
-            <div class="podium-score">${player.total} ${currentLang === 'en' ? 'pts' : 'نقطة'}</div>
+            <div class="podium-score">${player.total} نقطة</div>
             <div class="podium-base">${medals[index]}</div>
         `;
         podiumContainer.appendChild(div);
     });
 
+    const leaderboardList = document.getElementById('leaderboardList');
     leaderboardList.innerHTML = '';
     if (rest.length === 0) {
-        leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'Need more players!' : 'محتاجين لاعبين أكتر عشان نكمل القائمة!'}</div>`;
+        leaderboardList.innerHTML = `<div class="no-data">محتاجين لاعبين أكتر عشان نكمل القائمة!</div>`;
     } else {
         rest.forEach((player, index) => {
             const actualRank = index + 4;
             const div = document.createElement('div');
             div.className = 'lb-item';
+            
+            let avatarHTML = player.username.charAt(0).toUpperCase();
+            if (allUsersData[player.username] && allUsersData[player.username].profilePic) {
+                avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            }
+
             div.innerHTML = `
                 <span class="lb-rank">#${actualRank}</span>
-                <span class="lb-name">👤 ${player.username}</span>
-                <span class="lb-score">${player.total} ${currentLang === 'en' ? 'pts' : 'نقطة'}</span>
+                <span class="lb-name"><div class="lb-avatar">${avatarHTML}</div> ${player.username}</span>
+                <span class="lb-score">${player.total} نقطة</span>
             `;
             leaderboardList.appendChild(div);
         });
     }
   }
-
-  window.onload = () => {
-    applyLanguage();
-  };
 </script>
 </body>
 </html>
