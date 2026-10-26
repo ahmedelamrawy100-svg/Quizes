@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 الشات الجماعي - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --border-color: #333; --accent: #ff0000; }
+  body.light-mode { --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%); --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --border-color: #ccc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  
+  .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .ctrl-btn { background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
+  .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
+  
+  .chat-container { width: 100%; max-width: 700px; height: 100%; background: var(--card-bg); display: flex; flex-direction: column; margin: 0 auto; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+  
+  .chat-header { background: #ff0000; color: #fff; padding: 15px; font-weight: bold; font-size: 20px; z-index: 10; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 10px;}
+  
+  .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+  .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; font-size: 16px; line-height: 1.5; position: relative; }
+  
+  .msg.me { background: #ff0000; color: #fff; align-self: flex-end; border-bottom-left-radius: 2px; }
+  .msg.them { background: #333; color: #fff; align-self: flex-start; border-bottom-right-radius: 2px; }
+  body.light-mode .msg.them { background: #eee; color: #111; }
+  
+  .msg-user { font-size: 13px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+  .msg-avatar { width: 30px; height: 30px; border-radius: 50%; background: #555; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .rank-badge { font-size: 10px; padding: 2px 6px; border-radius: 5px; background: rgba(255,255,255,0.2); color: #fff; }
+  
+  .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; display: block; text-align: left; }
+
+  .chat-input-container { display: flex; padding: 15px; border-top: 1px solid var(--border-color); gap: 10px; background: var(--bg-color); }
+  .chat-input-container input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; }
+  .chat-input-container button { padding: 0 25px; background: #ff0000; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; transition: 0.3s; }
+  .chat-input-container button:hover { background: #cc0000; }
+</style>
+</head>
+<body>
+
+<div class="top-controls">
+  <a href="index.html" class="ctrl-btn">⬅ رجوع</a>
+  <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div class="chat-container">
+  <div class="chat-header" id="chatTitle">💬 الشات الجماعي</div>
+  <div class="chat-messages" id="chatMessages">
+    <div style="text-align: center; color: var(--subtitle-color); margin-top: 20px;" id="loadingText">جاري تحميل الرسائل...</div>
+  </div>
+  <div class="chat-input-container">
+    <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
+    <button onclick="sendMessage()" id="sendBtn">إرسال</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  
+  // ربط الدوال بالـ window عشان الإشعارات تشتغل
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; 
+  window.query = query; window.limitToLast = limitToLast; window.get = get;
+</script>
+
+<script>
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+
+  const currentUser = localStorage.getItem('loggedInUser') || 'Unknown';
+  const chatMessages = document.getElementById('chatMessages');
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  
+  let allUsersData = {};
+  let allAdmins = {}; 
+  let allRanks = {}; 
+  let isDataLoaded = false; 
+
+  // بنجيب بيانات المستخدمين (الصور) والرتب
+  async function fetchData() {
+      try {
+          const usersSnap = await window.get(window.ref(window.db, 'users_data'));
+          if (usersSnap.exists()) allUsersData = usersSnap.val();
+
+          const adminSnap = await window.get(window.ref(window.db, 'roles/admins'));
+          if (adminSnap.exists()) allAdmins = adminSnap.val();
+          
+          const userSnap = await window.get(window.ref(window.db, 'roles/users'));
+          if (userSnap.exists()) allRanks = userSnap.val();
+          
+          isDataLoaded = true;
+          loadMessages();
+      } catch (error) {
+          console.error("Error fetching roles:", error);
+          isDataLoaded = true;
+          loadMessages();
+      }
+  }
+
+  function getUserRank(username) {
+      if (!username || typeof username !== 'string') return { text: 'Player', color: '#888' };
+      for (let user in allRanks) {
+          if (user.toLowerCase() === username.toLowerCase()) {
+              let rankText = allRanks[user];
+              let color = '#ffd700';
+              if (rankText.toLowerCase() === 'admin') color = '#0088cc';
+              if (rankText.toLowerCase() === 'player') color = '#888';
+              return { text: rankText, color: color };
+          }
+      }
+      for (let admin in allAdmins) {
+          if (admin.toLowerCase() === username.toLowerCase()) {
+              return { text: 'Admin', color: '#0088cc' };
+          }
+      }
+      return { text: 'Player', color: '#888' };
+  }
+
+  function getUserPic(username) {
+      if (!username || typeof username !== 'string') return null;
+      for (let user in allUsersData) {
+          if (user.toLowerCase() === username.toLowerCase()) {
+              return allUsersData[user].profilePic || null;
+          }
+      }
+      return null;
+  }
+
+  function loadMessages() {
+    if (!isDataLoaded) return;
+
+    // تم تصحيح الاستدعاء هنا ليقرأ من الـ import مباشرة
+    const chatRef = query(ref(db, 'global_chat'), limitToLast(50));
+
+    onValue(chatRef, (snapshot) => {
+      const data = snapshot.val();
+      chatMessages.innerHTML = '';
+      
+      if (!data) {
+        chatMessages.innerHTML = `<div style="text-align: center; color: var(--subtitle-color); margin-top: 20px;">${currentLang === 'en' ? 'No messages yet. Be the first!' : 'لا توجد رسائل بعد. كن الأول!'}</div>`;
+        return;
+      }
+
+      const messages = Object.values(data);
+      messages.forEach(msg => {
+        const senderName = (msg.sender && typeof msg.sender === 'string') ? msg.sender : 'Unknown User';
+        
+        const div = document.createElement('div');
+        div.className = `msg ${senderName.toLowerCase() === currentUser.toLowerCase() ? 'me' : 'them'}`;
+        
+        let timeStr = new Date(msg.time).toLocaleTimeString(currentLang === 'en' ? 'en-US' : 'ar-EG', { hour: '2-digit', minute: '2-digit' });
+        let rank = getUserRank(senderName);
+        let pic = getUserPic(senderName);
+        
+        let avatarHTML = senderName.charAt(0).toUpperCase();
+        if (pic) {
+            avatarHTML = `<img src="${pic}">`;
+        }
+
+        div.innerHTML = `
+          <div class="msg-user" style="color: ${rank.color};">
+              <div class="msg-avatar">${avatarHTML}</div>
+              ${senderName} 
+              <span class="rank-badge" style="border: 1px solid ${rank.color};">${rank.text}</span>
+          </div>
+          <div>${msg.text || ''}</div>
+          <span class="msg-time">${timeStr}</span>
+        `;
+        chatMessages.appendChild(div);
+      });
+      
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+
+  window.sendMessage = function() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (currentUser === 'Unknown' || !currentUser) {
+        alert(currentLang === 'en' ? 'You must be logged in!' : 'لازم تسجل دخول الأول!');
+        return;
+    }
+
+    push(ref(db, 'global_chat'), {
+      sender: currentUser,
+      text: text,
+      time: Date.now()
+    });
+    
+    input.value = '';
+  };
+
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  }
+
+  window.onload = () => {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    fetchData();
+  };
+</script>
+
+<script src="notifications.js"></script>
+
+</body>
+</html>
