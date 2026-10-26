@@ -68,14 +68,12 @@
 
 <div id="toast-container"></div>
 
-<!-- شاشة عدم الصلاحية -->
 <div id="noPermissionScreen">
     <h1 id="noPermTitle" data-ar="🚫 ليس لديك صلاحيات" data-en="🚫 No Permission">🚫 ليس لديك صلاحيات</h1>
     <p id="noPermMsg" data-ar="هذه الصفحة مخصصة للأدمن فقط." data-en="This page is for admins only.">هذه الصفحة مخصصة للأدمن فقط.</p>
     <a href="index.html" id="backHomeBtn" data-ar="العودة للرئيسية" data-en="Back to Home">العودة للرئيسية</a>
 </div>
 
-<!-- واجهة الأدمن -->
 <div id="adminUI" style="display: none; width: 100%;">
     <div class="sidebar">
       <div class="sidebar-logo" id="panelTitle" data-ar="🛡️ أهلاً " data-en="🛡️ Welcome ">🛡️ أهلاً </div>
@@ -88,7 +86,6 @@
     </div>
 
     <div class="main">
-      <!-- الهيدر -->
       <div class="header">
         <h1 id="pageTitle" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</h1>
         <div>
@@ -101,7 +98,7 @@
       <div id="tab-dashboard" class="tab active">
         <div class="stats-grid">
           <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-          <div class="stat-card"><h3 data-ar="🟢 متصل الآن" data-en="🟢 Online">🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
+          <!-- شيلنا كارت متصل الآن -->
           <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
           <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
         </div>
@@ -116,25 +113,25 @@
       <!-- 3. Content -->
       <div id="tab-content" class="tab">
         <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
-        <div class="list-container" id="commentsList" style="margin-bottom: 20px;"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+        <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
         
         <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
-        <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+        <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
         
         <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
-        <div class="list-container" id="requestsList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+        <div class="list-container" id="requestsList"></div>
       </div>
 
       <!-- 4. Rooms -->
       <div id="tab-rooms" class="tab">
         <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة حالياً" data-en="🚪 Active Rooms">🚪 الغرف النشطة حالياً</h3>
-        <div class="list-container" id="roomsList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+        <div class="list-container" id="roomsList"></div>
       </div>
 
       <!-- 5. Warnings -->
       <div id="tab-warnings" class="tab">
         <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="⚠️ التحذيرات المسجلة" data-en="⚠️ Warnings">⚠️ التحذيرات المسجلة</h3>
-        <div class="list-container" id="warningsList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+        <div class="list-container" id="warningsList"></div>
       </div>
     </div>
 </div>
@@ -152,22 +149,17 @@
   if (!currentUser) {
       document.getElementById('noPermissionScreen').style.display = 'flex';
   } else {
-      window.get(window.ref(window.db, 'roles/admins')).then(snap => {
-          const isOwner = currentUser.toLowerCase() === 'ahmed';
-          let isAdmin = false;
-          if (snap.exists()) {
-              const admins = snap.val();
-              for (let adminName in admins) {
-                  if (adminName.toLowerCase() === currentUser.toLowerCase()) { isAdmin = true; break; }
-              }
-          }
-          if (isAdmin || isOwner) {
+      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(rankSnap => {
+          let rank = 'Player';
+          if (rankSnap.exists()) rank = rankSnap.val();
+          
+          const isOwner = currentUser.toLowerCase() === 'ahmed' || rank.toLowerCase() === 'owner';
+          const isAdmin = rank.toLowerCase() === 'admin';
+
+          if (isOwner || isAdmin) {
               document.getElementById('adminUI').style.display = 'flex';
-              
-              // تحديث اسم الأونر في القائمة الجانبية
               let currentLang = localStorage.getItem('lang') || 'ar';
               document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${currentUser}` : `🛡️ Welcome ${currentUser}`;
-              
               initData();
           } else {
               document.getElementById('noPermissionScreen').style.display = 'flex';
@@ -195,7 +187,6 @@
     document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
   };
 
-  // ================== الترجمة ==================
   window.toggleLanguage = function() {
       let currentLang = localStorage.getItem('lang') || 'ar';
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -209,7 +200,6 @@
       document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
       
-      // ترجمة كل العناصر
       const elements = document.querySelectorAll('[data-ar]');
       elements.forEach(el => {
           if(el.tagName === 'INPUT') {
@@ -219,34 +209,28 @@
           }
       });
 
-      // ترجمة اسم الأونر في القائمة الجانبية
       const username = localStorage.getItem('loggedInUser') || '';
       if(username) {
         document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${username}` : `🛡️ Welcome ${username}`;
       }
   }
 
-  // ================== الوضع الليلي ==================
   window.toggleTheme = function() {
       const body = document.body; const btn = document.getElementById('themeBtn');
       body.classList.toggle('light-mode');
-      if (body.classList.contains('light-mode')) { 
-          btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); 
-      } else { 
-          btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); 
-      }
+      if (body.classList.contains('light-mode')) { btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); } 
+      else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
   }
 
   if (localStorage.getItem('theme') === 'light') { 
       document.body.classList.add('light-mode'); 
       document.getElementById('themeBtn').innerText = '🌙';
   }
-  // =========================================================
 
   applyLanguage();
 
-  // ================== البيانات ==================
-  let allUsers = {}, allPresence = {}, allScores = {}, allRooms = {};
+  // البيانات (شيلنا allPresence)
+  let allUsers = {}, allScores = {}, allRooms = {};
 
   function initData() {
       window.onValue(window.ref(window.db, 'usernames'), snap => { 
@@ -254,11 +238,7 @@
           document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
           window.renderUsers(); 
       });
-      window.onValue(window.ref(window.db, 'presence'), snap => { 
-          allPresence = snap.val() || {}; 
-          document.getElementById('statOnline').innerText = Object.values(allPresence).filter(p => p.status === 'online').length; 
-          window.renderUsers(); 
-      });
+      // شيلنا قراءة الـ presence
       window.onValue(window.ref(window.db, 'scores'), snap => {
         allScores = snap.val() || {}; let plays = 0;
         for (let u in allScores) { for (let q in allScores[u]) { plays += Object.keys(allScores[u][q]).length; } }
@@ -276,6 +256,7 @@
       loadWarnings();
   }
 
+  // شيلنا الأونلاين من هنا
   window.renderUsers = function() {
     const container = document.getElementById('usersList'); if(!container) return;
     container.innerHTML = '';
@@ -283,13 +264,10 @@
     const search = document.getElementById('searchUser').value.toLowerCase();
     
     Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
-      const isOnline = allPresence[u] && allPresence[u].status === 'online';
-      
       const div = document.createElement('div'); div.className = 'item';
       div.innerHTML = `
         <div>
           <h3>${u}</h3>
-          <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? (currentLang === 'en' ? '🟢 Online' : '🟢 متصل') : (currentLang === 'en' ? '⚪ Offline' : '⚪ غير متصل')}</p>
         </div>
         <div style="display:flex; gap:5px; flex-wrap:wrap;">
           <button class="btn btn-blue" onclick="window.editXP('${u}')">${currentLang === 'en' ? 'Edit XP' : 'تعديل XP'}</button>
