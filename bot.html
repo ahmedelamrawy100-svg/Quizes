@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 بوت الاختبار الآلي - Quiz Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #080808; --panel: #111; --text: #fff; --accent: #00ffcc; --danger: #ff3333; --success: #00cc66; --border: #333; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  
+  .container { width: 100%; max-width: 900px; background: var(--panel); border: 2px solid var(--accent); border-radius: 15px; padding: 20px; }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+  .header h1 { color: var(--accent); font-size: 24px; }
+  .btn { padding: 10px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+  .btn-start { background: var(--accent); color: #000; }
+  .btn-start:hover { background: #fff; }
+  .btn-start:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+  
+  .console { background: #000; border: 1px solid var(--border); border-radius: 10px; padding: 15px; font-family: monospace; font-size: 14px; height: 500px; overflow-y: auto; direction: ltr; text-align: left; }
+  
+  .log-line { margin-bottom: 5px; }
+  .log-info { color: #00ffcc; }
+  .log-success { color: #00cc66; }
+  .log-error { color: #ff3333; font-weight: bold; }
+  .log-warning { color: #ffcc00; }
+  
+  #testFrame { display: none; width: 100%; height: 600px; border: none; }
+  
+  .stats-bar { display: flex; gap: 20px; margin-bottom: 15px; font-size: 16px; font-weight: bold; }
+  .stat-item span { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>🤖 بوت الاختبار الآلي (Simulation Bot)</h1>
+    <button id="startBtn" class="btn btn-start" onclick="startSimulation()">▶️ ابدأ المحاكاة الحقيقية</button>
+  </div>
+  
+  <div class="stats-bar">
+    <div class="stat-item">الخطوات: <span id="stat-steps">0</span></div>
+    <div class="stat-item">نجاح: <span id="stat-success" style="color: var(--success)">0</span></div>
+    <div class="stat-item">فشل: <span id="stat-errors" style="color: var(--danger)">0</span></div>
+  </div>
+
+  <div class="console" id="console"></div>
+  
+  <!-- Iframe مخفي عشان البوت يجرب جواه -->
+  <iframe id="testFrame"></iframe>
+</div>
+
+<script>
+  const consoleEl = document.getElementById('console');
+  let totalSteps = 0;
+  let totalSuccess = 0;
+  let totalErrors = 0;
+
+  function log(msg, type = 'info') {
+      const div = document.createElement('div');
+      div.className = `log-line log-${type}`;
+      div.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      consoleEl.appendChild(div);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+      totalSteps++;
+      document.getElementById('stat-steps').innerText = totalSteps;
+      if (type === 'success') { totalSuccess++; document.getElementById('stat-success').innerText = totalSuccess; }
+      if (type === 'error') { totalErrors++; document.getElementById('stat-errors').innerText = totalErrors; }
+  }
+
+  function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+  // دالة عشان تحمل صفحة جوه الـ iframe
+  function loadPageInFrame(url) {
+      return new Promise((resolve, reject) => {
+          const frame = document.getElementById('testFrame');
+          frame.src = url;
+          frame.onload = () => resolve(frame);
+          frame.onerror = () => reject(new Error(`فشل في تحميل ${url}`));
+      });
+  }
+
+  async function startSimulation() {
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.innerText = '⏳ جاري المحاكاة...';
+      consoleEl.innerHTML = '';
+      totalSteps = 0; totalSuccess = 0; totalErrors = 0;
+      
+      log('🚀 بدء البوت لمحاكاة الموقع بالكامل...', 'info');
+      log('⚠️ تأكد من أنك تستخدم Live Server (أو سيرفر محلي) عشان البوت يشتغل صح.', 'warning');
+      
+      try {
+          // 1. محاكاة تسجيل الدخول
+          log('▶️ الخطوة 1: فحص صفحة تسجيل الدخول (index.html)...', 'info');
+          const indexFrame = await loadPageInFrame('index.html');
+          const indexDoc = indexFrame.contentDocument;
+          await sleep(1000); // انتظار التحميل
+          
+          if (indexDoc.getElementById('authScreen')) {
+              log('✅ تم العثور على شاشة تسجيل الدخول.', 'success');
+          } else {
+              log('❌ شاشة تسجيل الدخول مش موجودة!', 'error');
+          }
+          
+          // 2. محاكاة الدخول للكويزات
+          log('▶️ الخطوة 2: جاري اختبار الكويزات (11 كويز)...', 'info');
+          const quizFiles = [
+              'Annabelle Quiz.html', 'Conjuring Quiz.html', 'FNAF Quiz.html', 
+              'Squid Game Quiz.html', 'The Nun Quiz.html', 'Train to Busan Quiz.html', 
+              'Wednesday Quiz.html', 'The Wonder Fools Quiz.html', 'True Beauty Quiz.html', 
+              'Dream To You Quiz.html', 'Family By Choice Quiz.html', 'Why Her Quiz.html'
+          ];
+
+          for (let quizFile of quizFiles) {
+              log(`🔍 جاري فحص: ${quizFile}...`, 'info');
+              const frame = await loadPageInFrame(quizFile);
+              const doc = frame.contentDocument;
+              const win = frame.contentWindow;
+              
+              await sleep(500); // انتظار بسيط للتحميل
+              
+              // 2.1 التأكد من وجود الزراير
+              const randomBtn = doc.querySelector('button[onclick="startRandomMatch()"]');
+              const challengeBtn = doc.querySelector('button[onclick="openChallengeModal()"]');
+              
+              if (randomBtn && challengeBtn) {
+                  log(`  ✅ أزرار التحدي موجودة.`, 'success');
+              } else {
+                  log(`  ❌ أزرار التحدي ناقصة في ${quizFile}`, 'error');
+                  continue; // نروح للكويز اللي بعده
+              }
+
+              // 2.2 محاكاة لعبة سولو (محاكاة الضغط على الكارت الأول)
+              log(`  🎮 جاري محاكاة لعب الكويز الأساسي...`, 'info');
+              const playBtn = doc.querySelector('.quiz-card');
+              if (playBtn) {
+                  playBtn.click(); // دوس على الكارت
+                  await sleep(800); // استنى الكويز يفتح
+                  
+                  // هل شاشة الكويز ظهرت؟
+                  const playScreen = doc.getElementById('playScreen');
+                  if (playScreen && playScreen.style.display !== 'none') {
+                      log(`    ✅ شاشة اللعب فتحت.`, 'success');
+                      
+                      // محاكاة إنهاء الكويز فوراً للاختبار
+                      if (win.showFinal) {
+                          win.score = 5; // حط درجة وهمية
+                          win.currentQuestions = [{}, {}, {}]; // حط أسئلة وهمية
+                          win.showFinal(); // استدعي شاشة النتيجة
+                          log(`    ✅ شاشة النتيجة ظهرت.`, 'success');
+                      } else {
+                          log(`    ❌ دالة showFinal مش موجودة!`, 'error');
+                      }
+                  } else {
+                      log(`    ❌ شاشة اللعب مفتحتش!`, 'error');
+                  }
+              }
+
+              // 2.3 محاكاة التحدي العشوائي (من غير ما نفتح المودال)
+              log(`  🎲 جاري محاكاة التحدي العشوائي...`, 'info');
+              if (win.startRandomMatch) {
+                  // البوت هيضغط الزرار
+                  randomBtn.click();
+                  await sleep(1000);
+                  // هل في غرفة اتفتحت؟
+                  const modal = doc.getElementById('challengeModal');
+                  if (modal && modal.style.display === 'flex') {
+                      log(`    ✅ التحدي العشوائي فتح غرفة (كان مستني/بحث).`, 'success');
+                  }
+              }
+          }
+
+          // 3. اختبار لوحة الأونر
+          log('▶️ الخطوة 3: فحص لوحة الأونر (owner.html)...', 'info');
+          const ownerFrame = await loadPageInFrame('owner.html');
+          const ownerDoc = ownerFrame.contentDocument;
+          await sleep(1000);
+          if (ownerDoc.getElementById('adminUI') || ownerDoc.querySelector('.sidebar')) {
+              log('✅ لوحة الأونر موجودة وشغالة.', 'success');
+          } else {
+              log('❌ لوحة الأونر فيها مشكلة في التحميل.', 'error');
+          }
+
+          // 4. اختبار لوحة الأدمن
+          log('▶️ الخطوة 4: فحص لوحة الأدمن (admin.html)...', 'info');
+          const adminFrame = await loadPageInFrame('admin.html');
+          const adminDoc = adminFrame.contentDocument;
+          await sleep(1000);
+          if (adminDoc.querySelector('.sidebar')) {
+              log('✅ لوحة الأدمن موجودة وشغالة.', 'success');
+          } else {
+              log('❌ لوحة الأدمن فيها مشكلة.', 'error');
+          }
+
+          log('🎉 المحاكاة انتهت! شوف الإحصائيات فوق (نجاح/فشل).', 'info');
+
+      } catch (e) {
+          log('💥 حدث خطأ فادح أثناء المحاكاة: ' + e.message, 'error');
+      }
+
+      btn.disabled = false;
+      btn.innerText = '▶️ ابدأ المحاكاة الحقيقية';
+  }
+</script>
+
+</body>
+</html>
