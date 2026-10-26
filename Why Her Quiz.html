@@ -106,6 +106,7 @@
   
   function createRoom() { 
       const code = Math.random().toString(36).substring(2, 8).toUpperCase(); myRoomCode = code; myRole = 'player1'; isChallengeMode = true; 
+      localStorage.setItem('activeRoomCode', myRoomCode);
       document.getElementById('displayRoomCode').innerText = code; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block'; 
       window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', quizType: currentSaveKey, created_at: Date.now() }).then(() => { 
           window.onValue(window.ref(window.db, 'rooms/' + code), (snapshot) => { 
@@ -120,6 +121,7 @@
   function joinRoom() { 
       const code = document.getElementById('roomCodeInput').value.trim().toUpperCase(); if (!code) { alert(currentLang === 'en' ? "Enter room code first!" : "اكتب كود الغرفة الأول!"); return; } 
       myRole = 'player2'; myRoomCode = code; isChallengeMode = true; 
+      localStorage.setItem('activeRoomCode', myRoomCode);
       window.get(window.ref(window.db, 'rooms/' + code)).then((snapshot) => { 
           if (snapshot.exists()) { 
               const data = snapshot.val(); 
@@ -143,6 +145,7 @@
           }
           if (foundRoom) {
               myRoomCode = foundRoom; myRole = 'player2';
+              localStorage.setItem('activeRoomCode', myRoomCode);
               await window.update(window.ref(window.db, 'rooms/' + myRoomCode), { status: 'playing' });
               startGame('challenge');
           } else { createRandomRoom(); }
@@ -152,6 +155,7 @@
   async function createRandomRoom() {
       const code = Math.random().toString(36).substring(2, 8).toUpperCase(); 
       myRoomCode = code; myRole = 'player1';
+      localStorage.setItem('activeRoomCode', myRoomCode);
       await window.set(window.ref(window.db, 'rooms/' + code), { player1_score: null, player2_score: null, status: 'waiting', quizType: currentSaveKey, created_at: Date.now() });
       document.getElementById('challengeModal').style.display = 'flex'; document.getElementById('roomOptions').style.display = 'none'; document.getElementById('waitingRoom').style.display = 'block';
       document.getElementById('displayRoomCode').innerText = code;
@@ -180,5 +184,6 @@
   window.shareResult = function(platform) { const quizName = currentSaveKey.split('_')[0].toUpperCase(); const text = currentLang === 'en' ? `I scored ${score}/${currentQuestions.length} on the ${quizName} quiz on Quiz Hub! Can you beat my score? 🏆` : `لقد حصلت على ${score}/${currentQuestions.length} في كويز ${quizName} على Quiz Hub! هل يمكنك التغلب علي؟ 🏆`; const url = window.location.href; const encodedText = encodeURIComponent(text); const encodedUrl = encodeURIComponent(url); if (platform === 'whatsapp') window.open(`https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`, '_blank'); else if (platform === 'telegram') window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank'); else if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank'); else if (platform === 'twitter') window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank'); else if (platform === 'native' && navigator.share) navigator.share({ title: 'Quiz Hub', text: text, url: url }).catch(console.error); else alert(currentLang === 'en' ? "Sharing is not supported on this browser." : "المشاركة غير مدعومة في هذا المتصفح."); }
   window.onload = () => { applyLanguage(); const container = document.getElementById('stars-bg'); for (let i = 0; i < 50; i++) { let star = document.createElement('div'); star.className = 'star'; star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%'; let size = Math.random() * 3 + 1; star.style.width = size + 'px'; star.style.height = size + 'px'; star.style.animationDuration = (Math.random() * 3 + 2) + 's'; star.style.animationDelay = Math.random() * 2 + 's'; container.appendChild(star); } for (let i = 0; i < 20; i++) { let star = document.createElement('div'); star.className = 'falling-star'; star.style.left = Math.random() * 100 + '%'; star.style.top = '-10px'; let duration = Math.random() * 10 + 5; star.style.animationDuration = duration + 's'; star.style.animationDelay = Math.random() * 5 + 's'; container.appendChild(star); } };
 </script>
+<script src="room-cleaner.js"></script>
 </body>
 </html>
