@@ -7,19 +7,32 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; }
-  body.light-mode { --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%); --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; }
+  :root {
+    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333;
+  }
+  body.light-mode {
+    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  body { 
+    background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); 
+    font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; 
+    display: flex; flex-direction: column; align-items: center; 
+  }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; }
-  
+  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+
   .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }
   .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
   .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
 
   .community-container { width: 100%; max-width: 800px; }
-  .header-title { text-align: center; color: #ffd700; font-size: 36px; margin-bottom: 10px; }
+  .header-title { text-align: center; color: #ffd700; font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.5); }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; }
 
   .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
@@ -40,18 +53,21 @@
   .post-time { font-size: 12px; color: var(--subtitle-color); }
   .post-text { font-size: 16px; line-height: 1.6; margin-bottom: 10px; }
   
-  .reply-btn { background: transparent; border: none; color: var(--subtitle-color); cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; gap: 5px; }
-  .reply-btn:hover { color: var(--text-color); }
+  .post-footer { display: flex; justify-content: flex-start; align-items: center; gap: 15px; }
+  .like-btn { background: transparent; border: none; color: var(--subtitle-color); cursor: pointer; font-family: 'Cairo'; font-size: 16px; display: flex; align-items: center; gap: 5px; transition: 0.3s; padding: 5px 10px; border-radius: 8px;}
+  .like-btn:hover { background: rgba(255, 0, 0, 0.1); }
+  .like-btn.liked { color: #ff0000; font-weight: bold; }
 
-  .replies-container { margin-top: 15px; padding-right: 20px; border-right: 2px solid var(--card-border); display: none; flex-direction: column; gap: 10px; }
-  .replies-container.show { display: flex; }
+  /* ستايل الردود */
+  .replies-container { margin-top: 15px; padding-right: 20px; border-right: 2px solid var(--card-border); display: flex; flex-direction: column; gap: 10px; }
   .reply-item { background: var(--bg-color); padding: 10px 15px; border-radius: 10px; border: 1px solid var(--card-border); }
   .reply-user { font-weight: bold; color: #ffd700; font-size: 14px; margin-bottom: 5px; }
   .reply-text { font-size: 14px; }
-  
   .reply-input-box { display: flex; gap: 10px; margin-top: 10px; }
-  .reply-input-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; outline: none; }
-  .reply-input-box button { padding: 8px 15px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+  .reply-input-box input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; outline: none; }
+  .reply-input-box button { padding: 6px 12px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+  .reply-btn-toggle { background: transparent; border: none; color: var(--subtitle-color); cursor: pointer; font-family: 'Cairo'; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+  .reply-btn-toggle:hover { color: var(--text-color); }
 
   .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
 </style>
@@ -87,7 +103,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
@@ -102,7 +118,9 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   
-  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue;
+  // ** ربط الدوال بالـ window عشان الشات والقلوب يشتغلوا **
+  window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; 
+  window.set = set; window.remove = remove; window.get = get;
 </script>
 
 <script>
@@ -184,6 +202,57 @@
     } catch (e) { alert("Error: " + e.message); }
   }
 
+  // ** دالة التفاعل بالقلوب **
+  window.toggleLike = function(node, postKey) {
+      if (!currentUser || currentUser === 'زائر') {
+          alert(currentLang === 'en' ? 'You must log in first to like!' : 'لازم تسجل دخول الأول عشان تضيف قلب!');
+          return;
+      }
+
+      const likeRef = window.ref(window.db, node + '/' + postKey + '/likes/' + currentUser);
+      
+      window.get(likeRef).then((snapshot) => {
+          if (snapshot.exists()) {
+              // لو موجود، شيله
+              window.remove(likeRef).then(() => {
+                  console.log("Removed like");
+              }).catch(e => console.error("Error removing like", e));
+          } else {
+              // لو مش موجود، ضيفه
+              window.set(likeRef, true).then(() => {
+                  console.log("Added like");
+              }).catch(e => console.error("Error adding like", e));
+          }
+      });
+  }
+
+  // ** دالة إضافة رد **
+  window.submitReply = function(node, postKey) {
+    const input = document.getElementById(`replyInput-${postKey}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (!currentUser || currentUser === 'زائر') {
+        alert(currentLang === 'en' ? 'You must log in first to reply!' : 'لازم تسجل دخول الأول عشان ترد!');
+        return;
+    }
+
+    const displayUser = currentUser;
+    
+    window.push(window.ref(window.db, node + '/' + postKey + '/replies'), {
+        user: displayUser,
+        text: text,
+        time: Date.now()
+    }).then(() => {
+        input.value = '';
+    });
+  }
+
+  window.toggleReplyBox = function(postKey) {
+      const box = document.getElementById(`replyBox-${postKey}`);
+      if (box) box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+  }
+
   function loadPosts() {
     const list = document.getElementById('postsList');
     const t = translations[currentLang];
@@ -215,6 +284,18 @@
             displayName += ` <span style="color: #ffd700; font-size: 12px; background: #333; padding: 2px 6px; border-radius: 10px;">👑 Owner</span>`;
         }
 
+        // القلوب
+        let likesCount = 0;
+        let isLiked = false;
+        if (post.likes) {
+            likesCount = Object.keys(post.likes).length;
+            if (post.likes[currentUser]) isLiked = true;
+        }
+
+        const likeBtnClass = isLiked ? 'like-btn liked' : 'like-btn';
+        const likeIcon = isLiked ? '❤️' : '🤍';
+
+        // الردود
         let repliesHTML = '';
         if (post.replies) {
             for (let replyKey in post.replies) {
@@ -234,42 +315,26 @@
             <span class="post-time">${post.time}</span>
           </div>
           <div class="post-text">${post.text}</div>
-          <button class="reply-btn" onclick="toggleReply('${postKey}')">↩️ ${t.reply}</button>
+          <div class="post-footer">
+             <button class="${likeBtnClass}" onclick="toggleLike('${dbNode}', '${postKey}')">
+                 ${likeIcon} ${likesCount}
+             </button>
+             <button class="reply-btn-toggle" onclick="toggleReplyBox('${postKey}')">
+                 ↩ ${t.reply}
+             </button>
+          </div>
           
-          <div class="replies-container" id="replies-${postKey}">
+          <div class="replies-container">
              ${repliesHTML}
-             <div class="reply-input-box">
+             <div class="reply-input-box" id="replyBox-${postKey}" style="display: none;">
                <input type="text" id="replyInput-${postKey}" placeholder="${t.reply}...">
-               <button onclick="submitReply('${postKey}')">${t.send}</button>
+               <button onclick="submitReply('${dbNode}', '${postKey}')">${t.send}</button>
              </div>
           </div>
         `;
         list.appendChild(div);
       });
     });
-  }
-
-  window.toggleReply = function(postKey) {
-    const container = document.getElementById(`replies-${postKey}`);
-    container.classList.toggle('show');
-  }
-
-  window.submitReply = async function(postKey) {
-    const input = document.getElementById(`replyInput-${postKey}`);
-    const text = input.value.trim();
-    if (!text) return;
-
-    const dbNode = currentTab === 'comments' ? 'comments' : currentTab === 'suggestions' ? 'suggestions' : 'quiz_requests';
-    const displayUser = currentUser === 'زائر' ? translations[currentLang].guest : currentUser;
-
-    try {
-        await window.push(window.ref(window.db, dbNode + '/' + postKey + '/replies'), {
-            user: displayUser,
-            text: text,
-            time: new Date().toLocaleString()
-        });
-        input.value = '';
-    } catch (e) { alert("Error: " + e.message); }
   }
 
   window.onload = () => {
