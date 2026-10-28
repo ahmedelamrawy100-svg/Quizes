@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ كويز المنتقمون - Avengers</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="quiz-style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div class="top-buttons-container">
+    <a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title" class="main-title" data-ar="🛡️ كويز المنتقمون 🛡️" data-en="🛡️ Avengers Quiz 🛡️">🛡️ كويز المنتقمون 🛡️</h1>
+  <p class="subtitle" data-ar="اختر الجزء اللي عايز تلعب فيه" data-en="Choose the part you want to play">اختر الجزء اللي عايز تلعب فيه</p>
+  
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 1000px;">
+    <div class="quiz-card" onclick="startGame('part1')" style="background-image: url('pic/Avengers 1.jpeg');">
+        <h2 class="card-title" data-ar="The Avengers (2012)" data-en="The Avengers (2012)">The Avengers (2012)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part2')" style="background-image: url('pic/Avengers 2.jpeg');">
+        <h2 class="card-title" data-ar="Age of Ultron (2015)" data-en="Age of Ultron (2015)">Age of Ultron (2015)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part3')" style="background-image: url('pic/Avengers 3.jpeg');">
+        <h2 class="card-title" data-ar="Infinity War (2018)" data-en="Infinity War (2018)">Infinity War (2018)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('part4')" style="background-image: url('pic/Avengers 4.jpeg');">
+        <h2 class="card-title" data-ar="Endgame (2019)" data-en="Endgame (2019)">Endgame (2019)</h2>
+    </div>
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Avengers.jpeg');">
+        <h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2>
+    </div>
+  </div>
+  
+  <button class="speedrun-btn" onclick="startSpeedrun()" data-ar="⚡ العب في وضع السرعة" data-en="⚡ Play Speedrun">⚡ العب في وضع السرعة</button>
+  <button class="speedrun-btn" style="background: #222; border-color: #ff0000; margin-top: 10px;" onclick="openChallengeModal()" data-ar="⚔️ تحدي صديق" data-en="⚔️ Challenge Friend">⚔️ تحدي صديق</button>
+  <button class="speedrun-btn" style="background: #ff9800; border-color: #ffd700; margin-top: 10px; color: #000;" onclick="startRandomMatch()" data-ar="🎲 تحدي عشوائي" data-en="🎲 Random Match">🎲 تحدي عشوائي</button>
+</div>
+
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ff0000;" data-ar="🛡️ كويز المنتقمون 🛡️" data-en="🛡️ Avengers Quiz 🛡️">🛡️ كويز المنتقمون 🛡️</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()" data-ar="السؤال التالي ←" data-en="Next Question →">السؤال التالي ←</button>
+</div>
+
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal-box">
+    <h2 data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
+    <div id="roomOptions">
+      <button class="room-btn" onclick="createRoom()" data-ar="إنشاء غرفة جديدة" data-en="Create New Room">إنشاء غرفة جديدة</button>
+      <p style="color:#aaa; margin: 10px 0;" data-ar="أو" data-en="OR">أو</p>
+      <input type="text" id="roomCodeInput" class="room-input" maxlength="6" placeholder="اكتب كود الغرفة هنا" data-ar="اكتب كود الغرفة هنا" data-en="Enter room code here" style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #555; background:#222; color:#fff; text-align:center;">
+      <button class="room-btn" onclick="joinRoom()" data-ar="انضمام لغرفة" data-en="Join Room">انضمام لغرفة</button>
+    </div>
+    <div id="waitingRoom" style="display: none;">
+      <p class="status-text" data-ar="ابعت الكود ده لصاحبك:" data-en="Send this code to your friend:">ابعت الكود ده لصاحبك:</p>
+      <div class="room-code-display" id="displayRoomCode" style="font-size:32px; color:#fff; background:#000; padding:15px; border:2px dashed #ff0000;">------</div>
+      <p class="status-text" id="waitingStatus" data-ar="في انتظار انضمام صديقك..." data-en="Waiting for your friend...">في انتظار انضمام صديقك...</p>
+    </div>
+    <button class="room-btn" style="background:#222;" onclick="closeChallengeModal()" data-ar="إغلاق" data-en="Close">إغلاق</button>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script src="quiz-core.js" type="module"></script>
+<script>
+    const quizKey = 'avengers'; 
+    const quizData = allQuizzesData.avengers;
+    const partsList = { 
+        part1: quizData.part1, 
+        part2: quizData.part2, 
+        part3: quizData.part3,
+        part4: quizData.part4
+    };
+    window.onload = () => { initQuiz({ title: "🛡️ كويز المنتقمون 🛡️", quizKey: quizKey, quizData: quizData, hasParts: true, partsList: partsList, bgMusic: 'sounds/heartbeat.wav' }); }
+</script>
+<script src="room-cleaner.js"></script>
+</body>
+</html>
