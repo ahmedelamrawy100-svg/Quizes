@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛒 المتجر - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #080808; --text: #fff; --card-bg: #111; --border: #333; --gold: #ffd700; --green: #4caf50; --accent: #ff3333; --blue: #0088cc; }
+  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  
+  .top-bar { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
+  
+  .header-title { text-align: center; color: var(--gold); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.3); }
+  
+  .balance-box { display: flex; gap: 15px; justify-content: center; margin-bottom: 30px; flex-wrap: wrap;}
+  .user-balance { font-size: 18px; font-weight: bold; color: var(--gold); background: rgba(255,215,0,0.1); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--gold); }
+  .user-xp { font-size: 18px; font-weight: bold; color: var(--green); background: rgba(76,175,80,0.1); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--green); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 900px; }
+  .shop-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; }
+  .shop-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+  
+  .preview-box { width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; background: #333; display: flex; justify-content: center; align-items: center; overflow: hidden; background-size: cover; background-position: center; position: relative; }
+  
+  .frame-gold { border: 5px solid #ffd700; box-shadow: 0 0 15px #ffd700; }
+  .frame-fire { border: 5px solid #ff4500; box-shadow: 0 0 15px #ff4500; }
+  .frame-diamond { border: 5px solid #00ffff; box-shadow: 0 0 15px #00ffff; }
+  .frame-legend { border: 5px solid #9c27b0; box-shadow: 0 0 15px #9c27b0; }
+  .frame-neon { border: 5px solid #00ff00; box-shadow: 0 0 15px #00ff00; }
+  .frame-blood { border: 5px solid #8b0000; box-shadow: 0 0 15px #8b0000; }
+  .frame-galaxy { border: 5px solid #4b0082; box-shadow: 0 0 15px #4b0082; background: linear-gradient(45deg, #000, #4b0082); }
+  
+  .shop-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
+  .shop-price { color: var(--gold); font-weight: bold; margin-bottom: 15px; font-size: 16px; }
+  
+  .btn-buy { width: 100%; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; background: var(--accent); color: #fff; }
+  .btn-buy:hover { background: #cc0000; }
+  .btn-buy.owned { background: var(--green); cursor: default; }
+  .btn-buy.equipped { background: var(--blue); cursor: default; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div style="text-align:center; width:100%;">
+  <h1 class="header-title" id="mainTitle">🛒 متجر Quiz Hub</h1>
+  <div class="balance-box">
+      <div class="user-balance" id="userBalance">🪙 جاري التحميل...</div>
+      <div class="user-xp" id="userXPBalance">✨ جاري التحميل...</div>
+  </div>
+</div>
+
+<div class="grid" id="shopGrid"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, get, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.onValue = onValue; window.push = push;
+
+  const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) { window.location.href = 'index.html'; }
+
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  
+  const translations = {
+    ar: {
+      back: "⬅ رجوع", title: "🛒 متجر Quiz Hub", balance: "🪙 رصيدك:", xpBal: "✨ الـ XP:",
+      buy: "شراء", equip: "تجهيز", equipped: "مُجهز ✅",
+      notEnough: "رصيدك من العملات مش كفاية! العب كويزات أو جرب حظك في العجلة عشان تجمع.",
+      confirmBuy: "متأكد إنك عايز تشتري ده بـ", coins: "عملة؟",
+      bought: "تم الشراء بنجاح! 🎉", equippedMsg: "تم التجهيز! ✨",
+      frameGold: "إطار ذهبي", frameFire: "إطار ناري", frameDiamond: "إطار ألماس", 
+      frameLegend: "إطار أسطوري", frameNeon: "إطار نيون", frameBlood: "إطار دموي", frameGalaxy: "إطار مجرة",
+      avatarAnnabelle: "أنابيل", avatarFnaf: "فريدي", avatarSquid: "لعبة الحبار", avatarWednesday: "وينزداي"
+    },
+    en: {
+      back: "⬅ Back", title: "🛒 Quiz Hub Shop", balance: "🪙 Your Balance:", xpBal: "✨ Your XP:",
+      buy: "Buy", equip: "Equip", equipped: "Equipped ✅",
+      notEnough: "Not enough Coins! Play quizzes or spin the wheel to earn more.",
+      confirmBuy: "Are you sure you want to buy this for", coins: "Coins?",
+      bought: "Purchased successfully! 🎉", equippedMsg: "Equipped! ✨",
+      frameGold: "Gold Frame", frameFire: "Fire Frame", frameDiamond: "Diamond Frame", 
+      frameLegend: "Legendary Frame", frameNeon: "Neon Frame", frameBlood: "Blood Frame", frameGalaxy: "Galaxy Frame",
+      avatarAnnabelle: "Annabelle", avatarFnaf: "Freddy", avatarSquid: "Squid Game", avatarWednesday: "Wednesday"
+    }
+  };
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    document.getElementById('mainTitle').innerText = t.title;
+    document.getElementById('userBalance').innerText = `${t.balance} ${userCoins} Coins`;
+    document.getElementById('userXPBalance').innerText = `${t.xpBal} ${userXP} XP`;
+    renderShop();
+  }
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+  }
+
+  const shopItems = [
+    { id: 'frame_gold', type: 'frame', ar: 'frameGold', en: 'frameGold', price: 50, class: 'frame-gold' },
+    { id: 'frame_fire', type: 'frame', ar: 'frameFire', en: 'frameFire', price: 100, class: 'frame-fire' },
+    { id: 'frame_diamond', type: 'frame', ar: 'frameDiamond', en: 'frameDiamond', price: 250, class: 'frame-diamond' },
+    { id: 'frame_legend', type: 'frame', ar: 'frameLegend', en: 'frameLegend', price: 500, class: 'frame-legend' },
+    { id: 'frame_neon', type: 'frame', ar: 'frameNeon', en: 'frameNeon', price: 750, class: 'frame-neon' },
+    { id: 'frame_blood', type: 'frame', ar: 'frameBlood', en: 'frameBlood', price: 1000, class: 'frame-blood' },
+    { id: 'frame_galaxy', type: 'frame', ar: 'frameGalaxy', en: 'frameGalaxy', price: 2500, class: 'frame-galaxy' },
+    { id: 'avatar_annabelle', type: 'avatar', ar: 'avatarAnnabelle', en: 'avatarAnnabelle', price: 75, image: 'pic/Annabelle.jpg' },
+    { id: 'avatar_fnaf', type: 'avatar', ar: 'avatarFnaf', en: 'avatarFnaf', price: 75, image: 'pic/FNAF.jpg' },
+    { id: 'avatar_squid', type: 'avatar', ar: 'avatarSquid', en: 'avatarSquid', price: 75, image: 'pic/Squid Game.jpg' },
+    { id: 'avatar_wednesday', type: 'avatar', ar: 'avatarWednesday', en: 'avatarWednesday', price: 75, image: 'pic/Wednesday.jpg' }
+  ];
+
+  let userCoins = 0;
+  let userXP = 0;
+  let userInventory = {};
+  let equippedFrame = null;
+  let equippedAvatar = null;
+
+  window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snapshot) => {
+    const data = snapshot.val() || {};
+    userCoins = data.coins || 0; 
+    userXP = data.xp || 0;
+    userInventory = data.inventory || {};
+    equippedFrame = data.equippedFrame || null;
+    equippedAvatar = data.equippedAvatar || null;
+
+    applyLanguage();
+  });
+
+  function renderShop() {
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = '';
+    const t = translations[currentLang];
+
+    shopItems.forEach(item => {
+      const isOwned = userInventory[item.id] === true;
+      const isEquipped = (item.type === 'frame' && equippedFrame === item.id) || (item.type === 'avatar' && equippedAvatar === item.id);
+      
+      const card = document.createElement('div');
+      card.className = 'shop-card';
+      
+      let previewHTML = '';
+      if (item.type === 'frame') {
+        previewHTML = `<div class="preview-box ${item.class}"><span style="font-size:30px;">👤</span></div>`;
+      } else if (item.type === 'avatar') {
+        previewHTML = `<div class="preview-box" style="background-image: url('${item.image}');"></div>`;
+      }
+
+      let btnHTML = '';
+      if (isEquipped) {
+        btnHTML = `<button class="btn-buy equipped">${t.equipped}</button>`;
+      } else if (isOwned) {
+        btnHTML = `<button class="btn-buy" style="background:#0088cc;" onclick="equipItem('${item.id}', '${item.type}')">${t.equip}</button>`;
+      } else {
+        btnHTML = `<button class="btn-buy" onclick="buyItem('${item.id}', ${item.price})">${t.buy}</button>`;
+      }
+
+      card.innerHTML = `
+        ${previewHTML}
+        <div class="shop-title">${t[item.ar]}</div>
+        <div class="shop-price">🪙 ${item.price}</div>
+        ${btnHTML}
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  window.buyItem = async function(itemId, price) {
+    const t = translations[currentLang];
+    if (userCoins < price) {
+      alert(t.notEnough);
+      return;
+    }
+    
+    if (confirm(`${t.confirmBuy} ${price} ${t.coins}`)) {
+      try {
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), userCoins - price);
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/inventory/' + itemId), true);
+        
+        await window.push(window.ref(window.db, 'activity_feed'), {
+            user: currentUser,
+            action: "اشترى",
+            detail: itemId.includes('frame') ? "إطار جديد 🖼️" : "صورة بروفايل جديدة 👤",
+            time: Date.now()
+        });
+
+        alert(t.bought);
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+  }
+
+  window.equipItem = async function(itemId, itemType) {
+    const t = translations[currentLang];
+    try {
+      if (itemType === 'frame') {
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/equippedFrame'), itemId);
+      } else if (itemType === 'avatar') {
+        const item = shopItems.find(i => i.id === itemId);
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/profilePic'), item.image);
+        await window.set(window.ref(window.db, 'users_data/' + currentUser + '/equippedAvatar'), itemId);
+      }
+      
+      await window.push(window.ref(window.db, 'activity_feed'), {
+          user: currentUser,
+          action: "جهّز",
+          detail: itemType === 'frame' ? "إطار جديد 🖼️" : "صورة بروفايل جديدة 👤",
+          time: Date.now()
+      });
+
+      alert(t.equippedMsg);
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+
+  window.addEventListener('load', () => {
+      applyLanguage();
+  });
+
+</script>
+</body>
+</html>
