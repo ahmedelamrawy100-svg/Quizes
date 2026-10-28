@@ -9,7 +9,7 @@
 <style>
   :root { 
       --bg-color: #080808; --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; 
-      --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0;
+      --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --orange: #ff9800;
   }
   body.light-mode { 
       --bg-color: #f4f4f4; --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; 
@@ -17,58 +17,48 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; }
+  .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
   
   .profile-container { width: 100%; max-width: 800px; margin-top: 50px; display: flex; flex-direction: column; gap: 30px; }
 
-  /* --- كارت الرأس --- */
-  .header-card { 
-      background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; 
-      text-align: center; display: flex; flex-direction: column; align-items: center; position: relative;
-      box-shadow: 0 10px 30px rgba(255,0,0,0.1);
-  }
-  
-  .avatar { 
-      width: 130px; height: 130px; background: var(--accent); border-radius: 50%; 
-      display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; 
-      margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center;
-  }
+  .header-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; box-shadow: 0 10px 30px rgba(255,0,0,0.1); }
+  .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; }
   body.light-mode .avatar { border-color: #111; }
-  
   .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; }
 
-  /* --- مربع الرتبة --- */
-  .rank-box { 
-      background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); 
-      padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px;
-      margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-  }
+  .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
   body.light-mode .rank-box { background: #fff; }
   .rank-label { font-size: 14px; color: var(--subtitle-color); margin-left: 5px; }
   .rank-value { font-size: 20px; font-weight: bold; color: var(--gold); }
 
-  /* --- الإحصائيات --- */
   .stats-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;}
   .stat-badge { font-size: 16px; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-weight: bold; border: 1px solid; }
   .score-badge { color: var(--gold); background: rgba(255, 215, 0, 0.1); border-color: var(--gold); }
   .xp-badge { color: var(--green); background: rgba(76, 175, 80, 0.1); border-color: var(--green); }
   .level-badge { color: var(--purple); background: rgba(156, 39, 176, 0.1); border-color: var(--purple); }
 
-  /* --- شريط التقدم --- */
   .progress-container { width: 100%; max-width: 400px; margin: 10px auto; }
   .progress-bar-bg { width: 100%; height: 15px; background: #333; border-radius: 10px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #00ff00); width: 0%; transition: width 0.5s; }
 
-  /* --- البادجات --- */
+  .advanced-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-top: 20px; }
+  .adv-stat-box { background: var(--bg-color); border: 1px solid var(--card-border); padding: 15px; border-radius: 12px; text-align: center; transition: 0.3s; }
+  .adv-stat-box:hover { transform: translateY(-5px); border-color: var(--accent); }
+  .adv-stat-title { font-size: 13px; color: var(--subtitle-color); margin-bottom: 8px; font-weight: bold; }
+  .adv-stat-value { font-size: 24px; font-weight: 900; color: var(--text-color); }
+  .adv-stat-value.accuracy { color: var(--blue); }
+  .adv-stat-value.streak { color: var(--orange); }
+  .adv-stat-value.completed { color: var(--green); }
+
   .badges-section { width: 100%; margin-top: 15px; }
   .badges-title { font-size: 14px; color: var(--subtitle-color); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
   .badges-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .badge-item { background: rgba(255,0,0,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
 
-  /* --- التحذيرات --- */
   #warningBox { display: none; background: rgba(255,0,0,0.1); border: 2px solid var(--accent); color: var(--accent); padding: 15px; border-radius: 10px; width: 100%; margin-top: 15px; text-align: center; font-weight: bold; }
 
-  /* --- رفع الصورة --- */
   .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px; flex-wrap: wrap; }
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
@@ -76,7 +66,6 @@
   .upload-btn { background: #4caf50; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; display: none;}
   .upload-btn:hover { background: #388e3c; }
 
-  /* --- الأصدقاء --- */
   .section-title { color: var(--accent); margin-bottom: 15px; font-size: 22px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
   .friends-container { display: flex; flex-direction: column; gap: 10px; }
   .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
@@ -85,58 +74,70 @@
   .friend-name { font-weight: bold; font-size: 16px; }
   .action-btn { padding: 6px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; background: #0088cc; font-size: 13px; }
   .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; background: var(--card-bg); border-radius: 15px; }
+
+  @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
-<a href="index.html" class="back-btn">⬅ رجوع</a>
+<div class="top-controls">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
 
 <div class="profile-container">
   <div class="header-card">
     <div class="avatar" id="userAvatar">A</div>
     <div class="username" id="userName">Loading...</div>
     
-    <!-- مربع الرتبة -->
     <div class="rank-box" id="rankBox" style="display: none;">
-        <span class="rank-label">الرتبة:</span>
+        <span class="rank-label" id="rankLabelText">الرتبة:</span>
         <span class="rank-value" id="userRankValue">-</span>
     </div>
 
-    <!-- الإحصائيات -->
     <div class="stats-row">
-      <div class="stat-badge score-badge">🏆 <span id="totalScoreDisplay">0</span> نقطة</div>
+      <div class="stat-badge score-badge">🏆 <span id="totalScoreDisplay">0</span> <span id="pointsText">نقطة</span></div>
       <div class="stat-badge xp-badge">✨ <span id="xpDisplay">0</span> XP</div>
-      <div class="stat-badge level-badge">⭐ المستوى: <span id="levelDisplay">1</span></div>
+      <div class="stat-badge level-badge"><span id="levelText">⭐ المستوى:</span> <span id="levelDisplay">1</span></div>
     </div>
 
-    <!-- شريط التقدم -->
     <div class="progress-container">
         <div class="progress-bar-bg"><div class="progress-bar-fill" id="xpProgressBar"></div></div>
         <div style="font-size: 12px; color: var(--subtitle-color); margin-top: 5px; direction: ltr;" id="xpProgressText">0 / 100 XP</div>
     </div>
 
-    <!-- التحذيرات -->
+    <div class="advanced-stats" id="advancedStatsSection">
+        <div class="adv-stat-box">
+            <div class="adv-stat-title" id="accLabel">🎯 دقة التصويب</div>
+            <div class="adv-stat-value accuracy" id="accuracyDisplay">0%</div>
+        </div>
+        <div class="adv-stat-box">
+            <div class="adv-stat-title" id="streakLabel">🔥 أفضل نتيجة</div>
+            <div class="adv-stat-value streak" id="bestStreakDisplay">0</div>
+        </div>
+        <div class="adv-stat-box">
+            <div class="adv-stat-title" id="compLabel">🎮 كويزات مكتملة</div>
+            <div class="adv-stat-value completed" id="completedDisplay">0</div>
+        </div>
+    </div>
+
     <div id="warningBox"><span id="warningText"></span></div>
 
-    <!-- البادجات -->
     <div class="badges-section" id="badgesSection" style="display: none;">
-        <div class="badges-title">الإنجازات (Badges)</div>
+        <div class="badges-title" id="badgesTitleText">الإنجازات (Badges)</div>
         <div class="badges-container" id="badgesContainer"></div>
     </div>
 
-    <!-- رفع الصورة -->
     <div class="upload-section" id="uploadSection" style="display: none;">
-      <label for="imageUpload" class="upload-label">📷 اختر صورة</label>
+      <label for="imageUpload" class="upload-label" id="uploadLabelText">📷 اختر صورة</label>
       <input type="file" id="imageUpload" accept="image/*" onchange="window.previewImage(event)">
       <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()">حفظ الصورة</button>
-      
-      <!-- زرار مسح الصورة -->
       <button class="upload-btn" style="background: #ff3333; display: none;" id="removeImgBtn" onclick="window.removeProfilePic()">🗑️ مسح</button>
     </div>
   </div>
 
   <div>
-    <h2 class="section-title">👥 أصدقاء <span id="friendsNameDisplay"></span></h2>
+    <h2 class="section-title" id="friendsSectionTitle">👥 أصدقاء <span id="friendsNameDisplay"></span></h2>
     <div id="friendsList" class="friends-container">
       <div class="no-data">جاري التحميل...</div>
     </div>
@@ -145,163 +146,261 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set;
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.push = push;
 
   const IMGBB_API_KEY = "3e7c71a0a091350d70363ef5909198d7";
-
   const urlParams = new URLSearchParams(window.location.search);
-  const loggedInUser = localStorage.getItem('loggedInUser');
-  const profileUser = urlParams.get('user') || loggedInUser; 
+  let loggedInUser = localStorage.getItem('loggedInUser');
+  let profileUser = urlParams.get('user') || loggedInUser; 
 
   if (!profileUser) { window.location.href = 'index.html'; }
 
-  const isMyProfile = (profileUser.toLowerCase() === loggedInUser.toLowerCase());
-
   document.getElementById('userName').innerText = profileUser;
   document.getElementById('friendsNameDisplay').innerText = profileUser;
-  
-  if (isMyProfile) {
-      document.getElementById('uploadSection').style.display = 'flex';
+
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  const translations = {
+    ar: { back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", badges: "الإنجازات (Badges)", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل نتيجة", completed: "🎮 كويزات مكتملة" },
+    en: { back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", badges: "Achievements (Badges)", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Score", completed: "🎮 Quizzes Completed" }
+  };
+
+  function applyLanguage() {
+      const t = translations[currentLang];
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+      document.getElementById('backBtn').innerText = t.back;
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      
+      document.getElementById('rankLabelText').innerText = t.rank;
+      document.getElementById('pointsText').innerText = t.points;
+      document.getElementById('levelText').innerText = t.level;
+      document.getElementById('badgesTitleText').innerText = t.badges;
+      document.getElementById('uploadLabelText').innerText = t.uploadLabel;
+      document.getElementById('saveImgBtn').innerText = t.saveImg;
+      document.getElementById('removeImgBtn').innerText = t.removeImg;
+      document.getElementById('friendsSectionTitle').innerHTML = `${t.friends} <span id="friendsNameDisplay">${profileUser}</span>`;
+      
+      document.getElementById('accLabel').innerText = t.accuracy;
+      document.getElementById('streakLabel').innerText = t.bestStreak;
+      document.getElementById('compLabel').innerText = t.completed;
+  }
+  applyLanguage();
+
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
   }
 
-  // --- جلب الصورة الشخصية ---
-  window.onValue(window.ref(window.db, 'users_data/' + profileUser), (snapshot) => {
-    const userData = snapshot.val();
-    const avatarEl = document.getElementById('userAvatar');
-    if (userData && userData.profilePic) {
-      avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
-      avatarEl.innerText = '';
-      if (isMyProfile) {
-        document.getElementById('removeImgBtn').style.display = 'block';
-      }
-    } else {
-      avatarEl.style.backgroundImage = 'none';
-      avatarEl.innerText = profileUser.charAt(0).toUpperCase();
-      if (isMyProfile) {
-        document.getElementById('removeImgBtn').style.display = 'none';
-      }
-    }
-  });
-
-  // --- الرتبة ---
-  window.onValue(window.ref(window.db, 'roles/admins'), (adminsSnap) => {
-      const admins = adminsSnap.val() || {};
-      const isOwner = profileUser.toLowerCase() === 'ahmed';
-      
-      let isAdmin = false;
-      for (let adminName in admins) {
-          if (adminName.toLowerCase() === profileUser.toLowerCase()) { isAdmin = true; break; }
-      }
-
-      window.get(window.ref(window.db, 'roles/users')).then(rankSnap => {
-          let rankText = '👤 لاعب عادي';
-          const ranks = rankSnap.val() || {};
-          
-          for (let user in ranks) {
-              if (user.toLowerCase() === profileUser.toLowerCase()) {
-                  rankText = ranks[user];
+  window.get(window.ref(window.db, 'usernames')).then(snap => {
+      if(snap.exists()) {
+          const allUsers = snap.val();
+          for(let user in allUsers) {
+              if(user.toLowerCase() === profileUser.toLowerCase()) {
+                  profileUser = user; 
                   break;
               }
           }
+      }
+      
+      document.getElementById('userName').innerText = profileUser;
+      document.getElementById('friendsNameDisplay').innerText = profileUser;
+      
+      if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
+          document.getElementById('uploadSection').style.display = 'flex';
+      }
+      
+      loadProfileData(); 
+  });
 
-          if (isOwner) rankText = '👑 الأونر';
-          else if (isAdmin && rankText === '👤 لاعب عادي') rankText = '🛡️ أدمن';
-
-          document.getElementById('rankBox').style.display = 'inline-flex';
-          document.getElementById('userRankValue').innerText = rankText;
+  function loadProfileData() {
+      window.get(window.ref(window.db, 'users_data/' + profileUser)).then((snapshot) => {
+        const userData = snapshot.val();
+        const avatarEl = document.getElementById('userAvatar');
+        if (userData && userData.profilePic) {
+          avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
+          avatarEl.innerText = '';
+          if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
+            document.getElementById('removeImgBtn').style.display = 'block';
+          }
+        } else {
+          avatarEl.style.backgroundImage = 'none';
+          avatarEl.innerText = profileUser.charAt(0).toUpperCase();
+          if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
+            document.getElementById('removeImgBtn').style.display = 'none';
+          }
+        }
       });
-  });
 
-  // --- البادجات ---
-  window.onValue(window.ref(window.db, 'badges/' + profileUser), (snapshot) => {
-    const data = snapshot.val();
-    const container = document.getElementById('badgesContainer');
-    const section = document.getElementById('badgesSection');
-    container.innerHTML = '';
-    if (data && Object.keys(data).length > 0) {
-        section.style.display = 'block';
-        Object.keys(data).forEach(badge => {
-            const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; container.appendChild(span);
-        });
-    } else { section.style.display = 'none'; }
-  });
+      window.get(window.ref(window.db, 'roles/admins')).then((adminsSnap) => {
+          const admins = adminsSnap.val() || {};
+          const isOwner = profileUser.toLowerCase() === 'ahmed';
+          
+          let isAdmin = false;
+          for (let adminName in admins) {
+              if (adminName.toLowerCase() === profileUser.toLowerCase()) { isAdmin = true; break; }
+          }
 
-  // --- النقاط والـ XP والمستويات ---
-  window.onValue(window.ref(window.db, 'scores/' + profileUser), (snapshot) => {
-    const data = snapshot.val(); let total = 0;
-    if (data) { for (let q in data) { const attempts = data[q]; let best = 0; for (let id in attempts) { if (attempts[id].score > best) best = attempts[id].score; } total += best; } }
-    document.getElementById('totalScoreDisplay').innerText = total;
-  });
+          window.get(window.ref(window.db, 'roles/users')).then(rankSnap => {
+              let rankText = translations[currentLang].rankPlayer;
+              const ranks = rankSnap.val() || {};
+              
+              for (let user in ranks) {
+                  if (user.toLowerCase() === profileUser.toLowerCase()) {
+                      rankText = ranks[user];
+                      break;
+                  }
+              }
 
-  window.onValue(window.ref(window.db, 'users_data/' + profileUser + '/xp'), (snapshot) => {
-    let xp = snapshot.exists() ? snapshot.val() : 0;
-    document.getElementById('xpDisplay').innerText = xp;
-    
-    // حساب المستوى
-    let level = 1;
-    let nextLevelXp = 100;
-    let currentLevelXp = 0;
+              if (isOwner) rankText = translations[currentLang].rankOwner;
+              else if (isAdmin && (rankText.includes('لاعب') || rankText.includes('Player'))) rankText = translations[currentLang].rankAdmin;
 
-    if (xp >= 4500) { level = 10; currentLevelXp = 4500; nextLevelXp = "Max"; }
-    else if (xp >= 3600) { level = 9; currentLevelXp = 3600; nextLevelXp = 4500; }
-    else if (xp >= 2800) { level = 8; currentLevelXp = 2800; nextLevelXp = 3600; }
-    else if (xp >= 2100) { level = 7; currentLevelXp = 2100; nextLevelXp = 2800; }
-    else if (xp >= 1500) { level = 6; currentLevelXp = 1500; nextLevelXp = 2100; }
-    else if (xp >= 1000) { level = 5; currentLevelXp = 1000; nextLevelXp = 1500; }
-    else if (xp >= 600) { level = 4; currentLevelXp = 600; nextLevelXp = 1000; }
-    else if (xp >= 300) { level = 3; currentLevelXp = 300; nextLevelXp = 600; }
-    else if (xp >= 100) { level = 2; currentLevelXp = 100; nextLevelXp = 300; }
-    else { level = 1; currentLevelXp = 0; nextLevelXp = 100; }
+              document.getElementById('rankBox').style.display = 'inline-flex';
+              document.getElementById('userRankValue').innerText = rankText;
+          });
+      });
 
-    document.getElementById('levelDisplay').innerText = level;
-    document.getElementById('xpProgressText').innerText = `${xp - currentLevelXp} / ${nextLevelXp === "Max" ? "Max" : nextLevelXp - currentLevelXp} XP`;
-    
-    let progressPercent = 0;
-    if (nextLevelXp !== "Max") {
-        progressPercent = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
-    } else {
-        progressPercent = 100;
-    }
-    document.getElementById('xpProgressBar').style.width = `${progressPercent}%`;
-  });
+      window.get(window.ref(window.db, 'badges/' + profileUser)).then((snapshot) => {
+        const data = snapshot.val();
+        const container = document.getElementById('badgesContainer');
+        const section = document.getElementById('badgesSection');
+        container.innerHTML = '';
+        if (data && Object.keys(data).length > 0) {
+            section.style.display = 'block';
+            Object.keys(data).forEach(badge => {
+                const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; container.appendChild(span);
+            });
+        } else { section.style.display = 'none'; }
+      });
 
-  // --- الأصدقاء ---
-  window.onValue(window.ref(window.db, 'friends/' + profileUser), (snapshot) => {
-    const data = snapshot.val();
-    const list = document.getElementById('friendsList');
-    list.innerHTML = '';
-    if (!data) { list.innerHTML = `<div class="no-data">${profileUser} لسه مفيش أصدقاء.</div>`; return; }
-    for (let friend in data) {
-      const div = document.createElement('div'); div.className = 'friend-card';
-      div.innerHTML = `
-        <div class="friend-info">
-          <div class="friend-avatar">${friend.charAt(0).toUpperCase()}</div>
-          <div class="friend-name">${friend}</div>
-        </div>
-        <div><a href="profile.html?user=${friend}" class="action-btn">زيارة البروفايل</a></div>
-      `;
-      list.appendChild(div);
-    }
-  });
+      window.get(window.ref(window.db, 'scores/' + profileUser)).then((snapshot) => {
+        const data = snapshot.val(); 
+        let total = 0;
+        let totalCorrect = 0;
+        let totalQuestions = 0;
+        let maxTotalScore = 0;
+        let completedCount = 0;
 
-  // --- التحذيرات ---
-  window.onValue(window.ref(window.db, 'warnings/' + profileUser), (snapshot) => {
-    const warnData = snapshot.val();
-    if (warnData) {
-        document.getElementById('warningBox').style.display = 'block';
-        document.getElementById('warningText').innerText = `⚠️ تحذير: ${warnData.text}`;
-    } else {
-        document.getElementById('warningBox').style.display = 'none';
-    }
-  });
+        if (data) { 
+            for (let quiz in data) { 
+                const attempts = data[quiz]; 
+                let quizBest = 0; 
+                let quizCorrect = 0;
+                let quizTotal = 0;
+                
+                // بنحسب الدقة على أساس أفضل محاولة في الكويز ده
+                let bestAttemptCorrect = 0;
+                let bestAttemptTotal = 0;
+                
+                for (let id in attempts) { 
+                    const attempt = attempts[id];
+                    if (attempt.score > quizBest) {
+                        quizBest = attempt.score; 
+                        bestAttemptCorrect = attempt.score;
+                        bestAttemptTotal = attempt.total;
+                    }
+                } 
+                
+                total += quizBest; 
+                totalCorrect += bestAttemptCorrect;
+                totalQuestions += bestAttemptTotal;
+                completedCount++;
+            } 
+            maxTotalScore = total; 
+        }
+        
+        document.getElementById('totalScoreDisplay').innerText = total;
+        document.getElementById('bestStreakDisplay').innerText = maxTotalScore;
+        document.getElementById('completedDisplay').innerText = completedCount;
+        
+        if (totalQuestions > 0) {
+            let accuracy = Math.round((totalCorrect / totalQuestions) * 100);
+            document.getElementById('accuracyDisplay').innerText = accuracy + '%';
+        } else {
+            document.getElementById('accuracyDisplay').innerText = '0%';
+        }
+      });
 
-  // --- دوال رفع الصورة ---
+      window.get(window.ref(window.db, 'users_data/' + profileUser + '/xp')).then((snapshot) => {
+        let xp = snapshot.exists() ? snapshot.val() : 0;
+        document.getElementById('xpDisplay').innerText = xp;
+        
+        let level = 1;
+        let nextLevelXp = 100;
+        let currentLevelXp = 0;
+
+        if (xp >= 4500) { level = 10; currentLevelXp = 4500; nextLevelXp = "Max"; }
+        else if (xp >= 3600) { level = 9; currentLevelXp = 3600; nextLevelXp = 4500; }
+        else if (xp >= 2800) { level = 8; currentLevelXp = 2800; nextLevelXp = 3600; }
+        else if (xp >= 2100) { level = 7; currentLevelXp = 2100; nextLevelXp = 2800; }
+        else if (xp >= 1500) { level = 6; currentLevelXp = 1500; nextLevelXp = 2100; }
+        else if (xp >= 1000) { level = 5; currentLevelXp = 1000; nextLevelXp = 1500; }
+        else if (xp >= 600) { level = 4; currentLevelXp = 600; nextLevelXp = 1000; }
+        else if (xp >= 300) { level = 3; currentLevelXp = 300; nextLevelXp = 600; }
+        else if (xp >= 100) { level = 2; currentLevelXp = 100; nextLevelXp = 300; }
+        else { level = 1; currentLevelXp = 0; nextLevelXp = 100; }
+
+        document.getElementById('levelDisplay').innerText = level;
+        document.getElementById('xpProgressText').innerText = `${xp - currentLevelXp} / ${nextLevelXp === "Max" ? "Max" : nextLevelXp - currentLevelXp} XP`;
+        
+        let progressPercent = 0;
+        if (nextLevelXp !== "Max") {
+            progressPercent = ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
+        } else {
+            progressPercent = 100;
+        }
+        document.getElementById('xpProgressBar').style.width = `${progressPercent}%`;
+      });
+
+      window.get(window.ref(window.db, 'warnings/' + profileUser)).then((snapshot) => {
+        const warnData = snapshot.val();
+        const t = translations[currentLang];
+        if (warnData) {
+            document.getElementById('warningBox').style.display = 'block';
+            document.getElementById('warningText').innerText = t.warnPrefix + warnData.text;
+        } else {
+            document.getElementById('warningBox').style.display = 'none';
+        }
+      });
+
+      window.get(window.ref(window.db, 'friends')).then((snapshot) => {
+          const list = document.getElementById('friendsList');
+          list.innerHTML = '';
+          let myFriends = {};
+          
+          if (snapshot.exists()) {
+              const allFriendsData = snapshot.val();
+              for (let userKey in allFriendsData) {
+                  if (userKey.toLowerCase() === profileUser.toLowerCase()) {
+                      myFriends = allFriendsData[userKey];
+                      break;
+                  }
+              }
+          }
+          
+          if (!myFriends || Object.keys(myFriends).length === 0) { 
+              list.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`; 
+              return; 
+          }
+          
+          for (let friend in myFriends) {
+            const div = document.createElement('div'); div.className = 'friend-card';
+            div.innerHTML = `
+              <div class="friend-info">
+                <div class="friend-avatar">${friend.charAt(0).toUpperCase()}</div>
+                <div class="friend-name">${friend}</div>
+              </div>
+              <div><a href="profile.html?user=${friend}" class="action-btn">${translations[currentLang].visitProfile}</a></div>
+            `;
+            list.appendChild(div);
+          }
+      });
+  }
+
   let selectedFile = null;
-
   window.previewImage = function(event) {
     selectedFile = event.target.files[0];
     if (selectedFile) {
@@ -311,15 +410,16 @@
         avatarEl.style.backgroundImage = `url('${e.target.result}')`;
         avatarEl.innerText = '';
         document.getElementById('saveImgBtn').style.display = 'block';
-        document.getElementById('removeImgBtn').style.display = 'block'; // إظهار زرار المسح
+        document.getElementById('removeImgBtn').style.display = 'block';
       }
       reader.readAsDataURL(selectedFile);
     }
   }
 
   window.uploadProfilePic = async function() {
-    if (!selectedFile || !isMyProfile) return;
+    if (!selectedFile || profileUser.toLowerCase() !== loggedInUser.toLowerCase()) return;
     const btn = document.getElementById('saveImgBtn');
+    const t = translations[currentLang];
     btn.innerText = '...'; btn.disabled = true;
     
     const formData = new FormData();
@@ -330,35 +430,30 @@
       const data = await response.json();
       
       if (data.success) {
-        await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), data.data.url);
-        alert("تم رفع الصورة بنجاح! 🎉");
-        btn.style.display = 'none';
+          await window.set(window.ref(window.db, 'users_data/' + profileUser + '/profilePic'), data.data.url);
+          alert(t.uploadedImg);
+          btn.style.display = 'none';
       } else {
-        alert("فشل رفع الصورة، حاول تاني.");
+        alert(t.errorImg);
       }
     } catch (error) { alert("Error: " + error.message); }
     
-    btn.innerText = 'حفظ الصورة'; btn.disabled = false;
+    btn.innerText = t.saveImg; btn.disabled = false;
   }
 
-  // دالة مسح الصورة
   window.removeProfilePic = async function() {
-    if (!isMyProfile) return;
-    if (confirm("هل أنت متأكد من مسح صورتك؟")) {
+    if (profileUser.toLowerCase() !== loggedInUser.toLowerCase()) return;
+    const t = translations[currentLang];
+    if (confirm(t.confirmRemove)) {
       try {
-        await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), null);
-        
+        await window.set(window.ref(window.db, 'users_data/' + profileUser + '/profilePic'), null);
         const avatarEl = document.getElementById('userAvatar');
         avatarEl.style.backgroundImage = 'none';
         avatarEl.innerText = profileUser.charAt(0).toUpperCase();
-        
         document.getElementById('saveImgBtn').style.display = 'none';
         document.getElementById('removeImgBtn').style.display = 'none';
-        
-        alert("تم مسح الصورة بنجاح! 🗑️");
-      } catch(e) {
-        alert("Error: " + e.message);
-      }
+        alert(t.removedImg);
+      } catch(e) { alert("Error: " + e.message); }
     }
   }
 
