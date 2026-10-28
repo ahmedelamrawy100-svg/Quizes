@@ -20,7 +20,7 @@
   .header-title { text-align: center; color: var(--accent); font-size: 32px; margin-bottom: 20px; }
   
   .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid var(--card-border); overflow-x: auto; }
-  .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: bold; color: var(--subtitle-color); border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
+  .tab { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-weight: bold; color: var(--subtitle-color); border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; font-size: 13px; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   
   .tab-content { display: none; }
@@ -35,6 +35,13 @@
   .btn-reject { background: #f44336; color: #fff; padding: 8px 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
 
   .no-data { text-align: center; color: var(--subtitle-color); padding: 30px; background: var(--card-bg); border-radius: 15px; }
+  
+  .request-box { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+  .request-box h3 { color: var(--accent); margin-bottom: 15px; }
+  .request-input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; outline: none; }
+  .request-input:focus { border-color: var(--accent); }
+  .btn-submit { width: 100%; padding: 12px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; transition: 0.3s; }
+  .btn-submit:hover { background: #cc0000; }
 </style>
 </head>
 <body>
@@ -49,8 +56,9 @@
   
   <div class="tabs">
     <div class="tab active" onclick="switchTab('friends', this)" id="tabFriends">👥 الأصدقاء</div>
-    <div class="tab" onclick="switchTab('admin', this)" id="tabAdmin">📩 رسائل الإدارة</div>
-    <div class="tab" onclick="switchTab('requests', this)" id="tabRequests">🤝 طلبات الصداقة</div>
+    <div class="tab" onclick="switchTab('admin', this)" id="tabAdmin">📩 الإدارة</div>
+    <div class="tab" onclick="switchTab('requests', this)" id="tabRequests">🤝 طلبات</div>
+    <div class="tab" onclick="switchTab('ownerReq', this)" id="tabOwnerReq">📩 للأونر</div>
   </div>
 
   <div id="tab-friends" class="tab-content active">
@@ -70,23 +78,59 @@
       <div class="no-data" id="loadingRequests">جاري تحميل الطلبات...</div>
     </div>
   </div>
+
+  <div id="tab-ownerReq" class="tab-content">
+    <div class="request-box">
+      <h3 id="ownerReqTitle">📩 إرسال طلب جديد للأونر</h3>
+      <p id="ownerReqDesc" style="font-size: 13px; color: var(--subtitle-color); margin-bottom: 10px;">اكتب طلبك (مثلاً: عايز رتبة VIP، أو بادج معين)، والأونر هيراجعه وهيرد عليك.</p>
+      <input type="text" id="reqReason" class="request-input" placeholder="اكتب طلبك هنا...">
+      <button class="btn-submit" id="btnSendReq" onclick="sendAdminRequest()">إرسال الطلب 🚀</button>
+    </div>
+    <h3 id="myReqTitle" style="color: var(--accent); margin-bottom: 10px;">📋 طلباتك السابقة</h3>
+    <div class="card-list" id="myOwnerRequestsList">
+      <div class="no-data" id="loadingMyReq">جاري تحميل طلباتك...</div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.remove = remove;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.remove = remove; window.push = push;
+</script>
+
+<script>
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
   let currentLang = localStorage.getItem('lang') || 'ar';
+  
   const translations = {
-    ar: { back: "⬅ رجوع", title: "💬 صندوق الرسائل", tabFriends: "👥 الأصدقاء", tabAdmin: "📩 رسائل الإدارة", tabRequests: "🤝 طلبات الصداقة", noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", noRequests: "لا توجد طلبات صداقة جديدة.", msg: "💬 محادثة", accept: "قبول", reject: "رفض", fromAdmin: "👑 من: " },
-    en: { back: "⬅ Back", title: "💬 Inbox", tabFriends: "👥 Friends", tabAdmin: "📩 Admin Messages", tabRequests: "🤝 Friend Requests", noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", noRequests: "No new friend requests.", msg: "💬 Chat", accept: "Accept", reject: "Reject", fromAdmin: "👑 From: " }
+    ar: { 
+      back: "⬅ رجوع", title: "💬 صندوق الرسائل", 
+      tabFriends: "👥 الأصدقاء", tabAdmin: "📩 الإدارة", tabRequests: "🤝 طلبات", tabOwnerReq: "📩 للأونر", 
+      noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", noRequests: "لا توجد طلبات صداقة جديدة.", noOwnerReq: "لا توجد طلبات سابقة.", 
+      msg: "💬 محادثة", accept: "قبول", reject: "رفض", fromAdmin: "👑 من: ", 
+      ownerReqTitle: "📩 إرسال طلب جديد للأونر", ownerReqDesc: "اكتب طلبك (مثلاً: عايز رتبة VIP، أو بادج معين)، والأونر هيراجعه وهيرد عليك.", 
+      reqPlaceholder: "اكتب طلبك هنا...", btnSendReq: "إرسال الطلب 🚀", myReqTitle: "📋 طلباتك السابقة",
+      reqSent: "تم إرسال طلبك بنجاح! الأونر هيراجعه.", 
+      statusPending: "⏳ قيد الانتظار", statusApproved: "✅ تم القبول", writeFirst: "اكتب طلبك الأول!" 
+    },
+    en: { 
+      back: "⬅ Back", title: "💬 Inbox", 
+      tabFriends: "👥 Friends", tabAdmin: "📩 Admin", tabRequests: "🤝 Requests", tabOwnerReq: "📩 Owner", 
+      noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", noRequests: "No new friend requests.", noOwnerReq: "No previous requests.", 
+      msg: "💬 Chat", accept: "Accept", reject: "Reject", fromAdmin: "👑 From: ", 
+      ownerReqTitle: "📩 Send New Request to Owner", ownerReqDesc: "Write your request (e.g., I want a VIP rank or a specific badge). The Owner will review it.", 
+      reqPlaceholder: "Write your request here...", btnSendReq: "Send Request 🚀", myReqTitle: "📋 Your Previous Requests",
+      reqSent: "Request sent successfully! The Owner will review it.", 
+      statusPending: "⏳ Pending", statusApproved: "✅ Approved", writeFirst: "Write your request first!" 
+    }
   };
 
   function applyLanguage() {
@@ -97,8 +141,21 @@
     document.getElementById('tabFriends').innerText = t.tabFriends;
     document.getElementById('tabAdmin').innerText = t.tabAdmin;
     document.getElementById('tabRequests').innerText = t.tabRequests;
+    document.getElementById('tabOwnerReq').innerText = t.tabOwnerReq;
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-    loadFriends(); loadAdminMessages(); loadRequests();
+    
+    // ترجمة نصوص تبويب طلبات الأونر
+    document.getElementById('ownerReqTitle').innerText = t.ownerReqTitle;
+    document.getElementById('ownerReqDesc').innerText = t.ownerReqDesc;
+    document.getElementById('reqReason').placeholder = t.reqPlaceholder;
+    document.getElementById('btnSendReq').innerText = t.btnSendReq;
+    document.getElementById('myReqTitle').innerText = t.myReqTitle;
+    
+    // إعادة تحميل البيانات عشان تتحدث باللغة الجديدة
+    loadFriends(); 
+    loadAdminMessages(); 
+    loadRequests();
+    loadMyOwnerRequests();
   }
 
   window.toggleLanguage = function() {
@@ -173,7 +230,6 @@
       let myKeyInDB = null;
 
       if (allRequests) {
-        // بندور على الطلبات اللي جاية لاسمنا (بنتجاهل الحروف الكبيرة والصغيرة)
         for (let userKey in allRequests) {
           if (userKey.toLowerCase() === currentUser.toLowerCase()) {
             myRequests = allRequests[userKey];
@@ -208,18 +264,70 @@
   }
 
   window.acceptRequest = async function(sender, myKey) {
-    // 1. إضافة الصداقة للطرفين
     await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + sender), true);
     await window.set(window.ref(window.db, 'friends/' + sender + '/' + currentUser), true);
-    // 2. مسح الطلب تماماً
     await window.remove(window.ref(window.db, 'friend_requests/' + myKey + '/' + sender));
     alert(currentLang === 'en' ? 'Friend request accepted!' : 'تم قبول طلب الصداقة!');
   }
 
   window.rejectRequest = async function(sender, myKey) {
-    // مسح الطلب تماماً
     await window.remove(window.ref(window.db, 'friend_requests/' + myKey + '/' + sender));
     alert(currentLang === 'en' ? 'Friend request rejected.' : 'تم رفض طلب الصداقة.');
+  }
+
+  // ================= دوال الطلبات (للأونر) =================
+  window.sendAdminRequest = async function() {
+    const input = document.getElementById('reqReason');
+    const text = input.value.trim();
+    const t = translations[currentLang];
+    if(!text) { alert(t.writeFirst); return; }
+
+    try {
+      await window.push(window.ref(window.db, 'admin_requests'), {
+        user: currentUser,
+        text: text,
+        status: 'pending',
+        time: Date.now()
+      });
+      input.value = '';
+      alert(t.reqSent);
+    } catch(e) {
+      alert("Error: " + e.message);
+    }
+  }
+
+  function loadMyOwnerRequests() {
+    const list = document.getElementById('myOwnerRequestsList');
+    const t = translations[currentLang];
+
+    window.onValue(window.ref(window.db, 'admin_requests'), (snapshot) => {
+      const data = snapshot.val();
+      list.innerHTML = '';
+      if(!data) { list.innerHTML = `<div class="no-data">${t.noOwnerReq}</div>`; return; }
+
+      let myReqs = [];
+      for(let key in data) {
+        if(data[key].user.toLowerCase() === currentUser.toLowerCase()) {
+          myReqs.push({ id: key, ...data[key] });
+        }
+      }
+
+      if(myReqs.length === 0) { list.innerHTML = `<div class="no-data">${t.noOwnerReq}</div>`; return; }
+
+      myReqs.sort((a,b) => b.time - a.time).forEach(req => {
+        const div = document.createElement('div');
+        div.className = 'friend-card';
+        div.style.flexDirection = 'column';
+        div.style.alignItems = 'flex-start';
+        
+        const statusBadge = req.status === 'approved' 
+          ? `<span style="background:#4caf50; color:#fff; padding:3px 8px; border-radius:5px; font-size:12px; margin-top:5px; display:inline-block;">${t.statusApproved}</span>`
+          : `<span style="background:#ff9800; color:#000; padding:3px 8px; border-radius:5px; font-size:12px; margin-top:5px; display:inline-block;">${t.statusPending}</span>`;
+
+        div.innerHTML = `<p style="margin-bottom:5px; font-weight:bold;">${req.text}</p>${statusBadge}`;
+        list.appendChild(div);
+      });
+    });
   }
 
   window.onload = () => {
