@@ -22,7 +22,7 @@
     </div>
 </div>
 
-<!-- محتوى اللوحة (مخفي لحد ما الباسورد يتكتب) -->
+<!-- محتوى اللوحة -->
 <div id="ownerContent" style="display: none; width: 100%;">
   <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px;"></div>
 
@@ -36,6 +36,7 @@
     <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</div>
     <div class="nav-item" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</div>
     <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</div>
+    <!-- تم إضافة تبويب الطلبات هنا -->
     <div class="nav-item" onclick="switchTab('requests', this)" data-ar="📩 الطلبات" data-en="📩 Requests">📩 الطلبات</div>
     <div class="nav-item" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</div>
     <div class="nav-item" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</div>
@@ -50,53 +51,56 @@
       <div>
           <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
           <button class="icon-btn" onclick="window.toggleLanguage()" id="langBtn">EN</button>
-          <button class="btn btn-red" onclick="window.logoutUser()" data-ar="تسجيل خروج 🚪" data-en="Logout 🚪" style="padding: 10px 15px; font-size:14px;">تسجيل خروج 🚪</button>
+          <button class="btn btn-red" onclick="window.logoutUser()" style="padding: 10px 15px; font-size:14px;">تسجيل خروج 🚪</button>
       </div>
     </div>
 
+    <!-- الإحصائيات -->
     <div id="tab-dashboard" class="tab active">
       <div class="stats-grid">
-        <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-        <div class="stat-card"><h3 data-ar="🟢 متصل الآن" data-en="🟢 Online">🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
-        <div class="stat-card"><h3 data-ar="✨ إجمالي XP" data-en="✨ Total XP">✨ إجمالي XP</h3><div class="num" id="statXP" style="color:var(--blue);">0</div></div>
-        <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-        <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Active Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
-        <div class="stat-card"><h3 data-ar="💬 تعليقات" data-en="💬 Comments">💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
-        <div class="stat-card"><h3 data-ar="💡 اقتراحات" data-en="💡 Suggestions">💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
-        <div class="stat-card"><h3 data-ar="🎬 طلبات" data-en="🎬 Requests">🎬 طلبات</h3><div class="num" id="statRequests">0</div></div>
-        <div class="stat-card"><h3 data-ar="✨ كويزات مخصصة" data-en="✨ Custom Quizzes">✨ كويزات مخصصة</h3><div class="num" id="statCustom">0</div></div>
-        <div class="stat-card"><h3 data-ar="👀 زوار اليوم" data-en="👀 Visitors">👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
+        <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
+        <div class="stat-card"><h3>🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
+        <div class="stat-card"><h3>✨ إجمالي XP</h3><div class="num" id="statXP" style="color:var(--blue);">0</div></div>
+        <div class="stat-card"><h3>🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
+        <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
+        <div class="stat-card"><h3>💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
+        <div class="stat-card"><h3>💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
+        <div class="stat-card"><h3>🎬 طلبات</h3><div class="num" id="statRequests">0</div></div>
+        <div class="stat-card"><h3>👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
       </div>
     </div>
 
+    <!-- اللاعبين -->
     <div id="tab-users" class="tab">
       <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
       <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
     </div>
 
+    <!-- الرتب -->
     <div id="tab-ranks" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--gold); margin-bottom:15px;" data-ar="🎖️ إعطاء رتبة للاعب" data-en="🎖️ Assign Rank">🎖️ إعطاء رتبة للاعب</h3>
+          <h3 style="color:var(--gold); margin-bottom:15px;">🎖️ إعطاء رتبة للاعب</h3>
           <select id="rankUserSelect" class="form-control"></select>
           <select id="rankSelect" class="form-control">
-              <option value="Owner" data-ar="الأونر" data-en="Owner">الأونر</option>
-              <option value="Player" data-ar="لاعب عادي" data-en="Player">لاعب عادي</option>
-              <option value="VIP" data-ar="VIP" data-en="VIP">VIP</option>
-              <option value="Pro Player" data-ar="محترف" data-en="Pro Player">محترف</option>
-              <option value="Legend" data-ar="أسطورة" data-en="Legend">أسطورة</option>
-              <option value="King" data-ar="ملك" data-en="King">ملك</option>
-              <option value="Admin" data-ar="أدمن" data-en="Admin">أدمن</option>
-              <option value="Star" data-ar="نجم" data-en="Star">نجم</option>
+              <option value="Owner">الأونر</option>
+              <option value="Player">لاعب عادي</option>
+              <option value="VIP">VIP</option>
+              <option value="Pro Player">محترف</option>
+              <option value="Legend">أسطورة</option>
+              <option value="King">ملك</option>
+              <option value="Admin">أدمن</option>
+              <option value="Star">نجم</option>
           </select>
-          <button class="btn btn-green" onclick="window.setRank()" style="width:100%;" data-ar="حفظ الرتبة ✅" data-en="Save Rank ✅">حفظ الرتبة ✅</button>
+          <button class="btn btn-green" onclick="window.setRank()" style="width:100%;">حفظ الرتبة ✅</button>
       </div>
-      <h3 style="color:var(--gold); margin-bottom:10px;" data-ar="📋 قائمة الرتب الحالية" data-en="📋 Current Ranks">📋 قائمة الرتب الحالية</h3>
+      <h3 style="color:var(--gold); margin-bottom:10px;">📋 قائمة الرتب الحالية</h3>
       <div class="list-container" id="ranksList"></div>
     </div>
 
+    <!-- البادجات -->
     <div id="tab-badges" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--pink); margin-bottom:15px;" data-ar="🎯 اختر اللاعب وامنحه بادج" data-en="🎯 Give Badge">🎯 اختر اللاعب وامنحه بادج</h3>
+          <h3 style="color:var(--pink); margin-bottom:15px;">🎯 اختر اللاعب وامنحه بادج</h3>
           <select id="badgeUserSelect" class="form-control"></select>
           <div class="badge-grid" id="badgeGrid">
               <div class="badge-item" onclick="window.giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
@@ -109,48 +113,51 @@
               <div class="badge-item" onclick="window.giveBadge('🧠 Genius')"><div class="badge-icon">🧠</div><div>Genius</div></div>
           </div>
       </div>
-      <h3 style="color:var(--pink); margin-bottom:10px;" data-ar="📋 اللاعبين المميزين بالبادجات" data-en="📋 Players with Badges">📋 اللاعبين المميزين بالبادجات</h3>
+      <h3 style="color:var(--pink); margin-bottom:10px;">📋 اللاعبين المميزين بالبادجات</h3>
       <div class="list-container" id="badgesList"></div>
     </div>
 
+    <!-- التحذيرات -->
     <div id="tab-warnings" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--accent); margin-bottom:15px;" data-ar="⚠️ إرسال تحذير" data-en="⚠️ Send Warning">⚠️ إرسال تحذير</h3>
+          <h3 style="color:var(--accent); margin-bottom:15px;">⚠️ إرسال تحذير</h3>
           <select id="warnUserSelect" class="form-control"></select>
           <input type="text" id="warnReason" class="form-control" placeholder="سبب التحذير...">
-          <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;" data-ar="إرسال التحذير ⚠️" data-en="Send Warning ⚠️">إرسال التحذير ⚠️</button>
+          <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;">إرسال التحذير ⚠️</button>
       </div>
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="📋 التحذيرات المسجلة" data-en="📋 Current Warnings">📋 التحذيرات المسجلة</h3>
+      <h3 style="color:var(--accent); margin-bottom:10px;">📋 التحذيرات المسجلة</h3>
       <div class="list-container" id="warningsList"></div>
     </div>
 
+    <!-- المحتوى -->
     <div id="tab-content" class="tab">
       <div class="item" style="margin-bottom:15px; display:block;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('comments')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
+              <h3 style="color:var(--accent);">💬 التعليقات</h3>
+              <button class="btn btn-red" onclick="window.clearAll('comments')">مسح الكل 🗑️</button>
           </div>
           <div class="list-container" id="commentsList"></div>
       </div>
       <div class="item" style="margin-bottom:15px; display:block;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('suggestions')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
+              <h3 style="color:var(--accent);">💡 الاقتراحات</h3>
+              <button class="btn btn-red" onclick="window.clearAll('suggestions')">مسح الكل 🗑️</button>
           </div>
           <div class="list-container" id="suggestionsList"></div>
       </div>
       <div class="item" style="display:block;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('quiz_requests')" data-ar="مسح الكل 🗑️" data-en="Clear All 🗑️">مسح الكل 🗑️</button>
+              <h3 style="color:var(--accent);">🎬 طلبات الكويزات</h3>
+              <button class="btn btn-red" onclick="window.clearAll('quiz_requests')">مسح الكل 🗑️</button>
           </div>
           <div class="list-container" id="requestsList"></div>
       </div>
     </div>
 
+    <!-- الكويزات -->
     <div id="tab-quizzes" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--gold); margin-bottom:15px;" data-ar="➕ إضافة كويز مخصص" data-en="➕ Add Custom Quiz">➕ إضافة كويز مخصص</h3>
+          <h3 style="color:var(--gold); margin-bottom:15px;">➕ إضافة كويز مخصص</h3>
           <input type="text" id="qName" class="form-control" placeholder="اسم الكويز">
           <input type="text" id="qImage" class="form-control" placeholder="رابط الصورة">
           <input type="text" id="qLink" class="form-control" placeholder="رابط صفحة الكويز">
@@ -160,77 +167,83 @@
               <option value="action">أكشن 💥</option>
               <option value="mystery">غموض 🕵️</option>
           </select>
-          <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;" data-ar="إضافة الكويز ✅" data-en="Add Quiz ✅">إضافة الكويز ✅</button>
+          <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;">إضافة الكويز ✅</button>
       </div>
-      <h3 style="color:var(--gold); margin-bottom:10px;" data-ar="✨ الكويزات المضافة" data-en="✨ Added Quizzes">✨ الكويزات المضافة</h3>
+      <h3 style="color:var(--gold); margin-bottom:10px;">✨ الكويزات المضافة</h3>
       <div class="list-container" id="customQuizzesList"></div>
     </div>
 
+    <!-- الغرف -->
     <div id="tab-rooms" class="tab">
-      <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة" data-en="🚪 Active Rooms">🚪 الغرف النشطة</h3>
+      <h3 style="color:var(--blue); margin-bottom:10px;">🚪 الغرف النشطة</h3>
       <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
     </div>
 
     <!-- تبويب الطلبات الجديد -->
     <div id="tab-requests" class="tab">
-      <h3 style="color:var(--gold); margin-bottom:10px;" data-ar="📩 طلبات اللاعبين" data-en="📩 Player Requests">📩 طلبات اللاعبين</h3>
+      <h3 style="color:var(--gold); margin-bottom:10px;">📩 طلبات اللاعبين</h3>
       <div class="list-container" id="requestsOwnerList"><p>جاري التحميل...</p></div>
     </div>
 
+    <!-- النظام -->
     <div id="tab-system" class="tab">
       <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--accent);" data-ar="🚧 وضع الصيانة" data-en="🚧 Maintenance">🚧 وضع الصيانة</h3></div>
-        <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()" data-ar="تفعيل الصيانة" data-en="Enable Maintenance">تفعيل الصيانة</button>
+        <div><h3 style="color:var(--accent);">🚧 وضع الصيانة</h3></div>
+        <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()">تفعيل الصيانة</button>
       </div>
       <div class="item" style="margin-bottom:15px;">
         <div style="width:100%;">
-          <h3 style="color:var(--gold);" data-ar="📢 إعلان عام" data-en="📢 Announcement">📢 إعلان عام</h3>
+          <h3 style="color:var(--gold);">📢 إعلان عام</h3>
           <textarea id="announcementInput" class="form-control" rows="2" placeholder="اكتب إعلان..."></textarea>
-          <button class="btn btn-green" onclick="window.publishAnnouncement()" data-ar="نشر 🚀" data-en="Publish 🚀">نشر 🚀</button>
+          <button class="btn btn-green" onclick="window.publishAnnouncement()">نشر 🚀</button>
         </div>
       </div>
       <div class="item" style="margin-bottom:15px;">
         <div style="width:100%;">
-          <h3 style="color:var(--blue);" data-ar="📡 إرسال إشعار منبثق" data-en="📡 Broadcast">📡 إرسال إشعار منبثق</h3>
+          <h3 style="color:var(--blue);">📡 إرسال إشعار منبثق</h3>
           <input type="text" id="broadcastInput" class="form-control" placeholder="اكتب الإشعار هنا...">
-          <button class="btn btn-blue" onclick="window.sendBroadcast()" data-ar="إرسال 📨" data-en="Send 📨">إرسال 📨</button>
+          <button class="btn btn-blue" onclick="window.sendBroadcast()">إرسال 📨</button>
         </div>
       </div>
       <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--orange);" data-ar="👀 تصفير عداد الزوار" data-en="👀 Reset Visitors">👀 تصفير عداد الزوار</h3></div>
-        <button class="btn btn-orange" onclick="window.resetVisitors()" data-ar="تصفير 🔄" data-en="Reset 🔄">تصفير 🔄</button>
+        <div><h3 style="color:var(--orange);">👀 تصفير عداد الزوار</h3></div>
+        <button class="btn btn-orange" onclick="window.resetVisitors()">تصفير 🔄</button>
       </div>
     </div>
 
+    <!-- الرسائل -->
     <div id="tab-messages" class="tab">
       <div class="item" style="margin-bottom:15px;">
         <div style="width:100%;">
-          <h3 style="color:var(--cyan);" data-ar="📩 إرسال رسالة خاصة" data-en="📩 Send Message">📩 إرسال رسالة خاصة</h3>
+          <h3 style="color:var(--cyan);">📩 إرسال رسالة خاصة</h3>
           <input type="text" id="dmUser" class="form-control" placeholder="اسم اللاعب...">
           <textarea id="dmText" class="form-control" rows="3" placeholder="نص الرسالة..."></textarea>
-          <button class="btn btn-cyan" onclick="window.sendDM()" data-ar="إرسال 📨" data-en="Send 📨">إرسال 📨</button>
+          <button class="btn btn-cyan" onclick="window.sendDM()">إرسال 📨</button>
         </div>
       </div>
     </div>
 
+    <!-- الأدمنز -->
     <div id="tab-admins" class="tab">
-      <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🛡️ إدارة الأدمنز" data-en="🛡️ Admins">🛡️ إدارة الأدمنز</h3>
+      <h3 style="color:var(--blue); margin-bottom:10px;">🛡️ إدارة الأدمنز</h3>
       <div class="list-container" id="adminsList"><p>جاري التحميل...</p></div>
     </div>
 
+    <!-- الأمان -->
     <div id="tab-security" class="tab">
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🔒 قائمة المحظورين" data-en="🔒 Banned Users">🔒 قائمة المحظورين</h3>
+      <h3 style="color:var(--accent); margin-bottom:10px;">🔒 قائمة المحظورين</h3>
       <div class="list-container" id="bannedList"><p>جاري التحميل...</p></div>
     </div>
 
+    <!-- المطور -->
     <div id="tab-developer" class="tab">
-      <h3 style="color:var(--purple); margin-bottom:10px;" data-ar="🔧 أدوات المطور" data-en="🔧 Developer Tools">🔧 أدوات المطور</h3>
+      <h3 style="color:var(--purple); margin-bottom:10px;">🔧 أدوات المطور</h3>
       <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--accent);" data-ar="⚠️ إعادة ضبط الموقع بالكامل" data-en="⚠️ Reset Site">⚠️ إعادة ضبط الموقع بالكامل</h3></div>
-        <button class="btn btn-red" onclick="window.resetSite()" data-ar="إعادة ضبط 💥" data-en="Reset 💥">إعادة ضبط 💥</button>
+        <div><h3 style="color:var(--accent);">⚠️ إعادة ضبط الموقع بالكامل</h3></div>
+        <button class="btn btn-red" onclick="window.resetSite()">إعادة ضبط 💥</button>
       </div>
       <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--gold);" data-ar="📤 استعادة نسخة احتياطية" data-en="📤 Restore Backup">📤 استعادة نسخة احتياطية</h3></div>
+        <div><h3 style="color:var(--gold);">📤 استعادة نسخة احتياطية</h3></div>
         <input type="file" id="restoreFile" class="form-control" accept=".json" onchange="window.restoreData(event)">
       </div>
     </div>
