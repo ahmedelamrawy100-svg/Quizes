@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎡 عجلة الحظ - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #080808; --text: #fff; --gold: #ffd700; --green: #4caf50; --accent: #ff3333; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+  
+  .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
+  
+  .header-title { color: var(--gold); font-size: 40px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+  .user-balance { font-size: 20px; font-weight: bold; color: var(--green); margin-bottom: 20px; background: rgba(76,175,80,0.1); padding: 8px 25px; border-radius: 20px; border: 1px solid var(--green); }
+  
+  .wheel-container { position: relative; width: 350px; height: 350px; margin-bottom: 40px; }
+  .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid var(--gold); z-index: 20; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+  
+  #wheelCanvas { width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.3); transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99); background: #111; }
+  
+  .center-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: #111; border: 4px solid var(--gold); border-radius: 50%; z-index: 10; display: flex; justify-content: center; align-items: center; font-size: 20px; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
+  
+  .spin-btn { padding: 15px 50px; background: var(--accent); color: #fff; border: 2px solid #fff; border-radius: 50px; font-family: 'Cairo'; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px var(--accent); }
+  .spin-btn:hover:not(:disabled) { background: #fff; color: var(--accent); transform: scale(1.05); }
+  .spin-btn:disabled { background: #444; border-color: #666; box-shadow: none; cursor: not-allowed; color: #888; }
+  
+  #resultMsg { margin-top: 25px; font-size: 24px; font-weight: 900; color: var(--gold); text-align: center; height: 35px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+</style>
+</head>
+<body>
+
+<div class="top-controls">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<h1 class="header-title" id="mainTitle">🎡 عجلة الحظ</h1>
+<div class="user-balance" id="userXPText">✨ جاري التحميل...</div>
+
+<div class="wheel-container">
+  <div class="pointer"></div>
+  <div class="center-circle">🎰</div>
+  <canvas id="wheelCanvas" width="350" height="350"></canvas>
+</div>
+
+<button class="spin-btn" id="spinBtn" onclick="spinTheWheel()">لف العجلة</button>
+<div id="resultMsg"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.update = update;
+</script>
+
+<script>
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  
+  const translations = {
+    ar: { back: "⬅ رجوع", title: "🎡 عجلة الحظ", balance: "✨ رصيدك:", spin: "لف العجلة", spinning: "بتلف... 🎰", won: "🎉 مبروك! كسبت:", wait: "ارجع تاني بعد", hours: "ساعة", noLuck: "حظ أوفر", loading: "جاري التحميل..." },
+    en: { back: "⬅ Back", title: "🎡 Lucky Wheel", balance: "✨ Your Balance:", spin: "Spin Wheel", spinning: "Spinning... 🎰", won: "🎉 Congrats! You won:", wait: "Come back after", hours: "hours", noLuck: "No Luck", loading: "Loading..." }
+  };
+
+  const prizes = [
+    { label: "10 XP", xp: 10, color: "#e74c3c" },
+    { label: "50 XP", xp: 50, color: "#9b59b6" },
+    { label: "حظ أوفر", xp: 0, color: "#34495e", en_label: "No Luck" },
+    { label: "100 XP", xp: 100, color: "#3498db" },
+    { label: "5 XP", xp: 5, color: "#e74c3c" },
+    { label: "إطار ذهبي", xp: 0, item: "frame_gold", color: "#f1c40f", en_label: "Gold Frame" },
+    { label: "20 XP", xp: 20, color: "#9b59b6" },
+    { label: "إطار ناري", xp: 0, item: "frame_fire", color: "#e67e22", en_label: "Fire Frame" },
+    { label: "30 XP", xp: 30, color: "#3498db" },
+    { label: "200 XP", xp: 200, color: "#2ecc71" },
+    { label: "صورة أنابيل", xp: 0, item: "avatar_annabelle", color: "#c0392b", en_label: "Annabelle Pic" },
+    { label: "500 XP", xp: 500, color: "#f1c40f" }
+  ];
+
+  let userXP = 0;
+  let canSpin = false;
+  let currentRotation = 0;
+  const currentUser = localStorage.getItem('loggedInUser');
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    document.getElementById('mainTitle').innerText = t.title;
+    document.getElementById('spinBtn').innerText = t.spin;
+    document.getElementById('userXPText').innerText = `${t.balance} ${userXP} XP`;
+    
+    drawWheel();
+  }
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+  }
+
+  function drawWheel() {
+    const canvas = document.getElementById('wheelCanvas');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const sliceAngle = (2 * Math.PI) / prizes.length;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = centerX - 6;
+
+    prizes.forEach((prize, i) => {
+      const startAngle = i * sliceAngle;
+      const endAngle = startAngle + sliceAngle;
+      
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.fillStyle = prize.color;
+      ctx.fill();
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(centerX, centerY);
+      ctx.rotate(startAngle + (sliceAngle / 2));
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 14px Cairo";
+      
+      let text = currentLang === 'en' && prize.en_label ? prize.en_label : prize.label;
+      ctx.fillText(text, radius - 20, 5);
+      ctx.restore();
+    });
+  }
+
+  window.spinTheWheel = function() {
+      if (!canSpin) return;
+      document.getElementById('spinBtn').disabled = true;
+      document.getElementById('resultMsg').innerText = translations[currentLang].spinning;
+      
+      const winningIndex = Math.floor(Math.random() * prizes.length);
+      const prize = prizes[winningIndex];
+
+      const targetDeg = (360 - (winningIndex * (360 / prizes.length))) - (180 / prizes.length);
+      const extraRounds = 360 * 5; 
+      
+      currentRotation += extraRounds + targetDeg;
+      
+      document.getElementById('wheelCanvas').style.transform = `rotate(${currentRotation}deg)`;
+
+      setTimeout(async () => {
+          let prizeName = currentLang === 'en' && prize.en_label ? prize.en_label : prize.label;
+          document.getElementById('resultMsg').innerText = `${translations[currentLang].won} ${prizeName}`;
+          
+          if (window.db && currentUser) {
+              const updates = {};
+              updates['users_data/' + currentUser + '/lastSpin'] = Date.now();
+              if (prize.xp > 0) updates['users_data/' + currentUser + '/xp'] = userXP + prize.xp;
+              if (prize.item) updates['users_data/' + currentUser + '/inventory/' + prize.item] = true;
+              
+              await window.update(window.ref(window.db), updates);
+          }
+          
+          setTimeout(() => { location.reload(); }, 3000);
+      }, 5000); 
+  }
+
+  window.addEventListener('load', () => {
+      applyLanguage();
+
+      if (!currentUser) { window.location.href = 'index.html'; return; }
+
+      // بنجيب الرصيد الحقيقي من الفايربيز
+      window.get(window.ref(window.db, 'users_data/' + currentUser)).then(snap => {
+          const data = snap.val() || {};
+          userXP = data.xp || 0;
+          
+          applyLanguage();
+
+          const lastSpin = data.lastSpin || 0;
+          const now = Date.now();
+          const oneDay = 24 * 60 * 60 * 1000;
+
+          if (now - lastSpin > oneDay) {
+              canSpin = true;
+              document.getElementById('spinBtn').disabled = false;
+          } else {
+              canSpin = false;
+              document.getElementById('spinBtn').disabled = true;
+              const remaining = Math.ceil((oneDay - (now - lastSpin)) / (1000 * 60 * 60));
+              document.getElementById('resultMsg').innerText = `${translations[currentLang].wait} ${remaining} ${translations[currentLang].hours} ⏳`;
+          }
+      }).catch((e) => {
+          canSpin = true;
+          document.getElementById('spinBtn').disabled = false;
+      });
+  });
+</script>
+</body>
+</html>
