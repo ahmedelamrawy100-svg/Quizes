@@ -9,11 +9,11 @@
 <style>
   :root {
     --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
-    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --gold: #ffd700;
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --gold: #ffd700; --blue: #00ffff; --accent: #ff3333;
   }
   body.light-mode {
     --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%);
-    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; --gold: #b8860b;
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; --gold: #b8860b; --blue: #0088cc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
@@ -26,33 +26,88 @@
   .header-title { text-align: center; font-size: 40px; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
 
-  .tabs-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
-  .tab-btn { padding: 10px 25px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-  .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
-  .tab-btn:hover:not(.active) { border-color: var(--gold); }
+  /* --- زراير التابات الرئيسية (النقاط / السرعة) --- */
+  .main-tabs { 
+      display: flex; 
+      width: 100%; 
+      max-width: 500px; 
+      margin: 0 auto 25px auto; 
+      background: var(--card-bg); 
+      border: 2px solid var(--card-border); 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+  
+  .main-tab-btn { 
+      flex: 1; 
+      padding: 15px 10px; 
+      border: none; 
+      background: transparent; 
+      color: var(--subtitle-color); 
+      font-family: 'Cairo'; 
+      font-weight: 900; 
+      font-size: 18px; 
+      cursor: pointer; 
+      transition: 0.3s; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      gap: 8px;
+  }
+  
+  .main-tab-btn.active { 
+      background: var(--gold); 
+      color: #000; 
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .main-tab-btn.speed-btn.active { 
+      background: var(--blue); 
+      color: #000; 
+  }
+  
+  .main-tab-btn:hover:not(.active) { 
+      background: rgba(255,255,255,0.05);
+      color: var(--text-color);
+  }
 
-  .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
-  .filter-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 8px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
-  .filter-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-  .filter-btn:hover:not(.active) { background: rgba(255, 215, 0, 0.1); border-color: var(--gold); }
+  /* --- قسم الفلاتر (تحت التاب الرئيسي) --- */
+  .filters-wrapper { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 40px; }
+  
+  /* فلاتر الوقت */
+  .time-filters { display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 25px; }
+  .time-btn { padding: 8px 20px; border-radius: 20px; border: none; background: transparent; color: var(--subtitle-color); font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
+  .time-btn.active { background: var(--card-bg); color: var(--gold); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-  .podium-wrapper { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin-bottom: 40px; min-height: 200px; flex-wrap: wrap; }
-  .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; animation: fadeInUp 0.5s ease-out; }
-  .podium-avatar { width: 70px; height: 70px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 3px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
+  /* فلاتر التصنيفات */
+  .category-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .cat-btn { padding: 6px 16px; border-radius: 15px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.3s; }
+  .cat-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+  .cat-btn:hover:not(.active) { border-color: var(--gold); }
+
+  /* --- المنصة --- */
+  .podium-wrapper { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin-bottom: 40px; min-height: 220px; flex-wrap: wrap; padding-top: 20px;}
+  .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; position: relative; animation: fadeInUp 0.5s ease-out; }
+  .podium-avatar { width: 80px; height: 80px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 4px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 2;}
   .podium-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; text-align: center; word-break: break-all; }
   .podium-score { font-size: 14px; color: var(--gold); font-weight: bold; margin-bottom: 10px; }
+  
   .podium-base { width: 100%; border-radius: 10px 10px 0 0; text-align: center; font-weight: bold; font-size: 26px; padding-top: 15px; color: #000; box-shadow: 0 -5px 15px rgba(0,0,0,0.3); }
   
-  .rank-1 { order: 2; }
-  .rank-2 { order: 1; }
+  .rank-1 { order: 2; width: 140px; } 
+  .rank-2 { order: 1; } 
   .rank-3 { order: 3; }
-
-  .rank-1 .podium-base { height: 140px; background: linear-gradient(to top, #b8860b, #ffd700); }
+  
+  .rank-1 .podium-base { height: 150px; background: linear-gradient(to top, #b8860b, #ffd700); }
   .rank-2 .podium-base { height: 110px; background: linear-gradient(to top, #708090, #c0c0c0); }
   .rank-3 .podium-base { height: 90px; background: linear-gradient(to top, #8b4513, #cd7f32); }
   
   .podium-wrapper.single { justify-content: center; }
   .podium-wrapper.single .podium-item { order: 0; }
+  .podium-wrapper.double { justify-content: center; }
+  .podium-wrapper.double .rank-1 { order: 1; }
+  .podium-wrapper.double .rank-2 { order: 2; }
 
   .leaderboard-list { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   .lb-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-bottom: 1px solid var(--card-border); font-size: 18px; transition: 0.3s; }
@@ -62,13 +117,17 @@
   .lb-name { flex: 1; text-align: right; font-weight: bold; display: flex; align-items: center; gap: 10px; }
   .lb-avatar { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; color: #000; font-weight: bold; background-size: cover; background-position: center; }
   .lb-score { color: #ff0000; font-weight: 900; font-size: 20px; background: rgba(255,0,0,0.1); padding: 5px 15px; border-radius: 20px; }
+  
+  .lb-time { color: var(--blue); font-weight: 900; font-size: 20px; background: rgba(0,255,255,0.1); padding: 5px 15px; border-radius: 20px; direction: ltr;}
   .no-data { text-align: center; color: var(--subtitle-color); padding: 40px; font-size: 18px; }
   
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   
   @media (max-width: 600px) {
     .header-title { font-size: 30px; }
+    .main-tab-btn { padding: 10px 20px; font-size: 16px; }
     .podium-item { width: 90px; }
+    .rank-1 { width: 100px; }
     .podium-avatar { width: 60px; height: 60px; font-size: 24px; }
     .podium-name { font-size: 14px; }
     .podium-score { font-size: 12px; }
@@ -76,7 +135,7 @@
     .rank-2 .podium-base { height: 90px; }
     .rank-3 .podium-base { height: 70px; }
     .lb-item { padding: 12px 15px; font-size: 16px; }
-    .lb-score { font-size: 16px; padding: 4px 10px; }
+    .lb-score, .lb-time { font-size: 16px; padding: 4px 10px; }
   }
 </style>
 </head>
@@ -89,52 +148,59 @@
 
 <div class="leaderboard-container">
   <h1 class="header-title" id="mainTitle" data-ar="🏆 قاعة المشاهير" data-en="🏆 Hall of Fame">🏆 قاعة المشاهير</h1>
-  <p class="header-subtitle" id="subtitle" data-ar="أفضل 10 لاعبين في منصة Quiz Hub" data-en="Top 10 players on Quiz Hub">أفضل 10 لاعبين في منصة Quiz Hub</p>
+  <p class="header-subtitle" id="subtitle" data-ar="أفضل اللاعبين في منصة Quiz Hub" data-en="Top players on Quiz Hub">أفضل اللاعبين في منصة Quiz Hub</p>
 
-  <div class="tabs-container">
-    <button class="tab-btn active" onclick="switchTimeFilter('all', this)" id="tabAll" data-ar="👑 كل الأوقات" data-en="👑 All Time">👑 كل الأوقات</button>
-    <button class="tab-btn" onclick="switchTimeFilter('week', this)" id="tabWeek" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
+  <!-- التابات الرئيسية -->
+  <div class="main-tabs">
+    <button class="main-tab-btn active" onclick="switchMainTab('normal', this)" id="tabNormal" data-ar="👑 النقاط" data-en="👑 Points">👑 النقاط</button>
+    <button class="main-tab-btn speed-btn" onclick="switchMainTab('speedrun', this)" id="tabSpeed" data-ar="⚡ السرعة" data-en="⚡ Speedrun">⚡ السرعة</button>
   </div>
 
-  <!-- تم إضافة زرار الغموض هنا -->
-  <div class="filters" id="categoryFilters">
-    <button class="filter-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
-    <button class="filter-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
-    <button class="filter-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
-    <button class="filter-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
-    <button class="filter-btn" onclick="filterLeaderboard('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+  <div id="normalSection">
+      <!-- الفلاتر -->
+      <div class="filters-wrapper" id="filtersWrapper">
+          <div class="time-filters">
+            <button class="time-btn active" onclick="switchTimeFilter('all', this)" data-ar="👑 كل الأوقات" data-en="👑 All Time">👑 كل الأوقات</button>
+            <button class="time-btn" onclick="switchTimeFilter('week', this)" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
+          </div>
+
+          <div class="category-filters" id="categoryFilters">
+            <button class="cat-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
+            <button class="cat-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+            <button class="cat-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
+            <button class="cat-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما 💖" data-en="K-Drama 💖">دراما 💖</button>
+            <button class="cat-btn" onclick="filterLeaderboard('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+          </div>
+      </div>
+
+      <div class="podium-wrapper" id="podiumContainer"></div>
+      <div class="leaderboard-list" id="leaderboardList">
+        <div class="no-data" id="loadingText" data-ar="جاري تحميل البيانات..." data-en="Loading data...">جاري تحميل البيانات...</div>
+      </div>
   </div>
 
-  <div class="podium-wrapper" id="podiumContainer"></div>
-  
-  <div class="leaderboard-list" id="leaderboardList">
-    <div class="no-data" id="loadingText" data-ar="جاري تحميل البيانات..." data-en="Loading data...">جاري تحميل البيانات...</div>
+  <div id="speedSection" style="display: none;">
+      <div class="leaderboard-list" id="speedrunList">
+          <div class="no-data">جاري تحميل البيانات...</div>
+      </div>
   </div>
+
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
-    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
-    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
-    projectId: "quiz-hub-app-f4cd0",
-    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
-    messagingSenderId: "282772179392",
-    appId: "1:282772179392:web:64646d757592b29ff3a025"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get;
 
-  let allScoresData = null;
-  let allUsersData = {}; 
+  let currentLang = localStorage.getItem('lang') || 'ar';
   let currentTimeFilter = 'all';
   let currentCategory = 'all';
-  let currentLang = localStorage.getItem('lang') || 'ar';
+  let allScoresData = null;
+  let allUsersData = {}; 
+  let speedrunData = null;
 
   window.toggleLanguage = function() {
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -145,17 +211,21 @@
   function applyLanguage() {
       document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-      
       document.querySelectorAll('[data-ar]').forEach(el => {
           el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
       });
       
-      if (allScoresData) renderLeaderboard();
+      if (document.getElementById('normalSection').style.display !== 'none') {
+          if (allScoresData) renderLeaderboard();
+      } else {
+          if (speedrunData) renderSpeedrun();
+      }
   }
 
   window.onValue(window.ref(window.db, 'users_data'), (snapshot) => {
       allUsersData = snapshot.val() || {};
       if (allScoresData) renderLeaderboard();
+      if (speedrunData) renderSpeedrun();
   });
 
   window.onValue(window.ref(window.db, 'scores'), (snapshot) => {
@@ -163,40 +233,59 @@
     renderLeaderboard();
   });
 
+  window.onValue(window.ref(window.db, 'speedrun_scores'), (snapshot) => {
+    speedrunData = snapshot.val();
+    renderSpeedrun();
+  });
+
+  window.switchMainTab = function(tab, btn) {
+      document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      if (tab === 'normal') {
+          document.getElementById('normalSection').style.display = 'block';
+          document.getElementById('speedSection').style.display = 'none';
+          document.getElementById('subtitle').innerText = currentLang === 'ar' ? 'أفضل اللاعبين في منصة Quiz Hub' : 'Top players on Quiz Hub';
+      } else {
+          document.getElementById('normalSection').style.display = 'none';
+          document.getElementById('speedSection').style.display = 'block';
+          document.getElementById('subtitle').innerText = currentLang === 'ar' ? 'أسرع 10 لاعبين في وضع السرعة' : 'Fastest 10 players in Speedrun';
+          renderSpeedrun();
+      }
+  }
+
   window.switchTimeFilter = function(timeType, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentTimeFilter = timeType;
       renderLeaderboard();
   }
 
   window.filterLeaderboard = function(category, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentCategory = category;
     renderLeaderboard();
   }
 
   function renderLeaderboard() {
-    const podiumContainer = document.getElementById('podiumContainer');
-    const leaderboardList = document.getElementById('leaderboardList');
-    
-    if (!allScoresData) { 
-        leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No data yet. Play a quiz!' : 'مفيش نتايج لحد دلوقتي. العب كويز عشان تتصدر!'}</div>`; 
-        return; 
-    }
+    if (!allScoresData) return;
     
     let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan'];
     let actionKeys = ['squidgame', 'wonderfools'];
     let kdramaKeys = ['family', 'beauty', 'dream', 'whyher'];
-    let mysteryKeys = ['wednesday']; // مفاتيح كويز الغموض
+    let mysteryKeys = ['wednesday'];
 
-    let players = [];
+    let playersMap = {};
     const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
     for (let username in allScoresData) {
       if (username.toLowerCase() === 'ahmed') continue; 
-      let playerTotal = 0;
+      
+      let lowerUsername = username.toLowerCase();
+      if (!playersMap[lowerUsername]) {
+          playersMap[lowerUsername] = { username: username, total: 0 };
+      }
       
       for (let quiz in allScoresData[username]) {
         let shouldCount = false;
@@ -210,8 +299,8 @@
 
         if (shouldCount) {
             const attempts = Object.values(allScoresData[username][quiz]);
-            
             let validAttempts = attempts;
+            
             if (currentTimeFilter === 'week') {
                 validAttempts = attempts.filter(entry => {
                     const entryTime = new Date(entry.time).getTime();
@@ -221,23 +310,25 @@
 
             if (validAttempts.length > 0) {
                 const bestScore = Math.max(...validAttempts.map(entry => entry.score));
-                playerTotal += bestScore;
+                playersMap[lowerUsername].total += bestScore;
             }
         }
       }
-      
-      if (playerTotal > 0 || (currentCategory === 'all' && currentTimeFilter === 'all')) {
-          players.push({ username, total: playerTotal });
-      }
     }
     
+    let players = Object.values(playersMap).filter(p => p.total > 0 || (currentCategory === 'all' && currentTimeFilter === 'all'));
     players.sort((a, b) => b.total - a.total);
+    
     const top10 = players.slice(0, 10);
     const top3 = top10.slice(0, 3);
     const rest = top10.slice(3);
 
+    const podiumContainer = document.getElementById('podiumContainer');
     podiumContainer.innerHTML = '';
-    if (top3.length === 1) podiumContainer.classList.add('single'); else podiumContainer.classList.remove('single');
+    
+    podiumContainer.className = 'podium-wrapper';
+    if (top3.length === 1) podiumContainer.classList.add('single');
+    else if (top3.length === 2) podiumContainer.classList.add('double');
 
     const displayOrder = [top3[1], top3[0], top3[2]];
     const classes = ['rank-2', 'rank-1', 'rank-3'];
@@ -264,6 +355,7 @@
         podiumContainer.appendChild(div);
     });
 
+    const leaderboardList = document.getElementById('leaderboardList');
     leaderboardList.innerHTML = '';
     if (rest.length === 0) {
         leaderboardList.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'Need more players to fill the list!' : 'محتاجين لاعبين أكتر عشان نكمل القائمة!'}</div>`;
@@ -288,6 +380,57 @@
             leaderboardList.appendChild(div);
         });
     }
+  }
+
+  function renderSpeedrun() {
+    const list = document.getElementById('speedrunList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    if (!speedrunData) {
+        list.innerHTML = `<div class="no-data">${currentLang === 'en' ? 'No speedrun records yet. Play a quiz in speedrun mode!' : 'لا توجد نتائج سرعة لحد دلوقتي. العب كويز في وضع السرعة عشان تتصدر!'}</div>`;
+        return;
+    }
+
+    let scores = Object.values(speedrunData);
+    
+    let bestSpeedRuns = {};
+    scores.forEach(entry => {
+        let lowerUser = entry.user.toLowerCase();
+        if (!bestSpeedRuns[lowerUser] || entry.time < bestSpeedRuns[lowerUser].time) {
+            bestSpeedRuns[lowerUser] = entry;
+        }
+    });
+
+    let finalScores = Object.values(bestSpeedRuns);
+    finalScores.sort((a, b) => a.time - b.time);
+
+    const top10 = finalScores.slice(0, 10);
+    const medals = ['🥇', '🥈', '🥉'];
+
+    top10.forEach((entry, index) => {
+        const div = document.createElement('div');
+        div.className = 'lb-item';
+        
+        let rankHTML = `#${index + 1}`;
+        if (index < 3) rankHTML = medals[index];
+
+        let avatarHTML = entry.user.charAt(0).toUpperCase();
+        if (allUsersData[entry.user] && allUsersData[entry.user].profilePic) {
+            avatarHTML = `<img src="${allUsersData[entry.user].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+
+        div.innerHTML = `
+            <div class="lb-rank">${rankHTML}</div>
+            <div class="lb-name">
+                <div class="lb-avatar">${avatarHTML}</div> 
+                ${entry.user}
+                <span style="font-size:12px; color:#aaa; font-weight:normal;">(${entry.quiz.toUpperCase()})</span>
+            </div>
+            <div class="lb-time">⏱️ ${entry.time}s</div>
+        `;
+        list.appendChild(div);
+    });
   }
 
   window.onload = () => {
