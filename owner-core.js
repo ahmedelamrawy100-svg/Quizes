@@ -22,7 +22,7 @@ window.checkPassword = async function() {
 }
 
 function initApp() {
-    const currentUser = localStorage.getItem('loggedInUser') || 'ahmed';
+    const currentUser = localStorage.getItem('loggedInUser') || 'owner';
 
     if (localStorage.getItem('theme') === 'light') { 
         document.body.classList.add('light-mode'); 
@@ -80,13 +80,13 @@ function initApp() {
         const titlesAr = { 
             dashboard: '📊 الإحصائيات', users: '👥 اللاعبين', ranks: '🎖️ إدارة الرتب', badges: '🏅 البادجات', 
             warnings: '⚠️ التحذيرات', content: '📝 المحتوى', quizzes: '🎬 الكويزات', 
-            rooms: '🚪 الغرف', system: '⚙️ النظام', messages: '📩 الرسائل', requests: '📩 الطلبات',
+            rooms: '🚪 الغرف', requests: '📩 الطلبات', system: '⚙️ النظام', messages: '📩 الرسائل', 
             admins: '🛡️ الأدمنز', security: '🔒 الأمان', developer: '🔧 المطور'
         };
         const titlesEn = { 
             dashboard: '📊 Dashboard', users: '👥 Players', ranks: '🎖️ Ranks', badges: '🏅 Badges', 
             warnings: '⚠️ Warnings', content: '📝 Content', quizzes: '🎬 Quizzes', 
-            rooms: '🚪 Rooms', system: '⚙️ System', messages: '📩 Messages', requests: '📩 Requests',
+            rooms: '🚪 Rooms', requests: '📩 Requests', system: '⚙️ System', messages: '📩 Messages', 
             admins: '🛡️ Admins', security: '🔒 Security', developer: '🔧 Developer'
         };
         document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
@@ -159,8 +159,8 @@ function initApp() {
                     <p style="font-size:11px; color:#888;">${new Date(req.time).toLocaleString()}</p>
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                    ${req.status !== 'approved' ? `<button class="btn btn-green" onclick="window.approveRequest('${req.user}', '${key}')" data-ar="قبول ✅" data-en="Approve ✅">قبول ✅</button>` : ''}
-                    <button class="btn btn-red" onclick="window.deleteRequest('${key}')" data-ar="مسح 🗑️" data-en="Delete 🗑️">مسح 🗑️</button>
+                    ${req.status !== 'approved' ? `<button class="btn btn-green" onclick="window.approveRequest('${req.user}', '${key}')">قبول ✅</button>` : ''}
+                    <button class="btn btn-red" onclick="window.deleteRequest('${key}')">مسح 🗑️</button>
                 </div>
             `;
             list.appendChild(div);
@@ -182,7 +182,7 @@ function initApp() {
             window.showToast('تم مسح الطلب');
         }
     };
-    // ----------------------------------------------------
+    // -----------------------------------------
 
     window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
         const isM = snap.exists() ? snap.val() : false;
@@ -195,7 +195,7 @@ function initApp() {
         container.innerHTML = '';
         const search = document.getElementById('searchUser').value.toLowerCase();
         
-        Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
+        Object.keys(allUsers).filter(u => u.toLowerCase().includes(search) && u.toLowerCase() !== 'owner').forEach(u => {
             const isOnline = allPresence[u] && allPresence[u].status === 'online';
             const userXP = allXP[u] ? allXP[u].xp || 0 : 0;
             const userRank = allUserRanks[u] || 'Player';
@@ -220,9 +220,9 @@ function initApp() {
                     <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 Online' : '⚪ Offline'} | XP: ${userXP}</p>
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                    <button class="btn btn-blue" onclick="window.editXP('${u}')" data-ar="تعديل XP" data-en="Edit XP">تعديل XP</button>
-                    <button class="btn btn-gold" onclick="window.sendDMPrompt('${u}')" data-ar="رسالة" data-en="Message">رسالة</button>
-                    ${u.toLowerCase() !== 'ahmed' ? `<button class="btn btn-red" onclick="window.banUser('${u}')" data-ar="حظر 🚫" data-en="Ban 🚫">حظر 🚫</button>` : ''}
+                    <button class="btn btn-blue" onclick="window.editXP('${u}')">تعديل XP</button>
+                    <button class="btn btn-gold" onclick="window.sendDMPrompt('${u}')">رسالة</button>
+                    ${u.toLowerCase() !== 'ahmed' ? `<button class="btn btn-red" onclick="window.banUser('${u}')">حظر 🚫</button>` : ''}
                 </div>
             `;
             container.appendChild(div);
@@ -232,7 +232,7 @@ function initApp() {
     window.populateRankSelect = function() {
         const sel = document.getElementById('rankUserSelect'); if(!sel) return;
         sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
-        Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
+        Object.keys(allUsers).forEach(u => { if(u.toLowerCase() !== 'owner') sel.innerHTML += `<option value="${u}">${u}</option>`; });
     };
 
     window.setRank = async function() {
@@ -271,7 +271,7 @@ function initApp() {
     window.populateBadgeSelect = function() {
         const sel = document.getElementById('badgeUserSelect'); if(!sel) return;
         sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
-        Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
+        Object.keys(allUsers).forEach(u => { if(u.toLowerCase() !== 'owner') sel.innerHTML += `<option value="${u}">${u}</option>`; });
     };
 
     window.giveBadge = async (badgeName) => {
@@ -309,7 +309,7 @@ function initApp() {
     window.populateWarnSelect = function() {
         const sel = document.getElementById('warnUserSelect'); if(!sel) return;
         sel.innerHTML = `<option value="">-- اختر اللاعب --</option>`;
-        Object.keys(allUsers).forEach(u => { sel.innerHTML += `<option value="${u}">${u}</option>`; });
+        Object.keys(allUsers).forEach(u => { if(u.toLowerCase() !== 'owner') sel.innerHTML += `<option value="${u}">${u}</option>`; });
     };
 
     window.sendWarning = async function() {
@@ -414,12 +414,20 @@ function initApp() {
 
     window.renderRooms = function() {
         const list = document.getElementById('roomsList'); if(!list) return;
-        list.innerHTML = '';
-        if(Object.keys(allRooms).length === 0) { list.innerHTML = '<div class="item">لا توجد غرف نشطة.</div>'; return; }
+        list.innerHTML = `<div style="margin-bottom: 15px; text-align: center;"><button class="btn btn-red" onclick="window.clearAllRooms()" style="width: 100%; padding: 10px;">🗑️ مسح كل الغرف</button></div>`;
+        
+        if(Object.keys(allRooms).length === 0) { list.innerHTML += '<div class="item">لا توجد غرف نشطة.</div>'; return; }
         for(let room in allRooms) {
             const div = document.createElement('div'); div.className = 'item';
             div.innerHTML = `<div><p>Room Code: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">Status: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">Delete 🗑️</button>`;
             list.appendChild(div);
+        }
+    };
+
+    window.clearAllRooms = async function() {
+        if (confirm('متأكد إنك عايز تمسح كل الغرف النشطة؟')) {
+            await window.remove(window.ref(window.db, 'rooms'));
+            window.showToast('تم مسح كل الغرف');
         }
     };
 
@@ -449,11 +457,26 @@ function initApp() {
     };
 
     window.banUser = async (user) => {
-        const reason = prompt(`سبب حظر ${user}:`);
+        const reason = prompt(`سبب حظر ${user}:`, 'مخالفة القواعد');
         if(reason !== null) {
-            await window.set(window.ref(window.db, 'banned_users/' + user), { status: true, reason: reason || 'مخالفة' });
-            window.showToast('User banned');
+            await window.set(window.ref(window.db, 'banned_users/' + user), { status: true, reason: reason });
+            await window.set(window.ref(window.db, 'kick_signals/' + user), Date.now());
+            window.showToast(`تم حظر ${user} وطرده`);
         }
+    };
+
+    window.unbanUser = async (user) => {
+        if(confirm(`فك الحظر عن ${user}؟`)) {
+            await window.remove(window.ref(window.db, 'banned_users/' + user));
+            window.showToast('User unbanned');
+        }
+    };
+
+    window.toggleMaintenance = async () => {
+        const snap = await window.get(window.ref(window.db, 'site_settings/maintenance'));
+        const isM = snap.exists() ? snap.val() : false;
+        await window.set(window.ref(window.db, 'site_settings/maintenance'), !isM);
+        window.showToast(isM ? 'تم إلغاء الصيانة' : 'تم تفعيل الصيانة');
     };
 
     window.renderAdmins = function() {
@@ -493,20 +516,6 @@ function initApp() {
             `;
             list.appendChild(div);
         });
-    };
-
-    window.unbanUser = async (user) => {
-        if(confirm(`فك الحظر عن ${user}؟`)) {
-            await window.remove(window.ref(window.db, 'banned_users/' + user));
-            window.showToast('User unbanned');
-        }
-    };
-
-    window.toggleMaintenance = async () => {
-        const snap = await window.get(window.ref(window.db, 'site_settings/maintenance'));
-        const isM = snap.exists() ? snap.val() : false;
-        await window.set(window.ref(window.db, 'site_settings/maintenance'), !isM);
-        window.showToast(isM ? 'Maintenance disabled' : 'Maintenance enabled');
     };
 
     window.publishAnnouncement = async () => {
