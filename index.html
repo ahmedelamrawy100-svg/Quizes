@@ -21,7 +21,8 @@
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; overflow-x: hidden; }
   
   #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; animation: fadeInUp 0.5s; position: relative;}
-  .auth-controls { position: absolute; top: -50px; right: 0; display: flex; gap: 10px; }
+  #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; animation: fadeInUp 0.5s; position: relative; margin-top: 60px;}  
+  .auth-controls { position: absolute; top: 10px; right: 0; display: flex; gap: 10px; z-index: 999; }
   .auth-controls button { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
   .auth-controls button:hover { background: var(--accent); border-color: var(--accent); }
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; text-align: center; font-size: 16px;}
