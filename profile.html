@@ -24,8 +24,10 @@
   .profile-container { width: 100%; max-width: 800px; margin-top: 50px; display: flex; flex-direction: column; gap: 30px; }
 
   .header-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; box-shadow: 0 10px 30px rgba(255,0,0,0.1); }
-  .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; }
+  
+  .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; transition: 0.3s; }
   body.light-mode .avatar { border-color: #111; }
+
   .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; }
 
   .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
@@ -217,12 +219,21 @@
   });
 
   function loadProfileData() {
+      // 1. جلب الصورة
       window.get(window.ref(window.db, 'users_data/' + profileUser)).then((snapshot) => {
         const userData = snapshot.val();
         const avatarEl = document.getElementById('userAvatar');
+        
         if (userData && userData.profilePic) {
-          avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
-          avatarEl.innerText = '';
+          // إذا كان الرابط ليس رابط إنترنت كامل، فهذا يعني أنه مسار محلي قديم
+          if (userData.profilePic.startsWith('http')) {
+             avatarEl.style.backgroundImage = `url('${userData.profilePic}')`;
+             avatarEl.innerText = '';
+          } else {
+             avatarEl.style.backgroundImage = 'none';
+             avatarEl.innerText = profileUser.charAt(0).toUpperCase();
+          }
+          
           if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
             document.getElementById('removeImgBtn').style.display = 'block';
           }
@@ -235,6 +246,7 @@
         }
       });
 
+      // 2. جلب الرتب
       window.get(window.ref(window.db, 'roles/admins')).then((adminsSnap) => {
           const admins = adminsSnap.val() || {};
           const isOwner = profileUser.toLowerCase() === 'ahmed';
@@ -263,6 +275,7 @@
           });
       });
 
+      // 3. جلب البادجات
       window.get(window.ref(window.db, 'badges/' + profileUser)).then((snapshot) => {
         const data = snapshot.val();
         const container = document.getElementById('badgesContainer');
@@ -276,6 +289,7 @@
         } else { section.style.display = 'none'; }
       });
 
+      // 4. جلب النقاط والدقة
       window.get(window.ref(window.db, 'scores/' + profileUser)).then((snapshot) => {
         const data = snapshot.val(); 
         let total = 0;
@@ -288,10 +302,6 @@
             for (let quiz in data) { 
                 const attempts = data[quiz]; 
                 let quizBest = 0; 
-                let quizCorrect = 0;
-                let quizTotal = 0;
-                
-                // بنحسب الدقة على أساس أفضل محاولة في الكويز ده
                 let bestAttemptCorrect = 0;
                 let bestAttemptTotal = 0;
                 
@@ -324,6 +334,7 @@
         }
       });
 
+      // 5. جلب الـ XP والمستوى
       window.get(window.ref(window.db, 'users_data/' + profileUser + '/xp')).then((snapshot) => {
         let xp = snapshot.exists() ? snapshot.val() : 0;
         document.getElementById('xpDisplay').innerText = xp;
@@ -355,6 +366,7 @@
         document.getElementById('xpProgressBar').style.width = `${progressPercent}%`;
       });
 
+      // 6. جلب التحذيرات
       window.get(window.ref(window.db, 'warnings/' + profileUser)).then((snapshot) => {
         const warnData = snapshot.val();
         const t = translations[currentLang];
@@ -366,6 +378,7 @@
         }
       });
 
+      // 7. جلب الأصدقاء
       window.get(window.ref(window.db, 'friends')).then((snapshot) => {
           const list = document.getElementById('friendsList');
           list.innerHTML = '';
@@ -430,7 +443,7 @@
       const data = await response.json();
       
       if (data.success) {
-          await window.set(window.ref(window.db, 'users_data/' + profileUser + '/profilePic'), data.data.url);
+          await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), data.data.url);
           alert(t.uploadedImg);
           btn.style.display = 'none';
       } else {
@@ -446,10 +459,10 @@
     const t = translations[currentLang];
     if (confirm(t.confirmRemove)) {
       try {
-        await window.set(window.ref(window.db, 'users_data/' + profileUser + '/profilePic'), null);
+        await window.set(window.ref(window.db, 'users_data/' + loggedInUser + '/profilePic'), null);
         const avatarEl = document.getElementById('userAvatar');
         avatarEl.style.backgroundImage = 'none';
-        avatarEl.innerText = profileUser.charAt(0).toUpperCase();
+        avatarEl.innerText = loggedInUser.charAt(0).toUpperCase();
         document.getElementById('saveImgBtn').style.display = 'none';
         document.getElementById('removeImgBtn').style.display = 'none';
         alert(t.removedImg);
