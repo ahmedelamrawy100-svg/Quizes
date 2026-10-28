@@ -7,7 +7,6 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* ================= المتغيرات (Light & Dark Mode) ================= */
   :root { 
       --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); 
       --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; 
@@ -21,16 +20,12 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; overflow-x: hidden; }
   
-  /* --- شاشة الدخول --- */
   #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; animation: fadeInUp 0.5s; position: relative;}
-  
   .auth-controls { position: absolute; top: -50px; right: 0; display: flex; gap: 10px; }
   .auth-controls button { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
   .auth-controls button:hover { background: var(--accent); border-color: var(--accent); }
-
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; text-align: center; font-size: 16px;}
   .auth-input:focus { border-color: var(--accent); }
-  
   .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.3s;}
   .auth-btn:hover { opacity: 0.9; transform: scale(1.02); }
   .auth-switch { color: var(--subtitle-color); cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 10px; }
@@ -38,7 +33,6 @@
   #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
   #mainTitle { animation: glowPulse 3s infinite; }
 
-  /* --- الشريط العلوي --- */
   .navbar { width: 100%; max-width: 1200px; background: var(--nav-bg); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 15px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 10px; z-index: 1000; flex-wrap: wrap; gap: 15px; }
   .nav-brand { font-size: 24px; font-weight: 900; color: var(--accent); text-decoration: none; }
   .nav-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -51,13 +45,7 @@
   .btn-lang { background: #333 !important; color: #fff !important; border-color: #555 !important; }
   .btn-notify { background: #ffd700 !important; color: #000 !important; }
 
-  /* --- القائمة الجانبية (Side Menu) --- */
-  .side-menu { 
-    position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; 
-    background: var(--card-bg); border-left: 2px solid var(--card-border); 
-    z-index: 2000; transition: 0.3s ease-in-out; 
-    display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; 
-  }
+  .side-menu { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: var(--card-bg); border-left: 2px solid var(--card-border); z-index: 2000; transition: 0.3s ease-in-out; display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; }
   .side-menu.open { right: 0; }
   .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1999; display: none; }
   .menu-overlay.open { display: block; }
@@ -65,15 +53,16 @@
   .menu-item { padding: 15px 20px; color: var(--text-color); text-decoration: none; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; border-right: 4px solid transparent; transition: 0.2s; cursor: pointer; font-family: 'Cairo'; background: transparent; border-top: none; border-bottom: none; border-left: none; width: 100%; text-align: right; }
   .menu-item:hover { background: rgba(255,0,0,0.1); border-right-color: var(--accent); color: var(--accent); padding-right: 30px; }
 
-  /* --- الإعلان --- */
   #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 12px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,0,0,0.3); }
+  
+  #live-feed-bar { display: none; width: 100%; max-width: 1200px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 10px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; position: relative; }
+  #live-feed-content { display: inline-block; animation: marquee 25s linear infinite; font-weight: bold; color: #ccc; font-size: 14px;}
+  @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-  /* --- العنوان وزرار العشوائي --- */
   .header-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1000px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-  .random-btn { background: var(--accent); color: #fff; padding: 10px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+  .random-btn { background: var(--accent); color: #fff; padding: 10px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;}
   .random-btn:hover { background: #cc0000; transform: translateY(-2px); }
 
-  /* --- البحث والفلاتر --- */
   .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
   #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; font-size: 16px; }
   #searchInput:focus { border-color: var(--accent); }
@@ -84,21 +73,18 @@
   .tab-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); border-radius: 20px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo'; font-weight: 700; font-size: 14px; transition: 0.3s; }
   .tab-btn.active, .tab-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* --- الكروت --- */
   .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
   .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; text-align: center; height: 320px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; overflow: hidden; background-size: cover; background-position: center; transition: 0.3s; }
   .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
   .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; padding: 10px; width: 100%; text-shadow: 0 0 10px #000; }
   .quiz-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(255,0,0,0.2); }
 
-  /* --- الإشعارات (Toast) --- */
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
   .toast { background: var(--card-bg); border-right: 5px solid var(--accent); color: var(--text-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s forwards; font-weight: bold; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes glowPulse { 0% { text-shadow: 0 0 10px #ff0000; } 50% { text-shadow: 0 0 25px #ff0000, 0 0 35px #ff0000; } 100% { text-shadow: 0 0 10px #ff0000; } }
 
-  /* --- الموبايل --- */
   @media (max-width: 768px) {
     .navbar { justify-content: center; padding: 10px; }
     .nav-brand { width: 100%; text-align: center; margin-bottom: 10px; }
@@ -115,7 +101,6 @@
 
 <div id="toast-container"></div>
 
-<!-- ================= القائمة الجانبية ================= -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
   <div class="menu-title" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
@@ -123,6 +108,8 @@
   <a href="leaderboard.html" class="menu-item" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
   <a href="users.html" class="menu-item" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
   <a href="badges.html" class="menu-item" data-ar="🎖️ الرتب والبادجات" data-en="🎖️ Ranks & Badges">🎖️ الرتب والبادجات</a>
+  <a href="shop.html" class="menu-item" style="color: #ffd700;" data-ar="🛒 المتجر" data-en="🛒 Shop">🛒 المتجر</a>
+  <a href="wheel.html" class="menu-item" style="color: #ffd700;" data-ar="🎡 عجلة الحظ" data-en="🎡 Lucky Wheel">🎡 عجلة الحظ</a>
   <a href="comments.html" class="menu-item" data-ar="💬 المجتمع" data-en="💬 Community">💬 المجتمع</a>
   <a href="inbox.html" class="menu-item" data-ar="📩 صندوق الرسائل" data-en="📩 Inbox">📩 صندوق الرسائل</a>
   <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat">💬 الشات الجماعي</a>
@@ -131,8 +118,7 @@
   
   <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
   
-  <!-- لينكات السوشيال ميديا -->
-  <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="menu-item" style="color: #25D366;" data-ar="📱 جروب الواتساب" data-en="📱 WhatsApp Group">📱 جروب الواتساب</a>
+  <a href="https://whatsapp.com/channel/0029VbDEaA20G0XYTZ18903l" target="_blank" class="menu-item" style="color: #25D366;" data-ar="📱 جروب الواتساب" data-en="📱 WhatsApp Group">📱 جروب الواتساب</a>
   <a href="https://t.me/quiz_hub001" target="_blank" class="menu-item" style="color: #0088cc;" data-ar="✈️ قناة التليجرام" data-en="✈️ Telegram Channel">✈️ قناة التليجرام</a>
 
   <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
@@ -144,7 +130,6 @@
   <button class="menu-item" onclick="logoutUser()" style="color: #ff0000;" data-ar="🚪 تسجيل خروج" data-en="🚪 Logout">🚪 تسجيل خروج</button>
 </div>
 
-<!-- ================= شاشة تسجيل الدخول ================= -->
 <div id="authScreen">
   <div class="auth-controls">
     <button onclick="toggleLanguage()" id="authLangBtn">EN</button>
@@ -162,10 +147,8 @@
   <span class="auth-switch" onclick="toggleAuthMode()" id="switchAuth" data-ar="ليس لديك حساب؟ سجل الآن" data-en="Don't have an account? Sign up">ليس لديك حساب؟ سجل الآن</span>
 </div>
 
-<!-- ================= الموقع بعد الدخول ================= -->
 <div id="mainContent">
   
-  <!-- الشريط العلوي -->
   <div class="navbar">
     <a href="index.html" class="nav-brand">Quiz Hub</a>
     <div class="nav-right">
@@ -179,54 +162,61 @@
     </div>
   </div>
   
-  <!-- شريط الإعلان -->
   <div id="announcement-bar"></div>
 
-  <!-- العنوان وزرار الكويز العشوائي -->
+  <div id="live-feed-bar">
+      <span style="color: var(--accent); font-weight: bold; margin-left: 10px;">🔴 مباشر:</span>
+      <div id="live-feed-content"></div>
+  </div>
+
   <div class="header-row">
     <div>
       <h1 style="font-size:32px; margin-bottom: 5px;" id="mainTitle" data-ar="🎬 مكتبة الكويزات 🎬" data-en="🎬 Quiz Library 🎬">🎬 مكتبة الكويزات 🎬</h1>
       <p class="subtitle" id="subtitle" style="color: var(--subtitle-color);" data-ar="اختر الكويز اللي عايز تلعبه" data-en="Choose the quiz you want to play">اختر الكويز اللي عايز تلعبه</p>
     </div>
-    <button class="random-btn" onclick="playRandom()" id="randomBtn" data-ar="🎲 كويز عشوائي" data-en="🎲 Random Quiz">🎲 كويز عشوائي</button>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button class="random-btn" onclick="playRandom()" id="randomBtn" data-ar="🎲 كويز عشوائي" data-en="🎲 Random Quiz">🎲 كويز عشوائي</button>
+      <a href="wheel.html" class="random-btn" style="background: #ffd700; color: #000;" data-ar="🎡 عجلة الحظ" data-en="🎡 Lucky Wheel">🎡 عجلة الحظ</a>
+    </div>
   </div>
   
-  <!-- البحث -->
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="ابحث عن كويز..." data-ar="ابحث عن كويز..." data-en="Search for a quiz...">
     <a href="assistant.html" class="ai-btn" data-ar="مساعد" data-en="Assistant">مساعد</a>
   </div>
 
-  <!-- الفلاتر -->
   <div class="tabs-container">
     <button class="tab-btn active" onclick="filterCategory('all', this)" data-ar="الكل" data-en="All">الكل</button>
     <button class="tab-btn" onclick="filterCategory('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
     <button class="tab-btn" onclick="filterCategory('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
-    <button class="tab-btn" onclick="filterCategory('kdrama', this)" data-ar="دراما كورية 💖" data-en="K-Drama 💖">دراما كورية 💖</button>
+    <button class="tab-btn" onclick="filterCategory('thriller', this)" data-ar="تشويق 🎬" data-en="Thriller 🎬">تشويق 🎬</button>
     <button class="tab-btn" onclick="filterCategory('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
   </div>
   
-  <!-- كروت الكويزات -->
   <div class="grid-container" id="cards-container">
+    <!-- تصنيف رعب -->
     <a href="Conjuring Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title">The Conjuring</h2></a>
     <a href="FNAF Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title">FNAF</h2></a>
     <a href="The Nun Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title">The Nun</h2></a>
     <a href="Annabelle Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title">Annabelle</h2></a>
     <a href="Train to Busan Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/busan.jpg');"><h2 class="card-title">Train to Busan</h2></a>
-
+    <a href="Scream Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/Scream.jpeg');"><h2 class="card-title">Scream</h2></a>
+    
+    <!-- تصنيف أكشن -->
     <a href="Squid Game Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title">Squid Game</h2></a>
-    <a href="The Wonder Fools Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/The Wonder Fools.jpeg');"><h2 class="card-title">The WONDERfools</h2></a>
+    <a href="Spider-Man Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Spider-Man.jpeg');"><h2 class="card-title">Spider-Man</h2></a>
+    <a href="Avatar Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avatar.jpeg');"><h2 class="card-title">Avatar</h2></a>
+    <a href="Avengers Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avengers.jpeg');"><h2 class="card-title">Avengers</h2></a>
 
-    <a href="Family By Choice Quiz.html" class="quiz-card" data-category="kdrama" style="background-image: url('pic/Family By Choice.avif');"><h2 class="card-title">Family By Choice</h2></a>
-    <a href="True Beauty Quiz.html" class="quiz-card" data-category="kdrama" style="background-image: url('pic/True Beauty.jpg');"><h2 class="card-title">True Beauty</h2></a>
-    <a href="Dream To You Quiz.html" class="quiz-card" data-category="kdrama" style="background-image: url('pic/Dream To You.jpeg');"><h2 class="card-title">Dream To You</h2></a>
-    <a href="Why Her Quiz.html" class="quiz-card" data-category="kdrama" style="background-image: url('pic/Why Her.jpg');"><h2 class="card-title">Why Her?</h2></a>
-
+    <!-- تصنيف تشويق -->
+    <a href="Fall Quiz.html" class="quiz-card" data-category="thriller" style="background-image: url('pic/Fall.jpeg');"><h2 class="card-title">Fall</h2></a>
+    
+    <!-- تصنيف غموض -->
     <a href="Wednesday Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title">Wednesday</h2></a>
+    <a href="Knives Out Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Knives Out.jpeg');"><h2 class="card-title">Knives Out</h2></a>
   </div>
 </div>
 
-<!-- ================= نافذة تقييم الموقع ================= -->
 <div id="ratingModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
   <div style="background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(255,0,0,0.4);">
     <h2 style="color: var(--accent); margin-bottom: 15px;" data-ar="قيّم تجربتك!" data-en="Rate your experience!">قيّم تجربتك!</h2>
@@ -244,7 +234,6 @@
   </div>
 </div>
 
-<!-- ================= الفايربيز ================= -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -267,7 +256,6 @@
           const presenceRef = window.ref(window.db, 'presence/' + username);
           window.set(presenceRef, { status: 'online', last_seen: Date.now() });
           
-          // عرض الإعلان
           window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
               const bar = document.getElementById('announcement-bar');
               if (snap.exists() && snap.val()) { 
@@ -278,7 +266,31 @@
               }
           });
 
-          // استقبال الإشعارات المنبثقة (Broadcast)
+          // --- البث المباشر (Live Activity Feed) ---
+          window.onValue(window.ref(window.db, 'activity_feed'), (snap) => {
+              const data = snap.val();
+              const feedBar = document.getElementById('live-feed-bar');
+              const feedContent = document.getElementById('live-feed-content');
+              
+              if (data) {
+                  const activities = Object.values(data).sort((a, b) => b.time - a.time);
+                  const latestFive = activities.slice(0, 5);
+                  
+                  if (latestFive.length > 0) {
+                      const feedText = latestFive.map(act => 
+                          `<span style="color:#ffd700; font-weight:bold;">⚡ ${act.user}</span> ${act.action} ${act.detail}`
+                      ).join(" &nbsp;&nbsp;|&nbsp;&nbsp; ");
+                      
+                      feedContent.innerHTML = feedText;
+                      feedBar.style.display = 'block';
+                  } else {
+                      feedBar.style.display = 'none';
+                  }
+              } else {
+                  feedBar.style.display = 'none';
+              }
+          });
+
           window.onValue(window.ref(window.db, 'site_settings/broadcast'), snap => {
               if (snap.exists()) {
                   const data = snap.val();
@@ -296,7 +308,6 @@
   });
 </script>
 
-<!-- ================= الترجمة والدخول والمنيو والتقييم ================= -->
 <script>
   let currentLang = localStorage.getItem('lang') || 'ar';
   let isSignupMode = false;
@@ -438,7 +449,6 @@
     window.location.href = cards[randomIndex].getAttribute('href');
   }
 
-  // ================== كود تقييم الموقع ==================
   window.openRatingModal = function() {
     document.getElementById('ratingModal').style.display = 'flex';
     resetStars();
