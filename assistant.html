@@ -67,18 +67,12 @@
   .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
   @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
-  /* =========================================
-     لوحة المفاتيح (Keyboard) شبه تلجرام
-     ========================================= */
   .chat-keyboard { 
     background: var(--kb-bg); border-top: 1px solid var(--border-color); 
     padding: 10px; display: flex; flex-direction: column; gap: 8px;
   }
   
-  /* الشريط العلوي في الكيبورد (مكان زرار الرجوع الصغير) */
   .kb-top-bar { display: flex; justify-content: flex-start; margin-bottom: -5px; }
-  
-  /* زرار الرجوع الصغير */
   .kb-back { 
     background: transparent; color: #888; border: none; 
     padding: 0; cursor: pointer; font-family: 'Cairo'; font-size: 14px; 
@@ -86,7 +80,6 @@
   }
   .kb-back:hover { color: #ff0000; transform: translateX(-3px); }
 
-  /* صف الأزرار الأساسية */
   .kb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   
   .kb-btn { 
@@ -103,7 +96,7 @@
 
   @media (max-width: 768px) {
     .assistant-container { height: 85vh; border-radius: 15px; }
-    .kb-row { grid-template-columns: 1fr; } /* زرار واحد في الموبايل */
+    .kb-row { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -119,7 +112,7 @@
   <div class="chat-header">
     <div class="bot-avatar">🤖</div>
     <div class="header-text">
-      <h2 id="headerTitle">مساعد الكويزات</h2>
+      <h2 id="headerTitle">مساعد Quiz Hub</h2>
       <p id="headerSubtitle">متصل الآن 🟢</p>
     </div>
   </div>
@@ -128,15 +121,13 @@
     <div class="msg-row bot">
       <div class="msg-avatar">🤖</div>
       <div class="msg-bubble" id="welcomeMsg">
-        أهلاً بيك! اختار من القايمة اللي تحت عشان أساعدك.
+        أهلاً بيك في Quiz Hub! اختار من القايمة اللي تحت عشان أساعدك تلاقي الكويز اللي يناسبك أو تعرف أكتر عن الموقع.
       </div>
     </div>
   </div>
 
-  <!-- لوحة المفاتيح -->
   <div class="chat-keyboard" id="chatKeyboard"></div>
 
-  <!-- مربع الكتابة -->
   <div class="chat-input-container">
     <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatEnter(event)">
     <button onclick="sendMessage()" id="sendBtn">إرسال</button>
@@ -152,52 +143,59 @@
 
   const ui = {
     ar: {
-      back: "⬅ رجوع", title: "مساعد الكويزات", subtitle: "متصل الآن 🟢",
-      welcome: "أهلاً بيك! اختار من القايمة اللي تحت عشان أساعدك.",
+      back: "⬅ رجوع", title: "مساعد Quiz Hub", subtitle: "متصل الآن 🟢",
+      welcome: "أهلاً بيك في Quiz Hub! اختار من القايمة اللي تحت عشان أساعدك تلاقي الكويز اللي يناسبك أو تعرف أكتر عن الموقع.",
       placeholder: "اكتب رسالتك هنا...", send: "إرسال",
-      btnMovies: "🎬 الأفلام", btnSeries: "📺 المسلسلات", btnHelp: "❓ إزاي أستخدم الموقع؟", btnFriends: "👥 الأصدقاء",
-      btnHorror: "🎃 رعب", btnMystery: "🕵️ غموض", btnAction: "💥 أكشن",
-      btnKdrama: "💖 دراما كورية",
+      btnMovies: "🎬 الكويزات", btnSiteFeatures: "🛠️ مميزات الموقع", btnRanks: "🎖️ الرتب والبادجات", btnHelp: "❓ إزاي أستخدم الموقع؟", 
+      btnHorror: "🎃 رعب", btnAction: "💥 أكشن", btnMystery: "🕵️ غموض", btnThriller: "🎬 تشويق",
       btnBack: "🔙 رجوع",
-      replyMovies: "اختار نوع الأفلام اللي عايز تعرف عنها:", replySeries: "اختار نوع المسلسلات اللي عايز تعرف عنها:",
-      replyHorror: "عندنا كويزات لـ: أنابيل، الكونجورينج، الراهبة، FNAF، قطار بوسان. العب من الصفحة الرئيسية!",
-      replyKdrama: "عندنا كويزات لـ: الجمال الحقيقي، عيلة بالاختيار، حلم إليك، لماذا هي.",
-      replyMystery: "عندنا كويز وينزداي (Wednesday) في قسم الغموض.",
-      replyAction: "عندنا كويزات لـ: لعبة الحبار، الحمقى الخارقون.",
-      replyHelp: "الموقع فيه كويزات، ليدر بورد، بادجات، وأصدقاء. تقدر ترفع صورة في البروفايل وتتحدى أصحابك!",
-      replyFriends: "روح لصفحة 'اللاعبين' من فوق، دور على صاحبك واضغط إضافة. أول ما يقبل، تقدر تكلمه أو تتحداه!",
-      replyDefault: "معلش مفهمتش، جرب تختار من الأزرار اللي تحت."
+      btnShop: "🛒 المتجر", btnWheel: "🎡 عجلة الحظ", btnFriends: "👥 الأصدقاء", btnRating: "⭐ تقييم الموقع",
+      replyMovies: "اختار القسم اللي عايز تلعب فيه:",
+      replyHorror: "عندنا كويزات رعب قوية زي: أنابيل (Annabelle)، الكونجورينج (The Conjuring)، الراهبة (The Nun)، فايف نايتس (FNAF)، قطار بوسان (Train to Busan)، وسكريم (Scream). تقدر تلعبهم من الصفحة الرئيسية!",
+      replyAction: "عندنا كويزات أكشن جبارة زي: سبايدرمان (Spider-Man)، المنتقمون (Avengers)، أفاتار (Avatar)، لعبة الحبار (Squid Game). ادخل العب واثبت نفسك!",
+      replyMystery: "عندنا كويزات غموض وتشويق للعقل زي: وينزداي (Wednesday) ومطارق (Knives Out بكل أجزائه).",
+      replyThriller: "عندنا فيلم السقوط (Fall)، ده كويز تشويق وإثارة هيخليك مش قادر تتنفس!",
+      replyShop: "من صفحة المتجر تقدر تشتري إطارات (Frames) مميزة لصورتك وإنت واقف في الليدر بورد، أو صور بروفايل حصرية. فلوسك بتزيد لما تلعب كويزات!",
+      replyWheel: "عجلة الحظ (Lucky Wheel) بتديك فرصة تكسب XP أو إطارات نادرة كل 24 ساعة. جرب حظك!",
+      replyFriends: "من صفحة 'اللاعبين' تقدر تضيف أصحابك. أول ما يقبلوا، تقدر تكلمهم في الشات أو تتحداهم في أي كويز (تحدي صديق)!",
+      replyRanks: "الأنظمة شغالة كالتالي: أنت بتلعب كويزات وبتجمع XP، وبعدها بتبعت طلب للـ (Owner) عشان يطلعلك الرتبة المناسبة. لو مستواك عالي، الأونر هيديك رتبة أسطورية أو بادج مميز! تقدر تبعت الطلب من صفحة 'صندوق الرسائل' -> تبويب 'طلبات الأونر'.",
+      replyHelp: "الموقع فيه كويزات لكل التصنيفات، متجر، عجلة حظ، ليدر بورد (عشان تشوف ترتيبك)، ونظام أصدقاء. كل اللي عليك تدخل وتلعب وتجمع XP!",
+      replyRating: "رأيك يهمنا جداً! من القائمة الجانبية اختار 'قيّم الموقع' وقولي رأيك في التحديثات الجديدة.",
+      replyDefault: "معلش مفهمتش قصدك. جرب تختار من الأزرار اللي تحت، أو اسألني عن قسم معين."
     },
     en: {
-      back: "⬅ Back", title: "Quiz Assistant", subtitle: "Online 🟢",
-      welcome: "Welcome! Choose from the menu below to get started.",
+      back: "⬅ Back", title: "Quiz Hub Assistant", subtitle: "Online 🟢",
+      welcome: "Welcome to Quiz Hub! Choose from the menu below to find a quiz or learn more about the site.",
       placeholder: "Type your message...", send: "Send",
-      btnMovies: "🎬 Movies", btnSeries: "📺 Series", btnHelp: "❓ How to use?", btnFriends: "👥 Friends",
-      btnHorror: "🎃 Horror", btnMystery: "🕵️ Mystery", btnAction: "💥 Action",
-      btnKdrama: "💖 K-Drama",
+      btnMovies: "🎬 Quizzes", btnSiteFeatures: "🛠️ Site Features", btnRanks: "🎖️ Ranks & Badges", btnHelp: "❓ How to use?", 
+      btnHorror: "🎃 Horror", btnAction: "💥 Action", btnMystery: "🕵️ Mystery", btnThriller: "🎬 Thriller",
       btnBack: "🔙 Back",
-      replyMovies: "Choose a movie category:", replySeries: "Choose a series category:",
-      replyHorror: "We have quizzes for: Annabelle, The Conjuring, The Nun, FNAF, Train to Busan. Play from Home!",
-      replyKdrama: "We have quizzes for: True Beauty, Family By Choice, Dream To You, Why Her.",
-      replyMystery: "We have the Wednesday quiz in the Mystery section.",
-      replyAction: "We have quizzes for: Squid Game, The WONDERfools.",
-      replyHelp: "The site has quizzes, leaderboard, badges, and friends. You can upload a profile pic and challenge friends!",
-      replyFriends: "Go to 'Players' page, find your friend and click Add. Once accepted, you can message or challenge them!",
-      replyDefault: "Sorry, I didn't understand. Try choosing from the buttons below."
+      btnShop: "🛒 Shop", btnWheel: "🎡 Lucky Wheel", btnFriends: "👥 Friends", btnRating: "⭐ Rate Website",
+      replyMovies: "Choose a category to play:",
+      replyHorror: "We have great horror quizzes: Annabelle, The Conjuring, The Nun, FNAF, Train to Busan, and Scream. Play from the Home page!",
+      replyAction: "We have amazing action quizzes: Spider-Man, Avengers, Avatar, Squid Game. Go play and prove yourself!",
+      replyMystery: "We have mind-bending mystery quizzes: Wednesday, and Knives Out (all parts).",
+      replyThriller: "We have the movie Fall, a thriller quiz that will leave you breathless!",
+      replyShop: "In the Shop, you can buy cool frames for your profile picture to show off on the leaderboard, or exclusive avatars. You earn coins by playing quizzes!",
+      replyWheel: "The Lucky Wheel gives you a chance to win XP or rare frames every 24 hours. Try your luck!",
+      replyFriends: "On the 'Players' page, you can add friends. Once they accept, you can chat or challenge them to any quiz (Challenge Friend)!",
+      replyRanks: "The Rank & Badge system works like this: You play quizzes and earn XP. Then you submit a request to the (Owner) to give you the appropriate rank. If your level is high, the Owner will give you a legendary rank or a special badge! You can send the request from the 'Inbox' page -> 'Owner Requests' tab.",
+      replyHelp: "The site has quizzes for all categories, a shop, a lucky wheel, a leaderboard, and a friend system. All you have to do is log in, play, and earn XP!",
+      replyRating: "We value your opinion! From the side menu, choose 'Rate the Website' and tell us what you think of the new updates.",
+      replyDefault: "Sorry, I didn't understand. Try choosing from the buttons below, or ask me about a specific category."
     }
   };
 
-  // القوائم
   function renderMainMenu() {
     const t = ui[currentLang];
     chatKeyboard.innerHTML = `
       <div class="kb-row">
         <button class="kb-btn" onclick="handleMenuClick('movies')">${t.btnMovies}</button>
-        <button class="kb-btn" onclick="handleMenuClick('series')">${t.btnSeries}</button>
+        <button class="kb-btn" onclick="handleMenuClick('siteFeatures')">${t.btnSiteFeatures}</button>
       </div>
       <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('ranks')">${t.btnRanks}</button>
         <button class="kb-btn" onclick="handleMenuClick('help')">${t.btnHelp}</button>
-        <button class="kb-btn" onclick="handleMenuClick('friends')">${t.btnFriends}</button>
       </div>
     `;
   }
@@ -212,18 +210,26 @@
         <button class="kb-btn" onclick="handleMenuClick('horror')">${t.btnHorror}</button>
         <button class="kb-btn" onclick="handleMenuClick('action')">${t.btnAction}</button>
       </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('mystery')">${t.btnMystery}</button>
+        <button class="kb-btn" onclick="handleMenuClick('thriller')">${t.btnThriller}</button>
+      </div>
     `;
   }
 
-  function renderSeriesMenu() {
+  function renderSiteFeaturesMenu() {
     const t = ui[currentLang];
     chatKeyboard.innerHTML = `
       <div class="kb-top-bar">
         <button class="kb-back" onclick="renderMainMenu()">${t.btnBack}</button>
       </div>
       <div class="kb-row">
-        <button class="kb-btn" onclick="handleMenuClick('mystery')">${t.btnMystery}</button>
-        <button class="kb-btn" onclick="handleMenuClick('kdrama')">${t.btnKdrama}</button>
+        <button class="kb-btn" onclick="handleMenuClick('shop')">${t.btnShop}</button>
+        <button class="kb-btn" onclick="handleMenuClick('wheel')">${t.btnWheel}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('friends')">${t.btnFriends}</button>
+        <button class="kb-btn" onclick="handleMenuClick('rating')">${t.btnRating}</button>
       </div>
     `;
   }
@@ -293,13 +299,17 @@
     let reply = '';
 
     if (action === 'movies') { btnText = t.btnMovies; reply = t.replyMovies; renderMoviesMenu(); }
-    else if (action === 'series') { btnText = t.btnSeries; reply = t.replySeries; renderSeriesMenu(); }
+    else if (action === 'siteFeatures') { btnText = t.btnSiteFeatures; reply = t.replyMovies; renderSiteFeaturesMenu(); }
     else if (action === 'horror') { btnText = t.btnHorror; reply = t.replyHorror; }
-    else if (action === 'mystery') { btnText = t.btnMystery; reply = t.replyMystery; }
-    else if (action === 'kdrama') { btnText = t.btnKdrama; reply = t.replyKdrama; }
     else if (action === 'action') { btnText = t.btnAction; reply = t.replyAction; }
-    else if (action === 'help') { btnText = t.btnHelp; reply = t.replyHelp; }
+    else if (action === 'mystery') { btnText = t.btnMystery; reply = t.replyMystery; }
+    else if (action === 'thriller') { btnText = t.btnThriller; reply = t.replyThriller; }
+    else if (action === 'shop') { btnText = t.btnShop; reply = t.replyShop; }
+    else if (action === 'wheel') { btnText = t.btnWheel; reply = t.replyWheel; }
     else if (action === 'friends') { btnText = t.btnFriends; reply = t.replyFriends; }
+    else if (action === 'rating') { btnText = t.btnRating; reply = t.replyRating; }
+    else if (action === 'ranks') { btnText = t.btnRanks; reply = t.replyRanks; }
+    else if (action === 'help') { btnText = t.btnHelp; reply = t.replyHelp; }
 
     addMessage(btnText, 'user');
     showTyping();
@@ -324,9 +334,11 @@
       const lowerText = text.toLowerCase();
       let reply = ui[currentLang].replyDefault;
 
-      if (lowerText.includes('فيلم') || lowerText.includes('movie')) reply = ui[currentLang].replyMovies;
-      else if (lowerText.includes('مسلسل') || lowerText.includes('series')) reply = ui[currentLang].replySeries;
+      if (lowerText.includes('فيلم') || lowerText.includes('movie') || lowerText.includes('كويز') || lowerText.includes('quiz')) reply = ui[currentLang].replyMovies;
       else if (lowerText.includes('صديق') || lowerText.includes('friend')) reply = ui[currentLang].replyFriends;
+      else if (lowerText.includes('رتبة') || lowerText.includes('rank') || lowerText.includes('بادج') || lowerText.includes('badge')) reply = ui[currentLang].replyRanks;
+      else if (lowerText.includes('متجر') || lowerText.includes('shop')) reply = ui[currentLang].replyShop;
+      else if (lowerText.includes('عجلة') || lowerText.includes('wheel')) reply = ui[currentLang].replyWheel;
 
       addMessage(reply, 'bot');
     }, 800);
