@@ -48,12 +48,43 @@ p.subtitle { text-align: center; color: #aaa; margin-bottom: 40px; font-size: 18
 .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; text-decoration: none; z-index: 999; display: flex; align-items: center; gap: 8px; }
 .back-btn:hover { background: #ff0000; border-color: #ff0000; }
 
-/* الوضع الليلي */
-body.light-mode { background: #f4f4f4; color: #111; }
+/* ================== الوضع النهاري (Light Mode) ================== */
+body.light-mode { 
+    background: #f4f4f4; 
+    color: #111; 
+}
 body.light-mode h1.main-title { color: #8b0000; text-shadow: none; }
 body.light-mode .play-screen { background: #fff; }
 body.light-mode .question { color: #111; }
 body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; }
+
+/* التعديلات عشان الاختيارات تبان في الوضع النهاري */
+body.light-mode .option:hover:not(.disabled) {
+    background: #ffe5e5 !important; /* لون وردي فاتح */
+    color: #111 !important; /* النص يبقى غامق */
+    border-color: #ff3333 !important;
+}
+
+body.light-mode .option.correct {
+    background: #d4edda !important; /* أخضر فاتح */
+    color: #155724 !important; /* نص غامق */
+    border-color: #28a745 !important;
+}
+
+body.light-mode .option.wrong {
+    background: #f8d7da !important; /* أحمر فاتح */
+    color: #721c24 !important; /* نص غامق */
+    border-color: #dc3545 !important;
+}
+
+body.light-mode .quiz-card h2 { color: #fff; text-shadow: 0 0 10px #000; background: rgba(0,0,0,0.7); border-radius: 8px; }
+body.light-mode .timer { color: #8b0000; }
+body.light-mode #next { background: #8b0000; }
+body.light-mode #next:hover { background: #ff3333; }
+body.light-mode #score { color: #8b0000; }
+body.light-mode .progress { background: #ddd; }
+body.light-mode .progress-bar { background: #8b0000; }
+body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
 
 @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); } }
 .shake-animation { animation: shake 0.4s ease-in-out; }
@@ -70,28 +101,9 @@ body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; 
 .share-container { margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; }
 .share-title { color: #aaa; font-size: 15px; margin-bottom: 15px; font-weight: bold; }
 .share-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.share-btn { 
-  padding: 8px 15px; 
-  border: none; 
-  border-radius: 8px; 
-  cursor: pointer; 
-  font-family: 'Cairo'; 
-  font-weight: bold; 
-  font-size: 14px; 
-  color: #fff; 
-  transition: 0.3s; 
-  display: flex; 
-  align-items: center; 
-  gap: 5px; 
-}
+.share-btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 14px; color: #fff; transition: 0.3s; display: flex; align-items: center; gap: 5px; }
 .share-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-
-/* ألوان كل زرار */
-.share-wa { background: #25D366; } /* واتساب */
-.share-tg { background: #0088cc; } /* تليجرام */
-.share-fb { background: #1877F2; } /* فيسبوك */
-.share-tw { background: #1DA1F2; } /* تويتر */
-.share-other { background: #444; border: 1px solid #666; } /* تطبيقات تانية */
+.share-wa { background: #25D366; } .share-tg { background: #0088cc; } .share-fb { background: #1877F2; } .share-tw { background: #1DA1F2; } .share-other { background: #444; border: 1px solid #666; }
 
 /* تظبيط أماكن الزراير العلوية */
 .top-buttons-container {
@@ -105,7 +117,7 @@ body.light-mode .option { background: #f9f9f9; color: #111; border-color: #ccc; 
 .top-buttons-container .back-btn,
 .top-buttons-container #langBtn,
 .top-buttons-container #themeBtn {
-    position: static !important; /* عشان ميبقوش fixed لوحدهم ويتداخلوا */
+    position: static !important;
     padding: 8px 15px;
     background: #333;
     color: #fff;
