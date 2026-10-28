@@ -31,30 +31,30 @@
 </div>
 
 <div id="playScreen" class="play-screen">
-  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ff0000;">🚄 كويز قطار بوسان 🚄</h1>
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ff0000;" data-ar="🚄 كويز قطار بوسان 🚄" data-en="🚄 Train to Busan Quiz 🚄">🚄 كويز قطار بوسان 🚄</h1>
   <div class="progress"><div class="progress-bar" id="progress"></div></div>
   <div class="timer" id="timer">⏱️ 20</div>
   <div id="question" class="question"></div>
   <div id="options"></div>
   <div id="score"></div>
-  <button id="next" onclick="nextQuestion()">السؤال التالي ←</button>
+  <button id="next" onclick="nextQuestion()" data-ar="السؤال التالي ←" data-en="Next Question →">السؤال التالي ←</button>
 </div>
 
 <div class="modal-overlay" id="challengeModal">
   <div class="modal-box">
-    <h2>تحدي صديق ⚔️</h2>
+    <h2 data-ar="تحدي صديق ⚔️" data-en="Challenge Friend ⚔️">تحدي صديق ⚔️</h2>
     <div id="roomOptions">
-      <button class="room-btn" onclick="createRoom()">إنشاء غرفة جديدة</button>
-      <p style="color:#aaa; margin: 10px 0;">أو</p>
-      <input type="text" id="roomCodeInput" class="room-input" maxlength="6" placeholder="كود الغرفة">
-      <button class="room-btn" onclick="joinRoom()">انضمام لغرفة</button>
+      <button class="room-btn" onclick="createRoom()" data-ar="إنشاء غرفة جديدة" data-en="Create New Room">إنشاء غرفة جديدة</button>
+      <p style="color:#aaa; margin: 10px 0;" data-ar="أو" data-en="OR">أو</p>
+      <input type="text" id="roomCodeInput" class="room-input" maxlength="6" placeholder="اكتب كود الغرفة هنا" data-ar="اكتب كود الغرفة هنا" data-en="Enter room code here">
+      <button class="room-btn" onclick="joinRoom()" data-ar="انضمام لغرفة" data-en="Join Room">انضمام لغرفة</button>
     </div>
     <div id="waitingRoom" style="display: none;">
-      <p class="status-text">ابعت الكود ده لصاحبك:</p>
+      <p class="status-text" data-ar="ابعت الكود ده لصاحبك:" data-en="Send this code to your friend:">ابعت الكود ده لصاحبك:</p>
       <div class="room-code-display" id="displayRoomCode">------</div>
-      <p class="status-text" id="waitingStatus">في انتظار انضمام صديقك...</p>
+      <p class="status-text" id="waitingStatus" data-ar="في انتظار انضمام صديقك..." data-en="Waiting for your friend...">في انتظار انضمام صديقك...</p>
     </div>
-    <button class="room-btn" style="background:#222;" onclick="closeChallengeModal()">إغلاق</button>
+    <button class="room-btn" style="background:#222;" onclick="closeChallengeModal()" data-ar="إغلاق" data-en="Close">إغلاق</button>
   </div>
 </div>
 
@@ -64,7 +64,7 @@
     const quizKey = 'TrainToBusan'; 
     const quizData = allQuizzesData.TrainToBusan;
     const partsList = { part1: quizData.part1, part2: quizData.part2 };
-    window.onload = () => { initQuiz({ title: "🚄 كويز قطار بوسان 🚄", quizKey: quizKey, quizData: quizData, hasParts: true, partsList: partsList, bgMusic: 'sounds/heartbeat.wav' }); }
+    window.onload = () => { initQuiz({ title: "🚄 كويز قطار بوسان 🚄", quizKey: quizKey, quizData: quizData, hasParts: true, partsList: partsList }); }
 </script>
 <script src="room-cleaner.js"></script>
 </body>
