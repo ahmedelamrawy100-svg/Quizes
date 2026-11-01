@@ -581,4 +581,11 @@ function initApp() {
         localStorage.removeItem('loggedInUser'); 
         window.location.href = 'index.html'; 
     };
+
+        window.clearSiteCache = async () => {
+        if(confirm('هل أنت متأكد من مسح الكاش؟ سيتم تحديث الموقع لجميع اللاعبين عند فتحهم للصفحة القادمة.')) {
+            await window.set(window.ref(window.db, 'site_settings/version'), Date.now());
+            window.showToast('تم مسح الكاش بنجاح! الموقع سيحدث للجميع.');
+        }
+    };
 }
