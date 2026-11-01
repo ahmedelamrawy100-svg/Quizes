@@ -205,12 +205,17 @@
           <button class="btn btn-blue" onclick="window.sendBroadcast()">إرسال 📨</button>
         </div>
       </div>
+      <!-- ضفنا زرار مسح الكاش هنا جوه تبويب النظام -->
+      <div class="item" style="margin-bottom:15px;">
+        <div><h3 style="color:var(--gold);">🧹 مسح الكاش (تحديث الموقع للجميع)</h3></div>
+        <button class="btn btn-orange" onclick="window.clearSiteCache()">مسح الكاش 💥</button>
+      </div>
       <div class="item" style="margin-bottom:15px;">
         <div><h3 style="color:var(--orange);">👀 تصفير عداد الزوار</h3></div>
-        <button class="btn btn-orange" onclick="window.resetVisitors()">تصفير 🔄</button>
+        <button class="btn btn-orange" onclick="window.resetVisitors">تصفير 🔄</button>
       </div>
     </div>
-
+    
     <!-- الرسائل -->
     <div id="tab-messages" class="tab">
       <div class="item" style="margin-bottom:15px;">
