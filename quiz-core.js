@@ -279,72 +279,113 @@ window.initQuiz = function(config) {
             }); 
         } else if (isChallengeMode && !myRoomCode) { 
             setTimeout(() => { window.location.href = 'index.html'; }, 3000); 
-        } else {
-            let realHighScore = highestScore; 
-            if (window.db && currentUser !== 'Unknown') { 
-                await window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
-                
-                try { const snap = await window.get(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey)); if (snap.exists()) { const data = snap.val(); let maxScore = 0; for (let key in data) { if (data[key].score > maxScore) maxScore = data[key].score; } realHighScore = maxScore; } } catch(e) { console.error(e); } 
-                
-                window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => { let xp = snap.exists() ? snap.val() : 0; window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score); }); 
-                
-                window.get(window.ref(window.db, 'users_data/' + currentUser + '/coins')).then(coinSnap => {
-                    let currentCoins = coinSnap.exists() ? coinSnap.val() : 0;
-                    window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), currentCoins + 5);
-                });
+    } else {
 
-                window.push(window.ref(window.db, 'activity_feed'), {
-                    user: currentUser,
-                    action: "أنهى",
-                    detail: "كويز " + (quizKey.toUpperCase()) + " بنتيجة " + score,
-                    time: Date.now()
-                });
+        let realHighScore = highestScore;
+        if (localStorage.getItem(currentSaveKey) > realHighScore) {
+            realHighScore = localStorage.getItem(currentSaveKey);
+        }
 
-                if (isSpeedrun) {
-                    const totalTime = Math.floor((Date.now() - startTime) / 1000);
-                    await window.push(window.ref(window.db, 'speedrun_scores'), {
-                        user: currentUser, quiz: quizKey, score: score, total: currentQuestions.length, time: totalTime, date: Date.now()
-                    });
-                    showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
-                }
+        document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+            <h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2>
+            <p style="color:var(--text-color); font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p>
+            <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${activeLang === 'en' ? 'High Score' : 'أعلى نتيجة'}: ${realHighScore}</p>
+            <div class="share-container">
+                <div class="share-title">${activeLang === 'en' ? 'Share your result with friends!' : 'شارك نتيجتك مع أصحابك!'}</div>
+                <div class="share-buttons">
+                    <button class="share-btn share-wa" onclick="shareResult('whatsapp')">📱 WhatsApp</button>
+                    <button class="share-btn share-tg" onclick="shareResult('telegram')">✈️ Telegram</button>
+                    <button class="share-btn share-fb" onclick="shareResult('facebook')">📘 Facebook</button>
+                    <button class="share-btn share-tw" onclick="shareResult('twitter')">🐦 Twitter</button>
+                    <button class="share-btn share-other" onclick="shareResult('native')">📤 ${activeLang === 'en' ? 'Other Apps' : 'تطبيقات تانية'}</button>
+                </div>
+            </div>
+            <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${activeLang === 'en' ? 'Play Again' : 'العب تاني'}</button>
+        </div>`;
+        
+        document.getElementById('options').innerHTML = ''; 
+        document.getElementById('timer').style.display = 'none';
+        document.getElementById('score').innerText = ''; 
+        document.getElementById('next').style.display = 'none';
+        document.getElementById('backBtn').style.display = 'flex'; 
 
-                const today = new Date().toDateString();
-                window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
-                    let lastPlay = snap.exists() ? snap.val() : null;
-                    let currentStreak = 0;
-                    window.get(window.ref(window.db, 'users_data/' + currentUser + '/streak')).then(s => { currentStreak = s.exists() ? s.val() : 0; });
-
-                    if (lastPlay !== today) {
-                        let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-                        if (lastPlay === yesterday.toDateString()) { currentStreak++; } else { currentStreak = 1; }
-                        
-                        window.set(window.ref(window.db, 'users_data/' + currentUser + '/streak'), currentStreak);
-                        window.set(window.ref(window.db, 'users_data/' + currentUser + '/lastPlay'), today);
-                        
-                        let bonusXP = currentStreak * 5; 
-                        window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(xpSnap => {
-                            let xp = xpSnap.exists() ? xpSnap.val() : 0;
-                            window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + bonusXP);
-                            showToastMessage(`🔥 ستريك ${currentStreak} أيام! خدت ${bonusXP} XP مكافأة!`);
-                        });
+        if (window.db && currentUser !== 'Unknown') { 
+            window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
+            
+            try { 
+                const snap = await window.get(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey)); 
+                if (snap.exists()) { 
+                    const data = snap.val(); 
+                    let maxScore = 0; 
+                    for (let key in data) { 
+                        if (data[key].score > maxScore) maxScore = data[key].score; 
+                    } 
+                    if (maxScore > realHighScore) {
+                        localStorage.setItem(currentSaveKey, maxScore);
                     }
+                } 
+            } catch(e) { console.error(e); } 
+            
+            window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => { 
+                let xp = snap.exists() ? snap.val() : 0; 
+                window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score); 
+            }); 
+            
+            window.get(window.ref(window.db, 'users_data/' + currentUser + '/coins')).then(coinSnap => {
+                let currentCoins = coinSnap.exists() ? coinSnap.val() : 0;
+                window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), currentCoins + 5);
+            });
+
+            window.push(window.ref(window.db, 'activity_feed'), {
+                user: currentUser, action: "أنهى", detail: "كويز " + (quizKey.toUpperCase()) + " بنتيجة " + score, time: Date.now()
+            });
+
+            if (isSpeedrun) {
+                const totalTime = Math.floor((Date.now() - startTime) / 1000);
+                await window.push(window.ref(window.db, 'speedrun_scores'), {
+                    user: currentUser, quiz: quizKey, score: score, total: currentQuestions.length, time: totalTime, date: Date.now()
                 });
+                showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
             }
-            if (realHighScore > highestScore) { localStorage.setItem(currentSaveKey, realHighScore); } 
-            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2><p style="color:var(--text-color); font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p><p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${activeLang === 'en' ? 'High Score' : 'أعلى نتيجة'}: ${realHighScore}</p><div class="share-container"><div class="share-title">${activeLang === 'en' ? 'Share your result with friends!' : 'شارك نتيجتك مع أصحابك!'}</div><div class="share-buttons"><button class="share-btn share-wa" onclick="shareResult('whatsapp')">📱 WhatsApp</button><button class="share-btn share-tg" onclick="shareResult('telegram')">✈️ Telegram</button><button class="share-btn share-fb" onclick="shareResult('facebook')">📘 Facebook</button><button class="share-btn share-tw" onclick="shareResult('twitter')">🐦 Twitter</button><button class="share-btn share-other" onclick="shareResult('native')">📤 ${activeLang === 'en' ? 'Other Apps' : 'تطبيقات تانية'}</button></div></div><button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${activeLang === 'en' ? 'Play Again' : 'العب تاني'}</button></div>`; 
-            document.getElementById('options').innerHTML = ''; document.getElementById('timer').style.display = 'none'; document.getElementById('score').innerText = ''; document.getElementById('next').style.display = 'none'; document.getElementById('backBtn').style.display = 'flex'; 
+
+            const today = new Date().toDateString();
+            window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
+                let lastPlay = snap.exists() ? snap.val() : null;
+                let currentStreak = 0;
+                window.get(window.ref(window.db, 'users_data/' + currentUser + '/streak')).then(s => { currentStreak = s.exists() ? s.val() : 0; });
+
+                if (lastPlay !== today) {
+                    let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                    if (lastPlay === yesterday.toDateString()) { currentStreak++; } else { currentStreak = 1; }
+                    
+                    window.set(window.ref(window.db, 'users_data/' + currentUser + '/streak'), currentStreak);
+                    window.set(window.ref(window.db, 'users_data/' + currentUser + '/lastPlay'), today);
+                    
+                    let bonusXP = currentStreak * 5; 
+                    window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(xpSnap => {
+                        let xp = xpSnap.exists() ? xpSnap.val() : 0;
+                        window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + bonusXP);
+                        showToastMessage(`🔥 ستريك ${currentStreak} أيام! خدت ${bonusXP} XP مكافأة!`);
+                    });
+                }
+            });
         }
     }
-
-    window.shareResult = function(platform) { 
-        const activeLang = localStorage.getItem('lang') || 'ar';
-        const quizName = currentSaveKey.split('_')[0].toUpperCase(); const text = activeLang === 'en' ? `I scored ${score}/${currentQuestions.length} on the ${quizName} quiz on Quiz Hub! Can you beat my score? 🏆` : `لقد حصلت على ${score}/${currentQuestions.length} في كويز ${quizName} على Quiz Hub! هل يمكنك التغلب علي؟ 🏆`; 
-        const url = window.location.href; const encodedText = encodeURIComponent(text); const encodedUrl = encodeURIComponent(url); 
-        if (platform === 'whatsapp') window.open(`https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`, '_blank'); 
-        else if (platform === 'telegram') window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank'); 
-        else if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank'); 
-        else if (platform === 'twitter') window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank'); 
-        else if (platform === 'native' && navigator.share) navigator.share({ title: 'Quiz Hub', text: text, url: url }).catch(console.error); 
-        else alert(activeLang === 'en' ? "Sharing is not supported." : "المشاركة غير مدعومة."); 
-    }
 }
+
+window.shareResult = function(platform) { 
+    const activeLang = localStorage.getItem('lang') || 'ar';
+    const quizName = currentSaveKey.split('_')[0].toUpperCase(); 
+    const text = activeLang === 'en' ? `I scored ${score}/${currentQuestions.length} on the ${quizName} quiz on Quiz Hub! Can you beat my score? 🏆` : `لقد حصلت على ${score}/${currentQuestions.length} في كويز ${quizName} على Quiz Hub! هل يمكنك التغلب علي؟ 🏆`; 
+    const url = window.location.href; 
+    const encodedText = encodeURIComponent(text); 
+    const encodedUrl = encodeURIComponent(url); 
+    
+    if (platform === 'whatsapp') window.open(`https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`, '_blank'); 
+    else if (platform === 'telegram') window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank'); 
+    else if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, '_blank'); 
+    else if (platform === 'twitter') window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank'); 
+    else if (platform === 'native' && navigator.share) navigator.share({ title: 'Quiz Hub', text: text, url: url }).catch(console.error); 
+    else alert(activeLang === 'en' ? "Sharing is not supported." : "المشاركة غير مدعومة."); 
+};
+};
