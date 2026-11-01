@@ -56,31 +56,17 @@
       gap: 8px;
   }
   
-  .main-tab-btn.active { 
-      background: var(--gold); 
-      color: #000; 
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  .main-tab-btn.speed-btn.active { 
-      background: var(--blue); 
-      color: #000; 
-  }
-  
-  .main-tab-btn:hover:not(.active) { 
-      background: rgba(255,255,255,0.05);
-      color: var(--text-color);
-  }
+  .main-tab-btn.active { background: var(--gold); color: #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
+  .main-tab-btn.speed-btn.active { background: var(--blue); color: #000; }
+  .main-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text-color); }
 
-  /* --- قسم الفلاتر (تحت التاب الرئيسي) --- */
+  /* --- قسم الفلاتر --- */
   .filters-wrapper { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 40px; }
   
-  /* فلاتر الوقت */
   .time-filters { display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 25px; }
   .time-btn { padding: 8px 20px; border-radius: 20px; border: none; background: transparent; color: var(--subtitle-color); font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
   .time-btn.active { background: var(--card-bg); color: var(--gold); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-  /* فلاتر التصنيفات */
   .category-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
   .cat-btn { padding: 6px 16px; border-radius: 15px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.3s; }
   .cat-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
@@ -144,6 +130,7 @@
 <div class="top-controls">
   <a href="index.html" class="ctrl-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
   <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+  <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
 </div>
 
 <div class="leaderboard-container">
@@ -164,11 +151,12 @@
             <button class="time-btn" onclick="switchTimeFilter('week', this)" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
           </div>
 
+          <!-- التصنيفات الجديدة (بدون دراما كورية) -->
           <div class="category-filters" id="categoryFilters">
             <button class="cat-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
             <button class="cat-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
             <button class="cat-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
-            <button class="cat-btn" onclick="filterLeaderboard('kdrama', this)" data-ar="دراما 💖" data-en="K-Drama 💖">دراما 💖</button>
+            <button class="cat-btn" onclick="filterLeaderboard('thriller', this)" data-ar="تشويق 🎬" data-en="Thriller 🎬">تشويق 🎬</button>
             <button class="cat-btn" onclick="filterLeaderboard('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
           </div>
       </div>
@@ -201,6 +189,22 @@
   let allScoresData = null;
   let allUsersData = {}; 
   let speedrunData = null;
+
+  // تفعيل الثيم
+  if (localStorage.getItem('theme') === 'light') { 
+      document.body.classList.add('light-mode'); 
+      document.getElementById('themeBtn').innerText = '🌙';
+  } else {
+      document.getElementById('themeBtn').innerText = '☀️';
+  }
+
+  window.toggleTheme = function() {
+      const body = document.body;
+      const isLight = body.classList.toggle('light-mode');
+      const icon = isLight ? '🌙' : '☀️';
+      document.getElementById('themeBtn').innerText = icon;
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  }
 
   window.toggleLanguage = function() {
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -271,10 +275,11 @@
   function renderLeaderboard() {
     if (!allScoresData) return;
     
-    let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan'];
-    let actionKeys = ['squidgame', 'wonderfools'];
-    let kdramaKeys = ['family', 'beauty', 'dream', 'whyher'];
-    let mysteryKeys = ['wednesday'];
+    // ربط التصنيفات بأسماء الكويزات اللي في الداتا بيز
+    let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'];
+    let actionKeys = ['squidgame', 'spiderman', 'avengers', 'avatar', 'venom'];
+    let thrillerKeys = ['fall'];
+    let mysteryKeys = ['wednesday', 'knivesout'];
 
     let playersMap = {};
     const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
@@ -294,7 +299,7 @@
         if (currentCategory === 'all') shouldCount = true;
         else if (currentCategory === 'horror' && horrorKeys.some(k => quizLower.includes(k))) shouldCount = true;
         else if (currentCategory === 'action' && actionKeys.some(k => quizLower.includes(k))) shouldCount = true;
-        else if (currentCategory === 'kdrama' && kdramaKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (currentCategory === 'thriller' && thrillerKeys.some(k => quizLower.includes(k))) shouldCount = true;
         else if (currentCategory === 'mystery' && mysteryKeys.some(k => quizLower.includes(k))) shouldCount = true;
 
         if (shouldCount) {
