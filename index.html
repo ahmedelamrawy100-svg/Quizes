@@ -20,116 +20,116 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; overflow-x: hidden; }
   
-  #authScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; animation: fadeInUp 0.5s; position: relative; margin-top: 60px;}
-  .auth-controls { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 999; }
-  .auth-controls button { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
-  .auth-controls button:hover { background: var(--accent); border-color: var(--accent); }
+  #loadingScreen { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 20px; }
+  #loadingScreen.hide { display: none; }
+  .loader-spinner { width: 60px; height: 60px; border: 5px solid #333; border-top-color: #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* شاشة الدخول */
+  #authScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; margin-top: 60px;}
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; text-align: center; font-size: 16px;}
   .auth-input:focus { border-color: var(--accent); }
-  .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; transition: 0.3s;}
-  .auth-btn:hover { opacity: 0.9; transform: scale(1.02); }
+  .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
   .auth-switch { color: var(--subtitle-color); cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 10px; }
-  
-  #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
-  #mainTitle { animation: glowPulse 3s infinite; }
 
-  .navbar { width: 100%; max-width: 1200px; background: var(--nav-bg); backdrop-filter: blur(15px); border: 1px solid var(--card-border); border-radius: 15px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 10px; z-index: 1000; flex-wrap: wrap; gap: 15px; }
+  /* المحتوى الأساسي */
+  #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
+  .navbar { width: 100%; max-width: 1200px; background: var(--nav-bg); border: 1px solid var(--card-border); border-radius: 15px; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
   .nav-brand { font-size: 24px; font-weight: 900; color: var(--accent); text-decoration: none; }
   .nav-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .icon-btn { background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; transition: 0.3s; font-family: 'Cairo'; }
-  .icon-btn:hover { transform: scale(1.05); background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn-menu { background: var(--accent) !important; color: #fff !important; border: none; font-size: 20px; padding: 5px 15px; }
-  .btn-messages { background: #0088cc !important; color: #fff !important; }
-  .btn-chat { background: #25D366 !important; color: #fff !important; }
+  .icon-btn { background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; font-family: 'Cairo'; }
+  .btn-menu { background: var(--accent) !important; font-size: 20px; }
+  .btn-messages { background: #0088cc !important; }
+  .btn-chat { background: #25D366 !important; }
   .btn-profile { background: #ffd700 !important; color: #000 !important; }
-  .btn-lang { background: #333 !important; color: #fff !important; border-color: #555 !important; }
   .btn-notify { background: #ffd700 !important; color: #000 !important; }
 
-  .side-menu { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: var(--card-bg); border-left: 2px solid var(--card-border); z-index: 2000; transition: 0.3s ease-in-out; display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; }
+  /* القائمة الجانبية */
+  .side-menu { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: var(--card-bg); border-left: 2px solid var(--card-border); z-index: 2000; transition: 0.3s; display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; }
   .side-menu.open { right: 0; }
   .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1999; display: none; }
   .menu-overlay.open { display: block; }
-  .menu-title { text-align: center; color: var(--accent); font-size: 24px; font-weight: bold; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); }
-  .menu-item { padding: 15px 20px; color: var(--text-color); text-decoration: none; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; border-right: 4px solid transparent; transition: 0.2s; cursor: pointer; font-family: 'Cairo'; background: transparent; border-top: none; border-bottom: none; border-left: none; width: 100%; text-align: right; }
-  .menu-item:hover { background: rgba(255,0,0,0.1); border-right-color: var(--accent); color: var(--accent); padding-right: 30px; }
+  .menu-title { text-align: center; color: var(--accent); font-size: 24px; font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
+  .menu-item { padding: 15px 20px; color: var(--text-color); text-decoration: none; font-weight: bold; font-size: 16px; display: flex; align-items: center; gap: 10px; border-right: 4px solid transparent; cursor: pointer; background: transparent; width: 100%; text-align: right; }
+  .menu-item:hover { background: rgba(255,0,0,0.1); border-right-color: var(--accent); color: var(--accent); }
 
-  #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 12px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,0,0,0.3); }
-  
+  #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 12px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; }
   .header-row { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1000px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-  .random-btn { background: var(--accent); color: #fff; padding: 10px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;}
-  .random-btn:hover { background: #cc0000; transform: translateY(-2px); }
-
-  .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
-  #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; font-size: 16px; }
-  #searchInput:focus { border-color: var(--accent); }
-  .ai-btn { background: var(--accent); color: #fff; border: none; border-radius: 25px; padding: 0 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; white-space: nowrap; transition: 0.3s; }
-  .ai-btn:hover { opacity: 0.9; }
+  .random-btn { background: var(--accent); color: #fff; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; text-decoration: none; }
   
-  .tabs-container { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
-  .tab-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); border-radius: 20px; padding: 8px 20px; cursor: pointer; font-family: 'Cairo'; font-weight: 700; font-size: 14px; transition: 0.3s; }
-  .tab-btn.active, .tab-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .search-container { width: 100%; max-width: 600px; margin-bottom: 20px; display: flex; gap: 10px; }
+  #searchInput { flex: 1; padding: 12px 20px; border-radius: 25px; border: 2px solid var(--card-border); background: var(--input-bg); color: var(--text-color); outline: none; font-size: 16px; }
+  .ai-btn { background: var(--accent); color: #fff; border-radius: 25px; padding: 0 20px; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; }
 
+  /* التبويبات الرئيسية (أجنبي ومصري) */
+  .main-sections { display: flex; gap: 20px; margin-bottom: 30px; width: 100%; max-width: 600px; }
+  .section-tab { flex: 1; padding: 15px; border-radius: 15px; background: var(--card-bg); border: 2px solid var(--card-border); color: var(--text-color); font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s; text-align: center; }
+  .section-tab:hover { border-color: var(--accent); }
+  .section-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+
+  /* الفلاتر الفرعية */
+  .sub-filters { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+  .sub-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); border-radius: 20px; padding: 8px 20px; cursor: pointer; font-weight: 700; font-size: 14px; transition: 0.3s; }
+  .sub-btn.active, .sub-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* الكروت */
   .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-  .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; text-align: center; height: 320px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; overflow: hidden; background-size: cover; background-position: center; transition: 0.3s; }
+  .quiz-card { background-color: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; text-decoration: none; color: #fff; height: 320px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; position: relative; overflow: hidden; background-size: cover; background-position: center; transition: 0.3s; }
   .quiz-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 40%); z-index: 1; }
-  .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; padding: 10px; width: 100%; text-shadow: 0 0 10px #000; }
+  .quiz-card h2 { position: relative; z-index: 2; font-size: 22px; margin-bottom: 15px; padding: 10px; width: 100%; text-align: center; text-shadow: 0 0 10px #000; }
   .quiz-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(255,0,0,0.2); }
 
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-  .toast { background: var(--card-bg); border-right: 5px solid var(--accent); color: var(--text-color); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s forwards; font-weight: bold; }
+  .toast { background: var(--card-bg); border-right: 5px solid var(--accent); color: var(--text-color); padding: 15px 20px; border-radius: 8px; font-weight: bold; animation: slideIn 0.3s forwards; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes glowPulse { 0% { text-shadow: 0 0 10px #ff0000; } 50% { text-shadow: 0 0 25px #ff0000, 0 0 35px #ff0000; } 100% { text-shadow: 0 0 10px #ff0000; } }
 
   @media (max-width: 768px) {
-    .navbar { justify-content: center; padding: 10px; }
+    .navbar { justify-content: center; }
     .nav-brand { width: 100%; text-align: center; margin-bottom: 10px; }
     .header-row { flex-direction: column; text-align: center; }
     .search-container { flex-direction: column; }
     .grid-container { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
     .quiz-card { height: 240px; }
     .quiz-card h2 { font-size: 16px; }
-    .menu-item { text-align: center; justify-content: center; }
+    .main-sections { flex-direction: column; gap: 10px; }
   }
 </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
-
-<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
-<div class="side-menu" id="sideMenu">
-  <div class="menu-title" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
-  <a href="index.html" class="menu-item" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
-  <a href="leaderboard.html" class="menu-item" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
-  <a href="users.html" class="menu-item" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
-  <a href="badges.html" class="menu-item" data-ar="🎖️ الرتب والبادجات" data-en="🎖️ Ranks & Badges">🎖️ الرتب والبادجات</a>
-  <a href="comments.html" class="menu-item" data-ar="💬 المجتمع" data-en="💬 Community">💬 المجتمع</a>
-  <a href="inbox.html" class="menu-item" data-ar="📩 صندوق الرسائل" data-en="📩 Inbox">📩 صندوق الرسائل</a>
-  <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat">💬 الشات الجماعي</a>
-  <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
-  <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
-  
-  <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
-  
-  <a href="https://chat.whatsapp.com/LOni0FZJAjXBuDiIyC2Pn3" target="_blank" class="menu-item" style="color: #25D366;" data-ar="📱 جروب الواتساب" data-en="📱 WhatsApp Group">📱 جروب الواتساب</a>
-  <a href="https://t.me/quiz_hub001" target="_blank" class="menu-item" style="color: #0088cc;" data-ar="✈️ قناة التليجرام" data-en="✈️ Telegram Channel">✈️ قناة التليجرام</a>
-
-  <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
-
-  <a href="notifications.html" class="menu-item" style="color: #ffd700;" data-ar="🔔 الإشعارات" data-en="🔔 Notifications">🔔 الإشعارات</a>
-  <a href="owner.html" class="menu-item" style="color: #ffd700;" data-ar="👑 لوحة الأونر" data-en="👑 Owner Panel">👑 لوحة الأونر</a>
-  <a href="admin.html" class="menu-item" style="color: #0088cc;" data-ar="🛡️ لوحة الإدارة" data-en="🛡️ Admin Panel">🛡️ لوحة الإدارة</a>
-  <button class="menu-item" onclick="openRatingModal()" style="color: #ffd700;" data-ar="⭐ قيّم الموقع" data-en="⭐ Rate the Website">⭐ قيّم الموقع</button>
-  <button class="menu-item" onclick="logoutUser()" style="color: #ff0000;" data-ar="🚪 تسجيل خروج" data-en="🚪 Logout">🚪 تسجيل خروج</button>
+<div id="loadingScreen" style="display: none;">
+    <div class="loader-spinner"></div>
 </div>
 
+<div id="toast-container"></div>
+
+<!-- القائمة الجانبية -->
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <div class="menu-title">Quiz Hub</div>
+  <a href="index.html" class="menu-item">🏠 الرئيسية</a>
+  <a href="leaderboard.html" class="menu-item">🏆 المتصدرين</a>
+  <a href="users.html" class="menu-item">👥 اللاعبين</a>
+  <a href="badges.html" class="menu-item">🎖️ الرتب والبادجات</a>
+  <a href="comments.html" class="menu-item">💬 المجتمع</a>
+  <a href="inbox.html" class="menu-item">📩 صندوق الرسائل</a>
+  <a href="chat.html" class="menu-item" style="color: #25D366;">💬 الشات الجماعي</a>
+  <a href="assistant.html" class="menu-item">🤖 المساعد</a>
+  <a href="profile.html" class="menu-item">👤 بروفايلي</a>
+  <a href="quizzes.html" class="menu-item" style="color: #00ffcc;">🛠️ صانع الكويزات</a>
+  <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
+  <a href="notifications.html" class="menu-item" style="color: #ffd700;">🔔 الإشعارات</a>
+  <a href="owner.html" class="menu-item" style="color: #ffd700;">👑 لوحة الأونر</a>
+  <a href="admin.html" class="menu-item" style="color: #0088cc;">🛡️ لوحة الإدارة</a>
+  <button class="menu-item" onclick="logoutUser()" style="color: #ff0000;">🚪 تسجيل خروج</button>
+</div>
+
+<!-- شاشة الدخول -->
 <div id="authScreen">
-  <div class="auth-controls">
-    <button onclick="toggleLanguage()" id="authLangBtn">EN</button>
-    <button onclick="toggleTheme()" id="authThemeBtn">☀️</button>
+  <div class="auth-controls" style="position: fixed; top: 20px; right: 20px;">
+    <button onclick="toggleLanguage()" id="authLangBtn" class="icon-btn">EN</button>
+    <button onclick="toggleTheme()" id="authThemeBtn" class="icon-btn">☀️</button>
   </div>
-  
   <h1 style="color:var(--accent); margin-bottom:20px; font-size: 32px;" id="authTitle" data-ar="🎬 أهلاً بيك" data-en="🎬 Welcome">🎬 أهلاً بيك</h1>
   <p style="margin-bottom: 20px; color: var(--subtitle-color); font-size: 16px;" id="authDesc" data-ar="سجل دخولك عشان نبدأ التحدي!" data-en="Log in to start the challenge!">سجل دخولك عشان نبدأ التحدي!</p>
   
@@ -141,13 +141,13 @@
   <span class="auth-switch" onclick="toggleAuthMode()" id="switchAuth" data-ar="ليس لديك حساب؟ سجل الآن" data-en="Don't have an account? Sign up">ليس لديك حساب؟ سجل الآن</span>
 </div>
 
+<!-- المحتوى الأساسي -->
 <div id="mainContent">
-  
   <div class="navbar">
     <a href="index.html" class="nav-brand">Quiz Hub</a>
     <div class="nav-right">
-      <button class="icon-btn btn-lang" onclick="toggleLanguage()" id="langBtn">EN</button>
-      <button class="icon-btn btn-lang" onclick="toggleTheme()" id="themeBtn" style="font-size: 16px;">☀️</button>
+      <button class="icon-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
       <button class="icon-btn btn-menu" onclick="toggleMenu()">☰</button>
       <a href="notifications.html" class="icon-btn btn-notify" data-ar="🔔 إشعارات" data-en="🔔 Notifications">🔔 إشعارات</a>
       <a href="chat.html" class="icon-btn btn-chat" data-ar="💬 الشات" data-en="💬 Chat">💬 الشات</a>
@@ -173,16 +173,32 @@
     <a href="assistant.html" class="ai-btn" data-ar="مساعد" data-en="Assistant">مساعد</a>
   </div>
 
-  <div class="tabs-container">
-    <button class="tab-btn active" onclick="filterCategory('all', this)" data-ar="الكل" data-en="All">الكل</button>
-    <button class="tab-btn" onclick="filterCategory('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
-    <button class="tab-btn" onclick="filterCategory('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
-    <button class="tab-btn" onclick="filterCategory('thriller', this)" data-ar="تشويق 🎬" data-en="Thriller 🎬">تشويق 🎬</button>
-    <button class="tab-btn" onclick="filterCategory('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+  <!-- تبويب اختيار القسم الرئيسي -->
+  <div class="main-sections">
+      <button class="section-tab active" id="btnForeign" onclick="switchMainSection('foreign')" data-ar="🌍 أجنبي" data-en="🌍 Foreign">🌍 أجنبي</button>
+      <button class="section-tab" id="btnEgyptian" onclick="switchMainSection('egyptian')" data-ar="🇪🇬 مصري" data-en="🇪🇬 Egyptian">🇪🇬 مصري</button>
   </div>
-  
+
+  <!-- الفلاتر الفرعية للأجنبي -->
+  <div class="sub-filters" id="foreignFilters">
+    <button class="sub-btn active" onclick="filterForeign('all', this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="sub-btn" onclick="filterForeign('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
+    <button class="sub-btn" onclick="filterForeign('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
+    <button class="sub-btn" onclick="filterForeign('thriller', this)" data-ar="تشويق 🎬" data-en="Thriller 🎬">تشويق 🎬</button>
+    <button class="sub-btn" onclick="filterForeign('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
+  </div>
+
+  <!-- الفلاتر الفرعية للمصري -->
+  <div class="sub-filters" id="egyptianFilters" style="display: none;">
+    <button class="sub-btn active" onclick="filterEgyptian('egyptian', this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="sub-btn" onclick="filterEgyptian('egyptian comedy-eg', this)" data-ar="كوميدي 😂" data-en="Comedy 😂">كوميدي 😂</button>
+    <button class="sub-btn" onclick="filterEgyptian('egyptian action-eg', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
+    <button class="sub-btn" onclick="filterEgyptian('egyptian drama-eg', this)" data-ar="دراما 🎭" data-en="Drama 🎭">دراما 🎭</button>
+  </div>
+
+  <!-- شبكة الكويزات -->
   <div class="grid-container" id="cards-container">
-    <!-- تصنيف رعب -->
+    <!-- أجنبي: رعب -->
     <a href="Conjuring Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title">The Conjuring</h2></a>
     <a href="FNAF Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title">FNAF</h2></a>
     <a href="The Nun Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title">The Nun</h2></a>
@@ -190,36 +206,22 @@
     <a href="Train to Busan Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/busan.jpg');"><h2 class="card-title">Train to Busan</h2></a>
     <a href="Scream Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/Scream.jpeg');"><h2 class="card-title">Scream</h2></a>
 
-    <!-- تصنيف أكشن -->
+    <!-- أجنبي: أكشن -->
     <a href="Squid Game Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title">Squid Game</h2></a>
     <a href="Spider-Man Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Spider-Man.jpeg');"><h2 class="card-title">Spider-Man</h2></a>
     <a href="Avengers Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avengers.jpeg');"><h2 class="card-title">Avengers</h2></a>
     <a href="Avatar Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avatar.jpeg');"><h2 class="card-title">Avatar</h2></a>
+    <a href="Venom.html" class="quiz-card" data-category="action" style="background-image: url('pic/Venom.jpeg');"><h2 class="card-title">Venom</h2></a>
+    <a href="Birds of Prey Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Birds of Prey.jpeg');"><h2 class="card-title">Birds of Prey</h2></a>
 
-    <!-- تصنيف تشويق -->
+    <!-- أجنبي: تشويق -->
     <a href="Fall Quiz.html" class="quiz-card" data-category="thriller" style="background-image: url('pic/Fall.jpeg');"><h2 class="card-title">Fall</h2></a>
 
-    <!-- تصنيف غموض -->
+    <!-- أجنبي: غموض -->
     <a href="Wednesday Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title">Wednesday</h2></a>
     <a href="Knives Out Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Knives Out.jpeg');"><h2 class="card-title">Knives Out</h2></a>
-  </div>
-</div>
 
-<div id="ratingModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(255,0,0,0.4);">
-    <h2 style="color: var(--accent); margin-bottom: 15px;" data-ar="قيّم تجربتك!" data-en="Rate your experience!">قيّم تجربتك!</h2>
-    <p style="color: var(--subtitle-color); margin-bottom: 20px;" data-ar="إيه رأيك في الموقع؟" data-en="What do you think of the site?">إيه رأيك في الموقع؟</p>
-    
-    <div id="starContainer" style="font-size: 40px; color: #555; cursor: pointer; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
-      <span onclick="rateSite(1)" onmouseover="hoverStars(1)" onmouseout="resetStars()">★</span>
-      <span onclick="rateSite(2)" onmouseover="hoverStars(2)" onmouseout="resetStars()">★</span>
-      <span onclick="rateSite(3)" onmouseover="hoverStars(3)" onmouseout="resetStars()">★</span>
-      <span onclick="rateSite(4)" onmouseover="hoverStars(4)" onmouseout="resetStars()">★</span>
-      <span onclick="rateSite(5)" onmouseover="hoverStars(5)" onmouseout="resetStars()">★</span>
-    </div>
-
-    <button onclick="closeRatingModal()" style="background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold;" data-ar="إغلاق" data-en="Close">إغلاق</button>
-  </div>
+    <!-- مصري -->
 </div>
 
 <script type="module">
@@ -231,67 +233,69 @@
   const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
   
   window.db = db; window.ref = ref; window.get = get; window.set = set; window.onValue = onValue;
-  window.auth = auth; window.createUserWithEmailAndPassword = createUserWithEmailAndPassword; window.signInWithEmailAndPassword = signInWithEmailAndPassword; window.signOut = signOut;
+  window.auth = auth; 
+  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword; 
+  window.signInWithEmailAndPassword = signInWithEmailAndPassword; 
+  window.signOut = signOut;
+
+  const cachedUser = localStorage.getItem('loggedInUser');
   
-  window.auth.onAuthStateChanged((user) => {
+  if (cachedUser) {
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'flex';
+      loadUserSettings(cachedUser);
+  } else {
+      document.getElementById('authScreen').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'none';
+  }
+
+  setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; }, 100);
+
+  let settingsLoaded = false;
+
+  function loadUserSettings(username) {
+      if (settingsLoaded) return;
+      settingsLoaded = true;
+
+      window.set(window.ref(window.db, 'presence/' + username), { status: 'online', last_seen: Date.now() }).catch(() => {});
+
+      window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
+          const bar = document.getElementById('announcement-bar');
+          if (!bar) return;
+          if (snap.exists() && snap.val()) { bar.innerText = "📢 " + snap.val(); bar.style.display = 'block'; } 
+          else { bar.style.display = 'none'; }
+      });
+
+      window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
+          const isMaintenance = snap.exists() ? snap.val() : false;
+          if (isMaintenance && username.toLowerCase() !== 'ahmed' && username.toLowerCase() !== 'owner') {
+              document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#000; color:#fff; text-align:center;"><h1 style="font-size: 50px; color: #ff0000;">🚧 الموقع تحت الصيانة 🚧</h1><p style="font-size: 20px; color: #aaa; margin-top: 20px;">جاري تحديث الموقع، يرجى العودة لاحقاً.</p></div>`;
+          }
+      });
+
+      window.onValue(window.ref(window.db, 'banned_users/' + username), snap => {
+          if (snap.exists()) {
+              alert('⛔ أنت محظور من الموقع! السبب: ' + (snap.val().reason || 'مخالفة'));
+              window.signOut(window.auth).then(() => { localStorage.removeItem('loggedInUser'); window.location.href = 'banned.html'; });
+          }
+      });
+  }
+
+  onAuthStateChanged(auth, (user) => {
       if (user) {
           const username = user.email.split('@')[0];
           localStorage.setItem('loggedInUser', username);
-          
-          document.getElementById('authScreen').style.display = 'none';
-          document.getElementById('mainContent').style.display = 'flex';
-          
-          const presenceRef = window.ref(window.db, 'presence/' + username);
-          window.set(presenceRef, { status: 'online', last_seen: Date.now() });
-          
-          window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
-              const bar = document.getElementById('announcement-bar');
-              if (snap.exists() && snap.val()) { 
-                  bar.innerText = "📢 " + snap.val(); 
-                  bar.style.display = 'block'; 
-              } else { 
-                  bar.style.display = 'none'; 
-              }
-          });
-
-          // التحقق من وضع الصيانة والحظر
-          window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
-              const isMaintenance = snap.exists() ? snap.val() : false;
-              if (isMaintenance && username.toLowerCase() !== 'ahmed' && username.toLowerCase() !== 'owner') {
-                  document.body.innerHTML = `
-                      <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#000; color:#fff; text-align:center; font-family:'Cairo', sans-serif;">
-                          <h1 style="font-size: 50px; color: #ff0000;">🚧 الموقع تحت الصيانة 🚧</h1>
-                          <p style="font-size: 20px; color: #aaa; margin-top: 20px;">جاري تحديث الموقع، يرجى العودة لاحقاً.</p>
-                      </div>
-                  `;
-                  return;
-              }
-          });
-
-          // التحقق من الحظر
-          window.onValue(window.ref(window.db, 'banned_users/' + username), snap => {
-              if (snap.exists()) {
-                  alert('⛔ أنت محظور من الموقع! السبب: ' + (snap.val().reason || 'مخالفة'));
-                  window.signOut(window.auth).then(() => {
-                      localStorage.removeItem('loggedInUser');
-                      window.location.href = 'index.html';
-                  });
-              }
-          });
-
-          window.onValue(window.ref(window.db, 'site_settings/broadcast'), snap => {
-              if (snap.exists()) {
-                  const data = snap.val();
-                  if (Date.now() - data.time < 10000) { 
-                      window.showToast("📡 " + data.text);
-                  }
-              }
-          });
-
+          if (document.getElementById('mainContent').style.display === 'none') {
+              document.getElementById('authScreen').style.display = 'none';
+              document.getElementById('mainContent').style.display = 'flex';
+              loadUserSettings(username);
+          }
       } else {
-          localStorage.removeItem('loggedInUser');
-          document.getElementById('authScreen').style.display = 'flex';
-          document.getElementById('mainContent').style.display = 'none';
+          if (cachedUser) {
+              localStorage.removeItem('loggedInUser');
+              document.getElementById('authScreen').style.display = 'flex';
+              document.getElementById('mainContent').style.display = 'none';
+          }
       }
   });
 </script>
@@ -299,28 +303,20 @@
 <script>
   let currentLang = localStorage.getItem('lang') || 'ar';
   let isSignupMode = false;
+  let currentMainSection = 'foreign'; // 'foreign' or 'egyptian'
 
-  if (localStorage.getItem('theme') === 'light') { 
-    document.body.classList.add('light-mode'); 
-  }
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 
   window.toggleMenu = function() {
-    const menu = document.getElementById('sideMenu');
-    const overlay = document.getElementById('menuOverlay');
-    if (menu) { 
-      menu.classList.toggle('open'); 
-      overlay.classList.toggle('open'); 
-    }
+    document.getElementById('sideMenu').classList.toggle('open'); 
+    document.getElementById('menuOverlay').classList.toggle('open'); 
   }
 
   window.toggleTheme = function() {
-    const body = document.body;
-    const isLight = body.classList.toggle('light-mode');
+    const isLight = document.body.classList.toggle('light-mode');
     const icon = isLight ? '🌙' : '☀️';
-    
     if(document.getElementById('themeBtn')) document.getElementById('themeBtn').innerText = icon;
     if(document.getElementById('authThemeBtn')) document.getElementById('authThemeBtn').innerText = icon;
-    
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
   }
 
@@ -331,44 +327,26 @@
   }
 
   function applyLanguage() {
-    const elements = document.querySelectorAll('[data-ar]');
-    elements.forEach(el => {
-      if(el.tagName === 'INPUT') {
-        el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-      } else {
-        el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-      }
+    document.querySelectorAll('[data-ar]').forEach(el => {
+      if(el.tagName === 'INPUT') el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      else el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
     });
-    
     document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-    
     const langBtn = document.getElementById('langBtn');
     const authLangBtn = document.getElementById('authLangBtn');
     const textBtn = currentLang === 'ar' ? 'EN' : 'AR';
     if(langBtn) langBtn.innerText = textBtn;
     if(authLangBtn) authLangBtn.innerText = textBtn;
-
     const switchAuth = document.getElementById('switchAuth');
-    if (switchAuth) {
-      switchAuth.innerText = isSignupMode 
-        ? (currentLang === 'en' ? 'Already have an account? Login' : 'لديك حساب؟ سجل دخول') 
-        : (currentLang === 'en' ? "Don't have an account? Sign up" : 'ليس لديك حساب؟ سجل الآن');
-    }
-
-    const isLight = document.body.classList.contains('light-mode');
-    const icon = isLight ? '🌙' : '☀️';
-    if(document.getElementById('themeBtn')) document.getElementById('themeBtn').innerText = icon;
-    if(document.getElementById('authThemeBtn')) document.getElementById('authThemeBtn').innerText = icon;
+    if (switchAuth) switchAuth.innerText = isSignupMode ? 'Already have an account? Login' : "Don't have an account? Sign up";
   }
-
   applyLanguage();
 
   window.showToast = function(msg, type = 'success') {
-      const container = document.getElementById('toast-container');
       const toast = document.createElement('div'); toast.className = 'toast';
       if(type === 'error') toast.style.borderRightColor = '#ff0000';
       toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
-      container.appendChild(toast); setTimeout(() => { toast.remove(); }, 3000);
+      document.getElementById('toast-container').appendChild(toast); setTimeout(() => { toast.remove(); }, 3000);
   }
 
   window.toggleAuthMode = function() {
@@ -378,59 +356,101 @@
       applyLanguage();
   }
 
-window.loginUser = async function() {
-    const u = document.getElementById('usernameInput').value.trim();
-    const p = document.getElementById('passwordInput').value.trim();
-    if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
-    
-    try {
-        await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
-        window.showToast('Welcome back!');
-    } catch(e) { 
-        let msg = '';
-        if (e.code === 'auth/wrong-password') msg = 'كلمة المرور غلط';
-        else if (e.code === 'auth/user-not-found') msg = 'اسم المستخدم غير موجود';
-        else if (e.code === 'auth/unauthorized-domain') msg = 'النطاق غير مصرح به في Firebase';
-        else if (e.code === 'auth/network-request-failed') msg = 'خطأ في الشبكة';
-        else msg = 'خطأ: ' + e.code;
-        window.showToast(msg, 'error');
-    }
-}
+  window.loginUser = async function() {
+      const u = document.getElementById('usernameInput').value.trim();
+      const p = document.getElementById('passwordInput').value.trim();
+      if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
+      try { await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p); window.showToast('Welcome back!'); } 
+      catch(e) { window.showToast('خطأ: كلمة المرور أو الاسم غلط', 'error'); }
+  }
 
   window.signupUser = async function() {
       const u = document.getElementById('usernameInput').value.trim();
       const p = document.getElementById('passwordInput').value.trim();
-      if(!u || !p) return window.showToast(currentLang === 'en' ? 'Enter username and password' : 'اكتب الاسم والباسورد', 'error');
-      
+      if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
       try {
           await window.createUserWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
           await window.set(window.ref(window.db, 'usernames/' + u), true);
           await window.set(window.ref(window.db, 'roles/users/' + u), 'Player');
-          window.showToast(currentLang === 'en' ? 'Account created!' : 'تم إنشاء الحساب بنجاح!');
-      } catch(e) { 
-          window.showToast('Error: ' + e.message, 'error'); 
-      }
+          window.showToast('تم إنشاء الحساب بنجاح!');
+      } catch(e) { window.showToast('Error: ' + e.message, 'error'); }
   }
 
   window.logoutUser = function() {
+      const u = localStorage.getItem('loggedInUser');
+      if (u && window.db && window.ref && window.set) {
+          window.set(window.ref(window.db, 'presence/' + u), { status: 'offline', last_seen: Date.now() }).catch(() => {});
+      }
       window.signOut(window.auth);
       localStorage.removeItem('loggedInUser');
       window.showToast('Logged out');
   }
 
-  window.filterCategory = function(cat, btn) {
-    document.querySelectorAll('.tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  // ==========================================
+  // هنا السحر كله: التبديل بين قسم أجنبي ومصري
+  // ==========================================
+  window.switchMainSection = function(section) {
+      currentMainSection = section;
+      
+      const btnForeign = document.getElementById('btnForeign');
+      const btnEgyptian = document.getElementById('btnEgyptian');
+      const foreignFilters = document.getElementById('foreignFilters');
+      const egyptianFilters = document.getElementById('egyptianFilters');
+
+      if (section === 'foreign') {
+          btnForeign.classList.add('active');
+          btnEgyptian.classList.remove('active');
+          foreignFilters.style.display = 'flex';
+          egyptianFilters.style.display = 'none';
+          filterForeign('all', document.querySelector('#foreignFilters .sub-btn')); // عرض كل الأجنبي
+      } else {
+          btnEgyptian.classList.add('active');
+          btnForeign.classList.remove('active');
+          egyptianFilters.style.display = 'flex';
+          foreignFilters.style.display = 'none';
+          filterEgyptian('egyptian', document.querySelector('#egyptianFilters .sub-btn')); // عرض كل المصري
+      }
+  };
+
+  // فلترة قسم أجنبي
+  window.filterForeign = function(cat, btn) {
+    document.querySelectorAll('#foreignFilters .sub-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+
     document.querySelectorAll('.quiz-card').forEach(card => {
-      card.style.display = (cat === 'all' || card.dataset.category === cat) ? 'flex' : 'none';
+        const cardCats = card.dataset.category || '';
+        // الكارت لازم يكون فيه التصنيف وميكونش فيه كلمة egyptian
+        if ((cat === 'all' && !cardCats.includes('egyptian')) || cardCats.includes(cat)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
     });
   };
 
+  // فلترة قسم مصري
+  window.filterEgyptian = function(cat, btn) {
+    document.querySelectorAll('#egyptianFilters .sub-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+
+    document.querySelectorAll('.quiz-card').forEach(card => {
+        const cardCats = card.dataset.category || '';
+        if (cardCats.includes(cat)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+  };
+
+  // البحث
   document.getElementById('searchInput').addEventListener('input', (e) => {
     const q = e.target.value.toLowerCase();
-    document.querySelectorAll('.tabs-container .tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.tab-btn').classList.add('active');
     
+    // إخفاء الفلاتر عشان البحث يبقى شامل
+    document.getElementById('foreignFilters').style.display = 'none';
+    document.getElementById('egyptianFilters').style.display = 'none';
+
     document.querySelectorAll('.quiz-card').forEach(card => {
       const title = card.querySelector('.card-title').innerText.toLowerCase();
       card.style.display = title.includes(q) ? 'flex' : 'none';
@@ -438,51 +458,34 @@ window.loginUser = async function() {
   });
 
   window.playRandom = function() {
-    const cards = document.querySelectorAll('.quiz-card');
+    const cards = Array.from(document.querySelectorAll('.quiz-card')).filter(c => c.style.display !== 'none');
     const randomIndex = Math.floor(Math.random() * cards.length);
     window.location.href = cards[randomIndex].getAttribute('href');
   }
 
-  window.openRatingModal = function() {
-    document.getElementById('ratingModal').style.display = 'flex';
-    resetStars();
-  }
-
-  window.closeRatingModal = function() {
-    document.getElementById('ratingModal').style.display = 'none';
-  }
-
+  // التقييم
+  window.openRatingModal = function() { document.getElementById('ratingModal').style.display = 'flex'; resetStars(); }
+  window.closeRatingModal = function() { document.getElementById('ratingModal').style.display = 'none'; }
   window.hoverStars = function(rating) {
     const stars = document.getElementById('starContainer').children;
-    for (let i = 0; i < stars.length; i++) {
-      stars[i].style.color = i < rating ? '#ffd700' : '#555';
-    }
+    for (let i = 0; i < stars.length; i++) stars[i].style.color = i < rating ? '#ffd700' : '#555';
   }
-
   window.resetStars = function() {
     const stars = document.getElementById('starContainer').children;
-    for (let i = 0; i < stars.length; i++) {
-      stars[i].style.color = '#555';
-    }
+    for (let i = 0; i < stars.length; i++) stars[i].style.color = '#555';
   }
-
   window.rateSite = async function(rating) {
     const user = localStorage.getItem('loggedInUser') || 'Guest';
     try {
-      await window.set(window.ref(window.db, 'site_ratings/' + user), {
-        stars: rating,
-        date: Date.now()
-      });
-      window.showToast(currentLang === 'en' ? 'Thanks for rating!' : 'شكراً لتقييمك! 🌟');
+      await window.set(window.ref(window.db, 'site_ratings/' + user), { stars: rating, date: Date.now() });
+      window.showToast('شكراً لتقييمك! 🌟');
       closeRatingModal();
-    } catch(e) {
-      console.error(e);
-      window.showToast('Error: ' + e.message, 'error');
-    }
+    } catch(e) { window.showToast('Error: ' + e.message, 'error'); }
   }
+  
+  // تشغيل الفلتر الافتراضي عند فتح الصفحة
+  switchMainSection('foreign');
 </script>
-
 <script src="notifications.js"></script>
-
 </body>
 </html>
