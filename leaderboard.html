@@ -151,14 +151,14 @@
             <button class="time-btn" onclick="switchTimeFilter('week', this)" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
           </div>
 
-          <!-- التصنيفات الجديدة (بدون دراما كورية) -->
           <div class="category-filters" id="categoryFilters">
             <button class="cat-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
             <button class="cat-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
             <button class="cat-btn" onclick="filterLeaderboard('action', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
             <button class="cat-btn" onclick="filterLeaderboard('thriller', this)" data-ar="تشويق 🎬" data-en="Thriller 🎬">تشويق 🎬</button>
             <button class="cat-btn" onclick="filterLeaderboard('mystery', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
-          </div>
+            <button class="cat-btn" onclick="filterLeaderboard('egyptian', this)" data-ar="مصري 🇪🇬" data-en="Egyptian 🇪🇬">مصري 🇪🇬</button>
+        </div>
       </div>
 
       <div class="podium-wrapper" id="podiumContainer"></div>
@@ -193,16 +193,19 @@
   // تفعيل الثيم
   if (localStorage.getItem('theme') === 'light') { 
       document.body.classList.add('light-mode'); 
-      document.getElementById('themeBtn').innerText = '🌙';
+      const btn = document.getElementById('themeBtn');
+      if(btn) btn.innerText = '🌙';
   } else {
-      document.getElementById('themeBtn').innerText = '☀️';
+      const btn = document.getElementById('themeBtn');
+      if(btn) btn.innerText = '☀️';
   }
 
   window.toggleTheme = function() {
       const body = document.body;
       const isLight = body.classList.toggle('light-mode');
       const icon = isLight ? '🌙' : '☀️';
-      document.getElementById('themeBtn').innerText = icon;
+      const btn = document.getElementById('themeBtn');
+      if(btn) btn.innerText = icon;
       localStorage.setItem('theme', isLight ? 'light' : 'dark');
   }
 
@@ -275,11 +278,12 @@
   function renderLeaderboard() {
     if (!allScoresData) return;
     
-    // ربط التصنيفات بأسماء الكويزات اللي في الداتا بيز
+    // ربط التصنيفات بأسماء الكويزات
     let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'];
-    let actionKeys = ['squidgame', 'spiderman', 'avengers', 'avatar', 'venom'];
+    let actionKeys = ['squidgame', 'spiderman', 'avengers', 'avatar', 'venom', 'birdsofprey'];
     let thrillerKeys = ['fall'];
     let mysteryKeys = ['wednesday', 'knivesout'];
+    let egyptianKeys = ['elkebir', 'elekhtiyar']; // ضيف أسماء الكويزات المصرية هنا
 
     let playersMap = {};
     const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
@@ -301,6 +305,7 @@
         else if (currentCategory === 'action' && actionKeys.some(k => quizLower.includes(k))) shouldCount = true;
         else if (currentCategory === 'thriller' && thrillerKeys.some(k => quizLower.includes(k))) shouldCount = true;
         else if (currentCategory === 'mystery' && mysteryKeys.some(k => quizLower.includes(k))) shouldCount = true;
+        else if (currentCategory === 'egyptian' && egyptianKeys.some(k => quizLower.includes(k))) shouldCount = true;
 
         if (shouldCount) {
             const attempts = Object.values(allScoresData[username][quiz]);
