@@ -104,7 +104,6 @@
   <a href="leaderboard.html" class="menu-item" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
   <a href="users.html" class="menu-item" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
   <a href="badges.html" class="menu-item" data-ar="🎖️ الرتب والبادجات" data-en="🎖️ Ranks & Badges">🎖️ الرتب والبادجات</a>
-  <a href="wheel.html" class="menu-item" style="color: #ffd700;" data-ar="🎡 عجلة الحظ" data-en="🎡 Lucky Wheel">🎡 عجلة الحظ</a>
   <a href="comments.html" class="menu-item" data-ar="💬 المجتمع" data-en="💬 Community">💬 المجتمع</a>
   <a href="inbox.html" class="menu-item" data-ar="📩 صندوق الرسائل" data-en="📩 Inbox">📩 صندوق الرسائل</a>
   <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat">💬 الشات الجماعي</a>
@@ -166,7 +165,6 @@
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
       <button class="random-btn" onclick="playRandom()" id="randomBtn" data-ar="🎲 كويز عشوائي" data-en="🎲 Random Quiz">🎲 كويز عشوائي</button>
-      <a href="wheel.html" class="random-btn" style="background: #ffd700; color: #000;" data-ar="🎡 عجلة الحظ" data-en="🎡 Lucky Wheel">🎡 عجلة الحظ</a>
     </div>
   </div>
   
@@ -380,18 +378,24 @@
       applyLanguage();
   }
 
-  window.loginUser = async function() {
-      const u = document.getElementById('usernameInput').value.trim();
-      const p = document.getElementById('passwordInput').value.trim();
-      if(!u || !p) return window.showToast(currentLang === 'en' ? 'Enter username and password' : 'اكتب الاسم والباسورد', 'error');
-      
-      try {
-          await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
-          window.showToast('Welcome back!');
-      } catch(e) { 
-          window.showToast(currentLang === 'en' ? 'Wrong username or password' : 'اسم المستخدم أو كلمة المرور غلط', 'error'); 
-      }
-  }
+window.loginUser = async function() {
+    const u = document.getElementById('usernameInput').value.trim();
+    const p = document.getElementById('passwordInput').value.trim();
+    if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
+    
+    try {
+        await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
+        window.showToast('Welcome back!');
+    } catch(e) { 
+        let msg = '';
+        if (e.code === 'auth/wrong-password') msg = 'كلمة المرور غلط';
+        else if (e.code === 'auth/user-not-found') msg = 'اسم المستخدم غير موجود';
+        else if (e.code === 'auth/unauthorized-domain') msg = 'النطاق غير مصرح به في Firebase';
+        else if (e.code === 'auth/network-request-failed') msg = 'خطأ في الشبكة';
+        else msg = 'خطأ: ' + e.code;
+        window.showToast(msg, 'error');
+    }
+}
 
   window.signupUser = async function() {
       const u = document.getElementById('usernameInput').value.trim();
