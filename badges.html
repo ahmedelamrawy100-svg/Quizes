@@ -77,8 +77,29 @@
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
   .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 25px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; position: relative; }
   .modal-title { color: var(--gold); font-size: 22px; margin-bottom: 20px; text-align: center; }
-  .close-modal { position: absolute; top: 10px; right: 15px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer; }
-  .user-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-border); }
+  .close-modal {
+      position: absolute;
+      top: 15px;
+      left: 15px; /* عشان يبقى على الشمال */
+      background: #ff3333;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: 0.3s;
+      z-index: 10;
+  }
+  .close-modal:hover {
+      background: #cc0000;
+      transform: scale(1.1);
+  }  .user-list-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--card-border); }
   .user-list-name { font-weight: bold; font-size: 16px; }
   .visit-btn { background: #0088cc; color: #fff; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 12px; font-weight: bold; }
 
@@ -111,7 +132,7 @@
 <!-- النافذة المنبثقة -->
 <div class="modal" id="usersModal">
     <div class="modal-box">
-        <button class="close-modal" onclick="closeUsersModal()">&times;</button>
+        <button class="close-modal" onclick="closeUsersModal()">✖</button>
         <h3 class="modal-title" id="modalTitle">اللاعبين</h3>
         <div id="modalUsersList"></div>
     </div>
@@ -138,11 +159,11 @@
   const tiers = [
     { key: 'transcendent', title_ar: "🔥 متعالي (Transcendent)", title_en: "🔥 Transcendent", items: [ { id: 'Owner', icon: '👑', ar: 'الأونر', en: 'Owner' } ]},
     { key: 'secret', title_ar: "🕵️ سري (Secret)", title_en: "🕵️ Secret", items: [ { id: 'Admin', icon: '🛡️', ar: 'أدمن', en: 'Admin' }, { id: 'Spy', icon: '🕵️', ar: 'جاسوس', en: 'Spy' } ]},
-    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: 'Star', icon: '🌟', ar: 'نجم', en: 'Star' }, { id: 'Genius', icon: '🧠', ar: 'عبقري', en: 'Genius' } ]},
+    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: 'VIP', icon: '💎', ar: 'VIP', en: 'VIP' }, { id: 'Star', icon: '🌟', ar: 'نجم', en: 'Star' } ]},
     { key: 'divine', title_ar: "😇 إلهي (Divine)", title_en: "😇 Divine", items: [ { id: 'Divine', icon: '⚡', ar: 'إلهي', en: 'Divine' }, { id: 'Angel', icon: '👼', ar: 'ملاك', en: 'Angel' } ]},
     { key: 'mythic', title_ar: "🐉 خرافي (Mythic)", title_en: "🐉 Mythic", items: [ { id: 'Dragon', icon: '🐉', ar: 'تنين', en: 'Dragon' }, { id: 'King', icon: '👑', ar: 'ملك', en: 'King' } ]},
     { key: 'legendary', title_ar: "🦅 أسطوري (Legendary)", title_en: "🦅 Legendary", items: [ { id: 'Legend', icon: '🦅', ar: 'أسطورة', en: 'Legend' }, { id: 'Lion', icon: '🦁', ar: 'ليث', en: 'Lion' } ]},
-    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: 'VIP', icon: '💎', ar: 'VIP', en: 'VIP' } ]},
+    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: 'Genius', icon: '🧠', ar: 'عبقري', en: 'Genius' } ]},
     { key: 'rare', title_ar: "💙 نادر (Rare)", title_en: "💙 Rare", items: [ { id: 'Pro Player', icon: '🔥', ar: 'محترف', en: 'Pro Player' } ]},
     { key: 'uncommon', title_ar: "💚 غير عادي (Uncommon)", title_en: "💚 Uncommon", items: [ { id: 'Knight', icon: '🛡️', ar: 'فارس', en: 'Knight' }, { id: 'Ninja', icon: '🥷', ar: 'نينجا', en: 'Ninja' } ]},
     { key: 'common', title_ar: "💚 عادي (Common)", title_en: "💚 Common", items: [ { id: 'Player', icon: '👤', ar: 'لاعب عادي', en: 'Player' } ]}
@@ -151,11 +172,11 @@
   const badgesData = [
     { key: 'transcendent', title_ar: "🔥 متعالي (Transcendent)", title_en: "🔥 Transcendent", items: [ { id: '👑 Founder', icon: '👑', ar: 'المؤسس', en: 'Founder' } ]},
     { key: 'secret', title_ar: "🕵️ سري (Secret)", title_en: "🕵️ Secret", items: [ { id: '👽 Alien', icon: '👽', ar: 'فضائي', en: 'Alien' } ]},
-    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: '🦸 Hero', icon: '🦸', ar: 'بطل', en: 'Hero' } ]},
+    { key: 'celestial', title_ar: "✨ سماوي (Celestial)", title_en: "✨ Celestial", items: [ { id: '💎 VIP', icon: '💎', ar: 'VIP', en: 'VIP' } ]},
     { key: 'divine', title_ar: "😇 إلهي (Divine)", title_en: "😇 Divine", items: [ { id: '🎯 Sniper', icon: '🎯', ar: 'قناص', en: 'Sniper' } ]},
     { key: 'mythic', title_ar: "🐉 خرافي (Mythic)", title_en: "🐉 Mythic", items: [ { id: '💥 Action', icon: '💥', ar: 'أكشن', en: 'Action' } ]},
-    { key: 'legendary', title_ar: "🦅 أسطوري (Legendary)", title_en: "🦅 Legendary", items: [ { id: '⭐ VIP', icon: '⭐', ar: 'VIP', en: 'VIP' } ]},
-    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: '🔥 Pro', icon: '🔥', ar: 'محترف', en: 'Pro' } ]},
+    { key: 'legendary', title_ar: "🦅 أسطوري (Legendary)", title_en: "🦅 Legendary", items: [ { id: '⭐ Star', icon: '⭐', ar: 'نجم', en: 'Star' } ]},
+    { key: 'epic', title_ar: "💜 ملحمي (Epic)", title_en: "💜 Epic", items: [ { id: '🧠 Genius', icon: '🧠', ar: 'عبقري', en: 'Genius' } ]},
     { key: 'rare', title_ar: "💙 نادر (Rare)", title_en: "💙 Rare", items: [ { id: '🕵️ Detective', icon: '🕵️', ar: 'محقق', en: 'Detective' } ]},
     { key: 'uncommon', title_ar: "💚 غير عادي (Uncommon)", title_en: "💚 Uncommon", items: [ { id: '🎃 Horror', icon: '🎃', ar: 'رعب', en: 'Horror' }, { id: '💖 K-Drama', icon: '💖', ar: 'دراما', en: 'K-Drama' } ]},
     { key: 'common', title_ar: "💚 عادي (Common)", title_en: "💚 Common", items: [ { id: '🎮 Gamer', icon: '🎮', ar: 'جيمر', en: 'Gamer' } ]}
@@ -166,6 +187,7 @@
   window.toggleLanguage = function() {
     currentLang = currentLang === 'ar' ? 'en' : 'ar';
     localStorage.setItem('lang', currentLang);
+    document.getElementById('usersModal').style.display = 'none';
     applyLanguage();
   }
 
