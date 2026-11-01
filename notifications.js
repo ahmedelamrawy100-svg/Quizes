@@ -2,12 +2,19 @@ function setupNotifications() {
     const currentUser = localStorage.getItem('loggedInUser');
     if (!currentUser || currentUser === 'Unknown' || currentUser === 'زائر') return;
 
-    const toastContainer = document.getElementById('toast-container');
+    // إنشاء حاوية الإشعارات لو مش موجودة
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:999999; display:flex; flex-direction:column; gap:10px; pointer-events:none;';
+        document.body.appendChild(toastContainer);
+    }
+
+    // دالة عرض الإشعارات بتصميم مباشر عشان ميتعارضش مع الـ CSS
     function showToast(msg, color = '#ff0000') {
-        if (!toastContainer) return;
         const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.style.borderRightColor = color;
+        toast.style.cssText = `background:#111; border-right:5px solid ${color}; color:#fff; padding:15px 20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.5); font-weight:bold; font-family:'Cairo', sans-serif; display:flex; align-items:center; gap:8px; animation: slideIn 0.3s forwards; direction:rtl; pointer-events:auto;`;
         toast.innerHTML = `<span>🔔</span> <span>${msg}</span>`;
         toastContainer.appendChild(toast);
         setTimeout(() => { toast.remove(); }, 5000);
@@ -93,6 +100,26 @@ function setupNotifications() {
     });
 }
 
-window.addEventListener('load', () => {
-    setTimeout(setupNotifications, 1000);
-});
+// حماية عشان ميتنفذش أكتر من مرة
+if (!window.hasNotificationsSetup) {
+    window.hasNotificationsSetup = true;
+    window.addEventListener('load', () => { setTimeout(setupNotifications, 1500); });
+}
+
+// كود مسح الكاش التلقائي
+(async function checkVersion() {
+    try {
+        if (typeof window.db === 'undefined') return;
+        const snap = await window.get(window.ref(window.db, 'site_settings/version'));
+        if (snap.exists()) {
+            const dbVersion = snap.val();
+            const localVersion = localStorage.getItem('site_version');
+            if (localVersion !== String(dbVersion)) {
+                localStorage.setItem('site_version', dbVersion);
+                if (localVersion !== null && localStorage.getItem('loggedInUser')) {
+                    window.location.reload(true); 
+                }
+            }
+        }
+    } catch (e) {}
+})();
