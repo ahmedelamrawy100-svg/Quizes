@@ -162,3 +162,153 @@ body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
+/* ============================================================ */
+/* 🕶️ REAL HORROR MODE - داخل الكويزات                       */
+/* ============================================================ */
+
+body.horror-mode {
+    background: #000 !important;
+    color: #2a2a2a !important;
+}
+
+/* ===== Vignette في الكويز ===== */
+body.horror-mode::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    background: radial-gradient(circle at center, transparent 25%, rgba(0, 0, 0, 0.95) 100%);
+    animation: horrorVignette 6s ease-in-out infinite;
+}
+
+/* ===== إخفاء الصور 100% ===== */
+body.horror-mode img,
+body.horror-mode .quiz-card,
+body.horror-mode [style*="background-image"] {
+    filter: brightness(0) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ===== شاشة اللعب ===== */
+body.horror-mode .play-screen {
+    background: rgba(2, 0, 0, 0.99) !important;
+    border-color: #2a0000 !important;
+    box-shadow: 0 0 40px rgba(139, 0, 0, 0.6) !important;
+}
+
+/* ===== السؤال ===== */
+body.horror-mode .question {
+    color: #5a0000 !important;
+    text-shadow: 0 0 15px rgba(139, 0, 0, 0.8) !important;
+    animation: horrorQuestion 4s ease-in-out infinite !important;
+}
+
+/* ===== الاختيارات ===== */
+body.horror-mode .option {
+    background: #050000 !important;
+    border-color: #1a0000 !important;
+    color: #3a0000 !important;
+    text-shadow: 0 0 10px rgba(139, 0, 0, 0.6) !important;
+    transition: all 0.3s ease !important;
+}
+body.horror-mode .option:hover:not(.disabled) {
+    background: #0a0000 !important;
+    border-color: #5a0000 !important;
+    color: #6a0000 !important;
+    box-shadow: 0 0 25px rgba(139, 0, 0, 0.6) !important;
+}
+body.horror-mode .option.correct {
+    background: #001a00 !important;
+    border-color: #1a4a00 !important;
+    color: #4a8b00 !important;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5) !important;
+}
+body.horror-mode .option.wrong {
+    background: #1a0000 !important;
+    border-color: #8b0000 !important;
+    color: #8b0000 !important;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+    animation: horrorWrong 0.5s ease-in-out !important;
+}
+
+/* ===== المؤقت ===== */
+body.horror-mode .timer {
+    color: #6a0000 !important;
+    text-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+    animation: horrorTimer 1s ease-in-out infinite !important;
+}
+
+/* ===== شريط التقدم ===== */
+body.horror-mode .progress {
+    background: #0a0000 !important;
+}
+body.horror-mode .progress-bar {
+    background: linear-gradient(90deg, #3a0000, #8b0000, #ff0000) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.7) !important;
+}
+
+/* ===== العناوين ===== */
+body.horror-mode h1,
+body.horror-mode #quiz-title,
+body.horror-mode #main-title {
+    color: #6a0000 !important;
+    text-shadow: 0 0 20px rgba(139, 0, 0, 0.9) !important;
+    animation: horrorTitle 4s ease-in-out infinite !important;
+}
+
+/* ===== النتيجة ===== */
+body.horror-mode #score {
+    color: #4a0000 !important;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+}
+
+/* ===== زرار التالي ===== */
+body.horror-mode #next {
+    background: #2a0000 !important;
+    border: 1px solid #5a0000 !important;
+    color: #6a0000 !important;
+}
+body.horror-mode #next:hover {
+    background: #3a0000 !important;
+    border-color: #8b0000 !important;
+    color: #8b0000 !important;
+}
+
+/* ===== النجوم ===== */
+body.horror-mode #stars-bg .star,
+body.horror-mode #stars-bg .falling-star {
+    background: #3a0000 !important;
+    box-shadow: 0 0 10px 2px rgba(139, 0, 0, 0.6) !important;
+}
+
+/* ===== Animations ===== */
+@keyframes horrorVignette {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+@keyframes horrorQuestion {
+    0%, 100% { transform: translateX(0); opacity: 0.8; }
+    25% { transform: translateX(-1px); opacity: 1; }
+    75% { transform: translateX(1px); opacity: 0.9; }
+}
+@keyframes horrorTimer {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes horrorTitle {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+@keyframes horrorWrong {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+/* ===== منع تحديد النص ===== */
+body.horror-mode * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
