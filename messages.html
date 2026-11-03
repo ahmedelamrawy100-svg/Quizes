@@ -7,38 +7,45 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg-color: #000; --text-color: #fff; --card-bg: #111; --border-color: #333; }
+  :root { --bg-color: #000; --text-color: #fff; --card-bg: #111; --border-color: #333; --accent: #ff0000; }
   body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --card-bg: #fff; --border-color: #ccc; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  body { background: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: 0.3s; }
   
-  .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; z-index: 999; }
+  .top-bar { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .back-btn { background: rgba(30, 30, 30, 0.9); color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+  .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
   
   .chat-container { width: 100%; max-width: 600px; height: 100%; background: var(--card-bg); display: flex; flex-direction: column; margin: 0 auto; border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
   
-  .chat-header { background: #ff0000; color: #fff; padding: 15px; font-weight: bold; font-size: 20px; z-index: 10; text-align: center;}
+  .chat-header { background: var(--accent); color: #fff; padding: 15px; font-weight: bold; font-size: 20px; z-index: 10; text-align: center; display: flex; justify-content: center; align-items: center; gap: 10px; }
   
   .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-  .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; font-size: 16px; line-height: 1.5; }
-  .msg.me { background: #ff0000; color: #fff; align-self: flex-end; border-bottom-left-radius: 2px; }
+  .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; font-size: 16px; line-height: 1.5; word-wrap: break-word; }
+  .msg.me { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-left-radius: 2px; }
   .msg.them { background: #333; color: #fff; align-self: flex-start; border-bottom-right-radius: 2px; }
   body.light-mode .msg.them { background: #eee; color: #111; }
-
-  .chat-input-container { display: flex; padding: 15px; border-top: 1px solid var(--border-color); gap: 10px; }
+  
+  .chat-input-container { display: flex; padding: 15px; border-top: 1px solid var(--border-color); gap: 10px; background: var(--card-bg); }
   .chat-input-container input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; }
-  .chat-input-container button { padding: 0 25px; background: #ff0000; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+  .chat-input-container button { padding: 0 25px; background: var(--accent); color: #fff; border: none; border-radius: 25px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; transition: 0.3s; }
+  .chat-input-container button:hover { opacity: 0.8; }
 </style>
 </head>
 <body>
 
-<a href="inbox.html" class="back-btn">⬅ رجوع للرسائل</a>
+<div class="top-bar">
+  <a href="inbox.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="back-btn" onclick="toggleLanguage()" id="langBtn" style="cursor:pointer; font-family:Cairo;">EN</button>
+</div>
 
 <div class="chat-container">
   <div class="chat-header" id="chatHeader">💬 جاري التحميل...</div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-container">
     <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا..." onkeypress="if(event.key === 'Enter') sendMessage()">
-    <button onclick="sendMessage()">إرسال</button>
+    <button onclick="sendMessage()" id="sendBtn">إرسال</button>
   </div>
 </div>
 
@@ -58,9 +65,29 @@
 
   if (!currentUser || !otherUser) { window.location.href = 'inbox.html'; }
 
-  document.getElementById('chatHeader').innerText = `💬 محادثة مع: ${otherUser}`;
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  const translations = {
+    ar: { back: "⬅ رجوع للرسائل", chatWith: "💬 محادثة مع: ", placeholder: "اكتب رسالتك هنا...", send: "إرسال" },
+    en: { back: "⬅ Back to Inbox", chatWith: "💬 Chat with: ", placeholder: "Type your message...", send: "Send" }
+  };
 
-  // حل مشكلة الحروف الكبيرة والصغيرة
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('chatHeader').innerText = t.chatWith + otherUser;
+    document.getElementById('msgInput').placeholder = t.placeholder;
+    document.getElementById('sendBtn').innerText = t.send;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  }
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+  }
+
+  // حل مشكلة الحروف الكبيرة والصغيرة في اسم الغرفة
   const roomId = [currentUser.toLowerCase(), otherUser.toLowerCase()].sort().join("_");
   const chatRef = window.ref(window.db, 'chats/' + roomId);
 
@@ -94,6 +121,8 @@
     
     input.value = '';
   };
+
+  applyLanguage();
 </script>
 </body>
 </html>
