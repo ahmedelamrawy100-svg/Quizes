@@ -142,6 +142,7 @@
   <div class="auth-controls" style="position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 999;">
     <button onclick="toggleLanguage()" id="authLangBtn" class="icon-btn">EN</button>
     <button onclick="toggleTheme()" id="authThemeBtn" class="icon-btn">☀️</button>
+    <button class="control-btn" id="blindBtn" onclick="toggleBlindMode()">🕶️ dark</button>
   </div>
   
   <h1 style="color:var(--accent); margin-bottom:20px; font-size: 32px;" id="authTitle" data-ar="🎬 أهلاً بيك" data-en="🎬 Welcome">🎬 أهلاً بيك</h1>
@@ -246,6 +247,9 @@
   window.signInWithEmailAndPassword = signInWithEmailAndPassword; 
   window.signOut = signOut;
 
+  // ✅ تم نقل هذا السطر لأعلى لتفادي خطأ "Cannot access 'settingsLoaded' before initialization"
+  let settingsLoaded = false;
+
   const cachedUser = localStorage.getItem('loggedInUser');
   
   if (cachedUser) {
@@ -258,8 +262,6 @@
   }
 
   setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; }, 100);
-
-  let settingsLoaded = false;
 
   function loadUserSettings(username) {
       if (settingsLoaded) return;
@@ -287,6 +289,15 @@
               window.signOut(window.auth).then(() => { localStorage.removeItem('loggedInUser'); window.location.href = 'banned.html'; });
           }
       });
+  }
+
+  function toggleBlindMode() {
+      document.body.classList.toggle('blind-mode');
+      if (document.body.classList.contains('blind-mode')) {
+        localStorage.setItem('blindMode', 'true');
+      } else {
+        localStorage.setItem('blindMode', 'false');
+      }
   }
 
   onAuthStateChanged(auth, (user) => {
