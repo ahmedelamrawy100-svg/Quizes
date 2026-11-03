@@ -19,17 +19,42 @@
   .users-container { width: 100%; max-width: 800px; }
   .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 20px; }
   
-  .search-box { width: 100%; margin-bottom: 20px; }
-  .search-box input { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; }
+  .search-box { width: 100%; margin-bottom: 20px; position: relative; }
+  .search-box input { width: 100%; padding: 15px 45px 15px 15px; border-radius: 10px; border: 2px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
+  .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(255,0,0,0.2); }
+  .search-box::before { content: '🔍'; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--subtitle-color); }
   
-  .users-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
-  .user-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
-  .user-card.owner-card { border-color: #ffd700; }
-  .user-info { display: flex; align-items: center; gap: 15px; }
-  .user-avatar { width: 50px; height: 50px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #fff; font-weight: bold; }
-  .user-name { font-weight: bold; font-size: 18px; }
+  .users-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+  .user-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; transition: 0.3s; position: relative; overflow: hidden; text-align: center; }
+  .user-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(255,0,0,0.2); }
   
-  .action-btn { padding: 8px 15px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; text-decoration: none; color: #fff; font-size: 14px; }
+  /* تمييز كارت الأونر */
+  .owner-card { border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+  .owner-card .user-avatar { background: #ffd700; color: #000; }
+  
+  .user-info { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
+  
+  /* تظبيط الصورة هنا */
+  .user-avatar { 
+      width: 70px; height: 70px; 
+      background: var(--accent); 
+      border-radius: 50%; 
+      display: flex; justify-content: center; align-items: center; 
+      font-size: 32px; color: #fff; font-weight: bold; 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+      overflow: hidden; /* عشان الصورة متطلعش برا الدايرة */
+  }
+  .user-avatar img {
+      width: 100%; height: 100%; object-fit: cover;
+  }
+  
+  .user-name { font-weight: bold; font-size: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; word-break: break-all; }
+  .owner-badge { color: #000; font-size: 12px; background: #ffd700; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+  
+  .action-buttons { display: flex; gap: 8px; width: 100%; margin-top: auto; flex-wrap: wrap; }
+  .action-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-family: 'Cairo'; text-decoration: none; color: #fff; font-size: 14px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 100px; }
+  .action-btn:hover { transform: scale(1.05); }
+  .btn-visit { background: #9c27b0; }
   .btn-add { background: var(--accent); }
   .btn-msg { background: #0088cc; }
   .btn-pending { background: #555; cursor: not-allowed; }
@@ -46,6 +71,7 @@
 
 <div class="users-container">
   <h1 class="header-title" id="pageTitle">👥 كل اللاعبين</h1>
+  
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="ابحث عن لاعب بالاسم..." onkeyup="window.filterUsers()">
   </div>
@@ -67,8 +93,8 @@
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   const translations = {
-    ar: { back: "⬅ رجوع", title: "👥 كل اللاعبين", placeholder: "ابحث عن لاعب بالاسم...", noUsers: "مفيش مستخدمين تانيين متاحين حالياً.", add: "➕ إضافة صديق", msg: "💬 رسالة", pending: "⏳ في انتظار الموافقة", you: "👤 أنت", owner: "👑 Owner" },
-    en: { back: "⬅ Back", title: "👥 All Players", placeholder: "Search by username...", noUsers: "No other players available.", add: "➕ Add Friend", msg: "💬 Message", pending: "⏳ Pending", you: "👤 You", owner: "👑 Owner" }
+    ar: { back: "⬅ رجوع", title: "👥 كل اللاعبين", placeholder: "ابحث عن لاعب بالاسم...", noUsers: "مفيش مستخدمين تانيين متاحين حالياً.", noResults: "مفيش لاعبين بالاسم ده.", add: "➕ إضافة صديق", msg: "💬 رسالة", visit: "👤 زيارة", pending: "⏳ في الانتظار", owner: "👑 الأونر" },
+    en: { back: "⬅ Back", title: "👥 All Players", placeholder: "Search by username...", noUsers: "No other players available.", noResults: "No players with this name.", add: "➕ Add Friend", msg: "💬 Message", visit: "👤 Visit", pending: "⏳ Pending", owner: "👑 Owner" }
   };
 
   function applyLanguage() {
@@ -87,9 +113,8 @@
     applyLanguage();
   }
 
-  let allUsers = [], myFriends = {}, sentRequests = {};
+  let allUsers = [], myFriends = {}, sentRequests = {}, allUsersData = {};
 
-  // قراءة الأصدقاء بطريقة ذكية (بتتجاهل الحروف الكبيرة والصغيرة)
   window.onValue(window.ref(window.db, 'friends'), (snapshot) => {
     const allFriends = snapshot.val();
     myFriends = {};
@@ -104,13 +129,11 @@
     window.renderUsers();
   });
 
-  // قراءة الطلبات بطريقة ذكية (بتتجاهل الحروف الكبيرة والصغيرة)
   window.onValue(window.ref(window.db, 'friend_requests'), (snapshot) => {
     const data = snapshot.val();
     sentRequests = {};
     if (data) {
       for (let targetUser in data) {
-        // لو المستخدم اللي إحنا بنبعتله موجود في الطلبات
         for (let sender in data[targetUser]) {
             if (sender.toLowerCase() === currentUser.toLowerCase()) {
                 sentRequests[targetUser] = true;
@@ -130,46 +153,90 @@
     window.renderUsers();
   });
 
+  // سحب بيانات المستخدمين (عشان الصور)
+  window.onValue(window.ref(window.db, 'users_data'), (snapshot) => {
+    allUsersData = snapshot.val() || {};
+    window.renderUsers();
+  });
+
   window.renderUsers = function() {
     const list = document.getElementById('usersList');
     list.innerHTML = '';
     const t = translations[currentLang];
-    let displayUsers = allUsers.filter(u => u.toLowerCase() !== currentUser.toLowerCase());
+    const searchTerm = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+    
+    const hiddenAdminNames = ['owner', 'admin']; 
+
+    const uniqueUsersMap = new Map();
+    
+    allUsers.forEach(u => {
+        const lower = u.toLowerCase();
+        
+        if (hiddenAdminNames.includes(lower)) return;
+        if (lower === currentUser.toLowerCase()) return;
+
+        if (!uniqueUsersMap.has(lower)) {
+            uniqueUsersMap.set(lower, u);
+        }
+    });
+
+    let displayUsers = Array.from(uniqueUsersMap.values());
+    
+    if (searchTerm) {
+        displayUsers = displayUsers.filter(u => u.toLowerCase().includes(searchTerm));
+    }
 
     if (displayUsers.length === 0) {
-      list.innerHTML = `<div class="no-data">${t.noUsers}</div>`;
+      if (searchTerm) {
+          list.innerHTML = `<div class="no-data">${t.noResults}</div>`;
+      } else {
+          list.innerHTML = `<div class="no-data">${t.noUsers}</div>`;
+      }
       return;
     }
 
     displayUsers.forEach(user => {
-      // بنشوف هل المستخدم ده صاحبنا (سواء بحروف كبيرة أو صغيرة)
       let isFriend = false;
       for(let f in myFriends) { if(f.toLowerCase() === user.toLowerCase()) { isFriend = true; break; } }
-
-      const isOwner = (user.toLowerCase() === 'ahmed'); 
       
       let isPending = false;
       for(let p in sentRequests) { if(p.toLowerCase() === user.toLowerCase()) { isPending = true; break; } }
 
+      const isOwner = (user.toLowerCase() === 'ahmed'); 
+
       const div = document.createElement('div');
-      div.className = `user-card ${isOwner ? 'owner-card' : ''}`;
+      div.className = `user-card ${isOwner ? 'owner-card' : ''}`; 
       div.setAttribute('data-username', user.toLowerCase());
 
-      let actionBtn = '';
-      if (isFriend) {
-        actionBtn = `<a href="messages.html?to=${user}" class="action-btn btn-msg">${t.msg}</a>`;
+      // **التعديل هنا: بنستخدم img عشان جودة الصورة تبان أحسن**
+      let avatarContent = user.charAt(0).toUpperCase();
+      
+      for(let key in allUsersData) {
+          if(key.toLowerCase() === user.toLowerCase() && allUsersData[key].profilePic) {
+              // لو في صورة، بنحطها في img
+              avatarContent = `<img src="${allUsersData[key].profilePic}" alt="${user}">`;
+              break;
+          }
+      }
+
+      let actionButtons = `<a href="profile.html?user=${user}" class="action-btn btn-visit" title="${t.visit}">${t.visit}</a>`;
+      
+      if (isOwner) {
+          actionButtons += `<a href="messages.html?to=${user}" class="action-btn btn-msg">${t.msg}</a>`;
+      } else if (isFriend) {
+        actionButtons += `<a href="messages.html?to=${user}" class="action-btn btn-msg">${t.msg}</a>`;
       } else if (isPending) {
-        actionBtn = `<button class="action-btn btn-pending" disabled>${t.pending}</button>`;
+        actionButtons += `<button class="action-btn btn-pending" disabled>${t.pending}</button>`;
       } else {
-        actionBtn = `<button class="action-btn btn-add" onclick="window.addFriend('${user}', this)">${t.add}</button>`;
+        actionButtons += `<button class="action-btn btn-add" onclick="window.addFriend('${user}', this)">${t.add}</button>`;
       }
 
       div.innerHTML = `
         <div class="user-info">
-          <div class="user-avatar">${user.charAt(0).toUpperCase()}</div>
-          <div class="user-name">${user} ${isOwner ? `<span style="color: #ffd700; font-size: 12px; background: #333; padding: 2px 6px; border-radius: 10px;">${t.owner}</span>` : ''}</div>
+          <div class="user-avatar">${avatarContent}</div>
+          <div class="user-name">${user} ${isOwner ? `<span class="owner-badge">${t.owner}</span>` : ''}</div>
         </div>
-        <div>${actionBtn}</div>
+        <div class="action-buttons">${actionButtons}</div>
       `;
       list.appendChild(div);
     });
@@ -181,12 +248,10 @@
 
     try {
         if (currentUser.toLowerCase() === 'ahmed') {
-            // الأونر يضيف فوراً
             await window.set(window.ref(window.db, 'friends/' + currentUser + '/' + targetUser), true);
             await window.set(window.ref(window.db, 'friends/' + targetUser + '/' + currentUser), true);
             alert(currentLang === 'en' ? `Added ${targetUser} as friend!` : `تمت إضافة ${targetUser} كصديق فوراً!`);
         } else {
-            // أي حد تاني يبعت طلب (بنستخدم الاسم الحقيقي targetUser)
             await window.set(window.ref(window.db, 'friend_requests/' + targetUser + '/' + currentUser), "pending");
             alert(currentLang === 'en' ? `Friend request sent to ${targetUser}.` : `تم إرسال طلب صداقة لـ ${targetUser}.`);
         }
@@ -198,11 +263,7 @@
   };
 
   window.filterUsers = function() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('.user-card').forEach(card => {
-      const username = card.getAttribute('data-username');
-      card.style.display = username.includes(query) ? 'flex' : 'none';
-    });
+    window.renderUsers();
   };
 
   window.onload = () => {
