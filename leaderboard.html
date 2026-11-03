@@ -26,53 +26,21 @@
   .header-title { text-align: center; font-size: 40px; color: var(--gold); margin-bottom: 10px; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); font-weight: 900; }
   .header-subtitle { text-align: center; color: var(--subtitle-color); margin-bottom: 30px; font-size: 18px; }
 
-  /* --- زراير التابات الرئيسية (النقاط / السرعة) --- */
-  .main-tabs { 
-      display: flex; 
-      width: 100%; 
-      max-width: 500px; 
-      margin: 0 auto 25px auto; 
-      background: var(--card-bg); 
-      border: 2px solid var(--card-border); 
-      border-radius: 12px; 
-      overflow: hidden; 
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  }
-  
-  .main-tab-btn { 
-      flex: 1; 
-      padding: 15px 10px; 
-      border: none; 
-      background: transparent; 
-      color: var(--subtitle-color); 
-      font-family: 'Cairo'; 
-      font-weight: 900; 
-      font-size: 18px; 
-      cursor: pointer; 
-      transition: 0.3s; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      gap: 8px;
-  }
-  
+  .main-tabs { display: flex; width: 100%; max-width: 500px; margin: 0 auto 25px auto; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .main-tab-btn { flex: 1; padding: 15px 10px; border: none; background: transparent; color: var(--subtitle-color); font-family: 'Cairo'; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
   .main-tab-btn.active { background: var(--gold); color: #000; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
   .main-tab-btn.speed-btn.active { background: var(--blue); color: #000; }
   .main-tab-btn:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text-color); }
 
-  /* --- قسم الفلاتر --- */
   .filters-wrapper { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 40px; }
-  
   .time-filters { display: flex; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 25px; }
   .time-btn { padding: 8px 20px; border-radius: 20px; border: none; background: transparent; color: var(--subtitle-color); font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
   .time-btn.active { background: var(--card-bg); color: var(--gold); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
   .category-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
   .cat-btn { padding: 6px 16px; border-radius: 15px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-color); font-family: 'Cairo'; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.3s; }
   .cat-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
   .cat-btn:hover:not(.active) { border-color: var(--gold); }
 
-  /* --- المنصة --- */
   .podium-wrapper { display: flex; justify-content: center; align-items: flex-end; gap: 15px; margin-bottom: 40px; min-height: 220px; flex-wrap: wrap; padding-top: 20px;}
   .podium-item { display: flex; flex-direction: column; align-items: center; width: 120px; position: relative; animation: fadeInUp 0.5s ease-out; }
   .podium-avatar { width: 80px; height: 80px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 35px; color: #000; font-weight: bold; margin-bottom: 10px; background-size: cover; background-position: center; border: 4px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 2;}
@@ -137,14 +105,12 @@
   <h1 class="header-title" id="mainTitle" data-ar="🏆 قاعة المشاهير" data-en="🏆 Hall of Fame">🏆 قاعة المشاهير</h1>
   <p class="header-subtitle" id="subtitle" data-ar="أفضل اللاعبين في منصة Quiz Hub" data-en="Top players on Quiz Hub">أفضل اللاعبين في منصة Quiz Hub</p>
 
-  <!-- التابات الرئيسية -->
   <div class="main-tabs">
     <button class="main-tab-btn active" onclick="switchMainTab('normal', this)" id="tabNormal" data-ar="👑 النقاط" data-en="👑 Points">👑 النقاط</button>
     <button class="main-tab-btn speed-btn" onclick="switchMainTab('speedrun', this)" id="tabSpeed" data-ar="⚡ السرعة" data-en="⚡ Speedrun">⚡ السرعة</button>
   </div>
 
   <div id="normalSection">
-      <!-- الفلاتر -->
       <div class="filters-wrapper" id="filtersWrapper">
           <div class="time-filters">
             <button class="time-btn active" onclick="switchTimeFilter('all', this)" data-ar="👑 كل الأوقات" data-en="👑 All Time">👑 كل الأوقات</button>
@@ -187,10 +153,10 @@
   let currentTimeFilter = 'all';
   let currentCategory = 'all';
   let allScoresData = null;
+  let allLeaderboardData = null; // جديد
   let allUsersData = {}; 
   let speedrunData = null;
 
-  // تفعيل الثيم
   if (localStorage.getItem('theme') === 'light') { 
       document.body.classList.add('light-mode'); 
       const btn = document.getElementById('themeBtn');
@@ -235,8 +201,15 @@
       if (speedrunData) renderSpeedrun();
   });
 
+  // بنقرا من scores
   window.onValue(window.ref(window.db, 'scores'), (snapshot) => {
     allScoresData = snapshot.val();
+    renderLeaderboard();
+  });
+
+  // بنقرا من leaderboard كمان (لو موجود)
+  window.onValue(window.ref(window.db, 'leaderboard'), (snapshot) => {
+    allLeaderboardData = snapshot.val();
     renderLeaderboard();
   });
 
@@ -276,27 +249,29 @@
   }
 
   function renderLeaderboard() {
-    if (!allScoresData) return;
+    // بنجمع الداتا من scores و leaderboard مع بعض عشان نضمن إن مفيش حاجة ضايعة
+    let combinedData = { ...allScoresData, ...allLeaderboardData }; 
     
-    // ربط التصنيفات بأسماء الكويزات
+    if (!combinedData) return;
+    
     let horrorKeys = ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'];
-    let actionKeys = ['squidgame', 'spiderman', 'avengers', 'avatar', 'venom', 'birdsofprey'];
+    let actionKeys = ['squidgame', 'spiderman', 'spiderman2026', 'avengers', 'avatar', 'venom', 'birdsofprey'];
     let thrillerKeys = ['fall'];
     let mysteryKeys = ['wednesday', 'knivesout'];
-    let egyptianKeys = ['elkebir', 'elekhtiyar']; // ضيف أسماء الكويزات المصرية هنا
+    let egyptianKeys = ['elharifa']; 
 
     let playersMap = {};
     const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
-    for (let username in allScoresData) {
-      if (username.toLowerCase() === 'ahmed') continue; 
+    for (let username in combinedData) {
+      if (username.toLowerCase() === 'ahmed' || username.toLowerCase() === 'owner') continue; 
       
       let lowerUsername = username.toLowerCase();
       if (!playersMap[lowerUsername]) {
           playersMap[lowerUsername] = { username: username, total: 0 };
       }
       
-      for (let quiz in allScoresData[username]) {
+      for (let quiz in combinedData[username]) {
         let shouldCount = false;
         let quizLower = quiz.toLowerCase();
         
@@ -308,7 +283,7 @@
         else if (currentCategory === 'egyptian' && egyptianKeys.some(k => quizLower.includes(k))) shouldCount = true;
 
         if (shouldCount) {
-            const attempts = Object.values(allScoresData[username][quiz]);
+            const attempts = Object.values(combinedData[username][quiz]);
             let validAttempts = attempts;
             
             if (currentTimeFilter === 'week') {
@@ -350,8 +325,11 @@
         div.className = `podium-item ${classes[index]}`;
         
         let avatarHTML = index === 1 ? '👑' : '👤';
-        if (allUsersData[player.username] && allUsersData[player.username].profilePic) {
-            avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        for(let key in allUsersData) {
+            if(key.toLowerCase() === player.username.toLowerCase() && allUsersData[key].profilePic) {
+                avatarHTML = `<img src="${allUsersData[key].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                break;
+            }
         }
 
         const ptsText = currentLang === 'en' ? 'pts' : 'نقطة';
@@ -376,8 +354,11 @@
             div.className = 'lb-item';
             
             let avatarHTML = player.username.charAt(0).toUpperCase();
-            if (allUsersData[player.username] && allUsersData[player.username].profilePic) {
-                avatarHTML = `<img src="${allUsersData[player.username].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+            for(let key in allUsersData) {
+                if(key.toLowerCase() === player.username.toLowerCase() && allUsersData[key].profilePic) {
+                    avatarHTML = `<img src="${allUsersData[key].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    break;
+                }
             }
 
             const ptsText = currentLang === 'en' ? 'pts' : 'نقطة';
@@ -426,8 +407,11 @@
         if (index < 3) rankHTML = medals[index];
 
         let avatarHTML = entry.user.charAt(0).toUpperCase();
-        if (allUsersData[entry.user] && allUsersData[entry.user].profilePic) {
-            avatarHTML = `<img src="${allUsersData[entry.user].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        for(let key in allUsersData) {
+            if(key.toLowerCase() === entry.user.toLowerCase() && allUsersData[key].profilePic) {
+                avatarHTML = `<img src="${allUsersData[key].profilePic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                break;
+            }
         }
 
         div.innerHTML = `
@@ -446,7 +430,6 @@
   window.onload = () => {
       applyLanguage();
   };
-
 </script>
 </body>
 </html>
