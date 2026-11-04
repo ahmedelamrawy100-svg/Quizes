@@ -495,24 +495,28 @@ window.initQuiz = function(config) {
             if (backBtn) backBtn.style.display = 'flex'; 
 
             if (window.db && currentUser !== 'Unknown') { 
+                // 1. حفظ النتيجة الأساسية
                 window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
                 window.set(window.ref(window.db, 'leaderboard/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
                 
+                // 2. تحديث الـ XP
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => { 
                     let xp = snap.exists() ? snap.val() : 0; 
                     window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score); 
                 }); 
                 
+                // 3. تحديث الكوينز
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/coins')).then(coinSnap => {
                     let currentCoins = coinSnap.exists() ? coinSnap.val() : 0;
                     window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), currentCoins + 5);
                 });
 
+                // 4. تسجيل النشاط
                 window.push(window.ref(window.db, 'activity_feed'), {
                     user: currentUser, action: "أنهى", detail: "كويز " + (quizKey.toUpperCase()) + " بنتيجة " + score, time: Date.now()
                 });
 
-                // 👇 تسجيل نقاط التيم
+                // 5. تسجيل نقاط التيم
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/team')).then(teamSnap => {
                     if (teamSnap.exists()) {
                         const playerTeam = teamSnap.val();
@@ -523,44 +527,16 @@ window.initQuiz = function(config) {
                     }
                 });
 
-window.push(window.ref(window.db, 'users_data/' + currentUser + '/history'), {
-    title: "أنهى كويز: " + quizKey.toUpperCase(),
-    description: "بنتيجة " + score + " من " + currentQuestions.length,
-    time: Date.now()
-});
+                // 6. تسجيل الحدث في الأرشيف الزمني (عشان يظهر في البروفايل)
+                window.push(window.ref(window.db, 'users_data/' + currentUser + '/history'), {
+                    title: "أنهى كويز: " + quizKey.toUpperCase(),
+                    description: "بنتيجة " + score + " من " + currentQuestions.length,
+                    time: Date.now()
+                });
 
-const today = new Date().toDateString();
-window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
-    let lastPlay = snap.exists() ? snap.val() : null;
-    let currentStreak = 0;
-    window.get(window.ref(window.db, 'users_data/' + currentUser + '/streak')).then(s => { currentStreak = s.exists() ? s.val() : 0; });
-
-    if (lastPlay !== today) {
-        let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-        if (lastPlay === yesterday.toDateString()) { currentStreak++; } else { currentStreak = 1; }
-        
-        window.set(window.ref(window.db, 'users_data/' + currentUser + '/streak'), currentStreak);
-        window.set(window.ref(window.db, 'users_data/' + currentUser + '/last_play'), today);
-        
-        let bonusXP = currentStreak * 5; 
-        window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(xpSnap => {
-            let xp = xpSnap.exists() ? xpSnap.val() : 0;
-            window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + bonusXP);
-            showToastMessage(`🔥 ستريك ${currentStreak} أيام! خدت ${bonusXP} XP مكافأة!`);
-        });
-    }
-});
-
-                if (isSpeedrun) {
-                    const totalTime = Math.floor((Date.now() - startTime) / 1000);
-                    await window.push(window.ref(window.db, 'speedrun_scores'), {
-                        user: currentUser, quiz: quizKey, score: score, total: currentQuestions.length, time: totalTime, date: Date.now()
-                    });
-                    showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
-                }
-
+                // 7. تحديث الستريك اليومي (مرة واحدة بس عشان مفيش تعارض)
                 const today = new Date().toDateString();
-                window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
+                window.get(window.ref(window.db, 'users_data/' + currentUser + '/lastPlay')).then(snap => {
                     let lastPlay = snap.exists() ? snap.val() : null;
                     let currentStreak = 0;
                     window.get(window.ref(window.db, 'users_data/' + currentUser + '/streak')).then(s => { currentStreak = s.exists() ? s.val() : 0; });
@@ -580,6 +556,15 @@ window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).th
                         });
                     }
                 });
+
+                // 8. تسجيل السرعة
+                if (isSpeedrun) {
+                    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+                    window.push(window.ref(window.db, 'speedrun_scores'), {
+                        user: currentUser, quiz: quizKey, score: score, total: currentQuestions.length, time: totalTime, date: Date.now()
+                    });
+                    showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
+                }
             }
         }
     }
