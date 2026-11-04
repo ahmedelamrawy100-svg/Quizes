@@ -77,13 +77,6 @@
   .action-btn { padding: 6px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; background: #0088cc; font-size: 13px; }
   .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; background: var(--card-bg); border-radius: 15px; }
 
-  #challengeModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99999; justify-content: center; align-items: center; }
-  .challenge-modal-box { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; width: 90%; max-width: 400px; text-align: center; }
-  .challenge-modal-box h2 { color: var(--accent); margin-bottom: 20px; }
-  .challenge-select { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; font-size: 16px; outline: none; }
-  .challenge-actions { display: flex; gap: 10px; justify-content: center; }
-  .challenge-btn-submit { background: #4caf50; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
-  .challenge-btn-cancel { background: #f44336; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
   @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -94,34 +87,6 @@
         <h2 id="alertTitle">تنبيه</h2>
         <p id="alertMessage">رسالة التنبيه</p>
         <button class="custom-alert-btn" onclick="closeCustomAlert()" id="alertOkBtn">حسناً</button>
-    </div>
-</div>
-
-<div id="challengeModal">
-    <div class="challenge-modal-box">
-        <h2 id="challengeModalTitle">⚔️ اختر الكويز للتحدي</h2>
-        <select id="quizSelect" class="challenge-select">
-            <option value="scream">Scream (سكريم)</option>
-            <option value="annabelle">Annabelle (أنابيل)</option>
-            <option value="conjuring">The Conjuring (الكونجورينج)</option>
-            <option value="thenun">The Nun (الراهبة)</option>
-            <option value="traintobusan">Train to Busan (قطار بوسان)</option>
-            <option value="fnaf">FNAF (فايف نايتس)</option>
-            <option value="squidgame">Squid Game (لعبة الحبار)</option>
-            <option value="spiderman">Spider-Man (سبايدرمان)</option>
-            <option value="avengers">Avengers (المنتقمون)</option>
-            <option value="avatar">Avatar (أفاتار)</option>
-            <option value="venom">Venom (فينوم)</option>
-            <option value="birdsofprey">Birds of Prey (الطيور الجارحة)</option>
-            <option value="fall">Fall (السقوط)</option>
-            <option value="wednesday">Wednesday (وينزداي)</option>
-            <option value="knivesout">Knives Out (مطارق)</option>
-            <option value="elharifa">El Harifa (الحريفة)</option>
-        </select>
-        <div class="challenge-actions">
-            <button class="challenge-btn-submit" onclick="submitChallenge()" id="challengeSubmitBtn">تحدي ⚔️</button>
-            <button class="challenge-btn-cancel" onclick="closeChallengeModal()" id="challengeCancelBtn">إلغاء ❌</button>
-        </div>
     </div>
 </div>
 
@@ -179,8 +144,9 @@
       <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()">حفظ الصورة</button>
       <button class="upload-btn" style="background: #ff3333; display: none;" id="removeImgBtn" onclick="window.removeProfilePic()">🗑️ مسح</button>
     </div>
+    
+    <!-- تم إزالة زرار التحدي من هنا بناءً على طلبك -->
 
-    <button id="challengeBtn" class="upload-btn" style="background: #e91e63; display: none; margin-top: 15px; width: 100%; max-width: 300px;" onclick="window.openChallengeModal()">⚔️ تحدى هذا اللاعب</button>
   </div>
 
   <div>
@@ -220,8 +186,8 @@
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   const translations = {
-    ar: { back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", badges: "الإنجازات (Badges)", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل نتيجة", completed: "🎮 كويزات مكتملة", challenge: "⚔️ تحدى هذا اللاعب", errTitle: "خطأ", okBtn: "حسناً", challengeTitle: "⚔️ اختر الكويز للتحدي", challengeBtn: "تحدي ⚔️", cancelBtn: "إلغاء ❌", successTitle: "نجاح", challengeSent: "تم إرسال التحدي!" },
-    en: { back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", badges: "Achievements (Badges)", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Score", completed: "🎮 Quizzes Completed", challenge: "⚔️ Challenge this player", errTitle: "Error", okBtn: "OK", challengeTitle: "⚔️ Choose Quiz to Challenge", challengeBtn: "Challenge ⚔️", cancelBtn: "Cancel ❌", successTitle: "Success", challengeSent: "Challenge sent!" }
+    ar: { back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", badges: "الإنجازات (Badges)", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل نتيجة", completed: "🎮 كويزات مكتملة", errTitle: "خطأ", okBtn: "حسناً" },
+    en: { back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", badges: "Achievements (Badges)", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Score", completed: "🎮 Quizzes Completed", errTitle: "Error", okBtn: "OK" }
   };
 
   function applyLanguage() {
@@ -242,11 +208,7 @@
       document.getElementById('accLabel').innerText = t.accuracy;
       document.getElementById('streakLabel').innerText = t.bestStreak;
       document.getElementById('compLabel').innerText = t.completed;
-      document.getElementById('challengeBtn').innerText = t.challenge;
       
-      document.getElementById('challengeModalTitle').innerText = t.challengeTitle;
-      document.getElementById('challengeSubmitBtn').innerText = t.challengeBtn;
-      document.getElementById('challengeCancelBtn').innerText = t.cancelBtn;
       document.getElementById('alertOkBtn').innerText = t.okBtn;
   }
   applyLanguage();
@@ -256,73 +218,6 @@
       localStorage.setItem('lang', currentLang);
       applyLanguage();
   }
-
-  window.openChallengeModal = function() { document.getElementById('challengeModal').style.display = 'flex'; };
-  window.closeChallengeModal = function() { document.getElementById('challengeModal').style.display = 'none'; };
-
-  window.submitChallenge = async function() {
-      const quizType = document.getElementById('quizSelect').value;
-      window.closeChallengeModal();
-      
-      if (!loggedInUser || loggedInUser === 'Unknown') {
-          showAlert(translations[currentLang].errTitle, currentLang === 'en' ? 'You must be logged in!' : 'لازم تسجل دخول الأول!');
-          return;
-      }
-      
-      if (!profileUser || profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
-          showAlert(translations[currentLang].errTitle, currentLang === 'en' ? 'Cannot challenge yourself!' : 'مش ممكن تتحدى نفسك!');
-          return;
-      }
-
-      try {
-          const existingChallenges = await window.get(window.ref(window.db, 'challenges/' + profileUser));
-          if (existingChallenges.exists()) {
-              const challenges = existingChallenges.val();
-              const hasPending = Object.values(challenges).some(c => c.status === 'pending');
-              if (hasPending) {
-                  showAlert(translations[currentLang].errTitle, currentLang === 'en' ? 'This player has a pending challenge.' : 'اللاعب ده عنده تحدي معلق. جرب تاني بعدين.');
-                  return;
-              }
-          }
-
-          const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-          await window.set(window.ref(window.db, 'rooms/' + roomCode), {
-              player1_score: null, player2_score: null, status: 'waiting', quizType: quizType,
-              created_at: Date.now(), isFriendChallenge: true,
-              player1_name: loggedInUser, player2_name: profileUser
-          });
-
-          await window.push(window.ref(window.db, 'challenges/' + profileUser), {
-              challenger: loggedInUser, quiz: quizType, roomCode: roomCode, time: Date.now(), status: 'pending'
-          });
-
-          localStorage.setItem('activeRoomCode', roomCode);
-          showAlert(translations[currentLang].successTitle, currentLang === 'en' ? 'Challenge sent! Waiting...' : 'تم إرسال التحدي! في انتظار صاحبك...');
-          
-          const timeoutId = setTimeout(async () => {
-              const snap = await window.get(window.ref(window.db, 'rooms/' + roomCode));
-              if (snap.exists() && snap.val().status === 'waiting') {
-                  window.remove(window.ref(window.db, 'rooms/' + roomCode));
-                  localStorage.removeItem('activeRoomCode');
-                  showAlert(translations[currentLang].errTitle, currentLang === 'en' ? 'Challenge expired.' : 'انتهت صلاحية التحدي.');
-              }
-          }, 180000);
-
-          window.onValue(window.ref(window.db, 'rooms/' + roomCode), (snapshot) => {
-              const data = snapshot.val();
-              if (data && data.status === 'playing') {
-                  clearTimeout(timeoutId);
-                  const fileMap = { 'elharifa': 'El Harifa Quiz', 'annabelle': 'Annabelle Quiz', 'scream': 'Scream Quiz', 'knivesout': 'Knives Out Quiz', 'conjuring': 'Conjuring Quiz', 'thenun': 'The Nun Quiz', 'traintobusan': 'Train to Busan Quiz', 'fnaf': 'FNAF Quiz', 'squidgame': 'Squid Game Quiz', 'spiderman': 'Spider-Man Quiz', 'avengers': 'Avengers Quiz', 'avatar': 'Avatar Quiz', 'venom': 'Venom Quiz', 'birdsofprey': 'Birds of Prey Quiz', 'fall': 'Fall Quiz', 'wednesday': 'Wednesday Quiz' };
-                  const quizFileName = fileMap[quizType] || quizType;
-                  window.location.href = `${quizFileName}.html?room=${roomCode}&role=player1`;
-              } else if (!data) {
-                  clearTimeout(timeoutId);
-                  localStorage.removeItem('activeRoomCode');
-                  showAlert(translations[currentLang].errTitle, currentLang === 'en' ? 'Challenge cancelled.' : 'تم إلغاء التحدي.');
-              }
-          });
-      } catch (e) { showAlert(translations[currentLang].errTitle, e.message); }
-  };
 
   window.get(window.ref(window.db, 'usernames')).then(snap => {
       if(snap.exists()) {
@@ -335,15 +230,10 @@
       document.getElementById('friendsNameDisplay').innerText = profileUser;
       if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
           document.getElementById('uploadSection').style.display = 'flex';
-      } else {
-          document.getElementById('challengeBtn').style.display = 'inline-block';
       }
       loadProfileData(); 
   });
 
-  // ==========================================
-  // 🚀 دالة تحميل البروفايل (الحل النهائي)
-  // ==========================================
   async function loadProfileData() {
       try {
           const [
@@ -452,10 +342,8 @@
               document.getElementById('warningBox').style.display = 'none'; 
           }
 
-          // 7. الأصدقاء
-          const friendsList = document.getElementById('friendsList');
-          friendsList.innerHTML = '';
-          
+          // 7. الأصدقاء (كود منفصل ومضمون)
+          const friendsListEl = document.getElementById('friendsList');
           let myFriendsObj = {};
           const allFriendsData = friendsSnap.val();
           
@@ -469,9 +357,10 @@
           }
 
           if (!myFriendsObj || typeof myFriendsObj !== 'object' || Object.keys(myFriendsObj).length === 0) {
-              friendsList.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`;
+              friendsListEl.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`;
           } else {
               const allUsersData = usersDataSnap.val() || {};
+              friendsListEl.innerHTML = '';
               
               for (let friendName in myFriendsObj) {
                   let picUrl = null;
@@ -496,7 +385,7 @@
                           <a href="profile.html?user=${friendName}" class="action-btn">${translations[currentLang].visitProfile}</a>
                       </div>
                   `;
-                  friendsList.appendChild(card);
+                  friendsListEl.appendChild(card);
               }
           }
 
