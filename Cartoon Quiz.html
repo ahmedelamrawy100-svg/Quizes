@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📺 كويز الكرتون - Cartoon</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="quiz-style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div class="top-buttons-container">
+    <a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="toggleLanguage()" id="langBtn">EN</button>
+</div>
+
+<div id="selectionScreen" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+  <h1 id="main-title" class="main-title" data-ar="📺 كويز الكرتون 📺" data-en="📺 Cartoon Quiz 📺">📺 كويز الكرتون 📺</h1>
+  <p class="subtitle" data-ar="اختر طريقة اللعب" data-en="Choose game mode">اختر طريقة اللعب</p>
+  
+  <div class="grid-container" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-width: 900px;">
+    <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Cartoon.jpg');">
+        <h2 class="card-title" data-ar="العب الشامل (75 سؤال)" data-en="Play Comprehensive (75 Qs)">العب الشامل (75 سؤال)</h2>
+    </div>
+  </div>
+  
+  <button class="speedrun-btn" onclick="startSpeedrun()" data-ar="⚡ العب في وضع السرعة" data-en="⚡ Play Speedrun">⚡ العب في وضع السرعة</button>
+</div>
+
+<div id="playScreen" class="play-screen">
+  <h1 id="quiz-title" style="font-size: 30px; margin-bottom: 20px; color:#ff0000;" data-ar="📺 كويز الكرتون 📺" data-en="📺 Cartoon Quiz 📺">📺 كويز الكرتون 📺</h1>
+  <div class="progress"><div class="progress-bar" id="progress"></div></div>
+  <div class="timer" id="timer">⏱️ 20</div>
+  <div id="question" class="question"></div>
+  <div id="options"></div>
+  <div id="score"></div>
+  <button id="next" onclick="nextQuestion()" data-ar="السؤال التالي ←" data-en="Next Question →">السؤال التالي ←</button>
+</div>
+
+<script src="questions.js"></script>
+<script src="quiz-core.js" type="module"></script>
+<script>
+    const quizKey = 'cartoon'; 
+    const quizData = allQuizzesData.cartoon;
+    window.onload = () => { initQuiz({ title: "📺 كويز الكرتون 📺", quizKey: quizKey, quizData: quizData, hasParts: false, partsList: {}, bgMusic: 'sounds/heartbeat.wav' }); }
+</script>
+<script src="room-cleaner.js"></script>
+</body>
+</html>
