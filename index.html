@@ -424,23 +424,36 @@
   }
 
   window.loginUser = async function() {
-      const u = document.getElementById('usernameInput').value.trim();
+      let u = document.getElementById('usernameInput').value.trim().toLowerCase(); 
       const p = document.getElementById('passwordInput').value.trim();
       if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
-      try { await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p); window.showToast('Welcome back!'); } 
-      catch(e) { window.showToast('خطأ: كلمة المرور أو الاسم غلط', 'error'); }
+      try { 
+          await window.signInWithEmailAndPassword(window.auth, u + "@quizhub.com", p); 
+          window.showToast('Welcome back!'); 
+      } 
+      catch(e) { 
+          window.showToast('خطأ: كلمة المرور أو الاسم غلط', 'error'); 
+      }
   }
 
   window.signupUser = async function() {
-      const u = document.getElementById('usernameInput').value.trim();
+      // بناخد الاسم ونحوله لحروف صغيرة فوراً
+      let u = document.getElementById('usernameInput').value.trim().toLowerCase(); 
       const p = document.getElementById('passwordInput').value.trim();
       if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
       try {
-          await window.createUserWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
+          const userSnap = await window.get(window.ref(window.db, 'usernames/' + u));
+          if (userSnap.exists()) {
+              return window.showToast('الاسم ده محجوز بالفعل، جرب اسم تاني!', 'error');
+          }
+          await window.createUserWithEmailAndPassword(window.auth, u + "@quizhub.com", p);          
           await window.set(window.ref(window.db, 'usernames/' + u), true);
           await window.set(window.ref(window.db, 'roles/users/' + u), 'Player');
           window.showToast('تم إنشاء الحساب بنجاح!');
-      } catch(e) { window.showToast('Error: ' + e.message, 'error'); }
+          
+      } catch(e) { 
+          window.showToast('Error: ' + e.message, 'error'); 
+      }
   }
 
   window.logoutUser = function() {
