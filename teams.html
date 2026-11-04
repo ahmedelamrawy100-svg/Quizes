@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-ar="⚔️ حرب التيمات - Quiz Hub" data-en="⚔️ Team Battles - Quiz Hub">⚔️ حرب التيمات - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  /* المتغيرات للوضع الليلي (الافتراضي) */
+  :root { 
+      --bg: #080808; 
+      --text: #fff; 
+      --card-bg: #111; 
+      --border: #333; 
+      --accent: #ff0000; 
+      --gold: #ffd700; 
+      --green: #4caf50; 
+      --subtitle: #aaa;
+  }
+  
+  /* المتغيرات للوضع النهاري */
+  body.light-mode { 
+      --bg: #f4f4f4; 
+      --text: #111; 
+      --card-bg: #fff; 
+      --border: #ccc; 
+      --gold: #b8860b; 
+      --subtitle: #555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  
+  .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
+  
+  .controls { display: flex; gap: 10px; }
+  .ctrl-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
+  .ctrl-btn:hover { background: var(--accent); border-color: var(--accent); }
+  body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
+  
+  .header-title { text-align: center; color: var(--gold); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.3); }
+  .subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; }
+
+  .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 900px; }
+  .team-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; position: relative; }
+  .team-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+  
+  .team-icon { font-size: 50px; margin-bottom: 10px; }
+  .team-name { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
+  .team-score { font-size: 28px; font-weight: bold; color: var(--accent); margin-bottom: 15px; }
+  
+  .btn-join { background: #333; color: #fff; border: 1px solid #555; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; width: 100%; transition: 0.3s; }
+  .btn-join:hover { background: var(--gold); color: #000; border-color: var(--gold); }
+  .btn-joined { background: var(--green); color: #fff; border: none; cursor: not-allowed; }
+  body.light-mode .btn-join { background: #eee; color: #111; border-color: #ccc; }
+  body.light-mode .btn-join:hover { background: var(--gold); color: #000; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+    <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+  </div>
+</div>
+
+<h1 class="header-title" id="mainTitle" data-ar="⚔️ حرب التيمات" data-en="⚔️ Team Battles">⚔️ حرب التيمات</h1>
+<p class="subtitle" id="subtitle" data-ar="انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!" data-en="Join your team, play quizzes, and raise your team's score to win the Team Battles!">انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!</p>
+
+<div class="teams-grid" id="teamsContainer">
+  <!-- التيمات هتظهر هنا -->
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.get = get;
+
+  const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) { window.location.href = 'index.html'; }
+
+  let currentLang = localStorage.getItem('lang') || 'ar';
+  let userTeam = null;
+  let teamsScores = {};
+
+  // التحقق من الثيم المحفوظ
+  if (localStorage.getItem('theme') === 'light') { 
+      document.body.classList.add('light-mode'); 
+      document.getElementById('themeBtn').innerText = '🌙';
+  }
+
+  window.toggleTheme = function() {
+      const body = document.body;
+      const btn = document.getElementById('themeBtn');
+      body.classList.toggle('light-mode');
+      if (body.classList.contains('light-mode')) {
+          btn.innerText = '🌙';
+          localStorage.setItem('theme', 'light');
+      } else {
+          btn.innerText = '☀️';
+          localStorage.setItem('theme', 'dark');
+      }
+  };
+
+  const translations = {
+    ar: {
+      back: "⬅ رجوع",
+      title: "⚔️ حرب التيمات",
+      subtitle: "انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!",
+      points: "نقطة",
+      join: "انضم للفريق",
+      joined: "✅ أنت في هذا الفريق",
+      otherTeam: "أنت في فريق آخر",
+      confirmJoin: "هل أنت متأكد؟ لا يمكنك تغيير الفريق بعد الانضمام!",
+      joinedSuccess: "تم الانضمام للفريق بنجاح! ابدأ العب كويزات عشان ترفع نقاط تيمك."
+    },
+    en: {
+      back: "⬅ Back",
+      title: "⚔️ Team Battles",
+      subtitle: "Join your team, play quizzes, and raise your team's score to win the Team Battles!",
+      points: "Points",
+      join: "Join Team",
+      joined: "✅ You are in this team",
+      otherTeam: "You are in another team",
+      confirmJoin: "Are you sure? You cannot change teams after joining!",
+      joinedSuccess: "Successfully joined the team! Start playing quizzes to raise your team's score."
+    }
+  };
+
+  const teams = [
+    { id: 'horror', nameAr: 'فريق الرعب', nameEn: 'Horror Team', icon: '🎃' },
+    { id: 'action', nameAr: 'فريق الأكشن', nameEn: 'Action Team', icon: '💥' },
+    { id: 'mystery', nameAr: 'فريق الغموض', nameEn: 'Mystery Team', icon: '🕵️' },
+    { id: 'thriller', nameAr: 'فريق التشويق', nameEn: 'Thriller Team', icon: '🎬' },
+    { id: 'egyptian', nameAr: 'فريق المصري', nameEn: 'Egyptian Team', icon: '🇪🇬' }
+  ];
+
+  window.toggleLanguage = function() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLanguage();
+    renderTeams();
+  };
+
+  function applyLanguage() {
+    const t = translations[currentLang];
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t.back;
+    document.getElementById('mainTitle').innerText = t.title;
+    document.getElementById('subtitle').innerText = t.subtitle;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    
+    document.querySelectorAll('[data-ar]').forEach(el => {
+        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+        } else {
+            el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+        }
+    });
+  }
+
+  window.onValue(window.ref(window.db, 'teams'), (snapshot) => {
+    teamsScores = snapshot.val() || {};
+    renderTeams();
+  });
+
+  window.get(window.ref(window.db, 'users_data/' + currentUser + '/team')).then(snap => {
+    userTeam = snap.exists() ? snap.val() : null;
+    renderTeams();
+  });
+
+  function renderTeams() {
+    const container = document.getElementById('teamsContainer');
+    const t = translations[currentLang];
+    container.innerHTML = '';
+
+    teams.forEach(team => {
+      const score = teamsScores[team.id] || 0;
+      const isJoined = userTeam === team.id;
+      const teamName = currentLang === 'ar' ? team.nameAr : team.nameEn;
+      
+      const div = document.createElement('div');
+      div.className = 'team-card';
+      div.innerHTML = `
+        <div class="team-icon">${team.icon}</div>
+        <div class="team-name">${teamName}</div>
+        <div class="team-score">${score} ${t.points}</div>
+        <button class="btn-join ${isJoined ? 'btn-joined' : ''}" 
+                onclick="joinTeam('${team.id}')" 
+                ${isJoined || userTeam ? 'disabled' : ''}>
+          ${isJoined ? t.joined : (userTeam ? t.otherTeam : t.join)}
+        </button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  window.joinTeam = async function(teamId) {
+    const t = translations[currentLang];
+    if (userTeam) return;
+    if (!confirm(t.confirmJoin)) return;
+
+    try {
+      await window.set(window.ref(window.db, 'users_data/' + currentUser + '/team'), teamId);
+      userTeam = teamId;
+      alert(t.joinedSuccess);
+      renderTeams();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  };
+
+  applyLanguage();
+</script>
+</body>
+</html>
