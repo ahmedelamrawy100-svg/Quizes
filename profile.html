@@ -281,13 +281,11 @@
           let completedCount = 0;
 
           if (scoresData) {
-              // بنلف على كل الكويزات اللي اللاعب لعبها
               for (let quizKey in scoresData) {
                   const attempts = scoresData[quizKey];
                   let bestScoreForQuiz = 0;
                   let bestTotalForQuiz = 0;
 
-                  // بنلف على كل المحاولات بتاعة الكويز ده
                   for (let attemptId in attempts) {
                       const attempt = attempts[attemptId];
                       if (attempt && attempt.score !== undefined) {
@@ -298,7 +296,6 @@
                       }
                   }
                   
-                  // بنجمع أفضل نتيجة في كل كويز
                   totalPoints += bestScoreForQuiz;
                   totalCorrect += bestScoreForQuiz;
                   totalQuestions += bestTotalForQuiz;
