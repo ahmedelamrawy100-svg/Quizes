@@ -1,5 +1,5 @@
 const allQuizzesData = {
-    // ================== كويز أنابيل ==================
+        // ================== كويز أنابيل ==================
     annabelle: {
 	        part1: [ 
             { q_ar: "في الفيلم الأصلي (2014)، مين اللي جاب دمية أنابيل للبيت؟", q_en: "In the original film (2014), who brought the Annabelle doll into the house?", options_ar: ["عيلة Warren", "جيران العيلة", "الأب (جون)", "الأم (ميا)"], options_en: ["The Warren family", "The neighbors", "The father (John)", "The mother (Mia)"], answer: 2 },
@@ -77,7 +77,7 @@ const allQuizzesData = {
             { q_ar: "أنابيل بتفضل عايشة فين بعد كل الأجزاء؟", q_en: "Where does Annabelle stay after all parts?", options_ar: ["البيت", "المتحف", "قفص زجاجي عند عيلة وارن", "الكنيسة"], options_en: ["The house", "The museum", "Glass case at the Warrens", "The church"], answer: 2 }
         ]
     },
-    // ================== كويز الكونجورينج ==================
+        // ================== كويز الكونجورينج ==================
     conjuring: {
         part1: [ 
             { q_ar: "في الجزء الأول، عيلة بيرون بينتقلوا لبيت جديد. إيه أول حاجة غريبة بتحصللهم؟", q_en: "In Part 1, the Perron family moves to a new house. What's the first strange thing?", options_ar: ["كلابهم بترفض تدخل البيت", "بنتهم بتبدأ تتكلم مع صديق خيالي", "بيسمعوا أصوات في السقف", "كل الإجابات صح"], options_en: ["Their dog refuses to enter", "Their daughter talks to an imaginary friend", "They hear noises in the ceiling", "All answers are correct"], answer: 3 },
@@ -153,7 +153,7 @@ const allQuizzesData = {
             { q_ar: "إيه الرسالة الأساسية لكل أجزاء الكونجورينج؟", q_en: "What is the main message of all The Conjuring parts?", options_ar: ["الخير ينتصر على الشر", "الشر هو الحل", "الفلوس هي كل حاجة", "الخوف هو القوة"], options_en: ["Good triumphs over evil", "Evil is the answer", "Money is everything", "Fear is power"], answer: 0 }
         ]
     },
-    // ================== كويز الراهبة ==================
+        // ================== كويز الراهبة ==================
     TheNun:    {
 
     part1: [
@@ -213,7 +213,7 @@ const allQuizzesData = {
     { q_ar: "أنهي جزء كان أكتر رعباً؟", q_en: "Which part was scarier?", options_ar: ["الجزء الأول", "الجزء التاني", "الاتنين", "مفيش رعب"], options_en: ["Part 1", "Part 2", "Both", "No horror"], answer: 0 }
   ]
     },
-    // ================== كويز خمس ليالي ==================
+        // ================== كويز خمس ليالي ==================
     FNAF:      {
         part1: [ 
     { q_ar: "في فيلم FNAF، إيه اللي بيخلي (Mike) يقبل شغل حارس ليلي في المطعم؟", q_en: "In the FNAF movie, what makes Mike accept the night guard job?", options_ar: ["عشان الفلوس", "عشان يهرب من حاجة", "عشان ياخد أخته", "عشان يعرف سر المكان"], options_en: ["For money", "To escape something", "To take his sister", "To know the place's secret"], answer: 0 },
@@ -272,7 +272,7 @@ const allQuizzesData = {
     { q_ar: "إيه اللي بيميز نهاية الفيلم التاني (2025)؟", q_en: "What characterizes the ending of the second movie (2025)?", options_ar: ["Vanessa بتتحول لدمية", "William بيرجع", "Abby بتموت", "Mike بيكتشف الحقيقة"], options_en: ["Vanessa transforms into an animatronic", "William returns", "Abby dies", "Mike discovers the truth"], answer: 0 }
   ]
     },
-    // ================== كويز لعبة الحبار ==================
+        // ================== كويز لعبة الحبار ==================
     SquidGame: {
 	part1: [
     { q_ar: "في الجزء الأول، إيه اللعبة الأولى اللي بيلعبوها في الساحة؟", q_en: "In Part 1, what is the first game they play in the arena?", options_ar: ["شد الحبل", "الحجلة", "إشارة الضوء الأخضر والأحمر", "البلي"], options_en: ["Tug of War", "Hopscotch", "Red Light, Green Light", "Marbles"], answer: 2 },
@@ -347,7 +347,7 @@ const allQuizzesData = {
     { q_ar: "مين اللي بيفوز في النهاية في المسلسل؟", q_en: "Who wins at the end of the series?", options_ar: ["جي هون", "الرجل المقنع", "طفل جون هي", "المحقق"], options_en: ["Gi-hun", "The Front Man", "Jun-hee's baby", "The detective"], answer: 2 }
   ]
     },
-    // ================== كويز وينسداي ==================
+        // ================== كويز وينسداي ==================
     Wednesday: {
         part1: [ 
             { q_ar: "في بداية المسلسل، وينزداي بتتنقل لمدرسة إيه؟", q_en: "At the start of the series, which school does Wednesday transfer to?", options_ar: ["Nevermore Academy", "Hogwarts", "Xavier's School", "Jericho High"], options_en: ["Nevermore Academy", "Hogwarts", "Xavier's School", "Jericho High"], answer: 0 },
@@ -406,7 +406,7 @@ const allQuizzesData = {
             { q_ar: "إيه الرسالة الأساسية للمسلسل؟", q_en: "What's the main message of the series?", options_ar: ["تقبل الاختلاف", "الخوف هو القوة", "الحب هو الحل", "الفلوس هي كل حاجة"], options_en: ["Accepting differences", "Fear is power", "Love is the answer", "Money is everything"], answer: 0 }
         ]
     },
-    // ================== كويز قطار لبوسان ==================
+        // ================== كويز قطار لبوسان ==================
     TrainToBusan: {
         part1: [ 
             { q_ar: "في الجزء الأول، إيه اللي بيخلي البطل (Seok-woo) يقرر يسافر بالقطار مع بنته؟", q_en: "In Part 1, what makes the protagonist (Seok-woo) decide to travel by train with his daughter?", options_ar: ["عشان يهربوا من الزومبي", "عشان بنته عايزة تشوف أمها", "عشان شغل", "عشان عيد ميلادها"], options_en: ["To escape the zombies", "Because his daughter wants to see her mother", "For work", "For her birthday"], answer: 1 },
@@ -465,7 +465,7 @@ const allQuizzesData = {
             { q_ar: "إيه اللي بيميز فيلم Train to Busan عن باقي أفلام الزومبي؟", q_en: "What distinguishes Train to Busan from other zombie films?", options_ar: ["التركيز على المشاعر الإنسانية", "الأكشن", "الكوميديا", "الرعب النفسي"], options_en: ["Focus on human emotions", "Action", "Comedy", "Psychological horror"], answer: 0 }
         ]
     },
-    // ================== كويز سبايدرمان ==================
+        // ================== كويز سبايدرمان ==================
     spiderman: {
         part1: [ // Spider-Man (2002)
             { q_ar: "إيه اللي بيقرص بيتر باركر في رحلة المدرسة عشان ياخد قواه؟", q_en: "What bites Peter Parker on the school trip to give him his powers?", options_ar: ["عقرب", "عنكبوت معدل", "نحلة", "خفاش"], options_en: ["A scorpion", "A genetically modified spider", "A bee", "A bat"], answer: 1 },
@@ -1077,9 +1077,12 @@ const allQuizzesData = {
             { q_ar: "فين بتحصل المعركة النهائية بين فينوم وكارناج؟", q_en: "Where does the final battle between Venom and Carnage take place?", options_ar: ["في كنيسة", "في سجن", "في المدينة", "في بيت إيدي"], options_en: ["In a church", "In a prison", "In the city", "In Eddie's house"], answer: 0 },
             { q_ar: "إيه اللي بيحصل لكارناج (كليتوس) في النهاية؟", q_en: "What happens to Carnage (Cletus) at the end?", options_ar: ["بيهرب", "فينوم بياكله", "بيتحبس", "بيختفي"], options_en: ["He escapes", "Venom eats him", "He gets imprisoned", "He disappears"], answer: 1 },
             { q_ar: "مين اللي خرج من السجن في نهاية الفيلم كشرير جديد؟", q_en: "Who got out of prison at the end of the movie as a new villain?", options_ar: ["كليتوس", "دكتور دان", "باتريك موليجان", "ريوت"], options_en: ["Cletus", "Dr. Dan", "Patrick Mulligan", "Riot"], answer: 2 },
-            { q_ar: "في نهاية الفيلم، إيدي وفينوم بيعملوا إيه؟", q_en: "At the end of the film, what do Eddie and Venom do?", options_ar: ["بيفترقوا", "بيهربوا ويسافروا مع بعض", "بيسلموا نفسهم للشرطة", "بيموتوا"], options_en: ["They separate", "They escape and travel together", "They turn themselves in", "They die"], answer: 1 }
+            { q_ar: "في نهاية الفيلم، إيدي وفينوم بيعملوا إيه؟", q_en: "At the end of the film, what do Eddie and Venom do?", options_ar: ["بيفترقوا", "بيهربوا ويسافروا مع بعض", "بيسلموا نفسهم للشرطة", "بيموتوا"], options_en: ["They separate", "They escape and travel together", "They turn themselves in", "They die"], answer: 1 },
+            { q_ar: "مين صاحبة المحل (Mrs. Chen) اللي بتظهر في الأجزاء؟", q_en: "Who is the store owner (Mrs. Chen) who appears in the parts?", options_ar: ["صاحبة محل بقالة إيدي بيشتري منها", "شرطية", "عالمة", "محامية"], options_en: ["The grocery store owner Eddie buys from", "A police officer", "A scientist", "A lawyer"], answer: 0 },
+            { q_ar: "مين اللي كان بيساعد كليتوس في جرائمه قبل ما يتحول؟", q_en: "Who was helping Cletus in his crimes before he transformed?", options_ar: ["فرانسيس", "مفيش حد", "إيدي", "كارناج"], options_en: ["Frances", "No one", "Eddie", "Carnage"], answer: 0 },
+            { q_ar: "عشان إيدي يفصل فينوم عنه في الفيلم التاني، كان لازم يسمع إيه؟", q_en: "For Eddie to separate Venom from him in the second movie, what did he have to hear?", options_ar: ["صوت عالي جداً", "مزيكا هادية", "كلام كتير", "نار"], options_en: ["A very loud sound", "Calm music", "Lots of talking", "Fire"], answer: 0 }
         ],
-        part3: [ // أحداث فيلم Venom: The Last Dance (2024)
+        part3: [ // أحداث فيلم Venom 3 (2024)    
             { q_ar: "إيه اسم فيلم فينوم الثالث (2024)؟", q_en: "What is the name of the third Venom movie (2024)?", options_ar: ["Venom: The Last Dance", "Venom: Let There Be Carnage", "Venom: Maximum Carnage", "Venom: The Final Chapter"], options_en: ["Venom: The Last Dance", "Venom: Let There Be Carnage", "Venom: Maximum Carnage", "Venom: The Final Chapter"], answer: 0 },
             { q_ar: "مين الممثل اللي لعب دور القائد العسكري ريكس ستريكلاند في الفيلم الثالث؟", q_en: "Who played the military leader Rex Strickland in the third movie?", options_ar: ["تشيوتيل إيجيوفور", "وودي هارلسون", "ريز أحمد", "توم هاردي"], options_en: ["Chiwetel Ejiofor", "Woody Harrelson", "Riz Ahmed", "Tom Hardy"], answer: 0 },
             { q_ar: "إيه اسم الوحوش اللي كانت بتطارد فينوم وإيدي في الفيلم الثالث؟", q_en: "What is the name of the monsters hunting Venom and Eddie in the third movie?", options_ar: ["كارناج", "ريوت", "زينوفاج (Xenophages)", "سكرين"], options_en: ["Carnage", "Riot", "Xenophages", "Scream"], answer: 2 },
@@ -1089,7 +1092,12 @@ const allQuizzesData = {
             { q_ar: "مين اللي بيظهر في الفيلم الثالث كضحية بتتحول لشخصية شريرة؟", q_en: "Who appears in the third movie as a victim who turns into a villain?", options_ar: ["باتريك موليجان (بعد ما اتقبض عليه)", "آن وي", "دان", "كليتوس"], options_en: ["Patrick Mulligan (after being arrested)", "Anne Weying", "Dan", "Cletus"], answer: 0 },
             { q_ar: "فين بتحصل المعركة النهائية الكبيرة في الفيلم الثالث؟", q_en: "Where does the big final battle take place in the third movie?", options_ar: ["في نيويورك", "في لاس فيجاس", "في قاعدة عسكرية (Area 51)", "في كنيسة"], options_en: ["In New York", "In Las Vegas", "In a military base (Area 51)", "In a church"], answer: 2 },
             { q_ar: "إيه اللي بيحصل لإيدي وفينوم في نهاية الفيلم الثالث؟", q_en: "What happens to Eddie and Venom at the end of the third movie?", options_ar: ["بيتحبسوا", "فينوم بيضحي بنفسه ويموت عشان ينقذ إيدي والأرض", "بيهربوا ويعيشوا في هدوء", "بيسافروا للفضاء"], options_en: ["They get imprisoned", "Venom sacrifices himself and dies to save Eddie and Earth", "They escape and live in peace", "They travel to space"], answer: 1 },
-            { q_ar: "مين صاحبة المحل (Mrs. Chen) اللي بتظهر في الأجزاء التلاتة؟", q_en: "Who is the store owner (Mrs. Chen) who appears in all three parts?", options_ar: ["صاحبة محل بقالة إيدي بيشتري منها", "شرطية", "عالمة", "محامية"], options_en: ["The grocery store owner Eddie buys from", "A police officer", "A scientist", "A lawyer"], answer: 0 }
+            { q_ar: "مين صاحبة المحل (Mrs. Chen) اللي بتظهر في الأجزاء التلاتة؟", q_en: "Who is the store owner (Mrs. Chen) who appears in all three parts?", options_ar: ["صاحبة محل بقالة إيدي بيشتري منها", "شرطية", "عالمة", "محامية"], options_en: ["The grocery store owner Eddie buys from", "A police officer", "A scientist", "A lawyer"], answer: 0 },
+            { q_ar: "إيه اللي كان بيحاول إيدي وفينوم يعملوه في الفيلم الثالث؟", q_en: "What were Eddie and Venom trying to do in the third movie?", options_ar: ["يهربوا من الوحوش", "يبحثوا عن الكوديكس", "يهربوا من الجيش والوحوش", "يسافروا للفضاء"], options_en: ["Escape the monsters", "Search for the Codex", "Escape the army and the monsters", "Travel to space"], answer: 2 },
+            { q_ar: "مين اللي بيطلب المساعدة من إيدي وفينوم في الفيلم الثالث؟", q_en: "Who asks Eddie and Venom for help in the third movie?", options_ar: ["دكتور تيدي", "الرجل العسكري", "باتريك موليجان", "آن وي"], options_en: ["Dr. Teddy", "The military man", "Patrick Mulligan", "Anne Weying"], answer: 0 },
+            { q_ar: "إيه علاقة Knull بالكوديكس؟", q_en: "What is Knull's connection to the Codex?", options_ar: ["هو اللي صنعه", "هو اللي عايزه عشان يتحرر", "هو اللي بيحرسه", "مفيش علاقة"], options_en: ["He made it", "He wants it to be freed", "He guards it", "No connection"], answer: 1 },
+            { q_ar: "إيه اللي بيحصل للـ Codex في النهاية؟", q_en: "What happens to the Codex in the end?", options_ar: ["بيتسرق", "بيتدمر", "بيتباع", "بيختفي"], options_en: ["It gets stolen", "It gets destroyed", "It gets sold", "It disappears"], answer: 1 },
+            { q_ar: "إيه الرسالة الأساسية لفيلم فينوم الثالث؟", q_en: "What is the main message of the third Venom movie?", options_ar: ["التضحية", "الانتقام", "الفقر", "الحب"], options_en: ["Sacrifice", "Revenge", "Poverty", "Love"], answer: 0 }
         ],
         comprehensive: [
             { q_ar: "مين الممثل اللي لعب دور إيدي بروك في كل الأجزاء؟", q_en: "Who played Eddie Brock in all parts?", options_ar: ["توم هاردي", "توم هولاند", "أندرو جارفيلد", "وودي هارلسون"], options_en: ["Tom Hardy", "Tom Holland", "Andrew Garfield", "Woody Harrelson"], answer: 0 },
@@ -1143,7 +1151,7 @@ const allQuizzesData = {
 
         // ================== كويز الحريفة ==================
     elharifa: {
-        part1: [ // أحداث فيلم الحريفة 1 (2024)
+        part1: [ // أحداث فيلم الحريفة 1 (2024) - 15 سؤال
             { q_ar: "ما هو اسم بطل فيلم الحريفة؟", q_en: "What is the name of the El Harifa protagonist?", options_ar: ["أمير", "ماجد", "عمر", "الشيشتاوي"], options_en: ["Amir", "Maged", "Omar", "El-Sheshtawy"], answer: 1 },
             { q_ar: "ما هو السبب الذي أجبر عائلة ماجد على تغيير حياتهم؟", q_en: "What forced Maged's family to change their lifestyle?", options_ar: ["فشل والده في تسديد القروض وبيع الشركة", "انتقالهم للعمل في الخارج", "إصابة ماجد في مباراة", "طرد ماجد من مدرسته الدولية"], options_en: ["His father's failure to pay loans and selling the company", "Moving abroad for work", "Maged's injury in a match", "Maged being expelled from his international school"], answer: 0 },
             { q_ar: "إلى أي نوع من المدارس انتقل ماجد بعد إفلاس والده؟", q_en: "To what type of school did Maged transfer after his father's bankruptcy?", options_ar: ["مدرسة دولية أخرى", "مدرسة الأبطال الثانوية النموذجية (حكومية)", "مدرسة خاصة", "مدرسة رياضية"], options_en: ["Another international school", "El-Abtal Secondary Model School (Public)", "A private school", "A sports school"], answer: 1 },
@@ -1158,14 +1166,9 @@ const allQuizzesData = {
             { q_ar: "ما هو السبب الذي جعل صديقهم 'كريم السلهوب' يدخل الحبس؟", q_en: "What caused their friend 'Karim El-Salhoub' to go to jail?", options_ar: ["سرقة", "توقيعه على إيصالات أمانة بسبب ديون", "خناقة في المدرسة", "تزوير"], options_en: ["Theft", "Signing trust receipts for debts", "A fight at school", "Forgery"], answer: 1 },
             { q_ar: "ما هو الاسم الذي أُطلق على فريق ماجد وأصدقائه؟", q_en: "What is the name given to Maged and his friends' team?", options_ar: ["فريق الأبطال", "فريق النجوم", "الحريفة", "فريق الشوارع"], options_en: ["El-Abtal Team", "El-Nogoom Team", "El Harifa", "El-Shawarea Team"], answer: 2 },
             { q_ar: "بمن كان ماجد يتكبر في بداية الفيلم؟", q_en: "Who was Maged arrogant towards at the beginning of the film?", options_ar: ["زملائه في المدرسة الدولية ومدربه", "عمر", "والدته", "أخته"], options_en: ["His classmates at the international school and his coach", "Omar", "His mother", "His sister"], answer: 0 },
-            { q_ar: "ما هي الصفة التي اكتسبها ماجد تدريجياً بعد انتقاله للمدرسة الحكومية؟", q_en: "What trait did Maged gradually acquire after transferring to the public school?", options_ar: ["التكبر", "الخوف", "التواضع والعمل الجماعي", "الأنانية"], options_en: ["Arrogance", "Fear", "Humility and teamwork", "Selfishness"], answer: 2 },
-            { q_ar: "كيف ساعدت شقيقة ماجد الصغرى في اندماجه بالبيئة الجديدة؟", q_en: "How did Maged's younger sister help him integrate into the new environment?", options_ar: ["علمته لغة الشارع وأسلوب التفاهم مع زملائه", "أعطته فلوس", "شجعته في المباريات", "عرفته على أصدقائها"], options_en: ["She taught him street language and how to understand his classmates", "She gave him money", "She cheered for him in matches", "She introduced him to her friends"], answer: 0 },
-            { q_ar: "ما هو الحلم الذي كان يراود ماجد منذ البداية؟", q_en: "What was the dream Maged had from the beginning?", options_ar: ["أن يصبح مدرباً", "الاحتراف الخارجي في كرة القدم", "أن يشتري شركة والده", "أن يسافر للسياحة"], options_en: ["To become a coach", "Professional football abroad", "To buy his father's company", "To travel for tourism"], answer: 1 },
-            { q_ar: "ما هو شعور زملاء ماجد تجاهه في مدرسته الدولية القديمة؟", q_en: "How did Maged's classmates feel about him at his old international school?", options_ar: ["كانوا يحبونه", "كانوا يخافون منه", "كرهوه بسبب غروره", "لم يهتموا به"], options_en: ["They loved him", "They feared him", "They hated him because of his arrogance", "They didn't care about him"], answer: 2 },
-            { q_ar: "ما هو الشيء الذي كان يفعله الفريق للعب المباريات في البداية؟", q_en: "What did the team do to play matches at first?", options_ar: ["اللعب في البطولات الرسمية", "اللعب في الساحات الشعبية ومراكز الشباب", "اللعب في المدرسة فقط", "اللعب في الأندية الكبرى"], options_en: ["Playing in official tournaments", "Playing in popular squares and youth centers", "Playing only at school", "Playing in major clubs"], answer: 1 },
-            { q_ar: "كيف أظهر ماجد تغيراً في شخصيته من خلال تعامله مع 'عمر المليجي'؟", q_en: "How did Maged show a change in his personality in his interaction with 'Omar El-Meligy'?", options_ar: ["سخر منه", "ضربه", "ضمه للمجموعة وأوقف سخريتهم منه", "تجاهله"], options_en: ["He mocked him", "He hit him", "He included him in the group and stopped their mockery of him", "He ignored him"], answer: 2 }
+            { q_ar: "ما هي الصفة التي اكتسبها ماجد تدريجياً بعد انتقاله للمدرسة الحكومية؟", q_en: "What trait did Maged gradually acquire after transferring to the public school?", options_ar: ["التكبر", "الخوف", "التواضع والعمل الجماعي", "الأنانية"], options_en: ["Arrogance", "Fear", "Humility and teamwork", "Selfishness"], answer: 2 }
         ],
-        part2: [ // أحداث فيلم الحريفة 2: الريمونتادا (2024)
+        part2: [ // أحداث فيلم الحريفة 2: الريمونتادا (2024) - 15 سؤال
             { q_ar: "بعد فوزهم بالبطولة في الجزء الأول، أين ذهب فريق الحريفة؟", q_en: "After winning the tournament in Part 1, where did El Harifa team go?", options_ar: ["إلى الجامعة", "إلى أوروبا", "إلى نادٍ احترافي", "إلى مدرسة جديدة"], options_en: ["To university", "To Europe", "To a professional club", "To a new school"], answer: 0 },
             { q_ar: "ما هو التحدي الجديد الذي واجههم في الجامعة؟", q_en: "What new challenge did they face in university?", options_ar: ["الحصول على منحة دراسية بشرط التفوق الأكاديمي", "عدم وجود ملعب", "عدم وجود مدرب", "رفض زملائهم اللعب معهم"], options_en: ["Getting a scholarship on the condition of academic excellence", "No football pitch", "No coach", "Their classmates refusing to play with them"], answer: 0 },
             { q_ar: "أين سافر ماجد لتحقيق حلم الاحتراف؟", q_en: "Where did Maged travel to achieve his professional dream?", options_ar: ["السعودية", "إنجلترا", "البرتغال (أوروبا)", "أمريكا"], options_en: ["Saudi Arabia", "England", "Portugal (Europe)", "America"], answer: 2 },
@@ -1180,14 +1183,9 @@ const allQuizzesData = {
             { q_ar: "ما هو الشيء الذي كان يربط فريق الحريفة دائماً؟", q_en: "What always connected El Harifa team?", options_ar: ["المال", "الصداقة وحب كرة القدم", "المدرسة", "المدرب"], options_en: ["Money", "Friendship and love for football", "School", "The coach"], answer: 1 },
             { q_ar: "هل حقق ماجد حلمه في النهاية؟", q_en: "Did Maged achieve his dream in the end?", options_ar: ["لا، فشل", "نعم، انضم لنادي برتغالي", "لا، عاد لمصر", "نعم، أصبح مدرباً"], options_en: ["No, he failed", "Yes, he joined a Portuguese club", "No, he returned to Egypt", "Yes, he became a coach"], answer: 1 },
             { q_ar: "في أي دولة تقع مدينة براغا حيث يلعب نادي سبورتنج براغا؟", q_en: "In which country is the city of Braga, where Sporting Braga plays?", options_ar: ["إسبانيا", "البرتغال", "فرنسا", "إيطاليا"], options_en: ["Spain", "Portugal", "France", "Italy"], answer: 1 },
-            { q_ar: "ما هو الدور الذي لعبه المدرب 'شلش' في الجزء الثاني؟", q_en: "What role did Coach 'Shalash' play in Part 2?", options_ar: ["ساعدهم في الجامعة", "سافر معهم", "اختفى", "أصبح مدرباً للفريق الوطني"], options_en: ["He helped them at university", "He traveled with them", "He disappeared", "He became the national team coach"], answer: 0 },
-            { q_ar: "ما هو التحدي الذي واجه الفتيات في فريق الحريفة بالجامعة؟", q_en: "What challenge did the girls in El Harifa team face at university?", options_ar: ["إثبات قدراتهن في كرة القدم", "عدم وجود ملابس رياضية", "عدم وجود مدرب", "رفض الجامعة"], options_en: ["Proving their abilities in football", "No sports clothes", "No coach", "The university's refusal"], answer: 0 },
-            { q_ar: "هل تخلّى ماجد عن أصدقائه بعد احترافه؟", q_en: "Did Maged abandon his friends after becoming a professional?", options_ar: ["نعم", "لا، ظل على تواصل معهم", "سافر ولم يعد", "نسيهم"], options_en: ["Yes", "No, he stayed in touch with them", "He traveled and never returned", "He forgot them"], answer: 1 },
-            { q_ar: "ما هو الدرس المستفاد من رحلة ماجد من مدرسة دولية إلى الاحتراف؟", q_en: "What is the lesson learned from Maged's journey from an international school to professionalism?", options_ar: ["المال هو كل شيء", "الإصرار والعمل الجماعي والأخلاق", "الخيانة", "الفوز فقط"], options_en: ["Money is everything", "Determination, teamwork, and morals", "Betrayal", "Winning only"], answer: 1 },
-            { q_ar: "من هو اللاعب العالمي الذي ظهر كضيف شرف في الجزء الثاني؟", q_en: "Which international player appeared as a guest star in Part 2?", options_ar: ["ميسي", "رونالدو", "مايكل أوين", "ديفيد بيكهام"], options_en: ["Messi", "Ronaldo", "Michael Owen", "David Beckham"], answer: 2 },
-            { q_ar: "في نهاية الجزء الثاني، هل استمر فريق الحريفة معاً؟", q_en: "At the end of Part 2, did El Harifa team stay together?", options_ar: ["لا، تفرقوا", "نعم، استمروا في دعم بعضهم البعض", "لا، سافروا جميعاً", "نعم، اشتروا نادياً"], options_en: ["No, they separated", "Yes, they continued supporting each other", "No, they all traveled", "Yes, they bought a club"], answer: 1 }
+            { q_ar: "من هو اللاعب العالمي الذي ظهر كضيف شرف في الجزء الثاني؟", q_en: "Which international player appeared as a guest star in Part 2?", options_ar: ["ميسي", "رونالدو", "مايكل أوين", "ديفيد بيكهام"], options_en: ["Messi", "Ronaldo", "Michael Owen", "David Beckham"], answer: 2 }
         ],
-        comprehensive: [ // الشامل (20 سؤال من الجزء 1 و 2)
+        comprehensive: [ // الشامل (20 سؤال من الجزء 1 و 2) - زي ما هو
             { q_ar: "ما هو اسم بطل فيلم الحريفة؟", q_en: "What is the name of the El Harifa protagonist?", options_ar: ["أمير", "ماجد", "عمر", "الشيشتاوي"], options_en: ["Amir", "Maged", "Omar", "El-Sheshtawy"], answer: 1 },
             { q_ar: "ما هو السبب الذي أجبر عائلة ماجد على تغيير حياتهم؟", q_en: "What forced Maged's family to change their lifestyle?", options_ar: ["فشل والده في تسديد القروض وبيع الشركة", "انتقالهم للعمل في الخارج", "إصابة ماجد في مباراة", "طرد ماجد من مدرسته الدولية"], options_en: ["His father's failure to pay loans and selling the company", "Moving abroad for work", "Maged's injury in a match", "Maged being expelled from his international school"], answer: 0 },
             { q_ar: "إلى أي نوع من المدارس انتقل ماجد بعد إفلاس والده؟", q_en: "To what type of school did Maged transfer after his father's bankruptcy?", options_ar: ["مدرسة دولية أخرى", "مدرسة الأبطال الثانوية النموذجية (حكومية)", "مدرسة خاصة", "مدرسة رياضية"], options_en: ["Another international school", "El-Abtal Secondary Model School (Public)", "A private school", "A sports school"], answer: 1 },
