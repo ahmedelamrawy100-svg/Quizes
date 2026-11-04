@@ -236,32 +236,13 @@
 
   async function loadProfileData() {
       try {
-          const [
-              userSnap, 
-              adminsSnap, 
-              ranksSnap, 
-              badgesSnap, 
-              scoresSnap, 
-              xpSnap, 
-              warnSnap, 
-              friendsSnap, 
-              usersDataSnap
-          ] = await Promise.all([
-              window.get(window.ref(window.db, 'users_data/' + profileUser)),
-              window.get(window.ref(window.db, 'roles/admins')),
-              window.get(window.ref(window.db, 'roles/users')),
-              window.get(window.ref(window.db, 'badges/' + profileUser)),
-              window.get(window.ref(window.db, 'scores/' + profileUser)),
-              window.get(window.ref(window.db, 'users_data/' + profileUser + '/xp')),
-              window.get(window.ref(window.db, 'warnings/' + profileUser)),
-              window.get(window.ref(window.db, 'friends')),
-              window.get(window.ref(window.db, 'users_data'))
-          ]);
+          // 1. بنجيب كل بيانات اللاعب مرة واحدة
+          const userSnap = await window.get(window.ref(window.db, 'users_data/' + profileUser));
+          const userData = userSnap.val() || {};
 
-          // 1. الصورة
+          // 2. الصورة
           const avatarEl = document.getElementById('userAvatar');
-          const userData = userSnap.val();
-          if (userData && userData.profilePic && userData.profilePic.startsWith('http')) {
+          if (userData.profilePic && userData.profilePic.startsWith('http')) {
               avatarEl.innerHTML = `<img src="${userData.profilePic}">`;
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'block';
           } else {
@@ -269,55 +250,8 @@
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'none';
           }
 
-          // 2. الرتب
-          const admins = adminsSnap.val() || {};
-          const ranks = ranksSnap.val() || {};
-          const isOwner = profileUser.toLowerCase() === 'ahmed';
-          let isAdmin = false;
-          for (let adminName in admins) { if (adminName.toLowerCase() === profileUser.toLowerCase()) { isAdmin = true; break; } }
-          
-          let rankText = translations[currentLang].rankPlayer;
-          for (let user in ranks) { if (user.toLowerCase() === profileUser.toLowerCase()) { rankText = ranks[user]; break; } }
-          if (isOwner) rankText = translations[currentLang].rankOwner;
-          else if (isAdmin && (rankText.includes('لاعب') || rankText.includes('Player'))) rankText = translations[currentLang].rankAdmin;
-
-          document.getElementById('rankBox').style.display = 'inline-flex';
-          document.getElementById('userRankValue').innerText = rankText;
-
-          // 3. البادجات
-          const badgesData = badgesSnap.val();
-          const badgesContainer = document.getElementById('badgesContainer');
-          const badgesSection = document.getElementById('badgesSection');
-          badgesContainer.innerHTML = '';
-          if (badgesData && Object.keys(badgesData).length > 0) {
-              badgesSection.style.display = 'block';
-              Object.keys(badgesData).forEach(badge => {
-                  const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; badgesContainer.appendChild(span);
-              });
-          } else { badgesSection.style.display = 'none'; }
-
-          // 4. النقاط والدقة
-          const scoresData = scoresSnap.val(); 
-          let total = 0, totalCorrect = 0, totalQuestions = 0, maxTotalScore = 0, completedCount = 0;
-          if (scoresData) { 
-              for (let quiz in scoresData) { 
-                  const attempts = scoresData[quiz]; 
-                  let quizBest = 0, bestAttemptCorrect = 0, bestAttemptTotal = 0;
-                  for (let id in attempts) { 
-                      const attempt = attempts[id];
-                      if (attempt.score > quizBest) { quizBest = attempt.score; bestAttemptCorrect = attempt.score; bestAttemptTotal = attempt.total; }
-                  } 
-                  total += quizBest; totalCorrect += bestAttemptCorrect; totalQuestions += bestAttemptTotal; completedCount++;
-              } 
-              maxTotalScore = total; 
-          }
-          document.getElementById('totalScoreDisplay').innerText = total;
-          document.getElementById('bestStreakDisplay').innerText = maxTotalScore;
-          document.getElementById('completedDisplay').innerText = completedCount;
-          document.getElementById('accuracyDisplay').innerText = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) + '%' : '0%';
-
-          // 5. XP والمستوى
-          let xp = xpSnap.exists() ? xpSnap.val() : 0;
+          // 3. الـ XP والمستوى
+          let xp = userData.xp || 0;
           document.getElementById('xpDisplay').innerText = xp;
           let level = 1, nextLevelXp = 100, currentLevelXp = 0;
           if (xp >= 4500) { level = 10; currentLevelXp = 4500; nextLevelXp = "Max"; }
@@ -333,7 +267,90 @@
           document.getElementById('xpProgressText').innerText = `${xp - currentLevelXp} / ${nextLevelXp === "Max" ? "Max" : nextLevelXp - currentLevelXp} XP`;
           document.getElementById('xpProgressBar').style.width = `${nextLevelXp === "Max" ? 100 : ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100}%`;
 
-          // 6. التحذيرات
+          // 4. الستريك
+          let streak = userData.streak || 0;
+          document.getElementById('bestStreakDisplay').innerText = streak;
+
+          // 5. جلب النقاط والدقة والكويزات
+          const scoresSnap = await window.get(window.ref(window.db, 'scores/' + profileUser));
+          const scoresData = scoresSnap.val();
+          
+          let totalPoints = 0;
+          let totalCorrect = 0;
+          let totalQuestions = 0;
+          let completedCount = 0;
+
+          if (scoresData) {
+              // بنلف على كل الكويزات اللي اللاعب لعبها
+              for (let quizKey in scoresData) {
+                  const attempts = scoresData[quizKey];
+                  let bestScoreForQuiz = 0;
+                  let bestTotalForQuiz = 0;
+
+                  // بنلف على كل المحاولات بتاعة الكويز ده
+                  for (let attemptId in attempts) {
+                      const attempt = attempts[attemptId];
+                      if (attempt && attempt.score !== undefined) {
+                          if (attempt.score > bestScoreForQuiz) {
+                              bestScoreForQuiz = attempt.score;
+                              bestTotalForQuiz = attempt.total || 0;
+                          }
+                      }
+                  }
+                  
+                  // بنجمع أفضل نتيجة في كل كويز
+                  totalPoints += bestScoreForQuiz;
+                  totalCorrect += bestScoreForQuiz;
+                  totalQuestions += bestTotalForQuiz;
+                  
+                  if (bestScoreForQuiz > 0) {
+                      completedCount++;
+                  }
+              }
+          }
+
+          document.getElementById('totalScoreDisplay').innerText = totalPoints;
+          document.getElementById('completedDisplay').innerText = completedCount;
+          
+          if (totalQuestions > 0) {
+              let accuracy = Math.round((totalCorrect / totalQuestions) * 100);
+              document.getElementById('accuracyDisplay').innerText = accuracy + '%';
+          } else {
+              document.getElementById('accuracyDisplay').innerText = '0%';
+          }
+
+          // 6. جلب الرتب
+          const adminsSnap = await window.get(window.ref(window.db, 'roles/admins'));
+          const ranksSnap = await window.get(window.ref(window.db, 'roles/users'));
+          const admins = adminsSnap.val() || {};
+          const ranks = ranksSnap.val() || {};
+          const isOwner = profileUser.toLowerCase() === 'ahmed';
+          let isAdmin = false;
+          for (let adminName in admins) { if (adminName.toLowerCase() === profileUser.toLowerCase()) { isAdmin = true; break; } }
+          
+          let rankText = translations[currentLang].rankPlayer;
+          for (let user in ranks) { if (user.toLowerCase() === profileUser.toLowerCase()) { rankText = ranks[user]; break; } }
+          if (isOwner) rankText = translations[currentLang].rankOwner;
+          else if (isAdmin && (rankText.includes('لاعب') || rankText.includes('Player'))) rankText = translations[currentLang].rankAdmin;
+
+          document.getElementById('rankBox').style.display = 'inline-flex';
+          document.getElementById('userRankValue').innerText = rankText;
+
+          // 7. جلب البادجات
+          const badgesSnap = await window.get(window.ref(window.db, 'badges/' + profileUser));
+          const badgesData = badgesSnap.val();
+          const badgesContainer = document.getElementById('badgesContainer');
+          const badgesSection = document.getElementById('badgesSection');
+          badgesContainer.innerHTML = '';
+          if (badgesData && Object.keys(badgesData).length > 0) {
+              badgesSection.style.display = 'block';
+              Object.keys(badgesData).forEach(badge => {
+                  const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; badgesContainer.appendChild(span);
+              });
+          } else { badgesSection.style.display = 'none'; }
+
+          // 8. جلب التحذيرات
+          const warnSnap = await window.get(window.ref(window.db, 'warnings/' + profileUser));
           const warnData = warnSnap.val();
           if (warnData && warnData.text) { 
               document.getElementById('warningBox').style.display = 'block'; 
@@ -342,56 +359,73 @@
               document.getElementById('warningBox').style.display = 'none'; 
           }
 
-          // 7. الأصدقاء (كود منفصل ومضمون)
-          const friendsListEl = document.getElementById('friendsList');
-          let myFriendsObj = {};
-          const allFriendsData = friendsSnap.val();
-          
-          if (allFriendsData) {
-              for (let key in allFriendsData) {
-                  if (key.toLowerCase() === profileUser.toLowerCase()) {
-                      myFriendsObj = allFriendsData[key];
-                      break;
-                  }
-              }
-          }
-
-          if (!myFriendsObj || typeof myFriendsObj !== 'object' || Object.keys(myFriendsObj).length === 0) {
-              friendsListEl.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`;
-          } else {
-              const allUsersData = usersDataSnap.val() || {};
-              friendsListEl.innerHTML = '';
-              
-              for (let friendName in myFriendsObj) {
-                  let picUrl = null;
-                  for (let u in allUsersData) {
-                      if (u.toLowerCase() === friendName.toLowerCase() && allUsersData[u].profilePic) {
-                          picUrl = allUsersData[u].profilePic;
-                          break;
-                      }
-                  }
-
-                  let avatarHTML = friendName.charAt(0).toUpperCase();
-                  if (picUrl) avatarHTML = `<img src="${picUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-
-                  const card = document.createElement('div');
-                  card.className = 'friend-card';
-                  card.innerHTML = `
-                      <div class="friend-info">
-                          <div class="friend-avatar">${avatarHTML}</div>
-                          <div class="friend-name">${friendName}</div>
-                      </div>
-                      <div>
-                          <a href="profile.html?user=${friendName}" class="action-btn">${translations[currentLang].visitProfile}</a>
-                      </div>
-                  `;
-                  friendsListEl.appendChild(card);
-              }
-          }
+          // 9. جلب الأصدقاء (بشكل منفصل ومحمي)
+          loadFriendsData();
 
       } catch (error) {
           console.error("حدث خطأ أثناء تحميل البيانات:", error);
-          document.getElementById('friendsList').innerHTML = `<div class="no-data" style="color:var(--accent); direction:ltr; text-align:left; word-break:break-all;">خطأ: ${error.message}</div>`;
+      }
+  }
+
+  // دالة منفصلة للأصدقاء عشان تضمن إنهم يتحملوا حتى لو حصل خطأ في حاجة تانية
+  async function loadFriendsData() {
+      const friendsListEl = document.getElementById('friendsList');
+      try {
+          const friendsSnap = await window.get(window.ref(window.db, 'friends'));
+          if (!friendsSnap.exists()) {
+              friendsListEl.innerHTML = `<div class="no-data">لا يوجد أصدقاء مسجلين في الموقع حالياً.</div>`;
+              return;
+          }
+
+          const allFriendsData = friendsSnap.val();
+          let myFriends = null;
+
+          for (let key in allFriendsData) {
+              if (key.toLowerCase() === profileUser.toLowerCase()) {
+                  myFriends = allFriendsData[key];
+                  break;
+              }
+          }
+
+          if (!myFriends || Object.keys(myFriends).length === 0) {
+              friendsListEl.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`;
+              return;
+          }
+
+          const usersSnap = await window.get(window.ref(window.db, 'users_data'));
+          const allUsersData = usersSnap.exists() ? usersSnap.val() : {};
+
+          friendsListEl.innerHTML = '';
+
+          for (let friendName in myFriends) {
+              let picUrl = null;
+              for (let u in allUsersData) {
+                  if (u.toLowerCase() === friendName.toLowerCase() && allUsersData[u].profilePic) {
+                      picUrl = allUsersData[u].profilePic;
+                      break;
+                  }
+              }
+
+              let avatarHTML = friendName.charAt(0).toUpperCase();
+              if (picUrl) avatarHTML = `<img src="${picUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+
+              const card = document.createElement('div');
+              card.className = 'friend-card';
+              card.innerHTML = `
+                  <div class="friend-info">
+                      <div class="friend-avatar">${avatarHTML}</div>
+                      <div class="friend-name">${friendName}</div>
+                  </div>
+                  <div>
+                      <a href="profile.html?user=${friendName}" class="action-btn">${translations[currentLang].visitProfile}</a>
+                  </div>
+              `;
+              friendsListEl.appendChild(card);
+          }
+
+      } catch (error) {
+          console.error("خطأ في تحميل الأصدقاء:", error);
+          friendsListEl.innerHTML = `<div class="no-data" style="color:var(--accent);">حدث خطأ أثناء تحميل الأصدقاء.</div>`;
       }
   }
 
