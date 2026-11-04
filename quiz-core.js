@@ -523,12 +523,33 @@ window.initQuiz = function(config) {
                     }
                 });
 
-                // 👇 تسجيل الحدث في الأرشيف الزمني
-                window.push(window.ref(window.db, 'users_data/' + currentUser + '/history'), {
-                    title: "أنهى كويز: " + quizKey.toUpperCase(),
-                    description: "بنتيجة " + score + " من " + currentQuestions.length,
-                    time: Date.now()
-                });
+window.push(window.ref(window.db, 'users_data/' + currentUser + '/history'), {
+    title: "أنهى كويز: " + quizKey.toUpperCase(),
+    description: "بنتيجة " + score + " من " + currentQuestions.length,
+    time: Date.now()
+});
+
+const today = new Date().toDateString();
+window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
+    let lastPlay = snap.exists() ? snap.val() : null;
+    let currentStreak = 0;
+    window.get(window.ref(window.db, 'users_data/' + currentUser + '/streak')).then(s => { currentStreak = s.exists() ? s.val() : 0; });
+
+    if (lastPlay !== today) {
+        let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (lastPlay === yesterday.toDateString()) { currentStreak++; } else { currentStreak = 1; }
+        
+        window.set(window.ref(window.db, 'users_data/' + currentUser + '/streak'), currentStreak);
+        window.set(window.ref(window.db, 'users_data/' + currentUser + '/last_play'), today);
+        
+        let bonusXP = currentStreak * 5; 
+        window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(xpSnap => {
+            let xp = xpSnap.exists() ? xpSnap.val() : 0;
+            window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + bonusXP);
+            showToastMessage(`🔥 ستريك ${currentStreak} أيام! خدت ${bonusXP} XP مكافأة!`);
+        });
+    }
+});
 
                 if (isSpeedrun) {
                     const totalTime = Math.floor((Date.now() - startTime) / 1000);
