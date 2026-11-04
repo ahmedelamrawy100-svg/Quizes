@@ -35,10 +35,8 @@ window.initQuiz = function(config) {
     let currentSaveKey = quizKey;
     let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
     let isChallengeMode = false; let isSpeedrun = false; let myRoomCode = null; let myRole = null;
+    let ghostTimes = []; 
     
-    // ==========================================
-    // استقبال التحدي من الـ URL
-    // ==========================================
     const urlParams = new URLSearchParams(window.location.search);
     const roomCodeFromUrl = urlParams.get('room');
     const roleFromUrl = urlParams.get('role');
@@ -92,24 +90,16 @@ window.initQuiz = function(config) {
         localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
     }
 
-    // ==========================================
-    // 🔧 التعديل المهم: انتظار الغرفة تبقى playing
-    // ==========================================
     if (isChallengeMode && myRoomCode) {
-        // بنستنى الغرفة تبقى playing قبل ما نبدأ
         let challengeStarted = false;
         
         const roomListener = window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
             if (challengeStarted) return;
-            
             const roomData = snapshot.val();
             
             if (!roomData) {
-                // الغرفة اتمسحت (التحدي اتلغى أو انتهى)
                 if (!challengeStarted) {
-                    alert(currentLang === 'en' 
-                        ? "Room was closed. Redirecting..." 
-                        : "الغرفة اتقفلت. جاري الرجوع...");
+                    alert(currentLang === 'en' ? "Room was closed. Redirecting..." : "الغرفة اتقفلت. جاري الرجوع...");
                     setTimeout(() => window.location.href = 'index.html', 2000);
                 }
                 return;
@@ -117,20 +107,15 @@ window.initQuiz = function(config) {
             
             if (roomData.status === 'playing') {
                 challengeStarted = true;
-                // نبدأ اللعبة
                 setTimeout(() => startGame('challenge'), 300);
             }
-            // لو status === 'waiting'، بنستنى (اللاعب التاني لسه ما انضمش)
         });
         
-        // Safety timeout - لو بعد 60 ثانية مفيش استجابة
         setTimeout(() => {
             if (!challengeStarted) {
                 window.get(window.ref(window.db, 'rooms/' + myRoomCode)).then(snap => {
                     if (!snap.exists() || snap.val().status !== 'playing') {
-                        alert(currentLang === 'en' 
-                            ? "Connection timeout. Redirecting..." 
-                            : "انتهت مهلة الاتصال. جاري الرجوع...");
+                        alert(currentLang === 'en' ? "Connection timeout. Redirecting..." : "انتهت مهلة الاتصال. جاري الرجوع...");
                         window.location.href = 'index.html';
                     }
                 });
@@ -150,7 +135,6 @@ window.initQuiz = function(config) {
     window.closeChallengeModal = function() { 
         const modal = document.getElementById('challengeModal');
         if (modal) modal.style.display = 'none'; 
-        // نمسح الغرفة بس لو إحنا اللي أنشأناها (player1)
         if (myRoomCode && myRole === 'player1') { 
             window.remove(window.ref(window.db, 'rooms/' + myRoomCode)); 
             localStorage.removeItem('activeRoomCode');
@@ -224,7 +208,6 @@ window.initQuiz = function(config) {
         if (roomsSnap.exists()) {
             const rooms = roomsSnap.val(); 
             let foundRoom = null;
-            // ⚠️ مقارنة quizType لازم تتطابق مع اللي اتحفظ في profile.html
             for (let code in rooms) { 
                 if (rooms[code].status === 'waiting' && 
                     (rooms[code].quizType === currentSaveKey || rooms[code].quizType === quizKey)) { 
@@ -279,37 +262,21 @@ window.initQuiz = function(config) {
         }); 
     }
 
-    // ==========================================
-    // 🔧 التعديل: fallback لو comprehensive مش موجود
-    // ==========================================
     window.startGame = function(part) { 
         isSpeedrun = false; 
+        ghostTimes = []; 
         
         if (part === 'challenge') { 
-            // نستخدم comprehensive لو موجود، وإلا all، وإلا part1
             let challengeQuestions = null;
-            
-            if (quizData.comprehensive && quizData.comprehensive.length > 0) {
-                challengeQuestions = [...quizData.comprehensive];
-            } else if (quizData.all && quizData.all.length > 0) {
-                challengeQuestions = [...quizData.all];
-            } else if (quizData.part1 && quizData.part1.length > 0) {
-                challengeQuestions = [...quizData.part1];
-            } else if (partsList) {
-                // نجرب أي جزء متاح
-                for (let key in partsList) {
-                    if (partsList[key] && partsList[key].length > 0) {
-                        challengeQuestions = [...partsList[key]];
-                        break;
-                    }
-                }
-            }
+            if (quizData.comprehensive && quizData.comprehensive.length > 0) { challengeQuestions = [...quizData.comprehensive]; } 
+            else if (quizData.all && quizData.all.length > 0) { challengeQuestions = [...quizData.all]; } 
+            else if (quizData.part1 && quizData.part1.length > 0) { challengeQuestions = [...quizData.part1]; } 
+            else if (partsList) { for (let key in partsList) { if (partsList[key] && partsList[key].length > 0) { challengeQuestions = [...partsList[key]]; break; } } }
             
             if (!challengeQuestions || challengeQuestions.length === 0) {
                 alert(currentLang === 'en' ? "Quiz data not found!" : "بيانات الكويز غير موجودة!");
                 return;
             }
-            
             currentQuestions = challengeQuestions;
             isChallengeMode = true; 
             document.getElementById('playScreen').classList.add('active-play'); 
@@ -399,6 +366,10 @@ window.initQuiz = function(config) {
                 if (!opts) opts = q.options_en || q.options_ar; 
                 document.querySelectorAll('.option').forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); }); 
                 document.getElementById('next').style.display = 'inline-block'; 
+                
+                if (!isChallengeMode && !isSpeedrun) {
+                    ghostTimes.push(20);
+                }
             } 
         } 
         timeLeft--; 
@@ -435,6 +406,10 @@ window.initQuiz = function(config) {
         
         document.getElementById('score').innerText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; 
         document.getElementById('next').style.display = 'inline-block'; 
+
+        if (!isChallengeMode && !isSpeedrun) {
+            ghostTimes.push(20 - timeLeft);
+        }
     }
 
     window.nextQuestion = function() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
@@ -474,7 +449,6 @@ window.initQuiz = function(config) {
                         const backBtn = document.getElementById('backBtn');
                         if (backBtn) backBtn.style.display = 'flex'; 
                         
-                        // نمسح الغرفة بعد ما الاتنين يخلصوا
                         window.remove(window.ref(window.db, 'rooms/' + myRoomCode)); 
                         localStorage.removeItem('activeRoomCode');
                     } 
@@ -485,7 +459,6 @@ window.initQuiz = function(config) {
             setTimeout(() => { window.location.href = 'index.html'; }, 3000); 
         } 
         else {
-            // ... باقي الكود بتاع الكويز العادي (زي ما هو)
             let realHighScore = highestScore;
             if (localStorage.getItem(currentSaveKey) > realHighScore) {
                 realHighScore = localStorage.getItem(currentSaveKey);
@@ -495,14 +468,20 @@ window.initQuiz = function(config) {
                 <h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2>
                 <p style="color:var(--text-color); font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p>
                 <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${activeLang === 'en' ? 'High Score' : 'أعلى نتيجة'}: ${realHighScore}</p>
-                <div class="share-container">
+                
+                <div style="margin-top: 30px; border-top: 1px dashed #333; padding-top: 20px;">
+                    <h3 style="color:var(--blue); font-size: 24px;">👻 ${activeLang === 'en' ? 'Ghost Mode Unlocked!' : 'تم فتح وضع الشبح!'}</h3>
+                    <p style="font-size: 16px; color: #aaa; margin-bottom: 15px;">${activeLang === 'en' ? 'Can you beat your own time and accuracy?' : 'هل يمكنك التغلب على سرعتك ودقتك السابقة؟'}</p>
+                    <button onclick="window.startGhostQuiz()" style="padding:15px 30px; background:#0088cc; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold; width:100%; max-width:300px; margin: 0 auto; display:block;">👻 ${activeLang === 'en' ? 'Play Against Your Ghost' : 'العب ضد شبحك'}</button>
+                </div>
+
+                <div class="share-container" style="margin-top: 20px;">
                     <div class="share-title">${activeLang === 'en' ? 'Share your result with friends!' : 'شارك نتيجتك مع أصحابك!'}</div>
                     <div class="share-buttons">
                         <button class="share-btn share-wa" onclick="shareResult('whatsapp')">📱 WhatsApp</button>
                         <button class="share-btn share-tg" onclick="shareResult('telegram')">✈️ Telegram</button>
                         <button class="share-btn share-fb" onclick="shareResult('facebook')">📘 Facebook</button>
                         <button class="share-btn share-tw" onclick="shareResult('twitter')">🐦 Twitter</button>
-                        <button class="share-btn share-other" onclick="shareResult('native')">📤 ${activeLang === 'en' ? 'Other Apps' : 'تطبيقات تانية'}</button>
                     </div>
                 </div>
                 <button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#8b0000; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; width:100%; max-width:250px; display:block; margin-left:auto; margin-right:auto;">${activeLang === 'en' ? 'Play Again' : 'العب تاني'}</button>
@@ -516,7 +495,6 @@ window.initQuiz = function(config) {
             if (backBtn) backBtn.style.display = 'flex'; 
 
             if (window.db && currentUser !== 'Unknown') { 
-                // ... حفظ النتايج (زي ما هو)
                 window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
                 window.set(window.ref(window.db, 'leaderboard/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
                 
@@ -534,6 +512,24 @@ window.initQuiz = function(config) {
                     user: currentUser, action: "أنهى", detail: "كويز " + (quizKey.toUpperCase()) + " بنتيجة " + score, time: Date.now()
                 });
 
+                // 👇 تسجيل نقاط التيم
+                window.get(window.ref(window.db, 'users_data/' + currentUser + '/team')).then(teamSnap => {
+                    if (teamSnap.exists()) {
+                        const playerTeam = teamSnap.val();
+                        window.get(window.ref(window.db, 'teams/' + playerTeam)).then(currentScoreSnap => {
+                            let currentScore = currentScoreSnap.exists() ? currentScoreSnap.val() : 0;
+                            window.set(window.ref(window.db, 'teams/' + playerTeam), currentScore + score);
+                        });
+                    }
+                });
+
+                // 👇 تسجيل الحدث في الأرشيف الزمني
+                window.push(window.ref(window.db, 'users_data/' + currentUser + '/history'), {
+                    title: "أنهى كويز: " + quizKey.toUpperCase(),
+                    description: "بنتيجة " + score + " من " + currentQuestions.length,
+                    time: Date.now()
+                });
+
                 if (isSpeedrun) {
                     const totalTime = Math.floor((Date.now() - startTime) / 1000);
                     await window.push(window.ref(window.db, 'speedrun_scores'), {
@@ -542,7 +538,6 @@ window.initQuiz = function(config) {
                     showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
                 }
 
-                // ستريك
                 const today = new Date().toDateString();
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/last_play')).then(snap => {
                     let lastPlay = snap.exists() ? snap.val() : null;
@@ -583,4 +578,110 @@ window.initQuiz = function(config) {
         else if (platform === 'native' && navigator.share) navigator.share({ title: 'Quiz Hub', text: text, url: url }).catch(console.error); 
         else alert(activeLang === 'en' ? "Sharing is not supported." : "المشاركة غير مدعومة."); 
     };
+
+    // ==========================================
+    // دالة تشغيل "كويز الشبح"
+    // ==========================================
+    window.startGhostQuiz = function() {
+        current = 0;
+        let ghostScore = 0;
+        let activeLang = localStorage.getItem('lang') || 'ar';
+        
+        document.getElementById('question').innerHTML = `<h2 style="color:var(--blue); text-align:center;">👻 ${activeLang === 'en' ? 'Ghost Mode' : 'وضع الشبح'}</h2><p style="text-align:center; color:#aaa;">${activeLang === 'en' ? 'Answer before your ghost!' : 'جاوب قبل الشبح بتاعك!'}</p>`;
+        document.getElementById('options').innerHTML = '';
+        document.getElementById('next').style.display = 'none';
+        document.getElementById('score').innerText = '';
+        document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('timer').style.display = 'none';
+        
+        let ghostInterval;
+        
+        function runGhost() {
+            if (current >= currentQuestions.length) {
+                clearInterval(ghostInterval);
+                document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:var(--blue); font-size:36px;">👻 ${activeLang === 'en' ? 'Ghost Mode Over!' : 'انتهى وضع الشبح!'}</h2><p style="font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${ghostScore} / ${currentQuestions.length}</p><button onclick="location.reload()" style="margin-top:20px; padding:12px 30px; background:#0088cc; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px;">${activeLang === 'en' ? 'Play Again' : 'العب تاني'}</button></div>`;
+                document.getElementById('options').innerHTML = '';
+                return;
+            }
+
+            let currentGhostTime = ghostTimes[current] !== undefined ? ghostTimes[current] : 20;
+            if (currentGhostTime <= 0) currentGhostTime = 1;
+            
+            const q = currentQuestions[current];
+            let qText = activeLang === 'ar' ? q.q_ar : q.q_en;
+            if (!qText) qText = q.q_en;
+            
+            let opts = activeLang === 'ar' ? q.options_ar : q.options_en;
+            if (!opts) opts = q.options_en;
+
+            document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
+                <p style="font-size:14px; color:#aaa;">${activeLang === 'en' ? 'Ghost Time:' : 'وقت الشبح:'} <span id="ghostTimer" style="color:var(--blue); font-weight:bold;">${currentGhostTime}</span>s</p>
+                <h3 style="font-size:22px; margin:10px 0;">${qText}</h3>
+            </div>`;
+
+            const optEl = document.getElementById('options');
+            optEl.innerHTML = '';
+            let optionsWithAnswers = opts.map((opt, index) => ({ text: opt, isCorrect: index === q.answer }));
+            optionsWithAnswers.sort(() => Math.random() - 0.5);
+            
+            let answeredGhost = false;
+
+            optionsWithAnswers.forEach((opt) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerText = opt.text;
+                div.onclick = () => {
+                    if (answeredGhost) return;
+                    answeredGhost = true;
+                    clearInterval(ghostInterval);
+                    
+                    if (opt.isCorrect) {
+                        ghostScore++;
+                        div.classList.add('correct');
+                        confetti({ particleCount: 20, spread: 50, origin: { y: 0.6 } });
+                    } else {
+                        div.classList.add('wrong');
+                        document.getElementById('playScreen').classList.add('shake-animation');
+                        setTimeout(() => document.getElementById('playScreen').classList.remove('shake-animation'), 400);
+                    }
+                    
+                    document.querySelectorAll('.option').forEach(o => {
+                        if (o.innerText === opts[q.answer]) o.classList.add('correct');
+                    });
+                    
+                    setTimeout(() => {
+                        current++;
+                        runGhost();
+                    }, 1500);
+                };
+                optEl.appendChild(div);
+            });
+
+            let timer = currentGhostTime;
+            ghostInterval = setInterval(() => {
+                timer--;
+                const timerEl = document.getElementById('ghostTimer');
+                if (timerEl) timerEl.innerText = timer;
+                
+                if (timer <= 0) {
+                    clearInterval(ghostInterval);
+                    if (!answeredGhost) {
+                        answeredGhost = true;
+                        document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+                        document.querySelectorAll('.option').forEach(o => {
+                            if (o.innerText === opts[q.answer]) o.classList.add('correct');
+                        });
+                        showToastMessage(`👻 ${activeLang === 'en' ? 'Ghost answered first!' : 'الشبح جاوب الأول!'}`);
+                        
+                        setTimeout(() => {
+                            current++;
+                            runGhost();
+                        }, 1500);
+                    }
+                }
+            }, 1000);
+        }
+
+        setTimeout(runGhost, 1000);
+    }
 }
