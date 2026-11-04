@@ -33,7 +33,8 @@
   .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; transition: 0.3s; overflow: hidden; }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   body.light-mode .avatar { border-color: #111; }
-  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; }
+  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; display: flex; flex-direction: column; align-items: center; gap: 10px;}
+  .persona-badge { font-size: 16px; color: #00bcd4; background: rgba(0, 188, 212, 0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid #00bcd4; font-weight: bold;}
   .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
   body.light-mode .rank-box { background: #fff; }
   .rank-label { font-size: 14px; color: var(--subtitle-color); margin-left: 5px; }
@@ -107,7 +108,10 @@
 <div class="profile-container">
   <div class="header-card">
     <div class="avatar" id="userAvatar">A</div>
-    <div class="username" id="userName">Loading...</div>
+    <div class="username" id="userName">
+        <span id="userNameText">Loading...</span>
+        <span class="persona-badge" id="personaBadge" style="display: none;"></span>
+    </div>
     
     <div class="rank-box" id="rankBox" style="display: none;">
         <span class="rank-label" id="rankLabelText">الرتبة:</span>
@@ -183,7 +187,6 @@
   const urlParams = new URLSearchParams(window.location.search);
   let loggedInUser = localStorage.getItem('loggedInUser');
   
-  // توحيد الاسم ليكون حروف صغيرة
   if (loggedInUser) loggedInUser = loggedInUser.toLowerCase();
   let profileUser = urlParams.get('user') ? urlParams.get('user').toLowerCase() : loggedInUser; 
 
@@ -198,7 +201,7 @@
       document.getElementById('customAlert').style.display = 'none';
   };
 
-  document.getElementById('userName').innerText = profileUser;
+  document.getElementById('userNameText').innerText = profileUser;
   document.getElementById('friendsNameDisplay').innerText = profileUser;
 
   let currentLang = localStorage.getItem('lang') || 'ar';
@@ -244,9 +247,8 @@
               if(user.toLowerCase() === profileUser.toLowerCase()) { profileUser = user; break; }
           }
       }
-      // بنخلي الاسم المعروض كابيتال عشان يبان حلو
       const displayName = profileUser.charAt(0).toUpperCase() + profileUser.slice(1);
-      document.getElementById('userName').innerText = displayName;
+      document.getElementById('userNameText').innerText = displayName;
       document.getElementById('friendsNameDisplay').innerText = displayName;
       
       if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
@@ -257,7 +259,6 @@
 
   async function loadProfileData() {
       try {
-          // بندور على الداتا بالاسم السمول عشان نضمن إننا بنجيب كل حاجة
           const dbUser = profileUser.toLowerCase();
           
           const userSnap = await window.get(window.ref(window.db, 'users_data/' + dbUser));
@@ -272,8 +273,15 @@
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'none';
           }
 
+          // إظهار اللقب (Persona) هنا
+          let myPersona = userData.persona;
+          if (myPersona) {
+              const badge = document.getElementById('personaBadge');
+              badge.innerText = myPersona;
+              badge.style.display = 'inline-block';
+          }
+
           let xp = userData.xp || 0;
-          // لو الـ xp متسجل بطريقة قديمة كرقم مباشر
           if (typeof userData === 'number') xp = userData; 
           else if (userData.xp === undefined && !isNaN(userData)) xp = userData;
 
@@ -357,7 +365,6 @@
               document.getElementById('warningText').innerText = translations[currentLang].warnPrefix + warnData.text; 
           } else { document.getElementById('warningBox').style.display = 'none'; }
 
-          // جلب الأرشيف الزمني
           const historySnap = await window.get(window.ref(window.db, 'users_data/' + dbUser + '/history'));
           const historyList = document.getElementById('timelineList');
           historyList.innerHTML = '';
