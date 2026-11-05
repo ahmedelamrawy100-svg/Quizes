@@ -7,17 +7,25 @@ const app = initializeApp(firebaseConfig); const db = getDatabase(app); const au
 
 window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push; window.signOut = signOut; window.auth = auth;
 
-window.checkPassword = async function() {
-    const input = document.getElementById('ownerPasswordInput').value;
-    try {
-        await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
-        document.getElementById('passwordLock').style.display = 'none';
-        document.getElementById('ownerContent').style.display = 'block';
-        initApp();
-    } catch (error) {
-        document.getElementById('errorMsg').style.display = 'block';
-        document.getElementById('ownerPasswordInput').value = '';
-        document.getElementById('ownerPasswordInput').focus();
+const currentUser = localStorage.getItem('loggedInUser');
+
+if (currentUser === 'ahmed') {
+    document.getElementById('passwordLock').style.display = 'none';
+    document.getElementById('ownerContent').style.display = 'block';
+    initApp();
+} else {
+    document.getElementById('passwordLock').style.display = 'flex';
+    window.checkPassword = async function() {
+        const input = document.getElementById('ownerPasswordInput').value;
+        try {
+            await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
+            document.getElementById('passwordLock').style.display = 'none';
+            document.getElementById('ownerContent').style.display = 'block';
+            initApp();
+        } catch (error) {
+            document.getElementById('errorMsg').style.display = 'block';
+            document.getElementById('ownerPasswordInput').value = '';
+        }
     }
 }
 
@@ -34,11 +42,8 @@ function initApp() {
     window.toggleTheme = function() {
         const body = document.body; const btn = document.getElementById('themeBtn');
         body.classList.toggle('light-mode');
-        if (body.classList.contains('light-mode')) { 
-            btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); 
-        } else { 
-            btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); 
-        }
+        if (body.classList.contains('light-mode')) { btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); } 
+        else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
     }
 
     let currentLang = localStorage.getItem('lang') || 'ar';
@@ -78,15 +83,15 @@ function initApp() {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
         const titlesAr = { 
-            dashboard: '📊 الإحصائيات', users: '👥 اللاعبين', ranks: '🎖️ إدارة الرتب', badges: '🏅 البادجات', 
+            dashboard: '📊 الإحصائيات', assign: '👑 تعيين الإدارة', users: '👥 اللاعبين', ranks: '🎖️ إدارة الرتب', badges: '🏅 البادجات', 
             warnings: '⚠️ التحذيرات', content: '📝 المحتوى', quizzes: '🎬 الكويزات', 
-            rooms: '🚪 الغرف', requests: '📩 الطلبات', system: '⚙️ النظام', messages: '📩 الرسائل', 
+            rooms: '🚪 الغرف', manager: '📩 طلبات المنجر', system: '⚙️ النظام', messages: '📩 الرسائل', 
             admins: '🛡️ الأدمنز', security: '🔒 الأمان', developer: '🔧 المطور'
         };
         const titlesEn = { 
-            dashboard: '📊 Dashboard', users: '👥 Players', ranks: '🎖️ Ranks', badges: '🏅 Badges', 
+            dashboard: '📊 Dashboard', assign: '👑 Assign Roles', users: '👥 Players', ranks: '🎖️ Ranks', badges: '🏅 Badges', 
             warnings: '⚠️ Warnings', content: '📝 Content', quizzes: '🎬 Quizzes', 
-            rooms: '🚪 Rooms', requests: '📩 Requests', system: '⚙️ System', messages: '📩 Messages', 
+            rooms: '🚪 Rooms', manager: '📩 Manager Reqs', system: '⚙️ System', messages: '📩 Messages', 
             admins: '🛡️ Admins', security: '🔒 Security', developer: '🔧 Developer'
         };
         document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
@@ -95,7 +100,8 @@ function initApp() {
     let allUsers = {}, allPresence = {}, allScores = {}, allRoles = {}, allXP = {}, allRooms = {}, allBadges = {}, allUserRanks = {};
 
     window.onValue(window.ref(window.db, 'usernames'), snap => { 
-        allUsers = snap.val() || {}; document.getElementById('statUsers').innerText = Object.keys(allUsers).length; window.renderUsers(); window.populateRankSelect(); window.populateBadgeSelect(); window.populateWarnSelect();
+        allUsers = snap.val() || {}; document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
+        window.renderUsers(); window.populateRankSelect(); window.populateBadgeSelect(); window.populateWarnSelect(); window.renderAssignList();
     });
     window.onValue(window.ref(window.db, 'presence'), snap => { 
         allPresence = snap.val() || {}; document.getElementById('statOnline').innerText = Object.values(allPresence).filter(p => p.status === 'online').length; window.renderUsers(); 
@@ -111,7 +117,7 @@ function initApp() {
         document.getElementById('statXP').innerText = total;
     });
     window.onValue(window.ref(window.db, 'roles/admins'), snap => { allRoles = snap.val() || {}; window.renderUsers(); window.renderAdmins(); });
-    window.onValue(window.ref(window.db, 'roles/users'), snap => { allUserRanks = snap.val() || {}; window.renderRanksList(); window.renderUsers(); });
+    window.onValue(window.ref(window.db, 'roles/users'), snap => { allUserRanks = snap.val() || {}; window.renderRanksList(); window.renderUsers(); window.renderAssignList(); });
     window.onValue(window.ref(window.db, 'badges'), snap => { allBadges = snap.val() || {}; window.renderBadgesList(); });
     window.onValue(window.ref(window.db, 'rooms'), snap => { 
         allRooms = snap.val() || {}; document.getElementById('statRooms').innerText = Object.keys(allRooms).length; window.renderRooms(); 
@@ -125,70 +131,95 @@ function initApp() {
         window.renderContent('suggestions', snap.val(), 'suggestionsList'); 
     });
     window.onValue(window.ref(window.db, 'quiz_requests'), snap => { 
-        document.getElementById('statRequests').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
         window.renderContent('quiz_requests', snap.val(), 'requestsList'); 
     });
     window.onValue(window.ref(window.db, 'custom_quizzes'), snap => { 
-        document.getElementById('statCustom').innerText = snap.exists() ? Object.keys(snap.val()).length : 0; 
         window.renderCustomQuizzes(snap.val()); 
     });
     window.onValue(window.ref(window.db, 'site_stats/visitors'), snap => { document.getElementById('statVisitors').innerText = snap.exists() ? snap.val() : 0; });
     window.onValue(window.ref(window.db, 'warnings'), snap => { window.renderWarnings(snap.val()); });
     window.onValue(window.ref(window.db, 'banned_users'), snap => { window.renderBanned(snap.val()); });
     
-    // --- قسم الطلبات (الرتب والبادجات) ---
-    window.onValue(window.ref(window.db, 'admin_requests'), snap => {
-        const list = document.getElementById('requestsOwnerList');
+    // دالة عرض التعيين
+    window.renderAssignList = function() {
+        const list = document.getElementById('assignList');
+        if(!list) return;
+        const searchInput = document.getElementById('assignSearch');
+        const search = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        let html = '';
+        for (let u in allUsers) {
+            if (u.toLowerCase() !== 'ahmed' && u.toLowerCase().includes(search)) {
+                html += `
+                <div class="item">
+                    <div><h3>👤 ${u}</h3></div>
+                    <div style="display:flex; gap:10px;">
+                        <select class="form-control" style="width:150px; margin:0;" onchange="window.setStaffRole('${u}', this.value)">
+                            <option value="Player" ${allUserRanks[u]==='Player'||!allUserRanks[u]?'selected':''}>لاعب عادي</option>
+                            <option value="Admin" ${allUserRanks[u]==='Admin'?'selected':''}>أدمن</option>
+                            <option value="Manager" ${allUserRanks[u]==='Manager'?'selected':''}>منجر</option>
+                            <option value="Partner" ${allUserRanks[u]==='Partner'?'selected':''}>بارتنر</option>
+                            <option value="Tester" ${allUserRanks[u]==='Tester'?'selected':''}>تستر</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+        }
+        list.innerHTML = html || '<p>لا يوجد لاعبين.</p>';
+    };
+
+    window.setStaffRole = async function(username, role) {
+        await window.set(window.ref(window.db, 'roles/users/' + username), role);
+        
+        await window.remove(window.ref(window.db, 'roles/admins/' + username));
+        await window.remove(window.ref(window.db, 'roles/managers/' + username));
+        await window.remove(window.ref(window.db, 'roles/partners/' + username));
+        await window.remove(window.ref(window.db, 'roles/testers/' + username));
+
+        if(role === 'Admin') await window.set(window.ref(window.db, 'roles/admins/' + username), true);
+        if(role === 'Manager') await window.set(window.ref(window.db, 'roles/managers/' + username), true);
+        if(role === 'Partner') await window.set(window.ref(window.db, 'roles/partners/' + username), true);
+        if(role === 'Tester') await window.set(window.ref(window.db, 'roles/testers/' + username), true);
+
+        window.showToast(`تم تعيين ${username} كـ ${role}`);
+    };
+
+    // استقبال رسائل الإدارة
+    window.onValue(window.ref(window.db, 'messages/owner_inbox'), snap => {
+        const list = document.getElementById('ownerInboxList');
         if(!list) return;
         list.innerHTML = '';
-        if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد طلبات حالياً.</div>'; return; }
-        const data = snap.val();
-        const sortedKeys = Object.keys(data).sort((a,b) => data[b].time - data[a].time);
+        if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد رسائل.</div>'; return; }
         
-        sortedKeys.forEach(key => {
-            const req = data[key];
+        Object.keys(snap.val()).reverse().forEach(key => {
+            const msg = snap.val()[key];
             const div = document.createElement('div'); div.className = 'item';
-            const statusColor = req.status === 'approved' ? '#4caf50' : '#ff9800';
-            const statusText = req.status === 'approved' ? 'تم القبول ✅' : 'قيد الانتظار ⏳';
-            
             div.innerHTML = `
                 <div>
-                    <h3 style="color:var(--gold);">👤 ${req.user}</h3>
-                    <p>${req.text}</p>
-                    <p style="font-size:12px; color:${statusColor}; font-weight:bold;">${statusText}</p>
-                    <p style="font-size:11px; color:#888;">${new Date(req.time).toLocaleString()}</p>
+                    <h4 style="color:var(--gold); font-size:14px;">${msg.from}</h4>
+                    <p>${msg.text}</p>
                 </div>
-                <div style="display:flex; gap:5px; flex-wrap:wrap;">
-                    ${req.status !== 'approved' ? `<button class="btn btn-green" onclick="window.approveRequest('${req.user}', '${key}')">قبول ✅</button>` : ''}
-                    <button class="btn btn-red" onclick="window.deleteRequest('${key}')">مسح 🗑️</button>
-                </div>
+                <button class="btn btn-blue" onclick="window.replyToStaff('${msg.from}', '${key}')">رد ✉️</button>
             `;
             list.appendChild(div);
         });
     });
 
+    window.replyToStaff = async function(senderStr, msgKey) {
+        const username = senderStr.split(': ')[1] || 'Unknown';
+        const reply = prompt(`اكتب ردك لـ ${username}:`);
+        if(reply) {
+            await window.push(window.ref(window.db, 'messages/' + username), { from: 'الإدارة (الأونر)', text: reply, time: Date.now() });
+            await window.remove(window.ref(window.db, 'messages/owner_inbox/' + msgKey));
+            window.showToast('تم إرسال الرد بنجاح!');
+        }
+    };
+
+    // باقي الدوال زي ما هي ...
     window.approveRequest = (user, key) => {
         window.set(window.ref(window.db, 'admin_requests/' + key + '/status'), 'approved');
         window.showToast(`تم قبول طلب ${user}، روح لصفحة اللاعبين واديله الرتبة.`);
-        // بننقله لصفحة اللاعبين
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById('tab-users').classList.add('active');
-        document.querySelectorAll('.nav-item')[1].classList.add('active');
     };
-
-    window.deleteRequest = (key) => {
-        if(confirm('مسح الطلب ده؟')) {
-            window.remove(window.ref(window.db, 'admin_requests/' + key));
-            window.showToast('تم مسح الطلب');
-        }
-    };
-    // -----------------------------------------
-
-    window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
-        const isM = snap.exists() ? snap.val() : false;
-        document.getElementById('maintenanceBtn').innerText = isM ? (currentLang === 'ar' ? 'إلغاء الصيانة' : 'Disable Maintenance') : (currentLang === 'ar' ? 'تفعيل الصيانة' : 'Enable Maintenance');
-        document.getElementById('maintenanceBtn').className = isM ? 'btn btn-green' : 'btn btn-red';
-    });
 
     window.renderUsers = function() {
         const container = document.getElementById('usersList'); if(!container) return;
@@ -582,10 +613,68 @@ function initApp() {
         window.location.href = 'index.html'; 
     };
 
-        window.clearSiteCache = async () => {
+    window.clearSiteCache = async () => {
         if(confirm('هل أنت متأكد من مسح الكاش؟ سيتم تحديث الموقع لجميع اللاعبين عند فتحهم للصفحة القادمة.')) {
             await window.set(window.ref(window.db, 'site_settings/version'), Date.now());
             window.showToast('تم مسح الكاش بنجاح! الموقع سيحدث للجميع.');
         }
+    };
+
+    // تبويب طلبات المنجر
+    window.onValue(window.ref(window.db, 'manager_requests/drafts'), snap => {
+        const list = document.getElementById('managerDraftsList');
+        if(!list) return;
+        list.innerHTML = '';
+        if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد مسودات.</div>'; return; }
+        const data = snap.val();
+        const namesAr = { rules: '📜 قوانين الموقع', announcement: '📢 إعلان', faq: '❓ أسئلة شائعة', welcome: '👋 رسالة ترحيب', journey: '🛣️ رحلة مستخدم', terms: '📝 شروط مسابقات', performance: '📊 تقييم فريق' };
+        for(let key in data) {
+            const div = document.createElement('div'); div.className = 'item';
+            div.innerHTML = `<div><h3 style="color:var(--gold);">${namesAr[key] || key}</h3><p style="font-size:14px; color:#ccc; margin-top:5px;">${data[key]}</p></div><div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="window.approveDraft('${key}', '${data[key].replace(/'/g, "\\'")}')">نشر ✅</button><button class="btn btn-red" onclick="window.deleteDraft('${key}')">مسح 🗑️</button></div>`;
+            list.appendChild(div);
+        }
+    });
+
+    window.onValue(window.ref(window.db, 'manager_requests'), snap => {
+        const list = document.getElementById('managerReqsList');
+        if(!list) return;
+        list.innerHTML = '';
+        const data = snap.val();
+        if(!data) { list.innerHTML = '<div class="item">لا توجد طلبات.</div>'; return; }
+        const ignored = ['drafts'];
+        const namesAr = { tournaments: '🏆 بطولات', player_week: '⭐ لاعب الأسبوع', matches: '⚔️ مباريات', ideas: '💡 أفكار كويزات', vip_notes: '👑 ملاحظات VIP', sponsor_replies: '🤝 ردود شركاء', shifts: '⏰ شفتات', team_tasks: '📋 مهام فريق', dev_requests: '🛠️ طلبات تطوير', calendar: '📅 فعاليات', tester_tasks: '🧪 مهام تسترات', bugs: '🐛 مشاكل', marketing: '📢 تسويق', meetings: '🤝 اجتماعات', discounts: '💸 خصومات' };
+        let hasReqs = false;
+        for(let key in data) {
+            if(ignored.includes(key)) continue;
+            for(let reqId in data[key]) {
+                hasReqs = true;
+                const req = data[key][reqId];
+                const div = document.createElement('div'); div.className = 'item';
+                div.innerHTML = `<div><h3 style="color:var(--blue); font-size:16px;">${namesAr[key] || key}</h3><p>${req.text}</p></div><button class="btn btn-green" onclick="window.deleteReq('${key}', '${reqId}')">تم ✅</button>`;
+                list.appendChild(div);
+            }
+        }
+        if(!hasReqs) list.innerHTML = '<div class="item">لا توجد طلبات حالياً.</div>';
+    });
+
+    window.approveDraft = async (key, text) => {
+        if(confirm('هل أنت متأكد من نشر هذه المسودة؟')) {
+            if(key === 'rules') await window.set(window.ref(window.db, 'site_settings/rules'), text);
+            if(key === 'announcement') await window.set(window.ref(window.db, 'site_settings/announcement'), text);
+            await window.remove(window.ref(window.db, 'manager_requests/drafts/' + key));
+            window.showToast('تم النشر بنجاح!');
+        }
+    };
+
+    window.deleteDraft = async (key) => {
+        if(confirm('مسح المسودة؟')) {
+            await window.remove(window.ref(window.db, 'manager_requests/drafts/' + key));
+            window.showToast('تم المسح');
+        }
+    };
+
+    window.deleteReq = async (node, id) => {
+        await window.remove(window.ref(window.db, 'manager_requests/' + node + '/' + id));
+        window.showToast('تم الإنجاز');
     };
 }
