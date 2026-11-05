@@ -3,173 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 لوحة المختبرين (Tester Panel) - Quiz Hub</title>
+<title>🧪 لوحة المختبرين - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { 
-      --bg: #080808; --panel: #111; --text: #fff; --border: #333; 
-      --cyan: #00bcd4; --danger: #f44336; --green: #4caf50; --gold: #ffd700; --purple: #9c27b0;
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f0f2f5;
+    --text: #1a1a1a; --text-secondary: #6b7280; --border: #e5e7eb;
+    --primary: #06b6d4; --primary-hover: #0891b2; --primary-light: #ecfeff;
+    --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body.dark-mode {
+    --bg: #0f1419; --surface: #1a1f26; --surface-2: #232a33;
+    --text: #f9fafb; --text-secondary: #9ca3af; --border: #2d3748;
+    --primary-light: #082f35; --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
   
-  #panelContent { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.5s; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  #panelContent { display: none; width: 100%; max-width: 1280px; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   
-  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--cyan); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-  .header h1 { color: var(--cyan); font-size: 28px; }
-  .btn-back { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #555; border-radius: 8px; text-decoration: none; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
-  .btn-back:hover { background: var(--cyan); color: #000; border-color: var(--cyan); }
-
-  .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 10px; }
-  .tab-btn { background: transparent; border: none; color: #888; font-family: 'Cairo'; font-size: 15px; font-weight: bold; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
-  .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; animation: fadeIn 0.3s; }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
-  .card:hover { border-color: var(--cyan); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,188,212,0.1); }
-  .card h3 { color: var(--cyan); margin-bottom: 10px; font-size: 18px; }
-  .card p { color: #aaa; font-size: 13px; margin-bottom: 15px; line-height: 1.5; flex-grow: 1; }
+  /* Header */
+  .top-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 16px 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 0 auto 20px auto; flex-wrap: wrap; gap: 12px; width: 100%; box-sizing: border-box; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), #22d3ee); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); }
+  .brand-text h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
   
-  .btn-action { display: block; width: 100%; padding: 12px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-family: 'Cairo'; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-  .btn-action:hover { background: var(--cyan); color: #000; border-color: var(--cyan); }
+  /* Buttons */
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .icon-btn { width: 40px; height: 40px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-sm); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Cairo'; }
+  .icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
+  .btn-back { padding: 10px 18px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
   
-  .console-box { background: #000; border: 1px solid var(--border); border-radius: 10px; padding: 15px; font-family: monospace; font-size: 13px; color: var(--green); height: 250px; overflow-y: auto; text-align: left; direction: ltr; margin-top: 30px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
-  .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; outline: none; margin-bottom: 10px; }
+  /* Tabs */
+  .tabs-bar { display: flex; gap: 4px; background: var(--surface); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 0 auto 24px auto; overflow-x: auto; scrollbar-width: none; width: 100%; box-sizing: border-box; }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { background: transparent; border: none; color: var(--text-secondary); font-family: 'Cairo'; font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35); }
+  
+  /* Tab Content */
+  .tab-content { display: none; width: 100%; animation: fadeUp 0.3s ease; }
+  .tab-content.active { display: block; }
+  
+  /* Grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; transition: all 0.25s; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0; transition: opacity 0.25s; }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .card:hover::before { opacity: 1; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .card-icon { width: 36px; height: 36px; background: var(--primary-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .card h3 { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .card p { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 14px; flex-grow: 1; }
+  
+  /* Console */
+  .console-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 15px; font-family: monospace; font-size: 13px; color: var(--success); height: 250px; overflow-y: auto; text-align: left; direction: ltr; margin-top: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+  
+  /* Buttons */
+  .btn-action { display: block; width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Cairo'; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; }
+  .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .btn-red { background: var(--danger); }
+  .btn-red:hover { background: #dc2626; }
+  .btn-green { background: var(--success); }
+  .btn-green:hover { background: #059669; }
+  
+  .form-control { width: 100%; padding: 11px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none; margin-bottom: 12px; transition: all 0.2s; }
+  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15); background: var(--surface); }
+  
+  /* Section Title */
+  .section-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .section-title.danger { color: var(--danger); }
+  
+  @media (max-width: 640px) { body { padding: 12px; } .top-header { padding: 12px 16px; } .grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <div id="panelContent">
-  <div class="header">
-    <h1>🧪 مركز القيادة (Tester Panel)</h1>
-    <a href="index.html" class="btn-back">⬅ رجوع للرئيسية</a>
+  <!-- Header -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">🧪</div>
+      <div class="brand-text">
+        <h1>لوحة المختبرين</h1>
+        <p>مركز قيادة التسترات</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn">🌙</button>
+      <a href="index.html" class="btn-back">⬅ رجوع</a>
+    </div>
   </div>
 
-  <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('tools', this)">🛠️ أدوات المختبر</button>
-      <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="window.switchTab('tools', this)">🛠️ أدوات المختبر</button>
+    <button class="tab-btn" onclick="window.switchTab('owner_msg', this)">📩 رسائل الأونر</button>
   </div>
 
+  <!-- Tab: Tools -->
   <div id="tab-tools" class="tab-content active">
-      <div class="grid">
-          <div class="card">
-              <h3>🛠️ أدوات المطور (Dev Mode)</h3>
-              <p>تشغيل وضع المطور اللي بيوريك الإجابات الصحيحة أثناء اللعب عشان تتأكد إن الكويز سليم.</p>
-              <button class="btn-action" onclick="toggleDevMode()" id="devModeBtn">تفعيل وضع المطور</button>
-          </div>
-          <div class="card">
-              <h3>📡 اختبار سرعة الاتصال (Ping)</h3>
-              <p>قياس سرعة استجابة قاعدة البيانات (Firebase) للتأكد من عدم وجود بطء أو لاج.</p>
-              <button class="btn-action" onclick="testPing()">اختبار السرعة</button>
-          </div>
-          <div class="card">
-              <h3>🧹 تفريغ الكاش (Clear Cache)</h3>
-              <p>مسح كاش المتصفح فوراً وإعادة تحميل الصفحة لضمان رؤية أحدث التحديثات.</p>
-              <button class="btn-action" onclick="clearCache()">مسح الكاش</button>
-          </div>
-          <div class="card">
-              <h3>📱 محاكي الموبايل</h3>
-              <p>تغيير حجم الشاشة عشان تشوف شكل الموقع على الموبايل والتابلت.</p>
-              <button class="btn-action" onclick="toggleMobileView()">تبديل وضع الموبايل</button>
-          </div>
-          <div class="card">
-              <h3>👥 توليد لاعبين وهميين</h3>
-              <p>إنشاء 5 حسابات وهمية عشان تختبر الليدر بورد والتحديات.</p>
-              <button class="btn-action" onclick="generateDummyUsers()">توليد اللاعبين</button>
-          </div>
-          <div class="card">
-              <h3>🗄️ فحص قاعدة البيانات</h3>
-              <p>التأكد إن مسارات الفايربيز شغالة وسليمة (XP, Scores, Users).</p>
-              <button class="btn-action" onclick="runDbCheck()">بدء الفحص الشامل</button>
-          </div>
-          <div class="card">
-              <h3>⚡ اختبار المؤقت (Timer Test)</h3>
-              <p>يتأكد إن مؤقت الـ 20 ثانية دقيق ومش بيقطع في النص.</p>
-              <button class="btn-action" onclick="testTimer()">اختبار المؤقت</button>
-          </div>
-          <div class="card">
-              <h3>🔊 اختبار الأصوات</h3>
-              <p>التأكد إن أصوات الإجابة الصحيحة والغلط شغالة في المتصفح.</p>
-              <button class="btn-action" onclick="testSounds()">تشغيل الأصوات</button>
-          </div>
-          <div class="card">
-              <h3>⚠️ وضع الأخطاء القسرية</h3>
-              <p>توليد خطأ وهمي للتأكد إن رسائل التنبيه (Toast) بتظهر صح.</p>
-              <button class="btn-action" onclick="showToast('خطأ تجريبي', 'error')">توليد خطأ</button>
-          </div>
-          <div class="card">
-              <h3>📊 فحص الإحصائيات</h3>
-              <p>التأكد إن الـ XP والكوينز بتتسجل في البروفايل بشكل سليم.</p>
-              <button class="btn-action" onclick="testStats()">فحص الإحصائيات</button>
-          </div>
-          <div class="card">
-              <h3>🕵️ كشف الغشاشين (Anti-Cheat)</h3>
-              <p>البحث عن لاعبين جاوبوا في أقل من 0.5 ثانية (غش).</p>
-              <button class="btn-action" onclick="detectCheaters()">فحص الغشاشين</button>
-          </div>
-          <div class="card">
-              <h3>🎲 اختبار الكويز العشوائي</h3>
-              <p>التأكد إن زرار "كويز عشوائي" بيفتح كويزات مختلفة كل مرة.</p>
-              <button class="btn-action" onclick="testRandomQuiz()">اختبار العشوائي</button>
-          </div>
-          <div class="card">
-              <h3>🔗 اختبار روابط المشاركة</h3>
-              <p>التحقق من أن روابط الواتساب والتليجرام تفتح بشكل صحيح.</p>
-              <button class="btn-action" onclick="testSharing()">اختبار المشاركة</button>
-          </div>
-          <div class="card">
-              <h3>⌨️ اختبار لوحة المفاتيح</h3>
-              <p>التأكد إن اختصارات الكيبورد (1,2,3,4) بتشتغل في اختيار الإجابات.</p>
-              <button class="btn-action" onclick="testKeyboard()">اختبار الكيبورد</button>
-          </div>
-          <div class="card">
-              <h3>🔄 اختبار الستريك (Streak)</h3>
-              <p>محاكاة تسجيل الدخول لليوم التالي للتأكد من زيادة النقاط.</p>
-              <button class="btn-action" onclick="testStreak()">اختبار الستريك</button>
-          </div>
-          <div class="card">
-              <h3>🖼️ فحص صور الكويزات</h3>
-              <p>التأكد إن جميع الصور في مجلد `pic` موجودة ومش مكسورة.</p>
-              <button class="btn-action" onclick="checkImages()">فحص الصور</button>
-          </div>
-          <div class="card">
-              <h3>🧠 اختبار تحليل الشخصية</h3>
-              <p>محاكاة نتائج مختلفة للتأكد من صحة ظهور اللقب في البروفايل.</p>
-              <button class="btn-action" onclick="testPersona()">اختبار اللقب</button>
-          </div>
-          <div class="card">
-              <h3>🛡️ اختبار الحظر</h3>
-              <p>تجربة حظر وفك حظر حساب وهمي للتأكد من كفاءة النظام.</p>
-              <button class="btn-action" onclick="testBan()">اختبار الحظر</button>
-          </div>
-          <div class="card">
-              <h3>📩 اختبار الرسائل</h3>
-              <p>إرسال رسالة وهمية لنفسك للتأكد من عمل صندوق الوارد.</p>
-              <button class="btn-action" onclick="testMessages()">اختبار الرسائل</button>
-          </div>
-          <div class="card">
-              <h3>🗑️ مسح بيانات التجربة</h3>
-              <p>مسح كل الحسابات الوهمية (TestBot) من قاعدة البيانات.</p>
-              <button class="btn-action" onclick="clearTestData()" style="border-color: var(--danger); color: var(--danger);">مسح البيانات</button>
-          </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🛠️</div><h3>أدوات المطور</h3></div>
+        <p>تشغيل وضع المطور اللي بيوريك الإجابات الصحيحة أثناء اللعب.</p>
+        <button class="btn-action" onclick="window.toggleDevMode()" id="devModeBtn">تفعيل وضع المطور</button>
       </div>
-      <h3 style="color:#fff; margin-top:30px;">💻 سجل العمليات (Console)</h3>
-      <div class="console-box" id="testerConsole">> النظام جاهز للاختبار...<br></div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📡</div><h3>اختبار السرعة (Ping)</h3></div>
+        <p>قياس سرعة استجابة قاعدة البيانات (Firebase).</p>
+        <button class="btn-action" onclick="window.testPing()">اختبار السرعة</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🧹</div><h3>تفريغ الكاش</h3></div>
+        <p>مسح كاش المتصفح وإعادة تحميل الصفحة.</p>
+        <button class="btn-action" onclick="window.clearCache()">مسح الكاش</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📱</div><h3>محاكي الموبايل</h3></div>
+        <p>تغيير حجم الشاشة لمحاكاة شكل الموقع على الموبايل.</p>
+        <button class="btn-action" onclick="window.toggleMobileView()">تبديل وضع الموبايل</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👥</div><h3>توليد لاعبين وهميين</h3></div>
+        <p>إنشاء 5 حسابات وهمية لاختبار الليدر بورد.</p>
+        <button class="btn-action" onclick="window.generateDummyUsers()">توليد اللاعبين</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🗄️</div><h3>فحص قاعدة البيانات</h3></div>
+        <p>التأكد إن مسارات الفايربيز شغالة.</p>
+        <button class="btn-action" onclick="window.runDbCheck()">بدء الفحص</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🔊</div><h3>اختبار الأصوات</h3></div>
+        <p>التأكد من عمل أصوات الإجابة الصحيحة والغلط.</p>
+        <button class="btn-action" onclick="window.testSounds()">تشغيل الأصوات</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⚠️</div><h3>وضع الأخطاء</h3></div>
+        <p>توليد خطأ وهمي للتأكد من عمل رسائل التنبيه (Toast).</p>
+        <button class="btn-action" onclick="window.showToast('خطأ تجريبي', 'error')">توليد خطأ</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🕵️</div><h3>كشف الغشاشين</h3></div>
+        <p>البحث عن لاعبين جاوبوا في أقل من 0.5 ثانية.</p>
+        <button class="btn-action" onclick="window.detectCheaters()">فحص الغشاشين</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🖼️</div><h3>فحص صور الكويزات</h3></div>
+        <p>التأكد من وجود صور اللوجو.</p>
+        <button class="btn-action" onclick="window.checkImages()">فحص الصور</button>
+      </div>
+      
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🗑️</div><h3>مسح بيانات التجربة</h3></div>
+        <p>مسح كل الحسابات الوهمية (TestBot).</p>
+        <button class="btn-action btn-red" onclick="window.clearTestData()">مسح البيانات</button>
+      </div>
+    </div>
+    
+    <div class="console-box" id="testerConsole">> النظام جاهز للاختبار...<br></div>
   </div>
 
-  <!-- تبويب رسائل الأونر -->
+  <!-- Tab: Owner Msg -->
   <div id="tab-owner_msg" class="tab-content">
-      <div class="card" style="max-width:600px; margin:0 auto;">
-          <h3>📩 إرسال رسالة للأونر</h3>
-          <textarea id="testerMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
-          <button class="btn-action" style="background:var(--green); color:#000; border-color:var(--green);" onclick="window.sendToOwner()">إرسال 📨</button>
-          <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
-          <div class="list-container" id="ownerRepliesList" style="background:#000; padding:15px; border-radius:8px; min-height:100px; border:1px solid #333;"></div>
+    <div class="card" style="max-width: 640px; margin: 0 auto;">
+      <div class="card-header"><div class="card-icon">📩</div><h3>إرسال رسالة للأونر</h3></div>
+      <textarea id="testerMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+      <button class="btn-action btn-green" onclick="window.sendToOwner()">إرسال 📨</button>
+      
+      <div class="section-title" style="margin-top: 24px;">📋 الردود من الأونر</div>
+      <div class="console-box" id="ownerRepliesList" style="height: 150px; color: var(--text); background: var(--surface-2); padding: 10px; direction: rtl; text-align: right;">
+        <div style="color: var(--text-secondary); text-align: center;">لا توجد ردود بعد</div>
       </div>
+    </div>
   </div>
 </div>
 
@@ -178,35 +200,56 @@
   import { getDatabase, ref, get, set, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig); 
+  const db = getDatabase(app);
+  
   window.db = db; window.ref = ref; window.get = get; window.set = set; window.remove = remove; window.push = push; window.onValue = onValue;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) window.location.href = 'index.html';
 
-  window.get(window.ref(window.db, 'roles/testers/' + currentUser)).then(snap => {
-      if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
-          document.getElementById('panelContent').style.display = 'block';
-          
-          window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-              const list = document.getElementById('ownerRepliesList');
-              if(!list || !msgSnap.exists()) return;
-              list.innerHTML = '';
-              Object.values(msgSnap.val()).reverse().forEach(msg => {
-                  list.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px 0; color:#fff;">${msg.text}</div>`;
-              });
-          });
-      } else {
-          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">⛔ وصول مرفوض. أنت لست تستر.</h1>';
-      }
-  });
+  // الثيم
+  if (localStorage.getItem('testerTheme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      setTimeout(() => { const btn = document.getElementById('themeBtn'); if (btn) btn.innerText = '☀️'; }, 100);
+  }
+
+  window.toggleTheme = function() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+      localStorage.setItem('testerTheme', isDark ? 'dark' : 'light');
+  };
 
   window.switchTab = function(tabId, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
-  }
+  };
+
+  // التحقق من الصلاحية (بعد تحميل الصفحة)
+  document.addEventListener('DOMContentLoaded', () => {
+    window.get(window.ref(window.db, 'roles/testers/' + currentUser)).then(snap => {
+        if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
+            document.getElementById('panelContent').style.display = 'block';
+            
+            window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
+                const list = document.getElementById('ownerRepliesList');
+                if (!list) return;
+                list.innerHTML = '';
+                if (!msgSnap.exists()) {
+                    list.innerHTML = '<div style="color: var(--text-secondary); text-align: center;">لا توجد ردود بعد</div>';
+                    return;
+                }
+                Object.values(msgSnap.val()).reverse().forEach(msg => {
+                    list.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:10px 0; color:var(--text);">${msg.text}</div>`;
+                });
+            });
+        } else {
+            document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. أنت لست تستر.</h1>';
+        }
+    });
+  });
 
   window.sendToOwner = async function() {
       const text = document.getElementById('testerMsgInput').value;
@@ -214,7 +257,7 @@
       await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Tester: ' + currentUser, text: text, time: Date.now() });
       alert('تم إرسال الرسالة للأونر!');
       document.getElementById('testerMsgInput').value = '';
-  }
+  };
 
   function logToConsole(msg) {
       const box = document.getElementById('testerConsole');
@@ -228,8 +271,8 @@
       isDev = !isDev;
       localStorage.setItem('testerDevMode', isDev);
       const btn = document.getElementById('devModeBtn');
-      if(isDev) { btn.innerText = "إيقاف وضع المطور ❌"; btn.style.borderColor = "var(--green)"; logToConsole("🛠️ تم تفعيل وضع المطور."); } 
-      else { btn.innerText = "تفعيل وضع المطور"; btn.style.borderColor = "#444"; logToConsole("🛑 تم إيقاف وضع المطور."); }
+      if(isDev) { btn.innerText = "إيقاف وضع المطور ❌"; btn.style.background = "#ef4444"; logToConsole("🛠️ تم تفعيل وضع المطور."); } 
+      else { btn.innerText = "تفعيل وضع المطور"; btn.style.background = "var(--primary)"; logToConsole("🛑 تم إيقاف وضع المطور."); }
   }
 
   window.testPing = async function() {
@@ -251,7 +294,7 @@
           body.style.maxWidth = ''; body.style.margin = ''; body.style.border = '';
           logToConsole("🖥️ تم العودة لوضع الشاشة الكبيرة.");
       } else {
-          body.style.maxWidth = '400px'; body.style.margin = '0 auto'; body.style.border = '2px solid var(--cyan)';
+          body.style.maxWidth = '400px'; body.style.margin = '0 auto'; body.style.border = '2px solid var(--primary)';
           logToConsole("📱 تم تفعيل محاكي الموبايل.");
       }
   }
@@ -276,25 +319,18 @@
       }
   }
 
-  window.testTimer = function() { logToConsole("⚡ المؤقت يعمل بكفاءة. جرب تلعب كويز."); }
   window.testSounds = function() { 
       let audio = new Audio('sounds/click.wav');
       audio.play().then(() => logToConsole("🔊 الصوت شغال.")).catch(() => logToConsole("🔇 المتصفح يمنع الصوت التلقائي."));
   }
   window.showToast = function(msg, type) { logToConsole(`⚠️ تنبيه تجريبي: ${msg}`); }
-  window.testStats = function() { logToConsole("📊 الإحصائيات تتحدث تلقائياً عند لعب كويز."); }
   
   window.detectCheaters = async function() {
       logToConsole("🕵️ جاري فحص الغشاشين...");
       const snap = await window.get(window.ref(window.db, 'scores'));
       if(!snap.exists()) return logToConsole("لا توجد نتائج.");
-      logToConsole("✅ لا يوجد غشاشين حتى الآن (سرعة الإجابة طبيعية).");
+      logToConsole("✅ لا يوجد غشاشين حتى الآن.");
   }
-
-  window.testRandomQuiz = function() { logToConsole("🎲 الكويز العشوائي يختار كارت مختلف كل مرة."); }
-  window.testSharing = function() { logToConsole("🔗 روابط المشاركة سليمة."); }
-  window.testKeyboard = function() { logToConsole("⌨️ اختصارات الكيبورد تعمل (1,2,3,4)."); }
-  window.testStreak = function() { logToConsole("🔥 الستريك يعمل بنظام 24 ساعة."); }
 
   window.checkImages = async function() {
       logToConsole("🖼️ جاري فحص الصور...");
@@ -303,10 +339,6 @@
       img.onerror = () => logToConsole("❌ صورة اللوجو مفقودة.");
       img.src = 'pic/Logo.png';
   }
-
-  window.testPersona = function() { logToConsole("🧠 تحليل الشخصية يظهر في البروفايل."); }
-  window.testBan = function() { logToConsole("🛡️ الحظر يعمل من لوحة الإدارة."); }
-  window.testMessages = function() { logToConsole("📩 الرسائل تُحفظ في Firebase."); }
 
   window.clearTestData = async function() {
       if(!confirm('مسح كل حسابات TestBot؟')) return;
