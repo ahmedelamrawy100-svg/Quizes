@@ -1,102 +1,106 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
+const app = initializeApp(firebaseConfig); 
+const db = getDatabase(app); 
+const auth = getAuth(app);
 
-window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push; window.signOut = signOut; window.auth = auth;
+window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; 
+window.set = set; window.remove = remove; window.push = push; 
+window.signOut = signOut; window.auth = auth;
 
+// 1. التحقق الأساسي
 const currentUser = localStorage.getItem('loggedInUser');
-
 if (currentUser === 'ahmed') {
     document.getElementById('passwordLock').style.display = 'none';
     document.getElementById('ownerContent').style.display = 'block';
-    initApp();
+    initApp('ahmed');
 } else {
     document.getElementById('passwordLock').style.display = 'flex';
     window.checkPassword = async function() {
         const input = document.getElementById('ownerPasswordInput').value;
+        const errorMsg = document.getElementById('errorMsg');
+        if (!input) return;
+
+        errorMsg.style.display = 'block';
+        errorMsg.style.color = '#eab308';
+        errorMsg.innerText = "جاري التحقق من السيرفر...";
+
         try {
-            await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
+            // محاولة تسجيل الدخول
+            const userCredential = await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
+            
+            // لو نجح
+            localStorage.setItem('loggedInUser', 'ahmed'); // نحفظه عشان المرة الجاية
             document.getElementById('passwordLock').style.display = 'none';
             document.getElementById('ownerContent').style.display = 'block';
-            initApp();
+            initApp('ahmed');
         } catch (error) {
-            document.getElementById('errorMsg').style.display = 'block';
+            // لو فشل
+            errorMsg.style.color = '#ef4444';
+            errorMsg.innerText = "كلمة المرور غير صحيحة! جرب تاني.";
             document.getElementById('ownerPasswordInput').value = '';
+            console.error(error);
         }
     }
 }
 
-function initApp() {
-    const currentUser = localStorage.getItem('loggedInUser') || 'owner';
-
-    if (localStorage.getItem('theme') === 'light') { 
-        document.body.classList.add('light-mode'); 
-        document.getElementById('themeBtn').innerText = '🌙';
-    } else {
+// 2. تشغيل اللوحة
+function initApp(username) {
+    document.getElementById('panelTitle').innerText = '👑 لوحة الأونر';
+    
+    // إعداد الثيم
+    if (localStorage.getItem('ownerTheme') === 'dark') { 
+        document.body.classList.add('dark-mode'); 
         document.getElementById('themeBtn').innerText = '☀️';
+    } else {
+        document.getElementById('themeBtn').innerText = '🌙';
     }
 
     window.toggleTheme = function() {
-        const body = document.body; const btn = document.getElementById('themeBtn');
-        body.classList.toggle('light-mode');
-        if (body.classList.contains('light-mode')) { btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); } 
-        else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
+        const isDark = document.body.classList.toggle('dark-mode');
+        if (isDark) { document.getElementById('themeBtn').innerText = '☀️'; localStorage.setItem('ownerTheme', 'dark'); } 
+        else { document.getElementById('themeBtn').innerText = '🌙'; localStorage.setItem('ownerTheme', 'light'); }
     }
-
-    let currentLang = localStorage.getItem('lang') || 'ar';
 
     window.toggleLanguage = function() {
-        currentLang = currentLang === 'ar' ? 'en' : 'ar';
-        localStorage.setItem('lang', currentLang);
-        applyLanguage();
+        // دالة بسيطة عشان الزرار ميعملش إيرور
+        alert('سيتم تفعيل تبديل اللغة قريباً');
     }
 
-    function applyLanguage() {
-        document.querySelectorAll('[data-ar]').forEach(el => {
-            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-            } else {
-                el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-            }
-        });
-        document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-        document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-        document.getElementById('panelTitle').innerText = currentLang === 'ar' ? '👑 لوحة الأونر' : '👑 Owner Panel';
-    }
-    applyLanguage();
+    window.logoutUser = () => { 
+        window.signOut(window.auth); 
+        localStorage.removeItem('loggedInUser'); 
+        window.location.href = 'index.html'; 
+    };
 
     window.showToast = function(msg, type='success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div'); 
-        toast.className = 'toast';
-        toast.style.cssText = 'background:#111; border-right:5px solid #4caf50; color:#fff; padding:15px 20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.5); font-weight:bold; font-family:Cairo, sans-serif; display:flex; align-items:center; gap:8px; animation: slideIn 0.3s forwards; direction:rtl;';
-        if(type === 'error') toast.style.borderRightColor = '#ff3333';
+        toast.style.cssText = 'background:#1a1f26; border-right:5px solid #10b981; color:#fff; padding:15px 20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.5); font-weight:bold; font-family:Cairo, sans-serif; display:flex; align-items:center; gap:8px; margin-bottom:10px;';
+        if(type === 'error') toast.style.borderRightColor = '#ef4444';
         toast.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> <span>${msg}</span>`;
         container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
     }
 
     window.switchTab = function(id, el) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(n => n.classList.remove('active'));
         document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
         const titlesAr = { 
             dashboard: '📊 الإحصائيات', assign: '👑 تعيين الإدارة', users: '👥 اللاعبين', ranks: '🎖️ إدارة الرتب', badges: '🏅 البادجات', 
             warnings: '⚠️ التحذيرات', content: '📝 المحتوى', quizzes: '🎬 الكويزات', 
-            rooms: '🚪 الغرف', manager: '📩 طلبات المنجر', system: '⚙️ النظام', messages: '📩 الرسائل', 
+            rooms: '🚪 الغرف', manager: '📩 طلبات المنجر', offers: '🎁 العروض والمسابقات', system: '⚙️ النظام', messages: '📩 الرسائل', 
             admins: '🛡️ الأدمنز', security: '🔒 الأمان', developer: '🔧 المطور'
         };
-        const titlesEn = { 
-            dashboard: '📊 Dashboard', assign: '👑 Assign Roles', users: '👥 Players', ranks: '🎖️ Ranks', badges: '🏅 Badges', 
-            warnings: '⚠️ Warnings', content: '📝 Content', quizzes: '🎬 Quizzes', 
-            rooms: '🚪 Rooms', manager: '📩 Manager Reqs', system: '⚙️ System', messages: '📩 Messages', 
-            admins: '🛡️ Admins', security: '🔒 Security', developer: '🔧 Developer'
-        };
-        document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
+        document.getElementById('pageTitle').innerText = titlesAr[id] || 'لوحة الأونر';
     };
 
+    // ==========================================
+    // ربط البيانات (Data Binding) زي الأصل بالظبط
+    // ==========================================
     let allUsers = {}, allPresence = {}, allScores = {}, allRoles = {}, allXP = {}, allRooms = {}, allBadges = {}, allUserRanks = {};
 
     window.onValue(window.ref(window.db, 'usernames'), snap => { 
@@ -139,8 +143,11 @@ function initApp() {
     window.onValue(window.ref(window.db, 'site_stats/visitors'), snap => { document.getElementById('statVisitors').innerText = snap.exists() ? snap.val() : 0; });
     window.onValue(window.ref(window.db, 'warnings'), snap => { window.renderWarnings(snap.val()); });
     window.onValue(window.ref(window.db, 'banned_users'), snap => { window.renderBanned(snap.val()); });
+
+    // ==========================================
+    // الدوال الأساسية (Core Functions)
+    // ==========================================
     
-    // دالة عرض التعيين
     window.renderAssignList = function() {
         const list = document.getElementById('assignList');
         if(!list) return;
@@ -170,7 +177,6 @@ function initApp() {
 
     window.setStaffRole = async function(username, role) {
         await window.set(window.ref(window.db, 'roles/users/' + username), role);
-        
         await window.remove(window.ref(window.db, 'roles/admins/' + username));
         await window.remove(window.ref(window.db, 'roles/managers/' + username));
         await window.remove(window.ref(window.db, 'roles/partners/' + username));
@@ -184,7 +190,6 @@ function initApp() {
         window.showToast(`تم تعيين ${username} كـ ${role}`);
     };
 
-    // استقبال رسائل الإدارة
     window.onValue(window.ref(window.db, 'messages/owner_inbox'), snap => {
         const list = document.getElementById('ownerInboxList');
         if(!list) return;
@@ -196,7 +201,7 @@ function initApp() {
             const div = document.createElement('div'); div.className = 'item';
             div.innerHTML = `
                 <div>
-                    <h4 style="color:var(--gold); font-size:14px;">${msg.from}</h4>
+                    <h4 style="color:var(--primary); font-size:14px;">${msg.from}</h4>
                     <p>${msg.text}</p>
                 </div>
                 <button class="btn btn-blue" onclick="window.replyToStaff('${msg.from}', '${key}')">رد ✉️</button>
@@ -215,12 +220,6 @@ function initApp() {
         }
     };
 
-    // باقي الدوال زي ما هي ...
-    window.approveRequest = (user, key) => {
-        window.set(window.ref(window.db, 'admin_requests/' + key + '/status'), 'approved');
-        window.showToast(`تم قبول طلب ${user}، روح لصفحة اللاعبين واديله الرتبة.`);
-    };
-
     window.renderUsers = function() {
         const container = document.getElementById('usersList'); if(!container) return;
         container.innerHTML = '';
@@ -231,24 +230,21 @@ function initApp() {
             const userXP = allXP[u] ? allXP[u].xp || 0 : 0;
             const userRank = allUserRanks[u] || 'Player';
 
-            let roleTag = `<span style="color:#aaa; font-size:12px; background:#222; padding:2px 6px; border-radius:4px;">${userRank}</span>`;
-            
+            let roleTag = `<span style="color:var(--text-secondary); font-size:12px; background:var(--surface-2); padding:2px 6px; border-radius:4px;">${userRank}</span>`;
             let isAdmin = false;
-            for (let adminName in allRoles) {
-                if (adminName.toLowerCase() === u.toLowerCase()) { isAdmin = true; break; }
-            }
+            for (let adminName in allRoles) { if (adminName.toLowerCase() === u.toLowerCase()) { isAdmin = true; break; } }
 
             if (u.toLowerCase() === 'ahmed') {
-                roleTag = '<span style="color:#ffd700; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">👑 Owner</span>';
+                roleTag = '<span style="color:var(--primary); font-size:12px; background:var(--primary-light); padding:2px 6px; border-radius:4px;">👑 Owner</span>';
             } else if (isAdmin) {
-                roleTag = '<span style="color:#0088cc; font-size:12px; background:#333; padding:2px 6px; border-radius:4px;">🛡️ Admin</span>';
+                roleTag = '<span style="color:var(--info); font-size:12px; background:rgba(59,130,246,0.1); padding:2px 6px; border-radius:4px;">🛡️ Admin</span>';
             }
 
             const div = document.createElement('div'); div.className = 'item';
             div.innerHTML = `
                 <div>
                     <h3>${u} ${roleTag}</h3>
-                    <p style="color:${isOnline ? 'var(--green)' : '#aaa'}; font-size:12px;">${isOnline ? '🟢 Online' : '⚪ Offline'} | XP: ${userXP}</p>
+                    <p style="color:${isOnline ? 'var(--success)' : 'var(--text-secondary)'}; font-size:12px;">${isOnline ? '🟢 Online' : '⚪ Offline'} | XP: ${userXP}</p>
                 </div>
                 <div style="display:flex; gap:5px; flex-wrap:wrap;">
                     <button class="btn btn-blue" onclick="window.editXP('${u}')">تعديل XP</button>
@@ -282,10 +278,7 @@ function initApp() {
         for(let user in allUserRanks) {
             const div = document.createElement('div'); div.className = 'item';
             div.innerHTML = `
-                <div>
-                    <h3>👤 ${user}</h3>
-                    <p style="color:var(--gold); font-weight:bold;">${allUserRanks[user]}</p>
-                </div>
+                <div><h3>👤 ${user}</h3><p style="color:var(--primary); font-weight:bold;">${allUserRanks[user]}</p></div>
                 <button class="btn btn-red" onclick="window.removeRank('${user}')">إزالة الرتبة 🗑️</button>
             `;
             list.appendChild(div);
@@ -322,7 +315,7 @@ function initApp() {
             if(badges.length > 0) {
                 hasData = true;
                 const div = document.createElement('div'); div.className = 'item';
-                div.innerHTML = `<div><h3>👤 ${user}</h3><p style="font-size:12px; color:var(--gold);">${badges.join(' | ')}</p></div>
+                div.innerHTML = `<div><h3>👤 ${user}</h3><p style="font-size:12px; color:var(--primary);">${badges.join(' | ')}</p></div>
                 <button class="btn btn-red" onclick="window.removeAllBadges('${user}')">Clear Badges 🗑️</button>`;
                 list.appendChild(div);
             }
@@ -356,18 +349,10 @@ function initApp() {
         const list = document.getElementById('warningsList'); if(!list) return;
         list.innerHTML = '';
         if(!data) { list.innerHTML = '<div class="item">لا توجد تحذيرات مسجلة.</div>'; return; }
-        
         Object.keys(data).forEach(user => {
             const warn = data[user];
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <div>
-                    <h3 style="color:var(--gold);">👤 ${user}</h3>
-                    <p>Reason: ${warn.text}</p>
-                    <p style="font-size:12px; color:#aaa;">${new Date(warn.date).toLocaleString()}</p>
-                </div>
-                <button class="btn btn-red" onclick="window.removeWarning('${user}')">Remove Warning 🗑️</button>
-            `;
+            div.innerHTML = `<div><h3 style="color:var(--primary);">👤 ${user}</h3><p>Reason: ${warn.text}</p></div><button class="btn btn-red" onclick="window.removeWarning('${user}')">Remove Warning 🗑️</button>`;
             list.appendChild(div);
         });
     };
@@ -383,16 +368,9 @@ function initApp() {
         const container = document.getElementById(containerId); if(!container) return;
         container.innerHTML = '';
         if (!data) { container.innerHTML = '<div class="item">لا يوجد محتوى.</div>'; return; }
-        
         Object.keys(data).reverse().forEach(key => {
             const c = data[key]; const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <div>
-                    <p style="color:var(--gold); font-size:12px;">👤 ${c.user}</p>
-                    <p>${c.text}</p>
-                </div>
-                <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">Delete 🗑️</button>
-            `;
+            div.innerHTML = `<div><p style="color:var(--primary); font-size:12px;">👤 ${c.user}</p><p>${c.text}</p></div><button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">Delete 🗑️</button>`;
             container.appendChild(div);
         });
     };
@@ -401,16 +379,9 @@ function initApp() {
         const container = document.getElementById('customQuizzesList'); if(!container) return;
         container.innerHTML = '';
         if (!data) { container.innerHTML = '<div class="item">لا توجد كويزات مخصصة.</div>'; return; }
-        
         Object.keys(data).forEach(key => {
             const q = data[key]; const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <div>
-                    <p style="color:var(--gold); font-weight:bold;">${q.name}</p>
-                    <p style="font-size:12px; color:#aaa;">${q.cat}</p>
-                </div>
-                <button class="btn btn-red" onclick="window.deleteItem('custom_quizzes', '${key}')">Delete 🗑️</button>
-            `;
+            div.innerHTML = `<div><p style="color:var(--primary); font-weight:bold;">${q.name}</p><p style="font-size:12px; color:var(--text-secondary);">${q.cat}</p></div><button class="btn btn-red" onclick="window.deleteItem('custom_quizzes', '${key}')">Delete 🗑️</button>`;
             container.appendChild(div);
         });
     };
@@ -435,8 +406,7 @@ function initApp() {
         const link = document.getElementById('qLink').value.trim();
         const cat = document.getElementById('qCategory').value;
         if(!name || !img || !link) return window.showToast('املأ كل الحقول', 'error');
-        
-        await window.push(window.ref(window.db, 'custom_quizzes'), { name, img, link, cat, addedBy: currentUser, time: Date.now() });
+        await window.push(window.ref(window.db, 'custom_quizzes'), { name, img, link, cat, addedBy: username, time: Date.now() });
         window.showToast('Quiz added successfully!');
         document.getElementById('qName').value = '';
         document.getElementById('qImage').value = '';
@@ -446,11 +416,10 @@ function initApp() {
     window.renderRooms = function() {
         const list = document.getElementById('roomsList'); if(!list) return;
         list.innerHTML = `<div style="margin-bottom: 15px; text-align: center;"><button class="btn btn-red" onclick="window.clearAllRooms()" style="width: 100%; padding: 10px;">🗑️ مسح كل الغرف</button></div>`;
-        
         if(Object.keys(allRooms).length === 0) { list.innerHTML += '<div class="item">لا توجد غرف نشطة.</div>'; return; }
         for(let room in allRooms) {
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `<div><p>Room Code: <b style="color:var(--gold)">${room}</b></p><p style="font-size:12px; color:#aaa;">Status: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">Delete 🗑️</button>`;
+            div.innerHTML = `<div><p>Room Code: <b style="color:var(--primary)">${room}</b></p><p style="font-size:12px; color:var(--text-secondary);">Status: ${allRooms[room].status}</p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">Delete 🗑️</button>`;
             list.appendChild(div);
         }
     };
@@ -517,8 +486,7 @@ function initApp() {
         for(let user in allRoles) {
             hasData = true;
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `<div><h3>🛡️ ${user}</h3></div>
-            <button class="btn btn-red" onclick="window.removeAdmin('${user}')">Remove Admin 🗑️</button>`;
+            div.innerHTML = `<div><h3>🛡️ ${user}</h3></div><button class="btn btn-red" onclick="window.removeAdmin('${user}')">Remove Admin 🗑️</button>`;
             list.appendChild(div);
         }
         if(!hasData) list.innerHTML = '<div class="item">لا يوجد أدمنز حالياً.</div>';
@@ -535,16 +503,9 @@ function initApp() {
         const list = document.getElementById('bannedList'); if(!list) return;
         list.innerHTML = '';
         if(!data) { list.innerHTML = '<div class="item">لا يوجد لاعبين محظورين.</div>'; return; }
-        
         Object.keys(data).forEach(user => {
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `
-                <div>
-                    <h3 style="color:var(--accent);">🚫 ${user}</h3>
-                    <p style="font-size:12px; color:#aaa;">Reason: ${data[user].reason || 'غير محدد'}</p>
-                </div>
-                <button class="btn btn-green" onclick="window.unbanUser('${user}')">Unban ✅</button>
-            `;
+            div.innerHTML = `<div><h3 style="color:var(--danger);">🚫 ${user}</h3><p style="font-size:12px; color:var(--text-secondary);">Reason: ${data[user].reason || 'غير محدد'}</p></div><button class="btn btn-green" onclick="window.unbanUser('${user}')">Unban ✅</button>`;
             list.appendChild(div);
         });
     };
@@ -607,12 +568,6 @@ function initApp() {
         reader.readAsText(file);
     };
 
-    window.logoutUser = () => { 
-        window.signOut(window.auth); 
-        localStorage.removeItem('loggedInUser'); 
-        window.location.href = 'index.html'; 
-    };
-
     window.clearSiteCache = async () => {
         if(confirm('هل أنت متأكد من مسح الكاش؟ سيتم تحديث الموقع لجميع اللاعبين عند فتحهم للصفحة القادمة.')) {
             await window.set(window.ref(window.db, 'site_settings/version'), Date.now());
@@ -620,28 +575,28 @@ function initApp() {
         }
     };
 
-    // تبويب طلبات المنجر
+    // ==========================================
+    // إدارة المنجر والعروض
+    // ==========================================
     window.onValue(window.ref(window.db, 'manager_requests/drafts'), snap => {
-        const list = document.getElementById('managerDraftsList');
-        if(!list) return;
+        const list = document.getElementById('managerDraftsList'); if(!list) return;
         list.innerHTML = '';
         if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد مسودات.</div>'; return; }
         const data = snap.val();
         const namesAr = { rules: '📜 قوانين الموقع', announcement: '📢 إعلان', faq: '❓ أسئلة شائعة', welcome: '👋 رسالة ترحيب', journey: '🛣️ رحلة مستخدم', terms: '📝 شروط مسابقات', performance: '📊 تقييم فريق' };
         for(let key in data) {
             const div = document.createElement('div'); div.className = 'item';
-            div.innerHTML = `<div><h3 style="color:var(--gold);">${namesAr[key] || key}</h3><p style="font-size:14px; color:#ccc; margin-top:5px;">${data[key]}</p></div><div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="window.approveDraft('${key}', '${data[key].replace(/'/g, "\\'")}')">نشر ✅</button><button class="btn btn-red" onclick="window.deleteDraft('${key}')">مسح 🗑️</button></div>`;
+            div.innerHTML = `<div><h3 style="color:var(--primary);">${namesAr[key] || key}</h3><p style="font-size:14px; color:var(--text-secondary); margin-top:5px;">${data[key]}</p></div><div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="window.approveDraft('${key}', '${data[key].replace(/'/g, "\\'")}')">نشر ✅</button><button class="btn btn-red" onclick="window.deleteDraft('${key}')">مسح 🗑️</button></div>`;
             list.appendChild(div);
         }
     });
 
     window.onValue(window.ref(window.db, 'manager_requests'), snap => {
-        const list = document.getElementById('managerReqsList');
-        if(!list) return;
+        const list = document.getElementById('managerReqsList'); if(!list) return;
         list.innerHTML = '';
         const data = snap.val();
         if(!data) { list.innerHTML = '<div class="item">لا توجد طلبات.</div>'; return; }
-        const ignored = ['drafts'];
+        const ignored = ['drafts', 'offers', 'contests'];
         const namesAr = { tournaments: '🏆 بطولات', player_week: '⭐ لاعب الأسبوع', matches: '⚔️ مباريات', ideas: '💡 أفكار كويزات', vip_notes: '👑 ملاحظات VIP', sponsor_replies: '🤝 ردود شركاء', shifts: '⏰ شفتات', team_tasks: '📋 مهام فريق', dev_requests: '🛠️ طلبات تطوير', calendar: '📅 فعاليات', tester_tasks: '🧪 مهام تسترات', bugs: '🐛 مشاكل', marketing: '📢 تسويق', meetings: '🤝 اجتماعات', discounts: '💸 خصومات' };
         let hasReqs = false;
         for(let key in data) {
@@ -650,12 +605,48 @@ function initApp() {
                 hasReqs = true;
                 const req = data[key][reqId];
                 const div = document.createElement('div'); div.className = 'item';
-                div.innerHTML = `<div><h3 style="color:var(--blue); font-size:16px;">${namesAr[key] || key}</h3><p>${req.text}</p></div><button class="btn btn-green" onclick="window.deleteReq('${key}', '${reqId}')">تم ✅</button>`;
+                div.innerHTML = `<div><h3 style="color:var(--info); font-size:16px;">${namesAr[key] || key}</h3><p>${req.text}</p></div><button class="btn btn-green" onclick="window.deleteReq('${key}', '${reqId}')">تم ✅</button>`;
                 list.appendChild(div);
             }
         }
         if(!hasReqs) list.innerHTML = '<div class="item">لا توجد طلبات حالياً.</div>';
     });
+
+    window.onValue(window.ref(window.db, 'manager_requests/offers'), snap => {
+        const list = document.getElementById('managerOffersList'); if(!list) return;
+        list.innerHTML = '';
+        if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد عروض حالياً.</div>'; return; }
+        const data = snap.val();
+        for(let key in data) {
+            const div = document.createElement('div'); div.className = 'item';
+            div.innerHTML = `<div><h3 style="color:var(--primary);">🎁 ${data[key].text}</h3></div><div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="window.approveOffer('${key}', '${data[key].text}')">نشر ✅</button><button class="btn btn-red" onclick="window.deleteReq('offers', '${key}')">رفض ❌</button></div>`;
+            list.appendChild(div);
+        }
+    });
+
+    window.onValue(window.ref(window.db, 'manager_requests/contests'), snap => {
+        const list = document.getElementById('managerContestsList'); if(!list) return;
+        list.innerHTML = '';
+        if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد مسابقات حالياً.</div>'; return; }
+        const data = snap.val();
+        for(let key in data) {
+            const div = document.createElement('div'); div.className = 'item';
+            div.innerHTML = `<div><h3 style="color:var(--primary);">🏆 ${data[key].text}</h3></div><div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="window.approveContest('${key}', '${data[key].text}')">نشر ✅</button><button class="btn btn-red" onclick="window.deleteReq('contests', '${key}')">رفض ❌</button></div>`;
+            list.appendChild(div);
+        }
+    });
+
+    window.approveOffer = async (key, text) => {
+        await window.set(window.ref(window.db, 'site_events/active_offers/' + key), { text: text, approved: Date.now() });
+        await window.remove(window.ref(window.db, 'manager_requests/offers/' + key));
+        window.showToast('تم نشر العرض!');
+    };
+
+    window.approveContest = async (key, text) => {
+        await window.set(window.ref(window.db, 'site_events/active_contests/' + key), { text: text, approved: Date.now() });
+        await window.remove(window.ref(window.db, 'manager_requests/contests/' + key));
+        window.showToast('تم نشر المسابقة!');
+    };
 
     window.approveDraft = async (key, text) => {
         if(confirm('هل أنت متأكد من نشر هذه المسودة؟')) {
