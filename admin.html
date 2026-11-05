@@ -17,20 +17,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; transition: 0.3s; }
 
-  /* --- شاشة القفل --- */
-  #passwordLock { position: fixed; inset: 0; background: var(--bg); z-index: 99999; display: flex; justify-content: center; align-items: center; }
-  .lock-box { background: var(--sidebar); border: 2px solid var(--blue); border-radius: 15px; padding: 40px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(0, 136, 204, 0.2); }
-  .lock-box h2 { color: var(--blue); margin-bottom: 10px; font-size: 24px; }
-  .lock-box p { color: #888; margin-bottom: 20px; font-size: 14px; }
-  .lock-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: 'Cairo'; font-size: 16px; text-align: center; letter-spacing: 2px; margin-bottom: 20px; outline: none; }
-  .lock-input:focus { border-color: var(--blue); }
-  .lock-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; background: var(--blue); color: #fff; margin-bottom: 10px; }
-  .lock-btn:hover { background: #006699; }
-  .lock-btn-cancel { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  .lock-btn-cancel:hover { background: rgba(255,255,255,0.1); }
-  #errorMsg { color: var(--accent); font-weight: bold; font-size: 14px; margin-bottom: 10px; display: none; }
-
-  /* --- التصميم --- */
   #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
   .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -71,10 +57,6 @@
   body.light-mode .header-btn { background: #ddd; color: #111; border-color: #aaa; }
   body.light-mode .header-btn:hover { background: var(--blue); color: #fff; }
 
-  #noPermissionScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%; text-align: center; }
-  #noPermissionScreen h1 { color: var(--accent); font-size: 40px; margin-bottom: 20px; }
-  #noPermissionScreen a { background: var(--accent); color: #fff; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 20px; }
-
   @media (max-width: 900px) {
     body { flex-direction: column; }
     .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; }
@@ -84,19 +66,6 @@
 </head>
 <body>
 
-<!-- شاشة القفل -->
-<div id="passwordLock">
-    <div class="lock-box">
-        <h2>🛡️ لوحة الإدارة</h2>
-        <p>مخصصة للأدمنز فقط. أدخل كلمة المرور للمتابعة.</p>
-        <div id="errorMsg">كلمة المرور غير صحيحة!</div>
-        <input type="password" id="adminPasswordInput" class="lock-input" placeholder="Password" onkeypress="if(event.key==='Enter') window.checkPassword()">
-        <button class="lock-btn" onclick="window.checkPassword()">فتح القفل (Unlock)</button>
-        <button class="lock-btn lock-btn-cancel" onclick="location.href='index.html'">إلغاء (Cancel)</button>
-    </div>
-</div>
-
-<!-- المحتوى الأساسي -->
 <div id="adminContent" style="display: none; width: 100%;">
   <div id="toast-container"></div>
 
@@ -107,6 +76,8 @@
     <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 إدارة المحتوى" data-en="📝 Content">📝 إدارة المحتوى</div>
     <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 إدارة الغرف" data-en="🚪 Rooms">🚪 إدارة الغرف</div>
     <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
+    <div class="nav-item" onclick="switchTab('tickets', this)" data-ar="🎫 تذاكر الدعم" data-en="🎫 Tickets">🎫 تذاكر الدعم</div>
+    <div class="nav-item" onclick="switchTab('owner_msg', this)" data-ar="📩 رسائل الأونر" data-en="📩 Owner Msg">📩 رسائل الأونر</div>
     <div class="nav-item" style="margin-top: auto; color: var(--accent);" onclick="location.href='index.html'" data-ar="⬅ العودة للرئيسية" data-en="⬅ Back to Home">⬅ العودة للرئيسية</div>
   </div>
 
@@ -152,32 +123,45 @@
       <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="⚠️ التحذيرات المسجلة" data-en="⚠️ Warnings">⚠️ التحذيرات المسجلة</h3>
       <div class="list-container" id="warningsList"></div>
     </div>
+
+    <div id="tab-tickets" class="tab">
+      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎫 تذاكر الدعم الفني (من المنجر)" data-en="🎫 Support Tickets (From Manager)">🎫 تذاكر الدعم الفني (من المنجر)</h3>
+      <div class="list-container" id="adminTicketsList"></div>
+    </div>
+
+    <div id="tab-owner_msg" class="tab">
+      <h3 style="color:var(--gold); margin-bottom:15px;">📩 إرسال رسالة للأونر</h3>
+      <textarea id="adminMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
+      <button class="btn btn-green" onclick="window.sendToOwner()">إرسال 📨</button>
+      <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
+      <div class="list-container" id="ownerRepliesList"></div>
+    </div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push;
 
-  // التحقق من الباسورد (لازم تكون عامل حساب admin@quizhub.com في الفايربيز)
-  window.checkPassword = async function() {
-      const input = document.getElementById('adminPasswordInput').value;
-      
-      try {
-          await signInWithEmailAndPassword(auth, "admin@quizhub.com", input);
-          document.getElementById('passwordLock').style.display = 'none';
-          document.getElementById('adminContent').style.display = 'flex';
-          initData();
-      } catch (error) {
-          document.getElementById('errorMsg').style.display = 'block';
-          document.getElementById('adminPasswordInput').value = '';
-          document.getElementById('adminPasswordInput').focus();
-      }
+  const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) window.location.href = 'index.html';
+
+  if (currentUser.toLowerCase() === 'ahmed') {
+      document.getElementById('adminContent').style.display = 'flex';
+      initData();
+  } else {
+      window.get(window.ref(window.db, 'roles/admins/' + currentUser)).then(snap => {
+          if (snap.exists()) {
+              document.getElementById('adminContent').style.display = 'flex';
+              initData();
+          } else {
+              document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">⛔ وصول مرفوض. أنت لست أدمن.</h1>';
+          }
+      });
   }
 
   window.showToast = function(msg, type='success') {
@@ -194,8 +178,8 @@
     document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
     
     let currentLang = localStorage.getItem('lang') || 'ar';
-    const titlesAr = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف', warnings: '⚠️ التحذيرات' };
-    const titlesEn = { dashboard: '📊 Dashboard', users: '👥 Players', content: '📝 Content', rooms: '🚪 Rooms', warnings: '⚠️ Warnings' };
+    const titlesAr = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف', warnings: '⚠️ التحذيرات', tickets: '🎫 تذاكر الدعم', owner_msg: '📩 رسائل الأونر' };
+    const titlesEn = { dashboard: '📊 Dashboard', users: '👥 Players', content: '📝 Content', rooms: '🚪 Rooms', warnings: '⚠️ Warnings', tickets: '🎫 Tickets', owner_msg: '📩 Owner Msg' };
     
     document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
   };
@@ -221,9 +205,8 @@
           }
       });
 
-      const username = localStorage.getItem('loggedInUser') || '';
-      if(username) {
-        document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${username}` : `🛡️ Welcome ${username}`;
+      if(currentUser) {
+        document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${currentUser}` : `🛡️ Welcome ${currentUser}`;
       }
   }
 
@@ -268,6 +251,50 @@
       loadContent('suggestions', 'suggestionsList');
       loadContent('quiz_requests', 'requestsList');
       loadWarnings();
+
+      window.onValue(window.ref(window.db, 'support_tickets'), snap => {
+          const list = document.getElementById('adminTicketsList');
+          if(!list) return;
+          list.innerHTML = '';
+          if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد تذاكر دعم.</div>'; return; }
+          
+          const data = snap.val();
+          Object.keys(data).reverse().forEach(key => {
+              const t = data[key];
+              const div = document.createElement('div'); div.className = 'item';
+              div.innerHTML = `
+                  <div>
+                      <h3 style="color:var(--gold);">🎫 تذكرة #${key.slice(-4)}</h3>
+                      <p>${t.text}</p>
+                      <p style="font-size:12px; color:#888;">من: ${t.by}</p>
+                  </div>
+                  <button class="btn btn-green" onclick="window.resolveTicket('${key}')">تم الحل ✅</button>
+              `;
+              list.appendChild(div);
+          });
+      });
+
+      window.onValue(window.ref(window.db, 'messages/' + currentUser), snap => {
+          const list = document.getElementById('ownerRepliesList');
+          if(!list || !snap.exists()) return;
+          list.innerHTML = '';
+          Object.values(snap.val()).reverse().forEach(msg => {
+              list.innerHTML += `<div class="item"><div><h4 style="color:var(--blue);">👑 من الأونر</h4><p>${msg.text}</p></div></div>`;
+          });
+      });
+  }
+
+  window.resolveTicket = async (key) => {
+      await window.remove(window.ref(window.db, 'support_tickets/' + key));
+      showToast('تم حل التذكرة');
+  };
+
+  window.sendToOwner = async function() {
+      const text = document.getElementById('adminMsgInput').value;
+      if(!text) return;
+      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Admin: ' + currentUser, text: text, time: Date.now() });
+      showToast('تم إرسال الرسالة للأونر!');
+      document.getElementById('adminMsgInput').value = '';
   }
 
   window.renderUsers = function() {
