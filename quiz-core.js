@@ -28,14 +28,12 @@ function showToastMessage(msg) {
     setTimeout(() => toast.remove(), 4000);
 }
 
-// دالة المذيع الآلي
 function speakText(text, lang) {
     if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel(); // إلغاء أي صوت شغال
+        window.speechSynthesis.cancel();
         let utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lang === 'en' ? 'en-US' : 'ar-EG';
-        utterance.rate = 1.0; 
-        utterance.pitch = 1.0;
+        utterance.rate = 1.0; utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
@@ -47,8 +45,7 @@ window.initQuiz = function(config) {
     let currentSaveKey = quizKey;
     let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
     let isChallengeMode = false; let isSpeedrun = false; let myRoomCode = null; let myRole = null;
-    let ghostTimes = []; 
-    let playerAnswers = []; // لتسجيل سرعة اللاعب عشان التحليل
+    let ghostTimes = []; let playerAnswers = [];
     
     const urlParams = new URLSearchParams(window.location.search);
     const roomCodeFromUrl = urlParams.get('room');
@@ -218,15 +215,15 @@ window.initQuiz = function(config) {
         } 
         else if (part === 'all') { currentQuestions = [...(quizData.comprehensive || quizData.all || quizData.part1 || [])]; currentSaveKey = quizKey + '_all'; } 
         else if (partsList && partsList[part]) { currentQuestions = [...partsList[part]]; currentSaveKey = quizKey + '_' + part; }
+        
         if (currentQuestions.length === 0) { alert(currentLang === 'en' ? "No questions available!" : "لا توجد أسئلة متاحة!"); return; }
         currentQuestions.sort(() => Math.random() - 0.5); highestScore = 0; 
+        
         document.getElementById('selectionScreen').style.display = 'none'; document.getElementById('playScreen').style.display = 'block'; 
         const backBtn = document.getElementById('backBtn'); if (backBtn) backBtn.style.display = 'none'; 
         current = 0; score = 0; 
         
-        // المذيع بيقول كلمة البداية
         speakText(currentLang === 'ar' ? "استعد.. اللعبة هتبدأ الآن!" : "Get ready.. The game is about to begin!", currentLang);
-        
         loadQuestion(); 
     }
     
@@ -246,14 +243,35 @@ window.initQuiz = function(config) {
         optionsWithAnswers.forEach((opt) => { 
             const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text; 
             div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div); 
+        if (localStorage.getItem('testerDevMode') === 'true') {
+            optionsWithAnswers.forEach((opt, index) => {
+                if (opt.isCorrect) {
+                    const correctOpt = document.querySelectorAll('.option')[index];
+                    if (correctOpt) {
+                        correctOpt.style.border = '3px solid #4caf50';
+                        correctOpt.style.boxShadow = '0 0 15px #4caf50';
+                    }
+                }
+            });
+        }
         }); 
         document.getElementById('score').innerText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; 
         document.getElementById('next').style.display = 'none'; document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%'; 
+        
+        document.getElementById('question').classList.add('cinematic-entrance');
+        document.getElementById('options').classList.add('cinematic-entrance');
+
         clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer(); 
     }
 
     function updateTimer() { 
         const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`; 
+        
+        let vignette = document.getElementById('redVignette');
+        if (timeLeft <= 5 && !answered) {
+            if (!vignette) { vignette = document.createElement('div'); vignette.id = 'redVignette'; vignette.className = 'red-vignette'; document.body.appendChild(vignette); }
+        } else { if (vignette) vignette.remove(); }
+
         if (timeLeft <= 5) { timerEl.style.color = '#f44336'; playSound(sndTick); } else { timerEl.style.color = ''; } 
         if (timeLeft <= 0) { 
             clearInterval(timerInterval); 
@@ -262,65 +280,58 @@ window.initQuiz = function(config) {
                 let activeLang = localStorage.getItem('lang') || 'ar'; const q = currentQuestions[current]; let opts = activeLang === 'ar' ? q.options_ar : q.options_en; if (!opts) opts = q.options_en || q.options_ar; 
                 document.querySelectorAll('.option').forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); }); 
                 document.getElementById('next').style.display = 'inline-block'; 
-                if('speechSynthesis' in window) window.speechSynthesis.resume();
                 if (!isChallengeMode && !isSpeedrun) { ghostTimes.push(20); }
-                playerAnswers.push(20); // سجل إنه استغرق 20 ثانية (مجاوبش)
+                playerAnswers.push(20); 
             } 
         } timeLeft--; 
     }
 
     function checkAnswer(isCorrect, el) { 
         if (answered) return; answered = true; clearInterval(timerInterval); 
+        
+        let vignette = document.getElementById('redVignette');
+        if (vignette) vignette.remove();
+
         let activeLang = localStorage.getItem('lang') || 'ar'; const q = currentQuestions[current]; let opts = activeLang === 'ar' ? q.options_ar : q.options_en; if (!opts) opts = q.options_en || q.options_ar; 
         const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled')); allOpts.forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); }); 
         
         let timeTaken = 20 - timeLeft;
-        playerAnswers.push(timeTaken); // سجل سرعة اللاعب في السؤال ده
+        playerAnswers.push(timeTaken); 
 
         if (isCorrect) { 
             score += isSpeedrun ? 2 : 1; playSound(sndCorrect);
             const rect = el.getBoundingClientRect(); const x = (rect.left + rect.width / 2) / window.innerWidth; const y = (rect.top + rect.height / 2) / window.innerHeight;
             confetti({ particleCount: 30, spread: 60, origin: { x: x, y: y }, colors: ['#ffd700', '#ff3333', '#ffffff'], ticks: 100, gravity: 0.8, scalar: 0.8 });
         } else { 
-            el.classList.add('wrong'); playSound(sndWrong); document.getElementById('playScreen').classList.add('shake-animation'); setTimeout(() => document.getElementById('playScreen').classList.remove('shake-animation'), 400); 
+            el.classList.add('wrong'); playSound(sndWrong); 
+            
+            document.getElementById('playScreen').classList.add('screen-glitch');
+            document.getElementById('playScreen').classList.add('cinematic-glitch');
+            setTimeout(() => { 
+                document.getElementById('playScreen').classList.remove('screen-glitch'); 
+                document.getElementById('playScreen').classList.remove('cinematic-glitch');
+            }, 500);
         } 
         document.getElementById('score').innerText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; 
         document.getElementById('next').style.display = 'inline-block'; 
         if (!isChallengeMode && !isSpeedrun) { ghostTimes.push(20 - timeLeft); }
+        if('speechSynthesis' in window) window.speechSynthesis.resume();
     }
 
     window.nextQuestion = function() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
 
-    // دالة تحليل الشخصية
     function getPlayerPersona(score, total, avgTime) {
-        let persona = "";
-        let personaDesc = "";
+        let persona = "", personaDesc = "";
         const isAr = (localStorage.getItem('lang') || 'ar') === 'ar';
-
         if (score >= (total * 0.8)) {
-            if (avgTime <= 6) {
-                persona = isAr ? "⚡ الأسطورة" : "⚡ The Legend";
-                personaDesc = isAr ? "بتجاوب بسرعة رهيبة ودقة عالية جداً. أنت عبقري!" : "You answer incredibly fast with high accuracy. You're a genius!";
-            } else {
-                persona = isAr ? "🧠 المفكر الاستراتيجي" : "🧠 The Strategist";
-                personaDesc = isAr ? "بتاخد وقتك في التفكير وبتطلع دايماً صح. ذكاء خارق!" : "You take your time thinking and always get it right. Brilliant!";
-            }
+            if (avgTime <= 6) { persona = isAr ? "⚡ الأسطورة" : "⚡ The Legend"; personaDesc = isAr ? "بتجاوب بسرعة رهيبة ودقة عالية جداً. أنت عبقري!" : "You answer incredibly fast with high accuracy. You're a genius!"; }
+            else { persona = isAr ? "🧠 المفكر الاستراتيجي" : "🧠 The Strategist"; personaDesc = isAr ? "بتاخد وقتك في التفكير وبتطلع دايماً صح. ذكاء خارق!" : "You take your time thinking and always get it right. Brilliant!"; }
         } else if (score >= (total * 0.5)) {
-            if (avgTime <= 6) {
-                persona = isAr ? "🔥 المتهور" : "🔥 The Reckless";
-                personaDesc = isAr ? "بتجاوب بسرعة جداً، لكن ساعات بتغلط بسبب التسرع. خد وقتك شوية!" : "You answer very fast, but sometimes make mistakes due to haste. Take your time!";
-            } else {
-                persona = isAr ? "🎯 المتوازن" : "🎯 The Balanced";
-                personaDesc = isAr ? "أداءك حلو ومتوازن، محتاج شوية تدريب عشان تبقى أسطورة." : "Your performance is good and balanced, needs a little training to be a legend.";
-            }
+            if (avgTime <= 6) { persona = isAr ? "🔥 المتهور" : "🔥 The Reckless"; personaDesc = isAr ? "بتجاوب بسرعة جداً، لكن ساعات بتغلط بسبب التسرع. خد وقتك شوية!" : "You answer very fast, but sometimes make mistakes due to haste. Take your time!"; }
+            else { persona = isAr ? "🎯 المتوازن" : "🎯 The Balanced"; personaDesc = isAr ? "أداءك حلو ومتوازن، محتاج شوية تدريب عشان تبقى أسطورة." : "Your performance is good and balanced, needs a little training to be a legend."; }
         } else {
-            if (avgTime <= 6) {
-                persona = isAr ? "🎲 المخاطر" : "🎲 The Gambler";
-                personaDesc = isAr ? "بتخمن بسرعة من غير ما تفكر كتير. جرب تقرا السؤال كويس!" : "You guess quickly without thinking much. Try reading the question well!";
-            } else {
-                persona = isAr ? "🐢 المتأمل" : "🐢 The Contemplator";
-                personaDesc = isAr ? "بتاخد وقتك جداً في التفكير وبتغلط كتير. محتاج تراجع معلوماتك." : "You take a very long time thinking and make many mistakes. You need to review your info.";
-            }
+            if (avgTime <= 6) { persona = isAr ? "🎲 المخاطر" : "🎲 The Gambler"; personaDesc = isAr ? "بتخمن بسرعة من غير ما تفكر كتير. جرب تقرا السؤال كويس!" : "You guess quickly without thinking much. Try reading the question well!"; }
+            else { persona = isAr ? "🐢 المتأمل" : "🐢 The Contemplator"; personaDesc = isAr ? "بتاخد وقتك جداً في التفكير وبتغلط كتير. محتاج تراجع معلوماتك." : "You take a very long time thinking and make many mistakes. You need to review your info."; }
         }
         return { persona, personaDesc };
     }
@@ -330,10 +341,12 @@ window.initQuiz = function(config) {
         document.getElementById('progress').style.width = '100%'; 
         if (score > (currentQuestions.length / 2)) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }
         
+        let vignette = document.getElementById('redVignette');
+        if (vignette) vignette.remove();
+
         let activeLang = localStorage.getItem('lang') || 'ar';
 
         if (isChallengeMode && myRoomCode) { 
-            // ... كود التحدي زي ما هو ...
             let updateData = {}; if (myRole === 'player1') updateData.player1_score = score; else updateData.player2_score = score; 
             window.update(window.ref(window.db, 'rooms/' + myRoomCode), updateData).then(() => { 
                 document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;"><h2 style="color:#ff0000; font-size:30px; margin-bottom:15px;">${activeLang === 'en' ? 'Waiting for friend... ⏳' : 'في انتظار صديقك... ⏳'}</h2><p style="color:#aaa; font-size:18px;">${activeLang === 'en' ? 'Please wait for them to finish.' : 'رجاءً استنى لحد ما يخلص الكويز.'}</p></div>`; 
@@ -358,7 +371,6 @@ window.initQuiz = function(config) {
             let realHighScore = highestScore;
             if (localStorage.getItem(currentSaveKey) > realHighScore) { realHighScore = localStorage.getItem(currentSaveKey); }
 
-            // حساب متوسط السرعة
             let avgTime = 0;
             if (playerAnswers.length > 0) {
                 let sum = playerAnswers.reduce((a, b) => a + b, 0);
@@ -367,10 +379,6 @@ window.initQuiz = function(config) {
 
             const { persona, personaDesc } = getPlayerPersona(score, currentQuestions.length, avgTime);
 
-    document.body.addEventListener('click', function playVoiceOnce() {
-    speakText(activeLang === 'ar' ? `أنت ${persona.replace(/[^\u0600-\u06FF\s]/g, '')}. ${personaDesc}` : `You are ${persona}. ${personaDesc}`, activeLang);
-    document.body.removeEventListener('click', playVoiceOnce);
-    }, { once: true });
             document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
                 <h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2>
                 <p style="color:var(--text-color); font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p>
@@ -453,14 +461,17 @@ window.initQuiz = function(config) {
                     showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
                 }
                 
-                // حفظ شخصية اللاعب في الفايربيز عشان تظهرله في البروفايل
                 window.set(window.ref(window.db, 'users_data/' + currentUser + '/persona'), persona);
             }
+
+            document.body.addEventListener('click', function playVoiceOnce() {
+                speakText(activeLang === 'ar' ? `أنت ${persona.replace(/[^\u0600-\u06FF\s]/g, '')}. ${personaDesc}` : `You are ${persona}. ${personaDesc}`, activeLang);
+                document.body.removeEventListener('click', playVoiceOnce);
+            }, { once: true });
         }
     }
 
     window.shareResult = function(platform) { 
-        // ... كود المشاركة زي ما هو ...
         const activeLang = localStorage.getItem('lang') || 'ar';
         const quizName = currentSaveKey.split('_')[0].toUpperCase(); 
         const text = activeLang === 'en' ? `I scored ${score}/${currentQuestions.length} on the ${quizName} quiz on Quiz Hub! Can you beat my score? 🏆` : `لقد حصلت على ${score}/${currentQuestions.length} في كويز ${quizName} على Quiz Hub! هل يمكنك التغلب علي؟ 🏆`; 
@@ -474,7 +485,6 @@ window.initQuiz = function(config) {
     };
 
     window.startGhostQuiz = function() { 
-        // ... كود الشبح زي ما هو ...
         current = 0; let ghostScore = 0; let activeLang = localStorage.getItem('lang') || 'ar';
         document.getElementById('question').innerHTML = `<h2 style="color:var(--blue); text-align:center;">👻 ${activeLang === 'en' ? 'Ghost Mode' : 'وضع الشبح'}</h2><p style="text-align:center; color:#aaa;">${activeLang === 'en' ? 'Answer before your ghost!' : 'جاوب قبل الشبح بتاعك!'}</p>`;
         document.getElementById('options').innerHTML = ''; document.getElementById('next').style.display = 'none'; document.getElementById('score').innerText = ''; document.getElementById('backBtn').style.display = 'none'; document.getElementById('timer').style.display = 'none';
@@ -493,7 +503,7 @@ window.initQuiz = function(config) {
                 const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text;
                 div.onclick = () => {
                     if (answeredGhost) return; answeredGhost = true; clearInterval(ghostInterval);
-                    if (opt.isCorrect) { ghostScore++; div.classList.add('correct'); confetti({ particleCount: 20, spread: 50, origin: { y: 0.6 } }); } else { div.classList.add('wrong'); document.getElementById('playScreen').classList.add('shake-animation'); setTimeout(() => document.getElementById('playScreen').classList.remove('shake-animation'), 400); }
+                    if (opt.isCorrect) { ghostScore++; div.classList.add('correct'); confetti({ particleCount: 20, spread: 50, origin: { y: 0.6 } }); } else { div.classList.add('wrong'); document.getElementById('playScreen').classList.add('screen-glitch'); setTimeout(() => document.getElementById('playScreen').classList.remove('screen-glitch'), 400); }
                     document.querySelectorAll('.option').forEach(o => { if (o.innerText === opts[q.answer]) o.classList.add('correct'); });
                     setTimeout(() => { current++; runGhost(); }, 1500);
                 };
