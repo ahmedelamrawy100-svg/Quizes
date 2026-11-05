@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦾 لوحة الشريك - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --surface-2: #1a1a1a;
+    --text: #fff;
+    --text-muted: #888;
+    --border: #333;
+    --primary: #facc15;
+    --primary-glow: rgba(250, 204, 21, 0.4);
+    --danger: #ff3333;
+    --success: #00ff88;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; overflow: hidden; background-image: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+
+  #partnerContent { display: none; width: 100%; height: 100vh; flex-direction: column; }
+  
+  .top-bar { background: var(--surface); height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 2px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow); clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 2% 100%, 0 80%); }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-glow); }
+  .btn-icon { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; text-decoration: none; font-size: 14px; }
+  .btn-icon:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); }
+
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar { width: 260px; background: var(--surface); border-left: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  .nav-btn { background: transparent; color: var(--text-muted); border: none; padding: 15px; text-align: right; font-family: 'Cairo'; font-weight: bold; font-size: 15px; border-radius: var(--radius); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
+  .nav-btn:hover { background: var(--surface-2); color: var(--text); }
+  .nav-btn.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); }
+
+  .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+  .main-content::-webkit-scrollbar { width: 8px; }
+  .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  
+  .tab-pane { display: none; animation: glitchIn 0.3s ease-out; }
+  .tab-pane.active { display: block; }
+  @keyframes glitchIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+
+  .pane-title { font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 25px; border-bottom: 2px dashed var(--border); padding-bottom: 15px; text-transform: uppercase; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 15px; transition: 0.3s; }
+  .card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(250, 204, 21, 0.1); }
+  .card h3 { font-size: 18px; color: var(--text); font-weight: bold; display: flex; align-items: center; gap: 10px; }
+  .card p { font-size: 13px; color: var(--text-muted); }
+  .card .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+
+  .input-control { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--primary); font-family: 'Cairo'; font-size: 15px; outline: none; transition: 0.3s; }
+  .input-control:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+  
+  .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+  .btn-submit:hover { background: #fff; box-shadow: 0 0 20px var(--primary-glow); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #cc0000; }
+  .btn-success { background: var(--success); color: #000; }
+  .btn-success:hover { background: #00cc66; }
+
+  .list-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+  .list-item { background: var(--surface-2); border: 1px solid var(--border); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .list-item .content { flex: 1; }
+  .list-item .header { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 3px; }
+  .list-item .action-btn { background: var(--danger); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 12px; }
+
+  .chat-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; height: 400px; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 80%; padding: 10px 15px; border-radius: 10px; font-size: 14px; }
+  .msg.me { background: var(--primary); color: #000; align-self: flex-end; }
+  .msg.them { background: #222; color: var(--text); align-self: flex-start; border: 1px solid #444; }
+  .chat-input { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 10px; }
+  .chat-input input { flex: 1; padding: 10px; background: #111; border: 1px solid #333; border-radius: 6px; color: #fff; font-family: 'Cairo'; outline: none; }
+  .chat-input button { padding: 0 20px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+  .idea-item { background: var(--surface-2); border: 1px solid var(--border); padding: 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .vote-btn { background: #000; color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+  .vote-btn.active { background: var(--primary); color: #000; }
+
+  #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 15px 30px; border-radius: 6px; font-weight: bold; z-index: 9999; transition: 0.3s; box-shadow: 0 0 30px var(--primary-glow); }
+  #toast.show { bottom: 30px; }
+  #toast.error { background: var(--danger); color: #fff; }
+
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-left: none; border-bottom: 1px solid var(--border); padding: 10px; }
+    .main-content { padding: 15px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast">تم التنفيذ بنجاح!</div>
+
+<div id="partnerContent">
+  <div class="top-bar">
+    <div class="brand">🦾 Cyber Partner</div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-icon" onclick="window.logout()">🚪 خروج</button>
+      <a href="index.html" class="btn-icon">⬅ الرئيسية</a>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <button class="nav-btn active" onclick="window.switchTab('dashboard', this)">📊 لوحة التحكم</button>
+      <button class="nav-btn" onclick="window.switchTab('quicktools', this)">⚡ أدوات سريعة</button>
+      <button class="nav-btn" onclick="window.switchTab('analytics', this)">📈 تحليلات</button>
+      <button class="nav-btn" onclick="window.switchTab('ideas', this)">💡 إدارة الأفكار</button>
+      <button class="nav-btn" onclick="window.switchTab('vigilance', this)">🚨 الرقابة</button>
+      <button class="nav-btn" onclick="window.switchTab('developer', this)">💻 المطور</button>
+      <button class="nav-btn" onclick="window.switchTab('chat', this)">💬 النقاش</button>
+    </div>
+
+    <div class="main-content">
+      
+      <!-- 1. Dashboard -->
+      <div id="tab-dashboard" class="tab-pane active">
+        <h2 class="pane-title">📊 لوحة التحكم</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>📈 إحصائيات حية</h3>
+            <p>عدد المتصلين: <b id="liveOnline" style="color:var(--success); font-size:20px;">0</b></p>
+            <p>عدد الغرف النشطة: <b id="liveRooms" style="color:var(--primary); font-size:20px;">0</b></p>
+          </div>
+          <div class="card">
+            <h3>💬 شات الشركاء</h3>
+            <p>تواصل مع باقي الشركاء في غرفة النقاش.</p>
+            <button class="btn-submit" onclick="window.switchTab('chat', document.querySelectorAll('.nav-btn')[6])">دخول الغرفة</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Quick Tools (6 Features) -->
+      <div id="tab-quicktools" class="tab-pane">
+        <h2 class="pane-title">⚡ أدوات سريعة</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>📢 نشر إعلان سريع</h3>
+            <p class="desc">أضف إعلاناً يظهر في شريط الموقع.</p>
+            <input type="text" id="quickAd" class="input-control" placeholder="نص الإعلان...">
+            <button class="btn-submit" onclick="window.quickAd()">نشر</button>
+          </div>
+          <div class="card">
+            <h3>📝 إرسال رسالة للأونر</h3>
+            <p class="desc">رسالة مباشرة للإدارة.</p>
+            <input type="text" id="quickMsg" class="input-control" placeholder="رسالتك...">
+            <button class="btn-submit" onclick="window.quickMsg()">إرسال</button>
+          </div>
+          <div class="card">
+            <h3>🎫 فتح تذكرة دعم</h3>
+            <p class="desc">هل تواجه مشكلة تقنية؟</p>
+            <input type="text" id="quickTicket" class="input-control" placeholder="عنوان المشكلة...">
+            <button class="btn-submit" onclick="window.quickTicket()">فتح</button>
+          </div>
+          <div class="card">
+            <h3>🚨 بلاغ عاجل</h3>
+            <p class="desc">بلاغ عن لاعب مخالف (يظهر للإدارة فوراً).</p>
+            <input type="text" id="quickReportUser" class="input-control" placeholder="اسم اللاعب...">
+            <input type="text" id="quickReportReason" class="input-control" placeholder="السبب...">
+            <button class="btn-submit btn-danger" onclick="window.quickReport()">إرسال البلاغ</button>
+          </div>
+          <div class="card">
+            <h3>📊 عرض إحصائيات اللاعبين</h3>
+            <p class="desc">عرض عدد اللاعبين والمتصلين.</p>
+            <button class="btn-submit" onclick="window.quickStats()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🚪 عرض الغرف النشطة</h3>
+            <p class="desc">شاهد الغرف النشطة حالياً.</p>
+            <button class="btn-submit" onclick="window.quickRooms()">عرض</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Analytics (6 Features) -->
+      <div id="tab-analytics" class="tab-pane">
+        <h2 class="pane-title">📈 التحليلات المتقدمة</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>📊 إحصائيات الموقع</h3>
+            <p class="desc">عرض أرقام حية من قاعدة البيانات.</p>
+            <button class="btn-submit" onclick="window.showSiteStats()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>👥 اللاعبين الأكثر تفاعلاً</h3>
+            <p class="desc">أكثر اللاعبين نشاطاً على الموقع.</p>
+            <button class="btn-submit" onclick="window.showTopUsers()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🎮 إحصائيات الكويزات</h3>
+            <p class="desc">عدد الكويزات التي تم لعبها.</p>
+            <button class="btn-submit" onclick="window.showQuizStats()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>💡 عدد الاقتراحات</h3>
+            <p class="desc">إجمالي الاقتراحات المقدمة.</p>
+            <button class="btn-submit" onclick="window.showSuggestionsCount()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🎫 عدد التذاكر المفتوحة</h3>
+            <p class="desc">تذاكر الدعم المفتوحة حالياً.</p>
+            <button class="btn-submit" onclick="window.showTicketsCount()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>📤 تصدير تقرير</h3>
+            <p class="desc">تحميل تقرير سريع بصيغة TXT.</p>
+            <button class="btn-submit" onclick="window.exportReport()">تحميل</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Ideas Management (6 Features) -->
+      <div id="tab-ideas" class="tab-pane">
+        <h2 class="pane-title">💡 إدارة الأفكار</h2>
+        <div class="grid">
+          <div class="card" style="grid-column: 1 / -1;">
+            <h3>➕ اقترح فكرة جديدة</h3>
+            <p class="desc">اكتب فكرتك وسيراها الجميع ويصوتون عليها.</p>
+            <input type="text" id="ideaInput" class="input-control" placeholder="اكتب فكرتك هنا...">
+            <button class="btn-submit" onclick="window.addIdea()">نشر الفكرة</button>
+          </div>
+          <div class="card" style="grid-column: 1 / -1;">
+            <h3>🔥 الأفكار المطروحة</h3>
+            <div class="list-container" id="ideasList">
+              <div style="text-align:center; color:var(--text-muted);">جاري التحميل...</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>🗑️ حذف كل الأفكار</h3>
+            <p class="desc">مسح جميع الأفكار المطروحة (للأونر فقط).</p>
+            <button class="btn-submit btn-danger" onclick="window.clearAllIdeas()">مسح الكل</button>
+          </div>
+          <div class="card">
+            <h3>📤 تصدير الأفكار</h3>
+            <p class="desc">تحميل قائمة الأفكار بصيغة TXT.</p>
+            <button class="btn-submit" onclick="window.exportIdeas()">تحميل</button>
+          </div>
+          <div class="card">
+            <h3>🏆 أفضل فكرة</h3>
+            <p class="desc">عرض الفكرة الأكثر تصويتاً.</p>
+            <button class="btn-submit" onclick="window.showTopIdea()">عرض</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Vigilance (6 Features) -->
+      <div id="tab-vigilance" class="tab-pane">
+        <h2 class="pane-title">🚨 الرقابة</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>🚨 إرسال بلاغ</h3>
+            <p class="desc">بلاغ فوري عن لاعب مخالف (يظهر في لوحة الأونر).</p>
+            <input type="text" id="vigilanceUser" class="input-control" placeholder="اسم اللاعب...">
+            <input type="text" id="vigilanceReason" class="input-control" placeholder="السبب...">
+            <button class="btn-submit btn-danger" onclick="window.sendVigilanceReport()">إرسال 🚨</button>
+          </div>
+          <div class="card">
+            <h3>📋 بلاغاتك السابقة</h3>
+            <p class="desc">آخر البلاغات التي قمت بإرسالها.</p>
+            <div class="list-container" id="vigilanceList">
+              <div style="text-align:center; color:var(--text-muted);">جاري التحميل...</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>👀 مراقبة لاعبين</h3>
+            <p class="desc">عرض آخر 5 لاعبين سجلوا دخول.</p>
+            <button class="btn-submit" onclick="window.showRecentUsers()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🔍 فحص شات عام</h3>
+            <p class="desc">مراجعة آخر 5 رسائل في الشات العام.</p>
+            <button class="btn-submit" onclick="window.showRecentChat()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🚫 عدد المحظورين</h3>
+            <p class="desc">عرض عدد اللاعبين المحظورين حالياً.</p>
+            <button class="btn-submit" onclick="window.showBannedCount()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>📊 تقرير الرقابة</h3>
+            <p class="desc">تحميل تقرير سريع بحالة الموقع.</p>
+            <button class="btn-submit" onclick="window.exportVigilanceReport()">تحميل</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Developer (6 Features) -->
+      <div id="tab-developer" class="tab-pane">
+        <h2 class="pane-title">💻 أدوات المطور</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>📡 فحص الاتصال (Ping)</h3>
+            <p class="desc">قياس سرعة استجابة السيرفر.</p>
+            <button class="btn-submit" onclick="window.testPing()">بدء الفحص</button>
+            <div id="pingResult" style="text-align:center; color:var(--success); font-weight:bold; margin-top:10px;"></div>
+          </div>
+          <div class="card">
+            <h3>🔍 عرض بيانات Firebase</h3>
+            <p class="desc">عرض مسار بيانات اللاعبين (Console).</p>
+            <button class="btn-submit" onclick="window.showFirebaseData()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>🧹 مسح LocalStorage</h3>
+            <p class="desc">مسح الكاش المحلي بالكامل.</p>
+            <button class="btn-submit btn-danger" onclick="window.clearLocalStorage()">مسح</button>
+          </div>
+          <div class="card">
+            <h3>📤 تصدير بياناتك</h3>
+            <p class="desc">تحميل بياناتك (JSON).</p>
+            <button class="btn-submit" onclick="window.exportMyData()">تحميل</button>
+          </div>
+          <div class="card">
+            <h3>📊 عرض إصدار الموقع</h3>
+            <p class="desc">نسخة الموقع الحالية.</p>
+            <button class="btn-submit" onclick="window.showVersion()">عرض</button>
+          </div>
+          <div class="card">
+            <h3>⚠️ محاكاة خطأ</h3>
+            <p class="desc">اختبار نظام معالجة الأخطاء.</p>
+            <button class="btn-submit btn-danger" onclick="window.testError()">تشغيل</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Chat -->
+      <div id="tab-chat" class="tab-pane">
+        <h2 class="pane-title">💬 غرفة النقاش</h2>
+        <div class="chat-box">
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') window.sendMsg()">
+            <button onclick="window.sendMsg()">إرسال</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, onValue, get, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); 
+  const db = getDatabase(app);
+  
+  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.push = push; window.set = set; window.remove = remove;
+
+  const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) window.location.href = 'index.html';
+
+  window.showToast = function(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.className = isError ? 'show error' : 'show';
+      setTimeout(() => t.className = t.className.replace('show', ''), 3000);
+  };
+  window.logout = function() { localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; };
+
+  window.switchTab = function(tabId, btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+  };
+
+  window.get(window.ref(window.db, 'roles/partners/' + currentUser)).then(snap => {
+      if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
+          document.getElementById('partnerContent').style.display = 'flex';
+          initLiveStats();
+          initChat();
+          initIdeas();
+          initVigilance();
+      } else {
+          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض.</h1>';
+      }
+  });
+
+  // ------------------ الأساسيات ------------------
+  function initLiveStats() {
+      window.onValue(window.ref(window.db, 'presence'), snap => {
+          let on = 0; if(snap.exists()) Object.values(snap.val()).forEach(u=>{if(u.status==='online') on++});
+          document.getElementById('liveOnline').innerText = on;
+      });
+      window.onValue(window.ref(window.db, 'rooms'), snap => {
+          document.getElementById('liveRooms').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
+      });
+  }
+
+  function initChat() {
+      window.onValue(window.ref(window.db, 'partners_chat'), snap => {
+          const container = document.getElementById('chatMessages');
+          container.innerHTML = '';
+          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد رسائل بعد.</div>'; return; }
+          Object.values(snap.val()).reverse().forEach(msg => {
+              const div = document.createElement('div');
+              div.className = `msg ${msg.sender === currentUser ? 'me' : 'them'}`;
+              div.innerHTML = `<div style="font-size:10px; opacity:0.7; margin-bottom:3px;">${msg.sender}</div><div>${msg.text}</div>`;
+              container.appendChild(div);
+          });
+          container.scrollTop = container.scrollHeight;
+      });
+  }
+
+  window.sendMsg = function() {
+      const input = document.getElementById('chatInput');
+      if (!input.value.trim()) return;
+      window.push(window.ref(window.db, 'partners_chat'), { sender: currentUser, text: input.value.trim(), time: Date.now() });
+      input.value = '';
+  };
+
+  // ------------------ الأفكار ------------------
+  function initIdeas() {
+      window.onValue(window.ref(window.db, 'partner_ideas'), snap => {
+          const container = document.getElementById('ideasList');
+          container.innerHTML = '';
+          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد أفكار بعد.</div>'; return; }
+          
+          const entries = Object.entries(snap.val()).sort((a,b) => {
+              const av = a[1].votes ? Object.keys(a[1].votes).length : 0;
+              const bv = b[1].votes ? Object.keys(b[1].votes).length : 0;
+              return bv - av;
+          });
+
+          entries.forEach(([key, idea]) => {
+              const div = document.createElement('div');
+              div.className = 'idea-item';
+              const votes = idea.votes ? Object.keys(idea.votes).length : 0;
+              const hasVoted = idea.votes && idea.votes[currentUser.toLowerCase()];
+              div.innerHTML = `
+                  <div>
+                      <div style="font-weight:bold; margin-bottom:5px;">${idea.text}</div>
+                      <div style="font-size:11px; color:#888;">بواسطة: ${idea.user}</div>
+                  </div>
+                  <button class="vote-btn ${hasVoted ? 'active' : ''}" onclick="window.vote('${key}')">👍 ${votes}</button>
+              `;
+              container.appendChild(div);
+          });
+      });
+  }
+
+  window.addIdea = async function() {
+      const text = document.getElementById('ideaInput').value.trim();
+      if (!text) return window.showToast('اكتب فكرتك!', true);
+      await window.push(window.ref(window.db, 'partner_ideas'), { text: text, user: currentUser, time: Date.now() });
+      document.getElementById('ideaInput').value = '';
+      window.showToast('✅ تم النشر!');
+  };
+
+  window.vote = async function(key) {
+      const refVote = window.ref(window.db, 'partner_ideas/' + key + '/votes/' + currentUser.toLowerCase());
+      const snap = await window.get(refVote);
+      if(snap.exists()) await window.set(refVote, null);
+      else await window.set(refVote, true);
+  };
+
+  // ------------------ الرقابة ------------------
+  function initVigilance() {
+      window.onValue(window.ref(window.db, 'support_tickets'), snap => {
+          const container = document.getElementById('vigilanceList');
+          if(!container) return;
+          container.innerHTML = '';
+          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد بلاغات بعد.</div>'; return; }
+          
+          Object.values(snap.val()).filter(t => t.by === 'Partner: ' + currentUser).reverse().forEach(t => {
+              const div = document.createElement('div');
+              div.className = 'list-item';
+              div.innerHTML = `
+                  <div class="content">
+                      <div class="header">${new Date(t.time).toLocaleDateString('ar-EG')}</div>
+                      <div>${t.text}</div>
+                  </div>
+              `;
+              container.appendChild(div);
+          });
+      });
+  }
+
+  window.sendVigilanceReport = async function() {
+      const user = document.getElementById('vigilanceUser').value.trim();
+      const reason = document.getElementById('vigilanceReason').value.trim();
+      if (!user || !reason) return window.showToast('اكتب الاسم والسبب!', true);
+      await window.push(window.ref(window.db, 'support_tickets'), { text: '🚨 بلاغ: ' + user + ' - ' + reason, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
+      window.showToast('✅ تم إرسال البلاغ!');
+      document.getElementById('vigilanceUser').value = '';
+      document.getElementById('vigilanceReason').value = '';
+  };
+
+  // ------------------ Quick Tools ------------------
+  window.quickAd = async function() {
+      const text = document.getElementById('quickAd').value.trim();
+      if (!text) return window.showToast('اكتب الإعلان!', true);
+      await window.push(window.ref(window.db, 'site_events/active_offers'), { text: text, time: Date.now() });
+      window.showToast('✅ تم النشر!');
+      document.getElementById('quickAd').value = '';
+  };
+
+  window.quickMsg = async function() {
+      const text = document.getElementById('quickMsg').value.trim();
+      if (!text) return window.showToast('اكتب الرسالة!', true);
+      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Partner: ' + currentUser, text: text, time: Date.now() });
+      window.showToast('✅ تم الإرسال!');
+      document.getElementById('quickMsg').value = '';
+  };
+
+  window.quickTicket = async function() {
+      const text = document.getElementById('quickTicket').value.trim();
+      if (!text) return window.showToast('اكتب المشكلة!', true);
+      await window.push(window.ref(window.db, 'support_tickets'), { text: text, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
+      window.showToast('✅ تم فتح التذكرة!');
+      document.getElementById('quickTicket').value = '';
+  };
+
+  window.quickReport = async function() {
+      const user = document.getElementById('quickReportUser').value.trim();
+      const reason = document.getElementById('quickReportReason').value.trim();
+      if (!user || !reason) return window.showToast('اكتب الاسم والسبب!', true);
+      await window.push(window.ref(window.db, 'support_tickets'), { text: '🚨 بلاغ: ' + user + ' - ' + reason, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
+      window.showToast('✅ تم الإرسال!');
+      document.getElementById('quickReportUser').value = '';
+      document.getElementById('quickReportReason').value = '';
+  };
+
+  window.quickStats = async function() {
+      const s = await window.get(window.ref(window.db, 'usernames'));
+      const on = await window.get(window.ref(window.db, 'presence'));
+      let onlineCount = 0; if(on.exists()) Object.values(on.val()).forEach(u => { if(u.status === 'online') onlineCount++; });
+      window.showToast('اللاعبين: ' + (s.exists() ? Object.keys(s.val()).length : 0) + ' | متصلين: ' + onlineCount);
+  };
+
+  window.quickRooms = async function() {
+      const s = await window.get(window.ref(window.db, 'rooms'));
+      window.showToast('عدد الغرف النشطة: ' + (s.exists() ? Object.keys(s.val()).length : 0));
+  };
+
+  // ------------------ Analytics ------------------
+  window.showSiteStats = async function() {
+      const u = await window.get(window.ref(window.db, 'usernames'));
+      const s = await window.get(window.ref(window.db, 'scores'));
+      let plays = 0; if(s.exists()) for(let user in s.val()) for(let q in s.val()[user]) plays += Object.keys(s.val()[user][q]).length;
+      window.showToast('لاعبين: ' + (u.exists() ? Object.keys(u.val()).length : 0) + ' | كويزات: ' + plays);
+  };
+
+  window.showTopUsers = async function() {
+      const s = await window.get(window.ref(window.db, 'scores'));
+      if(!s.exists()) return window.showToast('لا يوجد بيانات.', true);
+      window.showToast('أعلى اللاعبين في المتصدرين.');
+  };
+
+  window.showQuizStats = async function() {
+      const s = await window.get(window.ref(window.db, 'scores'));
+      let plays = 0; if(s.exists()) for(let u in s.val()) for(let q in s.val()[u]) plays += Object.keys(s.val()[u][q]).length;
+      window.showToast('إجمالي الكويزات: ' + plays);
+  };
+
+  window.showSuggestionsCount = async function() {
+      const s = await window.get(window.ref(window.db, 'suggestions'));
+      window.showToast('عدد الاقتراحات: ' + (s.exists() ? Object.keys(s.val()).length : 0));
+  };
+
+  window.showTicketsCount = async function() {
+      const s = await window.get(window.ref(window.db, 'support_tickets'));
+      window.showToast('التذاكر المفتوحة: ' + (s.exists() ? Object.keys(s.val()).length : 0));
+  };
+
+  window.exportReport = function() {
+      const text = "تقرير سريع - Quiz Hub\nالتاريخ: " + new Date().toLocaleString('ar-EG');
+      const blob = new Blob([text], {type: 'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'report.txt';
+      a.click();
+  };
+
+  // ------------------ Ideas Management ------------------
+  window.clearAllIdeas = async function() {
+      if(!confirm('هل أنت متأكد من مسح كل الأفكار؟')) return;
+      await window.remove(window.ref(window.db, 'partner_ideas'));
+      window.showToast('✅ تم مسح جميع الأفكار.');
+  };
+
+  window.exportIdeas = async function() {
+      const s = await window.get(window.ref(window.db, 'partner_ideas'));
+      const t = s.exists() ? JSON.stringify(s.val(), null, 2) : 'لا توجد أفكار';
+      const b = new Blob([t], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'ideas.json';
+      a.click();
+  };
+
+  window.showTopIdea = async function() {
+      const s = await window.get(window.ref(window.db, 'partner_ideas'));
+      if(!s.exists()) return window.showToast('لا توجد أفكار بعد.', true);
+      const sorted = Object.values(s.val()).sort((a,b) => {
+          return (b.votes ? Object.keys(b.votes).length : 0) - (a.votes ? Object.keys(a.votes).length : 0);
+      });
+      window.showToast('أفضل فكرة: ' + sorted[0].text);
+  };
+
+  // ------------------ Vigilance Extras ------------------
+  window.showRecentUsers = async function() {
+      const s = await window.get(window.ref(window.db, 'presence'));
+      if(!s.exists()) return window.showToast('لا يوجد لاعبين.', true);
+      const users = Object.keys(s.val()).slice(-5).join(', ');
+      window.showToast('آخر 5 لاعبين: ' + users);
+  };
+
+  window.showRecentChat = async function() {
+      const s = await window.get(window.ref(window.db, 'global_chat'));
+      if(!s.exists()) return window.showToast('لا توجد رسائل.', true);
+      const msgs = Object.values(s.val()).slice(-5).map(m => m.text).join(' | ');
+      window.showToast('آخر 5 رسائل: ' + msgs.substring(0, 100));
+  };
+
+  window.showBannedCount = async function() {
+      const s = await window.get(window.ref(window.db, 'banned_users'));
+      window.showToast('المحظورين: ' + (s.exists() ? Object.keys(s.val()).length : 0));
+  };
+
+  window.exportVigilanceReport = function() {
+      const text = "تقرير الرقابة - Quiz Hub\nالتاريخ: " + new Date().toLocaleString('ar-EG');
+      const blob = new Blob([text], {type: 'text/plain'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'vigilance.txt';
+      a.click();
+  };
+
+  // ------------------ Developer ------------------
+  window.testPing = async function() {
+      const res = document.getElementById('pingResult');
+      res.innerText = 'جاري الفحص...';
+      const t = Date.now();
+      await window.get(window.ref(window.db, '.info/connected'));
+      res.innerText = 'الاستجابة: ' + (Date.now() - t) + 'ms';
+  };
+
+  window.showFirebaseData = async function() {
+      const s = await window.get(window.ref(window.db, 'users_data'));
+      console.log('users_data:', s.val());
+      window.showToast('تم طباعة البيانات في الـ Console (F12)');
+  };
+
+  window.clearLocalStorage = function() {
+      localStorage.clear();
+      window.showToast('✅ تم مسح LocalStorage');
+  };
+
+  window.exportMyData = async function() {
+      const s = await window.get(window.ref(window.db, 'users_data/' + currentUser));
+      const t = s.exists() ? JSON.stringify(s.val(), null, 2) : 'لا توجد بيانات';
+      const b = new Blob([t], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b);
+      a.download = 'my_data.json';
+      a.click();
+  };
+
+  window.showVersion = async function() {
+      const s = await window.get(window.ref(window.db, 'site_settings/version'));
+      window.showToast('الإصدار: ' + (s.exists() ? s.val() : 'غير محدد'));
+  };
+
+  window.testError = function() {
+      console.error('Test Error Triggered');
+      window.showToast('تم تسجيل خطأ تجريبي', 'error');
+  };
+</script>
+</body>
+</html>
