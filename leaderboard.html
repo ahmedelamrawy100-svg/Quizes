@@ -116,16 +116,46 @@
   .fame-name { color: #fff; font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 5px; width: 100%; padding: 0 5px; word-break: break-all;}
   .fame-score { color: var(--gold); font-size: 16px; font-weight: bold; background: rgba(255,215,0,0.1); padding: 3px 12px; border-radius: 15px; }
   
-  /* على الموبايل نغير شوية حاجات عشان تبان كويسة */
-  @media (max-width: 600px) {
-      .hall-of-fame-container { gap: 10px; }
-      .fame-card { width: 100px; height: 150px; }
-      .fame-rank-1 { width: 120px; height: 180px; }
-      .fame-avatar { width: 50px; height: 50px; font-size: 20px; }
-      .fame-rank-1 .fame-avatar { width: 60px; height: 60px; font-size: 25px; }
-      .fame-name { font-size: 14px; }
-      .fame-score { font-size: 12px; padding: 2px 8px; }
-      .crown-icon { font-size: 30px; top: -25px; }
+  /* تظبيط الموبايل */
+  @media (max-width: 768px) {
+      .top-controls { top: 10px; left: 10px; gap: 5px; }
+      .ctrl-btn { padding: 6px 10px; font-size: 12px; }
+      .leaderboard-container { margin-top: 70px; padding: 0 10px; }
+      .header-title { font-size: 26px; }
+      .header-subtitle { font-size: 14px; margin-bottom: 20px; }
+      
+      .main-tabs { flex-direction: row; }
+      .main-tab-btn { font-size: 14px; padding: 10px 5px; }
+      
+      .time-filters { flex-wrap: wrap; justify-content: center; }
+      .time-btn { font-size: 12px; padding: 6px 12px; }
+      
+      .category-filters { gap: 6px; }
+      .cat-btn { font-size: 11px; padding: 5px 10px; }
+      
+      /* تصغير كروت الـ 3D عشان تبان */
+      .hall-of-fame-container { 
+          flex-direction: row; 
+          flex-wrap: wrap; 
+          gap: 8px; 
+          justify-content: center;
+          perspective: none; /* شيل تأثير الـ 3D في الموبايل */
+      }
+      .fame-card { 
+          width: 105px; 
+          height: 160px; 
+          transform: none !important; 
+      }
+      .fame-rank-1 { width: 120px; height: 180px; transform: none !important; }
+      .fame-avatar { width: 45px; height: 45px; font-size: 18px; }
+      .fame-rank-1 .fame-avatar { width: 55px; height: 55px; }
+      .fame-name { font-size: 12px; }
+      .fame-score { font-size: 11px; padding: 2px 6px; }
+      .crown-icon { font-size: 24px; top: -20px; }
+      
+      .lb-item { padding: 10px; font-size: 14px; }
+      .lb-name { font-size: 13px; }
+      .lb-score, .lb-time { font-size: 12px; padding: 3px 8px; }
   }
 
   .leaderboard-list { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
