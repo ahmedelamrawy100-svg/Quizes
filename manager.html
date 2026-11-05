@@ -3,217 +3,1012 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📋 لوحة المدير (Manager) - Quiz Hub</title>
+<title>📋 لوحة المدير - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #080808; --panel: #111; --text: #fff; --border: #333; --orange: #ff9800; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; }
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --text: #1a1a1a;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --primary: #f97316;
+    --primary-hover: #ea580c;
+    --primary-light: #fff7ed;
+    --success: #10b981;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body.dark-mode {
+    --bg: #0f1419;
+    --surface: #1a1f26;
+    --surface-2: #232a33;
+    --text: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border: #2d3748;
+    --primary-light: #2d1f0f;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-  
-  #panelContent { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.5s; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  
-  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--orange); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-  .header h1 { color: var(--orange); font-size: 28px; }
-  .btn-back { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #555; border-radius: 8px; text-decoration: none; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
-  .btn-back:hover { background: var(--orange); color: #000; border-color: var(--orange); }
 
-  .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 10px; }
-  .tab-btn { background: transparent; border: none; color: #888; font-family: 'Cairo'; font-size: 15px; font-weight: bold; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
-  .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  .tab-content { display: none; }
-  .tab-content.active { display: block; animation: fadeIn 0.3s; }
+  #panelContent {
+    display: none;
+    width: 100%;
+    max-width: 1280px;
+    animation: fadeUp 0.4s ease;
+  }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; transition: 0.3s; }
-  .card:hover { border-color: var(--orange); box-shadow: 0 5px 15px rgba(255,152,0,0.1); }
-  .card h3 { color: var(--gold); margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 5px; }
-  .card p { color: #aaa; font-size: 12px; margin-bottom: 15px; flex-grow: 1; line-height: 1.4; }
-  
-  .form-control { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; outline: none; margin-bottom: 10px; font-size: 14px; }
-  .btn-action { width: 100%; padding: 10px; background: #222; color: #fff; border: 1px solid #444; border-radius: 6px; font-family: 'Cairo'; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-  .btn-action:hover { background: var(--orange); color: #000; border-color: var(--orange); }
-  
-  .list-box { max-height: 120px; overflow-y: auto; background: #000; border: 1px solid #222; border-radius: 6px; padding: 8px; margin-top: 10px; font-size: 12px; }
-  .list-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; }
-  .list-item:last-child { border-bottom: none; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Header ===== */
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    padding: 16px 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--primary), #fb923c);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  }
+
+  .brand-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .brand-text p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Cairo';
+  }
+
+  .icon-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .btn-back {
+    padding: 10px 18px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-back:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* ===== Tabs ===== */
+  .tabs-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    padding: 6px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Cairo';
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tab-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+  }
+
+  /* ===== Tab Content ===== */
+  .tab-content {
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* ===== Grid ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  /* ===== Card ===== */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary-light);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .card h3 {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .card p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex-grow: 1;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: 'Cairo';
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+    background: var(--surface);
+  }
+
+  .form-control::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 70px;
+  }
+
+  .btn-action {
+    width: 100%;
+    padding: 11px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Cairo';
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-action:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  }
+
+  .btn-action:active {
+    transform: translateY(0);
+  }
+
+  .list-box {
+    max-height: 140px;
+    overflow-y: auto;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    gap: 8px;
+  }
+
+  .list-item:last-child {
+    border-bottom: none;
+  }
+
+  /* ===== Section Title ===== */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 28px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .section-title:first-child {
+    margin-top: 0;
+  }
+
+  /* ===== Status ===== */
+  .status-box {
+    margin-top: 8px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    display: none;
+  }
+
+  .status-box.success {
+    background: #d1fae5;
+    color: #065f46;
+    display: block;
+  }
+
+  .status-box.error {
+    background: #fee2e2;
+    color: #991b1b;
+    display: block;
+  }
+
+  body.dark-mode .status-box.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+  }
+
+  body.dark-mode .status-box.error {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    .top-header { padding: 12px 16px; }
+    .brand-text h1 { font-size: 16px; }
+    .grid { grid-template-columns: 1fr; }
+    .tab-btn { font-size: 13px; padding: 9px 12px; }
+  }
 </style>
 </head>
 <body>
 
 <div id="panelContent">
-  <div class="header">
-    <h1>📋 مركز إدارة المجتمع</h1>
-    <a href="index.html" class="btn-back">⬅ رجوع للرئيسية</a>
+  <!-- Header -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">📋</div>
+      <div class="brand-text">
+        <h1>لوحة المدير</h1>
+        <p>مركز إدارة المجتمع</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="تبديل الثيم">🌙</button>
+      <a href="index.html" class="btn-back">⬅ رجوع</a>
+    </div>
   </div>
 
-  <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('events', this)">🎉 الفعاليات (1-8)</button>
-      <button class="tab-btn" onclick="switchTab('support', this)">📩 الدعم (9-14)</button>
-      <button class="tab-btn" onclick="switchTab('team', this)">📋 الفريق (15-20)</button>
-      <button class="tab-btn" onclick="switchTab('reports', this)">📊 التقارير (21-30)</button>
-      <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('events', this)">🎉 الفعاليات</button>
+    <button class="tab-btn" onclick="switchTab('support', this)">📩 الدعم</button>
+    <button class="tab-btn" onclick="switchTab('team', this)">📋 الفريق</button>
+    <button class="tab-btn" onclick="switchTab('reports', this)">📊 التقارير</button>
+    <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
   </div>
 
-  <!-- 1-8: الفعاليات والمجتمع -->
+  <!-- ============ Tab: الفعاليات ============ -->
   <div id="tab-events" class="tab-content active">
-      <div class="grid">
-          <div class="card"><h3>1. سحب الجوائز</h3><p>اختيار فائز عشوائي وحفظه في الفايربيز.</p><button class="btn-action" onclick="pickWinner()">اختيار فائز</button><div id="winnerRes" style="color:var(--green); margin-top:5px; font-weight:bold; text-align:center;"></div></div>
-          <div class="card"><h3>2. جدول البطولات</h3><p>إرسال جدول البطولة للأونر.</p><input type="text" id="tourneyInput" class="form-control" placeholder="تيم A ضد تيم B..."><button class="btn-action" onclick="sendReq('tournaments', 'tourneyInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>3. لاعب الأسبوع</h3><p>ترشيح لاعب للتكريم.</p><input type="text" id="potwInput" class="form-control" placeholder="اسم اللاعب..."><button class="btn-action" onclick="sendReq('player_week', 'potwInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>4. عمل استفتاء</h3><p>نشر تصويت للاعبين فوراً.</p><input type="text" id="pollQ" class="form-control" placeholder="السؤال..."><input type="text" id="pollO1" class="form-control" placeholder="الاختيار 1"><input type="text" id="pollO2" class="form-control" placeholder="الاختيار 2"><button class="btn-action" onclick="createPoll()">نشر الاستفتاء</button></div>
-          <div class="card"><h3>5. تنسيق التيمات</h3><p>إرسال جدول المباريات للأونر.</p><input type="text" id="matchInput" class="form-control" placeholder="المباراة..."><button class="btn-action" onclick="sendReq('matches', 'matchInput')">إرسال</button></div>
-          <div class="card"><h3>6. صندوق الأفكار</h3><p>حفظ أفكار الكويزات في أرشيف الأفكار.</p><input type="text" id="ideaInput" class="form-control" placeholder="فكرة كويز..."><button class="btn-action" onclick="sendReq('ideas', 'ideaInput')">حفظ الفكرة</button></div>
-          <div class="card"><h3>7. استفسارات اللاعبين</h3><p>قراءة تعليقات المجتمع.</p><a href="comments.html" class="btn-action" style="display:block; text-align:center; text-decoration:none;">فتح المجتمع</a></div>
-          <div class="card"><h3>8. متابعة الـ VIP</h3><p>إرسال تقرير عن اللاعبين المميزين.</p><input type="text" id="vipInput" class="form-control" placeholder="ملاحظة..."><button class="btn-action" onclick="sendReq('vip_notes', 'vipInput')">إرسال للأونر</button></div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🎰</div>
+          <h3>سحب الجوائز</h3>
+        </div>
+        <p>اختيار فائز عشوائي من قائمة اللاعبين.</p>
+        <button class="btn-action" onclick="pickWinner()">اختيار فائز</button>
+        <div class="status-box" id="winnerRes"></div>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🏆</div>
+          <h3>جدول البطولات</h3>
+        </div>
+        <p>إرسال جدول البطولة للأونر لمراجعته.</p>
+        <input type="text" id="tourneyInput" class="form-control" placeholder="تيم A ضد تيم B...">
+        <button class="btn-action" onclick="sendReq('tournaments', 'tourneyInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⭐</div>
+          <h3>لاعب الأسبوع</h3>
+        </div>
+        <p>ترشيح لاعب للتكريم.</p>
+        <input type="text" id="potwInput" class="form-control" placeholder="اسم اللاعب...">
+        <button class="btn-action" onclick="sendReq('player_week', 'potwInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📊</div>
+          <h3>عمل استفتاء</h3>
+        </div>
+        <p>نشر تصويت للاعبين فوراً.</p>
+        <input type="text" id="pollQ" class="form-control" placeholder="السؤال...">
+        <input type="text" id="pollO1" class="form-control" placeholder="الاختيار 1">
+        <input type="text" id="pollO2" class="form-control" placeholder="الاختيار 2">
+        <button class="btn-action" onclick="createPoll()">نشر الاستفتاء</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⚔️</div>
+          <h3>تنسيق التيمات</h3>
+        </div>
+        <p>إرسال جدول المباريات للأونر.</p>
+        <input type="text" id="matchInput" class="form-control" placeholder="المباراة...">
+        <button class="btn-action" onclick="sendReq('matches', 'matchInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">💡</div>
+          <h3>صندوق الأفكار</h3>
+        </div>
+        <p>حفظ أفكار الكويزات في أرشيف الأفكار.</p>
+        <input type="text" id="ideaInput" class="form-control" placeholder="فكرة كويز...">
+        <button class="btn-action" onclick="sendReq('ideas', 'ideaInput', this)">حفظ الفكرة</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">💬</div>
+          <h3>استفسارات اللاعبين</h3>
+        </div>
+        <p>قراءة تعليقات المجتمع والرد عليها.</p>
+        <a href="comments.html" class="btn-action" style="text-decoration:none;">فتح المجتمع</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👑</div>
+          <h3>متابعة الـ VIP</h3>
+        </div>
+        <p>إرسال تقرير عن اللاعبين المميزين.</p>
+        <input type="text" id="vipInput" class="form-control" placeholder="ملاحظة...">
+        <button class="btn-action" onclick="sendReq('vip_notes', 'vipInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🎁</div>
+          <h3>إرسال عرض/خصم</h3>
+        </div>
+        <p>إرسال عرض جديد للأونر لنشره.</p>
+        <input type="text" id="offerInput" class="form-control" placeholder="اسم العرض...">
+        <button class="btn-action" onclick="sendReq('offers', 'offerInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🏁</div>
+          <h3>إرسال تحدي/مسابقة</h3>
+        </div>
+        <p>إرسال مسابقة جديدة للأونر لنشرها.</p>
+        <input type="text" id="contestInput" class="form-control" placeholder="اسم المسابقة...">
+        <button class="btn-action" onclick="sendReq('contests', 'contestInput', this)">إرسال للأونر</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 9-14: الدعم والقوانين -->
+  <!-- ============ Tab: الدعم ============ -->
   <div id="tab-support" class="tab-content">
-      <div class="grid">
-          <div class="card"><h3>9. فرز التذاكر</h3><p>إرسال تذكرة دعم فني للأدمن.</p><input type="text" id="ticketInput" class="form-control" placeholder="وصف المشكلة..."><button class="btn-action" onclick="sendTicket()">فتح تذكرة</button></div>
-          <div class="card"><h3>10. مسودة FAQ</h3><p>إرسال مسودة الأسئلة الشائعة للأونر.</p><textarea id="faqInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('faq', 'faqInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>11. مسودة إعلان</h3><p>إرسال إعلان للأونر لمراجعته ونشره.</p><textarea id="annInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('announcement', 'annInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>12. مسودة قوانين</h3><p>إرسال قوانين جديدة للأونر.</p><textarea id="rulesInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('rules', 'rulesInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>13. رسالة الترحيب</h3><p>إرسال نص ترحيبي للأونر.</p><textarea id="welcomeInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('welcome', 'welcomeInput')">إرسال</button></div>
-          <div class="card"><h3>14. رسائل الشركاء</h3><p>إرسال ردود مبدئية للرعاة للأونر.</p><input type="text" id="sponsorInput" class="form-control" placeholder="رد على شريك..."><button class="btn-action" onclick="sendReq('sponsor_replies', 'sponsorInput')">إرسال</button></div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🎫</div>
+          <h3>فرز التذاكر</h3>
+        </div>
+        <p>إرسال تذكرة دعم فني للأدمن.</p>
+        <input type="text" id="ticketInput" class="form-control" placeholder="وصف المشكلة...">
+        <button class="btn-action" onclick="sendTicket(this)">فتح تذكرة</button>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">❓</div>
+          <h3>مسودة FAQ</h3>
+        </div>
+        <p>إرسال مسودة الأسئلة الشائعة للأونر.</p>
+        <textarea id="faqInput" class="form-control" rows="3" placeholder="اكتب الأسئلة الشائعة..."></textarea>
+        <button class="btn-action" onclick="sendDraft('faq', 'faqInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📢</div>
+          <h3>مسودة إعلان</h3>
+        </div>
+        <p>إرسال إعلان للأونر لمراجعته ونشره.</p>
+        <textarea id="annInput" class="form-control" rows="3" placeholder="اكتب الإعلان..."></textarea>
+        <button class="btn-action" onclick="sendDraft('announcement', 'annInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📜</div>
+          <h3>مسودة قوانين</h3>
+        </div>
+        <p>إرسال قوانين جديدة للأونر.</p>
+        <textarea id="rulesInput" class="form-control" rows="3" placeholder="اكتب القوانين..."></textarea>
+        <button class="btn-action" onclick="sendDraft('rules', 'rulesInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👋</div>
+          <h3>رسالة الترحيب</h3>
+        </div>
+        <p>إرسال نص ترحيبي للأونر.</p>
+        <textarea id="welcomeInput" class="form-control" rows="3" placeholder="اكتب نص الترحيب..."></textarea>
+        <button class="btn-action" onclick="sendDraft('welcome', 'welcomeInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🤝</div>
+          <h3>رسائل الشركاء</h3>
+        </div>
+        <p>إرسال ردود مبدئية للرعاة للأونر.</p>
+        <input type="text" id="sponsorInput" class="form-control" placeholder="رد على شريك...">
+        <button class="btn-action" onclick="sendReq('sponsor_replies', 'sponsorInput', this)">إرسال</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 15-20: لوجستيات الفريق -->
+  <!-- ============ Tab: الفريق ============ -->
   <div id="tab-team" class="tab-content">
-      <div class="grid">
-          <div class="card"><h3>15. جدول الشفتات</h3><p>إرسال جدول المناوبات للأونر.</p><input type="text" id="shiftInput" class="form-control" placeholder="الأدمن (فلان) - الساعة 8"><button class="btn-action" onclick="sendReq('shifts', 'shiftInput')">إرسال</button></div>
-          <div class="card"><h3>16. مهام الفريق</h3><p>إرسال مهام للفريق للأونر.</p><input type="text" id="teamTaskInput" class="form-control" placeholder="مهمة..."><button class="btn-action" onclick="sendReq('team_tasks', 'teamTaskInput')">إرسال</button></div>
-          <div class="card"><h3>17. مراقبة الفريق</h3><p>مراجعة اللاعبين النشطين.</p><a href="users.html" class="btn-action" style="display:block; text-align:center; text-decoration:none;">عرض اللاعبين</a></div>
-          <div class="card"><h3>18. طلب ميزة للمطور</h3><p>إرسال طلب تحديث تقني للأونر.</p><input type="text" id="featureInput" class="form-control" placeholder="ميزة مطلوبة..."><button class="btn-action" onclick="sendReq('dev_requests', 'featureInput')">إرسال</button></div>
-          <div class="card"><h3>19. جدول الفعاليات</h3><p>إرسال خطة الفعاليات السنوية.</p><input type="text" id="calInput" class="form-control" placeholder="هالوين - كويزات رعب"><button class="btn-action" onclick="sendReq('calendar', 'calInput')">إرسال</button></div>
-          <div class="card"><h3>20. توزيع التسترات</h3><p>إرسال مهام للمختبرين.</p><input type="text" id="testerInput" class="form-control" placeholder="تستر A - كويز فينوم"><button class="btn-action" onclick="sendReq('tester_tasks', 'testerInput')">إرسال</button></div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⏰</div>
+          <h3>جدول الشفتات</h3>
+        </div>
+        <p>إرسال جدول المناوبات للأونر.</p>
+        <input type="text" id="shiftInput" class="form-control" placeholder="الأدمن (فلان) - الساعة 8">
+        <button class="btn-action" onclick="sendReq('shifts', 'shiftInput', this)">إرسال</button>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📋</div>
+          <h3>مهام الفريق</h3>
+        </div>
+        <p>إرسال مهام للفريق للأونر.</p>
+        <input type="text" id="teamTaskInput" class="form-control" placeholder="مهمة...">
+        <button class="btn-action" onclick="sendReq('team_tasks', 'teamTaskInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👥</div>
+          <h3>مراقبة الفريق</h3>
+        </div>
+        <p>مراجعة اللاعبين النشطين.</p>
+        <a href="users.html" class="btn-action" style="text-decoration:none;">عرض اللاعبين</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🛠️</div>
+          <h3>طلب ميزة للمطور</h3>
+        </div>
+        <p>إرسال طلب تحديث تقني للأونر.</p>
+        <input type="text" id="featureInput" class="form-control" placeholder="ميزة مطلوبة...">
+        <button class="btn-action" onclick="sendReq('dev_requests', 'featureInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📅</div>
+          <h3>جدول الفعاليات</h3>
+        </div>
+        <p>إرسال خطة الفعاليات السنوية.</p>
+        <input type="text" id="calInput" class="form-control" placeholder="هالوين - كويزات رعب">
+        <button class="btn-action" onclick="sendReq('calendar', 'calInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🧪</div>
+          <h3>توزيع التسترات</h3>
+        </div>
+        <p>إرسال مهام للمختبرين.</p>
+        <input type="text" id="testerInput" class="form-control" placeholder="تستر A - كويز فينوم">
+        <button class="btn-action" onclick="sendReq('tester_tasks', 'testerInput', this)">إرسال</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 21-30: التقارير -->
+  <!-- ============ Tab: التقارير ============ -->
   <div id="tab-reports" class="tab-content">
-      <div class="grid">
-          <div class="card"><h3>21. تقرير نبض المجتمع</h3><p>إحصائيات سريعة (لاعبين وكويزات).</p><button class="btn-action" onclick="getPulse()">تحديث الأرقام</button><div id="pulseRes" style="color:var(--orange); font-weight:bold; margin-top:5px; text-align:center;"></div></div>
-          <div class="card"><h3>22. تقرير الحسابات الوهمية</h3><p>رصد الحسابات التي لم تلعب أي كويز.</p><button class="btn-action" onclick="findFakeAccs()">فحص الحسابات</button><div id="fakeAccsRes" class="list-box"></div></div>
-          <div class="card"><h3>23. تقرير مشاكل النظام</h3><p>إرسال الأعطال للأونر.</p><input type="text" id="bugInput" class="form-control" placeholder="عطل..."><button class="btn-action" onclick="sendReq('bugs', 'bugInput')">إرسال للأونر</button></div>
-          <div class="card"><h3>24. تحليل الاقتراحات</h3><p>عدّاد سريع لاقتراحات اللاعبين.</p><button class="btn-action" onclick="countSuggestions()">عد الاقتراحات</button><div id="suggestRes" style="margin-top:5px; color:var(--gold); text-align:center;"></div></div>
-          <div class="card"><h3>25. متابعة التسويق</h3><p>إرسال تقرير الحملات للأونر.</p><input type="text" id="marketInput" class="form-control" placeholder="حملة فيسبوك..."><button class="btn-action" onclick="sendReq('marketing', 'marketInput')">إرسال</button></div>
-          <div class="card"><h3>26. سجل الاجتماعات</h3><p>إرسال ملاحظات الاجتماع للأونر.</p><input type="text" id="meetingInput" class="form-control" placeholder="ملاحظة..."><button class="btn-action" onclick="sendReq('meetings', 'meetingInput')">إرسال</button></div>
-          <div class="card"><h3>27. رحلة المستخدم</h3><p>إرسال ملاحظات تجربة اللاعب.</p><textarea id="journeyInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('journey', 'journeyInput')">إرسال</button></div>
-          <div class="card"><h3>28. شروط المسابقات</h3><p>إرسال شروط السحب للأونر.</p><textarea id="termsInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('terms', 'termsInput')">إرسال</button></div>
-          <div class="card"><h3>29. خطط العروض</h3><p>إرسال خطط خصومات الكوينز للأونر.</p><input type="text" id="discountInput" class="form-control" placeholder="خصم 20%..."><button class="btn-action" onclick="sendReq('discounts', 'discountInput')">إرسال</button></div>
-          <div class="card"><h3>30. تقييم الفريق</h3><p>إرسال تقييمك لأداء الفريق للأونر.</p><textarea id="perfInput" class="form-control" rows="2"></textarea><button class="btn-action" onclick="sendDraft('performance', 'perfInput')">إرسال</button></div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📈</div>
+          <h3>تقرير نبض المجتمع</h3>
+        </div>
+        <p>إحصائيات سريعة (لاعبين وكويزات).</p>
+        <button class="btn-action" onclick="getPulse()">تحديث الأرقام</button>
+        <div class="status-box" id="pulseRes"></div>
       </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">👤</div>
+          <h3>تقرير الحسابات الوهمية</h3>
+        </div>
+        <p>رصد الحسابات التي لم تلعب أي كويز.</p>
+        <button class="btn-action" onclick="findFakeAccs()">فحص الحسابات</button>
+        <div class="list-box" id="fakeAccsRes"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🐛</div>
+          <h3>تقرير مشاكل النظام</h3>
+        </div>
+        <p>إرسال الأعطال للأونر.</p>
+        <input type="text" id="bugInput" class="form-control" placeholder="عطل...">
+        <button class="btn-action" onclick="sendReq('bugs', 'bugInput', this)">إرسال للأونر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">💡</div>
+          <h3>تحليل الاقتراحات</h3>
+        </div>
+        <p>عدّاد سريع لاقتراحات اللاعبين.</p>
+        <button class="btn-action" onclick="countSuggestions()">عد الاقتراحات</button>
+        <div class="status-box" id="suggestRes"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📣</div>
+          <h3>متابعة التسويق</h3>
+        </div>
+        <p>إرسال تقرير الحملات للأونر.</p>
+        <input type="text" id="marketInput" class="form-control" placeholder="حملة فيسبوك...">
+        <button class="btn-action" onclick="sendReq('marketing', 'marketInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📝</div>
+          <h3>سجل الاجتماعات</h3>
+        </div>
+        <p>إرسال ملاحظات الاجتماع للأونر.</p>
+        <input type="text" id="meetingInput" class="form-control" placeholder="ملاحظة...">
+        <button class="btn-action" onclick="sendReq('meetings', 'meetingInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">🛣️</div>
+          <h3>رحلة المستخدم</h3>
+        </div>
+        <p>إرسال ملاحظات تجربة اللاعب.</p>
+        <textarea id="journeyInput" class="form-control" rows="3" placeholder="اكتب ملاحظاتك..."></textarea>
+        <button class="btn-action" onclick="sendDraft('journey', 'journeyInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">📋</div>
+          <h3>شروط المسابقات</h3>
+        </div>
+        <p>إرسال شروط السحب للأونر.</p>
+        <textarea id="termsInput" class="form-control" rows="3" placeholder="اكتب الشروط..."></textarea>
+        <button class="btn-action" onclick="sendDraft('terms', 'termsInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">💸</div>
+          <h3>خطط العروض</h3>
+        </div>
+        <p>إرسال خطط خصومات الكوينز للأونر.</p>
+        <input type="text" id="discountInput" class="form-control" placeholder="خصم 20%...">
+        <button class="btn-action" onclick="sendReq('discounts', 'discountInput', this)">إرسال</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">⭐</div>
+          <h3>تقييم الفريق</h3>
+        </div>
+        <p>إرسال تقييمك لأداء الفريق للأونر.</p>
+        <textarea id="perfInput" class="form-control" rows="3" placeholder="اكتب تقييمك..."></textarea>
+        <button class="btn-action" onclick="sendDraft('performance', 'perfInput', this)">إرسال</button>
+      </div>
+    </div>
   </div>
 
-  <!-- تبويب رسائل الأونر -->
+  <!-- ============ Tab: رسائل الأونر ============ -->
   <div id="tab-owner_msg" class="tab-content">
-      <div class="card" style="max-width:600px; margin:0 auto;">
-          <h3>📩 إرسال رسالة للأونر</h3>
-          <textarea id="managerMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
-          <button class="btn-action" onclick="window.sendToOwner()">إرسال 📨</button>
-          <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
-          <div class="list-box" id="ownerRepliesList"></div>
+    <div class="card" style="max-width: 640px; margin: 0 auto;">
+      <div class="card-header">
+        <div class="card-icon">📩</div>
+        <h3>إرسال رسالة للأونر</h3>
       </div>
+      <textarea id="managerMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+      <button class="btn-action" onclick="window.sendToOwner()">إرسال 📨</button>
+
+      <div class="section-title" style="margin-top: 24px;">📋 الردود من الأونر</div>
+      <div class="list-box" id="ownerRepliesList">
+        <div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- ============ Scripts ============ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
   window.db = db; window.ref = ref; window.get = get; window.set = set; window.push = push; window.onValue = onValue;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) window.location.href = 'index.html';
 
-  if (currentUser.toLowerCase() === 'ahmed') {
+  // التحقق من الصلاحية (زي ما هو — من غير تغيير)
+  if (currentUser.toLowerCase() === 'ahmed' || currentUser.toLowerCase() === 'banned') {
       document.getElementById('panelContent').style.display = 'block';
-      window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-          const list = document.getElementById('ownerRepliesList'); if(!msgSnap.exists()) return;
-          list.innerHTML = ''; Object.values(msgSnap.val()).reverse().forEach(msg => { list.innerHTML += `<div class="list-item"><span>${msg.text}</span></div>`; });
-      });
+      listenToReplies();
   } else {
-      // لو حد تاني، هيشوف رسالة الرفض
       window.get(window.ref(window.db, 'roles/managers/' + currentUser)).then(snap => {
           if (snap.exists()) {
               document.getElementById('panelContent').style.display = 'block';
-              window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-                  const list = document.getElementById('ownerRepliesList'); if(!msgSnap.exists()) return;
-                  list.innerHTML = ''; Object.values(msgSnap.val()).reverse().forEach(msg => { list.innerHTML += `<div class="list-item"><span>${msg.text}</span></div>`; });
-              });
+              listenToReplies();
           } else {
               document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. أنت لست منجر.</h1>';
           }
       });
   }
 
+  function listenToReplies() {
+      window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
+          const list = document.getElementById('ownerRepliesList');
+          if (!msgSnap.exists()) {
+              list.innerHTML = '<div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>';
+              return;
+          }
+          list.innerHTML = '';
+          Object.values(msgSnap.val()).reverse().forEach(msg => {
+              const div = document.createElement('div');
+              div.className = 'list-item';
+              div.innerHTML = `<span>${msg.text}</span>`;
+              list.appendChild(div);
+          });
+      });
+  }
+
+  // ===== تبديل التاب =====
   window.switchTab = function(tabId, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active'); document.getElementById('tab-' + tabId).classList.add('active');
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+  };
+
+  // ===== تبديل الثيم =====
+  window.toggleTheme = function() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+      localStorage.setItem('managerTheme', isDark ? 'dark' : 'light');
+  };
+
+  // تحميل الثيم المحفوظ
+  if (localStorage.getItem('managerTheme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.addEventListener('DOMContentLoaded', () => {
+          const btn = document.getElementById('themeBtn');
+          if (btn) btn.innerText = '☀️';
+      });
   }
 
-  window.sendReq = async function(node, inputId) {
-      const val = document.getElementById(inputId).value.trim(); if(!val) return alert('اكتب حاجة!');
-      await window.push(window.ref(window.db, 'manager_requests/' + node), { text: val, time: Date.now() });
-      alert('تم الإرسال للأونر!'); document.getElementById(inputId).value = '';
-  }
+  // ===== دوال الإرسال =====
+  window.sendReq = async function(node, inputId, btn) {
+      const val = document.getElementById(inputId).value.trim();
+      if (!val) return alert('اكتب حاجة!');
+      const original = btn.innerHTML;
+      btn.innerHTML = '⏳ جاري الإرسال...';
+      btn.disabled = true;
+      try {
+          await window.push(window.ref(window.db, 'manager_requests/' + node), { text: val, time: Date.now() });
+          alert('تم الإرسال للأونر!');
+          document.getElementById(inputId).value = '';
+      } catch(e) {
+          alert('خطأ: ' + e.message);
+      }
+      btn.innerHTML = original;
+      btn.disabled = false;
+  };
 
-  window.sendDraft = async function(node, inputId) {
-      const val = document.getElementById(inputId).value.trim(); if(!val) return alert('اكتب حاجة!');
-      await window.set(window.ref(window.db, 'manager_requests/drafts/' + node), val);
-      alert('تم حفظ المسودة وإرسالها!'); document.getElementById(inputId).value = '';
-  }
+  window.sendDraft = async function(node, inputId, btn) {
+      const val = document.getElementById(inputId).value.trim();
+      if (!val) return alert('اكتب حاجة!');
+      const original = btn.innerHTML;
+      btn.innerHTML = '⏳ جاري الحفظ...';
+      btn.disabled = true;
+      try {
+          await window.set(window.ref(window.db, 'manager_requests/drafts/' + node), val);
+          alert('تم حفظ المسودة وإرسالها!');
+          document.getElementById(inputId).value = '';
+      } catch(e) {
+          alert('خطأ: ' + e.message);
+      }
+      btn.innerHTML = original;
+      btn.disabled = false;
+  };
 
   window.sendToOwner = async function() {
-      const text = document.getElementById('managerMsgInput').value; if(!text) return;
+      const text = document.getElementById('managerMsgInput').value;
+      if (!text) return;
       await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Manager: ' + currentUser, text: text, time: Date.now() });
-      alert('تم الإرسال!'); document.getElementById('managerMsgInput').value = '';
-  }
+      alert('تم الإرسال!');
+      document.getElementById('managerMsgInput').value = '';
+  };
 
   window.createPoll = async function() {
-      const q = document.getElementById('pollQ').value.trim(); const o1 = document.getElementById('pollO1').value.trim(); const o2 = document.getElementById('pollO2').value.trim();
-      if(!q || !o1 || !o2) return alert('اكتب السؤال والاختيارات!');
+      const q = document.getElementById('pollQ').value.trim();
+      const o1 = document.getElementById('pollO1').value.trim();
+      const o2 = document.getElementById('pollO2').value.trim();
+      if (!q || !o1 || !o2) return alert('اكتب السؤال والاختيارات!');
       await window.set(window.ref(window.db, 'site_events/active_poll'), { question: q, option1: o1, option2: o2, created: Date.now() });
-      alert('تم النشر!'); document.getElementById('pollQ').value = ''; document.getElementById('pollO1').value = ''; document.getElementById('pollO2').value = '';
-  }
+      alert('تم النشر!');
+      document.getElementById('pollQ').value = '';
+      document.getElementById('pollO1').value = '';
+      document.getElementById('pollO2').value = '';
+  };
 
   window.pickWinner = async function() {
       const snap = await window.get(window.ref(window.db, 'usernames'));
-      if(snap.exists()) { const users = Object.keys(snap.val()); const winner = users[Math.floor(Math.random() * users.length)]; document.getElementById('winnerRes').innerText = "الفائز: " + winner; }
-  }
+      const res = document.getElementById('winnerRes');
+      if (snap.exists()) {
+          const users = Object.keys(snap.val());
+          const winner = users[Math.floor(Math.random() * users.length)];
+          res.className = 'status-box success';
+          res.innerText = '🎉 الفائز: ' + winner;
+      }
+  };
 
-  window.sendTicket = async function() {
-      const val = document.getElementById('ticketInput').value.trim(); if(!val) return;
-      await window.push(window.ref(window.db, 'support_tickets'), { text: val, by: 'Manager', time: Date.now(), status: 'open' });
-      alert('تم فتح تذكرة!'); document.getElementById('ticketInput').value = '';
-  }
+  window.sendTicket = async function(btn) {
+      const val = document.getElementById('ticketInput').value.trim();
+      if (!val) return;
+      const original = btn.innerHTML;
+      btn.innerHTML = '⏳ جاري الفتح...';
+      btn.disabled = true;
+      try {
+          await window.push(window.ref(window.db, 'support_tickets'), { text: val, by: 'Manager', time: Date.now(), status: 'open' });
+          alert('تم فتح تذكرة!');
+          document.getElementById('ticketInput').value = '';
+      } catch(e) {
+          alert('خطأ: ' + e.message);
+      }
+      btn.innerHTML = original;
+      btn.disabled = false;
+  };
 
   window.getPulse = async () => {
-      const uSnap = await window.get(window.ref(window.db, 'usernames')); const sSnap = await window.get(window.ref(window.db, 'scores'));
-      let plays = 0; if(sSnap.exists()) { const d = sSnap.val(); for(let u in d) { for(let q in d[u]) { plays += Object.keys(d[u][q]).length; } } }
-      document.getElementById('pulseRes').innerText = `اللاعبين: ${uSnap.exists()?Object.keys(uSnap.val()).length:0} | الكويزات: ${plays}`;
-  }
+      const uSnap = await window.get(window.ref(window.db, 'usernames'));
+      const sSnap = await window.get(window.ref(window.db, 'scores'));
+      let plays = 0;
+      if (sSnap.exists()) {
+          const d = sSnap.val();
+          for (let u in d) { for (let q in d[u]) { plays += Object.keys(d[u][q]).length; } }
+      }
+      const res = document.getElementById('pulseRes');
+      res.className = 'status-box success';
+      res.innerText = `👥 اللاعبين: ${uSnap.exists() ? Object.keys(uSnap.val()).length : 0} | 🎮 الكويزات: ${plays}`;
+  };
 
   window.findFakeAccs = async () => {
-      const uSnap = await window.get(window.ref(window.db, 'usernames')); const xpSnap = await window.get(window.ref(window.db, 'users_data'));
-      const box = document.getElementById('fakeAccsRes'); box.innerHTML = '';
-      if(uSnap.exists() && xpSnap.exists()) {
+      const uSnap = await window.get(window.ref(window.db, 'usernames'));
+      const xpSnap = await window.get(window.ref(window.db, 'users_data'));
+      const box = document.getElementById('fakeAccsRes');
+      box.innerHTML = '';
+      if (uSnap.exists() && xpSnap.exists()) {
           const users = uSnap.val(), data = xpSnap.val();
-          for(let u in users) { if(!data[u] || !data[u].xp) box.innerHTML += `<div class="list-item">${u}</div>`; }
-          if(!box.innerHTML) box.innerHTML = 'لا يوجد حسابات وهمية.';
+          let found = 0;
+          for (let u in users) {
+              if (!data[u] || !data[u].xp) {
+                  box.innerHTML += `<div class="list-item"><span>👤 ${u}</span></div>`;
+                  found++;
+              }
+          }
+          if (!found) box.innerHTML = '<div class="list-item" style="justify-content:center; color: var(--text-secondary);">لا يوجد حسابات وهمية.</div>';
       }
-  }
+  };
 
-  window.countSuggestions = async () => { const snap = await window.get(window.ref(window.db, 'suggestions')); document.getElementById('suggestRes').innerText = 'الاقتراحات: ' + (snap.exists()?Object.keys(snap.val()).length:0); }
+  window.countSuggestions = async () => {
+      const snap = await window.get(window.ref(window.db, 'suggestions'));
+      const res = document.getElementById('suggestRes');
+      res.className = 'status-box success';
+      res.innerText = '💡 الاقتراحات: ' + (snap.exists() ? Object.keys(snap.val()).length : 0);
+  };
 </script>
 </body>
 </html>
