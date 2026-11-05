@@ -4,51 +4,83 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏗️ Quiz Builder - Quiz Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #080808; --panel: #151515; --text: #fff; --border: #444; --input-bg: #222; --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; }
+  :root {
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f0f2f5;
+    --text: #1a1a1a; --text-secondary: #6b7280; --border: #e5e7eb;
+    --primary: #10b981; --primary-hover: #059669; --primary-light: #ecfdf5;
+    --danger: #ef4444; --gold: #eab308; --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body.dark-mode {
+    --bg: #0f1419; --surface: #1a1f26; --surface-2: #232a33;
+    --text: #f9fafb; --text-secondary: #9ca3af; --border: #2d3748;
+    --primary-light: #052e16;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-  #builderContent { display: none; width: 100%; max-width: 900px; animation: fadeIn 0.5s; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; }
-  .header h1 { color: var(--gold); font-size: 28px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-  .btn-back { padding: 10px 20px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; transition: 0.3s; }
-  .btn-back:hover { background: #006699; }
-  .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 10px; }
-  .tab-btn { background: transparent; border: none; color: #888; font-family: 'Cairo'; font-size: 15px; font-weight: bold; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
-  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
-  .tab-content { display: none; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  
+  #builderContent { display: none; width: 100%; max-width: 900px; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .top-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 16px 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), #34d399); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+  .brand-text h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .icon-btn { width: 40px; height: 40px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-sm); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Cairo'; }
+  .icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
+  .btn-back { padding: 10px 18px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+  .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  
+  .tabs-bar { display: flex; gap: 4px; background: var(--surface); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { background: transparent; border: none; color: var(--text-secondary); font-family: 'Cairo'; font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35); }
+  
+  .tab-content { display: none; animation: fadeUp 0.3s ease; }
   .tab-content.active { display: block; }
-  .section { background: var(--panel); border: 1px solid var(--border); border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-  .section h3 { color: var(--accent); margin-bottom: 25px; border-bottom: 1px solid var(--border); padding-bottom: 15px; font-size: 22px; display: flex; align-items: center; gap: 10px; }
-  .form-group { margin-bottom: 25px; }
-  .form-group label { display: block; margin-bottom: 10px; color: var(--gold); font-size: 18px; font-weight: bold; }
-  .form-group small { display: block; color: #aaa; font-size: 14px; margin-bottom: 10px; line-height: 1.5; }
-  .form-control { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--border); background: var(--input-bg); color: #fff; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
-  .form-control:focus { border-color: var(--blue); background: #2a2a2a; box-shadow: 0 0 15px rgba(0, 136, 204, 0.3); }
-  .form-control::placeholder { color: #777; }
-  .btn { padding: 12px 25px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn:hover { transform: translateY(-2px); opacity: 0.9; }
-  .btn-green { background: var(--green); color: #fff; }
-  .btn-blue { background: var(--blue); color: #fff; }
-  .btn-gold { background: var(--gold); color: #000; }
-  .question-block { background: #1a1a1a; border: 2px dashed var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; position: relative; transition: 0.3s; }
-  .question-block:hover { border-color: #666; }
-  .question-block::before { content: attr(data-number); position: absolute; top: -14px; right: 20px; background: var(--blue); color: #fff; padding: 4px 15px; border-radius: 10px; font-size: 14px; font-weight: bold; }
-  .remove-q { position: absolute; top: 15px; left: 15px; background: rgba(255, 51, 51, 0.2); color: var(--accent); border: 1px solid var(--accent); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: 'Cairo'; font-size: 13px; transition: 0.3s; }
-  .remove-q:hover { background: var(--accent); color: #fff; }
+  
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 25px; margin-bottom: 25px; box-shadow: var(--shadow-sm); }
+  .section h3 { color: var(--primary); margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+  
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; margin-bottom: 8px; color: var(--text); font-size: 15px; font-weight: 700; }
+  .form-control { width: 100%; padding: 12px 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none; transition: 0.3s; }
+  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); background: var(--surface); }
+  
+  .question-block { background: var(--surface-2); border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 25px; margin-bottom: 20px; position: relative; transition: 0.3s; }
+  .question-block:hover { border-color: var(--primary); }
+  .question-block::before { content: attr(data-number); position: absolute; top: -14px; right: 20px; background: var(--primary); color: #fff; padding: 4px 15px; border-radius: 10px; font-size: 14px; font-weight: bold; }
+  .remove-q { position: absolute; top: 15px; left: 15px; background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); border-radius: 6px; padding: 6px 12px; cursor: pointer; font-family: 'Cairo'; font-size: 13px; transition: 0.3s; }
+  .remove-q:hover { background: var(--danger); color: #fff; }
+  
   .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; padding-top: 20px; border-top: 1px solid var(--border); }
   @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
-  .option-row { display: flex; align-items: center; gap: 10px; background: var(--input-bg); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); transition: 0.3s; }
-  .option-row:focus-within { border-color: var(--green); }
-  .option-row input[type="radio"] { cursor: pointer; width: 22px; height: 22px; accent-color: var(--green); }
-  .option-row input[type="text"] { border: none; background: transparent; color: #fff; font-family: 'Cairo'; width: 100%; outline: none; font-size: 15px; }
-  .option-row input[type="text"]::placeholder { color: #777; }
-  #outputCode { width: 100%; height: 500px; background: #000; color: #00ffcc; font-family: monospace; padding: 20px; border-radius: 12px; border: 1px solid var(--border); display: none; margin-top: 20px; direction: ltr; text-align: left; font-size: 13px; line-height: 1.5; }
-  #toast { visibility: hidden; min-width: 250px; background: var(--green); color: #fff; text-align: center; border-radius: 8px; padding: 15px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
+  
+  .option-row { display: flex; align-items: center; gap: 10px; background: var(--surface); padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); transition: 0.3s; }
+  .option-row:focus-within { border-color: var(--primary); }
+  .option-row input[type="radio"] { cursor: pointer; width: 20px; height: 20px; accent-color: var(--primary); }
+  .option-row input[type="text"] { border: none; background: transparent; color: var(--text); font-family: 'Cairo'; width: 100%; outline: none; font-size: 14px; }
+  
+  .btn { padding: 12px 25px; border: none; border-radius: var(--radius-sm); font-family: 'Cairo'; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+  .btn-green { background: var(--primary); color: #fff; }
+  .btn-blue { background: #3b82f6; color: #fff; }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-full { width: 100%; padding: 15px; border: 2px dashed var(--primary); background: transparent; color: var(--primary); font-size: 16px; }
+  .btn-full:hover { background: var(--primary-light); }
+  
+  #outputCode { width: 100%; height: 500px; background: #000; color: #00ffcc; font-family: monospace; padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); display: none; margin-top: 20px; direction: ltr; text-align: left; font-size: 13px; line-height: 1.5; }
+  #toast { visibility: hidden; min-width: 250px; background: var(--primary); color: #fff; text-align: center; border-radius: 8px; padding: 15px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5); opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
   #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
-  #toast.error { background: var(--accent); }
+  #toast.error { background: var(--danger); }
+  
+  .list-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 15px; min-height: 100px; }
 </style>
 </head>
 <body>
@@ -56,12 +88,21 @@
 <div id="toast">تم النسخ بنجاح!</div>
 
 <div id="builderContent">
-  <div class="header">
-    <h1>🏗️ Quiz Builder</h1>
-    <a href="index.html" class="btn-back">⬅ رجوع للرئيسية</a>
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">🏗️</div>
+      <div class="brand-text">
+        <h1>صانع الكويزات</h1>
+        <p>Quiz Builder</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <a href="index.html" class="btn-back">⬅ رجوع</a>
+    </div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs-bar">
       <button class="tab-btn active" onclick="switchTab('builder', this)">🛠️ صانع الكويزات</button>
       <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
   </div>
@@ -86,13 +127,13 @@
       <div class="section">
         <h3>2. الأسئلة والإجابات</h3>
         <div id="questionsContainer"></div>
-        <button class="btn btn-blue" onclick="addQuestion()" style="width:100%; padding:15px; border:2px dashed var(--blue); background:transparent; font-size:18px;">➕ إضافة سؤال جديد</button>
+        <button class="btn btn-full" onclick="addQuestion()">➕ إضافة سؤال جديد</button>
       </div>
 
       <div class="section" style="text-align:center; display:flex; flex-direction:column; gap:15px;">
         <h3>3. توليد الكود</h3>
-        <button class="btn btn-gold" style="font-size:20px; padding:15px;" onclick="generateHTML()">🚀 توليد كود الملف الكامل</button>
-        <button class="btn btn-green" id="copyBtn" style="display:none; font-size:20px; padding:15px;" onclick="copyCode()">📋 نسخ الكود</button>
+        <button class="btn btn-gold" style="font-size:18px; padding:15px;" onclick="generateHTML()">🚀 توليد كود الملف الكامل</button>
+        <button class="btn btn-green" id="copyBtn" style="display:none; font-size:18px; padding:15px;" onclick="copyCode()">📋 نسخ الكود</button>
       </div>
 
       <textarea id="outputCode" readonly></textarea>
@@ -101,15 +142,18 @@
   <div id="tab-owner_msg" class="tab-content">
       <div class="section" style="max-width:600px; margin:0 auto;">
           <h3>📩 إرسال رسالة للأونر</h3>
-          <textarea id="builderMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
-          <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="window.sendToOwner()">إرسال 📨</button>
-          <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
-          <div class="list-container" id="ownerRepliesList" style="background:#000; padding:15px; border-radius:8px; min-height:100px; border:1px solid #333;"></div>
+          <textarea id="builderMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+          <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="sendToOwner()">إرسال 📨</button>
+          
+          <h3 style="color:var(--primary); margin:20px 0 10px;">📋 الردود من الأونر</h3>
+          <div class="list-box" id="ownerRepliesList">
+              <div style="text-align:center; color:var(--text-secondary);">لا توجد ردود بعد</div>
+          </div>
       </div>
   </div>
 </div>
 
-<!-- القالب (هنا بنحط الكود عشان VS Code ميتلغبطش) -->
+<!-- القالب -->
 <template id="quizTemplate">
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -214,22 +258,39 @@
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) window.location.href = 'index.html';
 
-  window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
-      const role = snap.exists() ? snap.val() : 'Player';
-      if (role === 'Admin' || role === 'Manager' || currentUser.toLowerCase() === 'ahmed') {
-          document.getElementById('builderContent').style.display = 'block';
-          
-          window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-              const list = document.getElementById('ownerRepliesList');
-              if(!list || !msgSnap.exists()) return;
-              list.innerHTML = '';
-              Object.values(msgSnap.val()).reverse().forEach(msg => {
-                  list.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px 0; color:#fff;">${msg.text}</div>`;
+  // الثيم
+  if (localStorage.getItem('builderTheme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      setTimeout(() => { const btn = document.getElementById('themeBtn'); if (btn) btn.innerText = '☀️'; }, 100);
+  }
+  window.toggleTheme = function() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+      localStorage.setItem('builderTheme', isDark ? 'dark' : 'light');
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
+          const role = snap.exists() ? snap.val() : 'Player';
+          if (role === 'Admin' || role === 'Manager' || currentUser.toLowerCase() === 'ahmed') {
+              document.getElementById('builderContent').style.display = 'block';
+              
+              window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
+                  const list = document.getElementById('ownerRepliesList');
+                  if(!list) return;
+                  list.innerHTML = '';
+                  if (!msgSnap.exists()) {
+                      list.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">لا توجد ردود بعد</div>';
+                      return;
+                  }
+                  Object.values(msgSnap.val()).reverse().forEach(msg => {
+                      list.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:8px 0; color:var(--text);">${msg.text}</div>`;
+                  });
               });
-          });
-      } else {
-          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">⛔ وصول مرفوض. الأداة دي للمديرين والأدمنز فقط.</h1>';
-      }
+          } else {
+              document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. الأداة دي للمديرين والأدمنز فقط.</h1>';
+          }
+      });
   });
 
   window.switchTab = function(tabId, btn) {
@@ -237,7 +298,7 @@
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
-  }
+  };
 
   window.sendToOwner = async function() {
       const text = document.getElementById('builderMsgInput').value;
@@ -245,7 +306,7 @@
       await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Builder: ' + currentUser, text: text, time: Date.now() });
       alert('تم إرسال الرسالة للأونر!');
       document.getElementById('builderMsgInput').value = '';
-  }
+  };
 
   window.showToastMessage = function(msg, isError = false) {
       const toast = document.getElementById('toast');
@@ -265,14 +326,14 @@
       div.innerHTML = `
           <button class="remove-q" onclick="document.getElementById('q${qCount}').remove()">🗑️ مسح السؤال</button>
           <div class="form-group">
-            <label style="color:#fff;">السؤال (بالعربي)</label>
+            <label>السؤال (بالعربي)</label>
             <input type="text" class="form-control q-text" placeholder="اكتب السؤال هنا...">
           </div>
           <div class="form-group">
-            <label style="color:#ccc;">السؤال (بالإنجليزي - اختياري)</label>
+            <label>السؤال (بالإنجليزي - اختياري)</label>
             <input type="text" class="form-control q-text-en" placeholder="English question here...">
           </div>
-          <label style="color:var(--green); font-weight:bold; margin-bottom:10px; display:block; font-size:16px;">حدد الإجابة الصحيحة من الدائرة:</label>
+          <label style="color:var(--primary); font-weight:bold; margin-bottom:10px; display:block; font-size:15px;">حدد الإجابة الصحيحة من الدائرة:</label>
           <div class="options-grid">
               <div class="option-row"><input type="radio" name="correct_${qCount}" value="0"><input type="text" class="opt-text" placeholder="الإجابة 1"></div>
               <div class="option-row"><input type="radio" name="correct_${qCount}" value="1"><input type="text" class="opt-text" placeholder="الإجابة 2"></div>
@@ -297,8 +358,8 @@
           const optionsAr = Array.from(optInputs).map(i => i.value.trim());
           const correctRadio = block.querySelector('input[type="radio"]:checked');
           
-          if(!qAr || !optionsAr[0]) { hasError = true; block.style.borderColor = 'var(--accent)'; return; }
-          if(!correctRadio) { showToastMessage('لازم تحدد الإجابة الصحيحة للسؤال رقم ' + (index + 1), true); hasError = true; block.style.borderColor = 'var(--accent)'; return; }
+          if(!qAr || !optionsAr[0]) { hasError = true; block.style.borderColor = 'var(--danger)'; return; }
+          if(!correctRadio) { showToastMessage('لازم تحدد الإجابة الصحيحة للسؤال رقم ' + (index + 1), true); hasError = true; block.style.borderColor = 'var(--danger)'; return; }
 
           const answerIdx = parseInt(correctRadio.value);
           questionsData.push({ q_ar: qAr, q_en: qEn, options_ar: optionsAr, options_en: optionsAr, answer: answerIdx });
@@ -314,7 +375,6 @@
       
       let template = document.getElementById('quizTemplate').innerHTML;
       
-      // استبدال النصوص بدون أي رموز غريبة
       let fullCode = template.split('[[TITLE]]').join(title)
                              .split('[[VARNAME]]').join(varName)
                              .split('[[JSDATA]]').join(jsData);
