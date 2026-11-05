@@ -5,14 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>👑 لوحة الأونر - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="owner-style.css">
 </head>
 <body>
 
+<!-- شاشة القفل -->
 <div id="passwordLock">
     <div class="lock-box">
-        <h2>🔒 منطقة محظورة</h2>
+        <div class="lock-icon">🔒</div>
+        <h2>منطقة محظورة</h2>
         <p>هذه الصفحة مخصصة للأونر فقط. من فضلك أدخل كلمة المرور.</p>
         <div id="errorMsg">كلمة المرور غير صحيحة!</div>
         <input type="password" id="ownerPasswordInput" class="lock-input" placeholder="Password" onkeypress="if(event.key==='Enter') window.checkPassword()">
@@ -21,233 +23,289 @@
     </div>
 </div>
 
+<!-- محتوى اللوحة -->
 <div id="ownerContent" style="display: none; width: 100%;">
-  <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px;"></div>
+  <div id="toast-container"></div>
 
-  <div class="sidebar">
-    <div class="sidebar-logo" id="panelTitle" data-ar="👑 لوحة الأونر" data-en="👑 Owner Panel">👑 لوحة الأونر</div>
-    <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
-    <div class="nav-item" onclick="switchTab('assign', this)" data-ar="👑 تعيين الإدارة" data-en="👑 Assign Roles">👑 تعيين الإدارة</div>
-    <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</div>
-    <div class="nav-item" onclick="switchTab('ranks', this)" data-ar="🎖️ إدارة الرتب" data-en="🎖️ Ranks">🎖️ إدارة الرتب</div>
-    <div class="nav-item" onclick="switchTab('badges', this)" data-ar="🏅 البادجات" data-en="🏅 Badges">🏅 البادجات</div>
-    <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
-    <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</div>
-    <div class="nav-item" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</div>
-    <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</div>
-    <div class="nav-item" onclick="switchTab('manager', this)" data-ar="📩 طلبات المنجر" data-en="📩 Manager Reqs">📩 طلبات المنجر</div>
-    <div class="nav-item" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</div>
-    <div class="nav-item" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</div>
-    <div class="nav-item" onclick="switchTab('admins', this)" data-ar="🛡️ الأدمنز" data-en="🛡️ Admins">🛡️ الأدمنز</div>
-    <div class="nav-item" onclick="switchTab('security', this)" data-ar="🔒 الأمان" data-en="🔒 Security">🔒 الأمان</div>
-    <div class="nav-item" onclick="switchTab('developer', this)" data-ar="🔧 المطور" data-en="🔧 Developer">🔧 المطور</div>
+  <!-- Header -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">👑</div>
+      <div class="brand-text">
+        <h1 id="panelTitle">لوحة الأونر</h1>
+        <p>التحكم الكامل في Quiz Hub</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" title="تبديل الثيم">🌙</button>
+      <button class="icon-btn" onclick="window.toggleLanguage()" id="langBtn" title="تبديل اللغة" style="width:auto; padding:0 14px; font-size:14px; font-weight:700;">EN</button>
+      <button class="btn-back" onclick="window.logoutUser()" style="background:var(--danger); color:#fff; border-color:var(--danger);">تسجيل خروج 🚪</button>
+    </div>
   </div>
 
-  <div class="main">
-    <div class="header">
-      <h1 id="pageTitle">📊 الإحصائيات</h1>
-      <div>
-          <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
-          <button class="icon-btn" onclick="window.toggleLanguage()" id="langBtn">EN</button>
-          <button class="btn btn-red" onclick="window.logoutUser()" style="padding: 10px 15px; font-size:14px;">تسجيل خروج 🚪</button>
-      </div>
-    </div>
+  <!-- Tabs Bar -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</button>
+    <button class="tab-btn" onclick="switchTab('assign', this)" data-ar="👑 تعيين الإدارة" data-en="👑 Assign">👑 تعيين الإدارة</button>
+    <button class="tab-btn" onclick="switchTab('users', this)" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</button>
+    <button class="tab-btn" onclick="switchTab('ranks', this)" data-ar="🎖️ الرتب" data-en="🎖️ Ranks">🎖️ الرتب</button>
+    <button class="tab-btn" onclick="switchTab('badges', this)" data-ar="🏅 البادجات" data-en="🏅 Badges">🏅 البادجات</button>
+    <button class="tab-btn" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</button>
+    <button class="tab-btn" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</button>
+    <button class="tab-btn" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</button>
+    <button class="tab-btn" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</button>
+    <button class="tab-btn" onclick="switchTab('manager', this)" data-ar="📩 طلبات المنجر" data-en="📩 Manager">📩 طلبات المنجر</button>
+    <button class="tab-btn" onclick="switchTab('offers', this)" data-ar="🎁 العروض" data-en="🎁 Offers">🎁 العروض</button>
+    <button class="tab-btn" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</button>
+    <button class="tab-btn" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</button>
+    <button class="tab-btn" onclick="switchTab('admins', this)" data-ar="🛡️ الأدمنز" data-en="🛡️ Admins">🛡️ الأدمنز</button>
+    <button class="tab-btn" onclick="switchTab('security', this)" data-ar="🔒 الأمان" data-en="🔒 Security">🔒 الأمان</button>
+    <button class="tab-btn" onclick="switchTab('developer', this)" data-ar="🔧 المطور" data-en="🔧 Developer">🔧 المطور</button>
+  </div>
 
-    <div id="tab-dashboard" class="tab active">
-      <div class="stats-grid">
-        <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-        <div class="stat-card"><h3>🟢 متصل الآن</h3><div class="num" id="statOnline" style="color:var(--green);">0</div></div>
-        <div class="stat-card"><h3>✨ إجمالي XP</h3><div class="num" id="statXP" style="color:var(--blue);">0</div></div>
-        <div class="stat-card"><h3>🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-        <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
-        <div class="stat-card"><h3>💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
-        <div class="stat-card"><h3>💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
-        <div class="stat-card"><h3>👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
-      </div>
+  <!-- ============ Dashboard ============ -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">👥 اللاعبين</div><div class="stat-value" id="statUsers">0</div></div>
+      <div class="stat-card green"><div class="stat-label">🟢 متصل الآن</div><div class="stat-value" id="statOnline">0</div></div>
+      <div class="stat-card"><div class="stat-label">✨ إجمالي XP</div><div class="stat-value" id="statXP">0</div></div>
+      <div class="stat-card gold"><div class="stat-label">🎮 كويزات اتلعبت</div><div class="stat-value" id="statPlays">0</div></div>
+      <div class="stat-card purple"><div class="stat-label">🚪 غرف نشطة</div><div class="stat-value" id="statRooms">0</div></div>
+      <div class="stat-card"><div class="stat-label">💬 تعليقات</div><div class="stat-value" id="statComments">0</div></div>
+      <div class="stat-card"><div class="stat-label">💡 اقتراحات</div><div class="stat-value" id="statSuggestions">0</div></div>
+      <div class="stat-card" style="--primary:#f97316;"><div class="stat-label">👀 زوار اليوم</div><div class="stat-value" id="statVisitors" style="color:#f97316;">0</div></div>
     </div>
+  </div>
 
-    <!-- تبويب تعيين الإدارة -->
-    <div id="tab-assign" class="tab">
-      <h3 style="color:var(--gold); margin-bottom:15px;">👑 تعيين اللاعبين (إدارة، منجر، بارتنر)</h3>
+  <!-- ============ Assign ============ -->
+  <div id="tab-assign" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">👑 تعيين اللاعبين (إدارة، منجر، بارتنر)</div>
       <input type="text" id="assignSearch" class="form-control" placeholder="ابحث عن لاعب..." onkeyup="window.renderAssignList()">
       <div class="list-container" id="assignList"></div>
     </div>
+  </div>
 
-    <div id="tab-users" class="tab">
+  <!-- ============ Users ============ -->
+  <div id="tab-users" class="tab-content">
+    <div class="section">
+      <div class="section-title">👥 إدارة اللاعبين</div>
       <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
-      <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
+      <div class="list-container" id="usersList"><div class="item">جاري التحميل...</div></div>
     </div>
+  </div>
 
-    <div id="tab-ranks" class="tab">
-      <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--gold); margin-bottom:15px;">🎖️ إعطاء رتبة للاعب</h3>
-          <select id="rankUserSelect" class="form-control"></select>
-          <select id="rankSelect" class="form-control">
-              <option value="Owner">الأونر</option>
-              <option value="Player">لاعب عادي</option>
-              <option value="VIP">VIP</option>
-              <option value="Pro Player">محترف</option>
-              <option value="Legend">أسطورة</option>
-              <option value="King">ملك</option>
-              <option value="Admin">أدمن</option>
-              <option value="Star">نجم</option>
-          </select>
-          <button class="btn btn-green" onclick="window.setRank()" style="width:100%;">حفظ الرتبة ✅</button>
-      </div>
-      <h3 style="color:var(--gold); margin-bottom:10px;">📋 قائمة الرتب الحالية</h3>
+  <!-- ============ Ranks ============ -->
+  <div id="tab-ranks" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">🎖️ إعطاء رتبة للاعب</div>
+      <select id="rankUserSelect" class="form-control"></select>
+      <select id="rankSelect" class="form-control">
+          <option value="Owner">الأونر</option>
+          <option value="Player">لاعب عادي</option>
+          <option value="VIP">VIP</option>
+          <option value="Pro Player">محترف</option>
+          <option value="Legend">أسطورة</option>
+          <option value="King">ملك</option>
+          <option value="Admin">أدمن</option>
+          <option value="Star">نجم</option>
+      </select>
+      <button class="btn btn-green" onclick="window.setRank()" style="width:100%;">حفظ الرتبة ✅</button>
+    </div>
+    <div class="section">
+      <div class="section-title gold">📋 قائمة الرتب الحالية</div>
       <div class="list-container" id="ranksList"></div>
     </div>
+  </div>
 
-    <div id="tab-badges" class="tab">
-      <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--pink); margin-bottom:15px;">🎯 اختر اللاعب وامنحه بادج</h3>
-          <select id="badgeUserSelect" class="form-control"></select>
-          <div class="badge-grid" id="badgeGrid">
-              <div class="badge-item" onclick="window.giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
-              <div class="badge-item" onclick="window.giveBadge('⭐ VIP')"><div class="badge-icon">⭐</div><div>VIP</div></div>
-              <div class="badge-item" onclick="window.giveBadge('🔥 Pro')"><div class="badge-icon">🔥</div><div>Pro</div></div>
-              <div class="badge-item" onclick="window.giveBadge('🎃 Horror')"><div class="badge-icon">🎃</div><div>Horror</div></div>
-              <div class="badge-item" onclick="window.giveBadge('💖 K-Drama')"><div class="badge-icon">💖</div><div>K-Drama</div></div>
-              <div class="badge-item" onclick="window.giveBadge('💥 Action')"><div class="badge-icon">💥</div><div>Action</div></div>
-              <div class="badge-item" onclick="window.giveBadge('🎯 Sniper')"><div class="badge-icon">🎯</div><div>Sniper</div></div>
-              <div class="badge-item" onclick="window.giveBadge('🧠 Genius')"><div class="badge-icon">🧠</div><div>Genius</div></div>
-          </div>
+  <!-- ============ Badges ============ -->
+  <div id="tab-badges" class="tab-content">
+    <div class="section">
+      <div class="section-title" style="color:#ec4899;">🎯 اختر اللاعب وامنحه بادج</div>
+      <select id="badgeUserSelect" class="form-control"></select>
+      <div class="badge-grid" id="badgeGrid">
+          <div class="badge-item" onclick="window.giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
+          <div class="badge-item" onclick="window.giveBadge('⭐ VIP')"><div class="badge-icon">⭐</div><div>VIP</div></div>
+          <div class="badge-item" onclick="window.giveBadge('🔥 Pro')"><div class="badge-icon">🔥</div><div>Pro</div></div>
+          <div class="badge-item" onclick="window.giveBadge('🎃 Horror')"><div class="badge-icon">🎃</div><div>Horror</div></div>
+          <div class="badge-item" onclick="window.giveBadge('💖 K-Drama')"><div class="badge-icon">💖</div><div>K-Drama</div></div>
+          <div class="badge-item" onclick="window.giveBadge('💥 Action')"><div class="badge-icon">💥</div><div>Action</div></div>
+          <div class="badge-item" onclick="window.giveBadge('🎯 Sniper')"><div class="badge-icon">🎯</div><div>Sniper</div></div>
+          <div class="badge-item" onclick="window.giveBadge('🧠 Genius')"><div class="badge-icon">🧠</div><div>Genius</div></div>
       </div>
-      <h3 style="color:var(--pink); margin-bottom:10px;">📋 اللاعبين المميزين بالبادجات</h3>
+    </div>
+    <div class="section">
+      <div class="section-title" style="color:#ec4899;">📋 اللاعبين المميزين بالبادجات</div>
       <div class="list-container" id="badgesList"></div>
     </div>
+  </div>
 
-    <div id="tab-warnings" class="tab">
-      <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--accent); margin-bottom:15px;">⚠️ إرسال تحذير</h3>
-          <select id="warnUserSelect" class="form-control"></select>
-          <input type="text" id="warnReason" class="form-control" placeholder="سبب التحذير...">
-          <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;">إرسال التحذير ⚠️</button>
-      </div>
-      <h3 style="color:var(--accent); margin-bottom:10px;">📋 التحذيرات المسجلة</h3>
+  <!-- ============ Warnings ============ -->
+  <div id="tab-warnings" class="tab-content">
+    <div class="section">
+      <div class="section-title danger">⚠️ إرسال تحذير</div>
+      <select id="warnUserSelect" class="form-control"></select>
+      <input type="text" id="warnReason" class="form-control" placeholder="سبب التحذير...">
+      <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;">إرسال التحذير ⚠️</button>
+    </div>
+    <div class="section">
+      <div class="section-title danger">📋 التحذيرات المسجلة</div>
       <div class="list-container" id="warningsList"></div>
     </div>
+  </div>
 
-    <div id="tab-content" class="tab">
-      <div class="item" style="margin-bottom:15px; display:block;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);">💬 التعليقات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('comments')">مسح الكل 🗑️</button>
-          </div>
-          <div class="list-container" id="commentsList"></div>
+  <!-- ============ Content ============ -->
+  <div id="tab-content" class="tab-content">
+    <div class="section">
+      <div class="section-title danger" style="justify-content:space-between;">
+          <span>💬 التعليقات</span>
+          <button class="btn btn-red" onclick="window.clearAll('comments')" style="font-size:12px;">مسح الكل 🗑️</button>
       </div>
-      <div class="item" style="margin-bottom:15px; display:block;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);">💡 الاقتراحات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('suggestions')">مسح الكل 🗑️</button>
-          </div>
-          <div class="list-container" id="suggestionsList"></div>
-      </div>
-      <div class="item" style="display:block;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <h3 style="color:var(--accent);">🎬 طلبات الكويزات</h3>
-              <button class="btn btn-red" onclick="window.clearAll('quiz_requests')">مسح الكل 🗑️</button>
-          </div>
-          <div class="list-container" id="requestsList"></div>
-      </div>
+      <div class="list-container" id="commentsList"></div>
     </div>
-
-    <div id="tab-quizzes" class="tab">
-      <div class="item" style="display:block; margin-bottom:20px;">
-          <h3 style="color:var(--gold); margin-bottom:15px;">➕ إضافة كويز مخصص</h3>
-          <input type="text" id="qName" class="form-control" placeholder="اسم الكويز">
-          <input type="text" id="qImage" class="form-control" placeholder="رابط الصورة">
-          <input type="text" id="qLink" class="form-control" placeholder="رابط صفحة الكويز">
-          <select id="qCategory" class="form-control">
-              <option value="horror">رعب 🎃</option>
-              <option value="kdrama">دراما 💖</option>
-              <option value="action">أكشن 💥</option>
-              <option value="mystery">غموض 🕵️</option>
-          </select>
-          <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;">إضافة الكويز ✅</button>
+    <div class="section">
+      <div class="section-title danger" style="justify-content:space-between;">
+          <span>💡 الاقتراحات</span>
+          <button class="btn btn-red" onclick="window.clearAll('suggestions')" style="font-size:12px;">مسح الكل 🗑️</button>
       </div>
-      <h3 style="color:var(--gold); margin-bottom:10px;">✨ الكويزات المضافة</h3>
+      <div class="list-container" id="suggestionsList"></div>
+    </div>
+    <div class="section">
+      <div class="section-title danger" style="justify-content:space-between;">
+          <span>🎬 طلبات الكويزات</span>
+          <button class="btn btn-red" onclick="window.clearAll('quiz_requests')" style="font-size:12px;">مسح الكل 🗑️</button>
+      </div>
+      <div class="list-container" id="requestsList"></div>
+    </div>
+  </div>
+
+  <!-- ============ Quizzes ============ -->
+  <div id="tab-quizzes" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">➕ إضافة كويز مخصص</div>
+      <input type="text" id="qName" class="form-control" placeholder="اسم الكويز">
+      <input type="text" id="qImage" class="form-control" placeholder="رابط الصورة">
+      <input type="text" id="qLink" class="form-control" placeholder="رابط صفحة الكويز">
+      <select id="qCategory" class="form-control">
+          <option value="horror">رعب 🎃</option>
+          <option value="kdrama">دراما 💖</option>
+          <option value="action">أكشن 💥</option>
+          <option value="mystery">غموض 🕵️</option>
+      </select>
+      <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;">إضافة الكويز ✅</button>
+    </div>
+    <div class="section">
+      <div class="section-title gold">✨ الكويزات المضافة</div>
       <div class="list-container" id="customQuizzesList"></div>
     </div>
+  </div>
 
-    <div id="tab-rooms" class="tab">
-      <h3 style="color:var(--blue); margin-bottom:10px;">🚪 الغرف النشطة</h3>
-      <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
+  <!-- ============ Rooms ============ -->
+  <div id="tab-rooms" class="tab-content">
+    <div class="section">
+      <div class="section-title">🚪 الغرف النشطة</div>
+      <div class="list-container" id="roomsList"><div class="item">جاري التحميل...</div></div>
     </div>
+  </div>
 
-    <div id="tab-manager" class="tab">
-      <h3 style="color:var(--gold); margin-bottom:15px;">📩 المسودات المطلوب اعتمادها</h3>
-      <div class="list-container" id="managerDraftsList"><p>لا توجد مسودات.</p></div>
-      
-      <h3 style="color:var(--gold); margin: 25px 0 15px;">📋 طلبات وتقارير المنجر</h3>
-      <div class="list-container" id="managerReqsList"><p>لا توجد طلبات.</p></div>
+  <!-- ============ Manager ============ -->
+  <div id="tab-manager" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">📩 المسودات المطلوب اعتمادها</div>
+      <div class="list-container" id="managerDraftsList"><div class="item">لا توجد مسودات.</div></div>
     </div>
+    <div class="section">
+      <div class="section-title gold">📋 طلبات وتقارير المنجر</div>
+      <div class="list-container" id="managerReqsList"><div class="item">لا توجد طلبات.</div></div>
+    </div>
+  </div>
 
-    <div id="tab-system" class="tab">
-      <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--accent);">🚧 وضع الصيانة</h3></div>
-        <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()">تفعيل الصيانة</button>
-      </div>
-      <div class="item" style="margin-bottom:15px;">
-        <div style="width:100%;">
-          <h3 style="color:var(--gold);">📢 إعلان عام</h3>
-          <textarea id="announcementInput" class="form-control" rows="2" placeholder="اكتب إعلان..."></textarea>
-          <button class="btn btn-green" onclick="window.publishAnnouncement()">نشر 🚀</button>
-        </div>
-      </div>
-      <div class="item" style="margin-bottom:15px;">
-        <div style="width:100%;">
-          <h3 style="color:var(--blue);">📡 إرسال إشعار منبثق</h3>
-          <input type="text" id="broadcastInput" class="form-control" placeholder="اكتب الإشعار هنا...">
-          <button class="btn btn-blue" onclick="window.sendBroadcast()">إرسال 📨</button>
-        </div>
-      </div>
-      <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--gold);">🧹 مسح الكاش (تحديث الموقع للجميع)</h3></div>
-        <button class="btn btn-orange" onclick="window.clearSiteCache()">مسح الكاش 💥</button>
-      </div>
-      <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--orange);">👀 تصفير عداد الزوار</h3></div>
-        <button class="btn btn-orange" onclick="window.resetVisitors()">تصفير 🔄</button>
-      </div>
+  <!-- ============ Offers ============ -->
+  <div id="tab-offers" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">🎁 العروض والخصومات</div>
+      <div class="list-container" id="managerOffersList"><div class="item">لا توجد عروض حالياً.</div></div>
     </div>
-    
-    <div id="tab-messages" class="tab">
-      <div class="item" style="margin-bottom:15px;">
-        <div style="width:100%;">
-          <h3 style="color:var(--cyan);">📩 إرسال رسالة خاصة</h3>
-          <input type="text" id="dmUser" class="form-control" placeholder="اسم اللاعب...">
-          <textarea id="dmText" class="form-control" rows="3" placeholder="نص الرسالة..."></textarea>
-          <button class="btn btn-cyan" onclick="window.sendDM()">إرسال 📨</button>
-        </div>
-      </div>
-      <h3 style="color:var(--cyan); margin: 25px 0 15px;">📥 رسائل الإدارة (أدمن/منجر/بيلدر)</h3>
+    <div class="section">
+      <div class="section-title gold">🏆 المسابقات والتحديات</div>
+      <div class="list-container" id="managerContestsList"><div class="item">لا توجد مسابقات حالياً.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ System ============ -->
+  <div id="tab-system" class="tab-content">
+    <div class="section">
+      <div class="section-title danger">🚧 وضع الصيانة</div>
+      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:12px;">عند التفعيل، يتم إغلاق الموقع على الجميع عدا الأونر.</p>
+      <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()" style="width:100%;">تفعيل الصيانة</button>
+    </div>
+    <div class="section">
+      <div class="section-title gold">📢 إعلان عام</div>
+      <textarea id="announcementInput" class="form-control" rows="3" placeholder="اكتب إعلان..."></textarea>
+      <button class="btn btn-green" onclick="window.publishAnnouncement()" style="width:100%;">نشر 🚀</button>
+    </div>
+    <div class="section">
+      <div class="section-title">📡 إرسال إشعار منبثق</div>
+      <input type="text" id="broadcastInput" class="form-control" placeholder="اكتب الإشعار هنا...">
+      <button class="btn btn-blue" onclick="window.sendBroadcast()" style="width:100%;">إرسال 📨</button>
+    </div>
+    <div class="section">
+      <div class="section-title">🧹 مسح الكاش (تحديث الموقع للجميع)</div>
+      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:12px;">عند الضغط، كل اللاعبين هيشوفوا تحديث للموقع عند فتح الصفحة القادمة.</p>
+      <button class="btn btn-orange" onclick="window.clearSiteCache()" style="width:100%;">مسح الكاش 💥</button>
+    </div>
+    <div class="section">
+      <div class="section-title">👀 تصفير عداد الزوار</div>
+      <button class="btn btn-orange" onclick="window.resetVisitors()" style="width:100%;">تصفير 🔄</button>
+    </div>
+  </div>
+
+  <!-- ============ Messages ============ -->
+  <div id="tab-messages" class="tab-content">
+    <div class="section">
+      <div class="section-title" style="color:#06b6d4;">📩 إرسال رسالة خاصة</div>
+      <input type="text" id="dmUser" class="form-control" placeholder="اسم اللاعب...">
+      <textarea id="dmText" class="form-control" rows="3" placeholder="نص الرسالة..."></textarea>
+      <button class="btn btn-blue" onclick="window.sendDM()" style="width:100%;">إرسال 📨</button>
+    </div>
+    <div class="section">
+      <div class="section-title" style="color:#06b6d4;">📥 رسائل الإدارة (أدمن/منجر/بيلدر)</div>
       <div class="list-container" id="ownerInboxList"></div>
     </div>
-
-    <div id="tab-admins" class="tab">
-      <h3 style="color:var(--blue); margin-bottom:10px;">🛡️ إدارة الأدمنز</h3>
-      <div class="list-container" id="adminsList"><p>جاري التحميل...</p></div>
-    </div>
-
-    <div id="tab-security" class="tab">
-      <h3 style="color:var(--accent); margin-bottom:10px;">🔒 قائمة المحظورين</h3>
-      <div class="list-container" id="bannedList"><p>جاري التحميل...</p></div>
-    </div>
-
-    <div id="tab-developer" class="tab">
-      <h3 style="color:var(--purple); margin-bottom:10px;">🔧 أدوات المطور</h3>
-      <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--accent);">⚠️ إعادة ضبط الموقع بالكامل</h3></div>
-        <button class="btn btn-red" onclick="window.resetSite()">إعادة ضبط 💥</button>
-      </div>
-      <div class="item" style="margin-bottom:15px;">
-        <div><h3 style="color:var(--gold);">📤 استعادة نسخة احتياطية</h3></div>
-        <input type="file" id="restoreFile" class="form-control" accept=".json" onchange="window.restoreData(event)">
-      </div>
-    </div>
-
   </div>
+
+  <!-- ============ Admins ============ -->
+  <div id="tab-admins" class="tab-content">
+    <div class="section">
+      <div class="section-title">🛡️ إدارة الأدمنز</div>
+      <div class="list-container" id="adminsList"><div class="item">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <!-- ============ Security ============ -->
+  <div id="tab-security" class="tab-content">
+    <div class="section">
+      <div class="section-title danger">🔒 قائمة المحظورين</div>
+      <div class="list-container" id="bannedList"><div class="item">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <!-- ============ Developer ============ -->
+  <div id="tab-developer" class="tab-content">
+    <div class="section">
+      <div class="section-title" style="color:#a855f7;">🔧 أدوات المطور</div>
+      <div class="item" style="flex-direction:column; align-items:stretch;">
+        <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ إعادة ضبط الموقع بالكامل</h3>
+        <p style="margin-bottom:10px;">هيحذف كل الـ scores والـ users_data.</p>
+        <button class="btn btn-red" onclick="window.resetSite()" style="width:100%;">إعادة ضبط 💥</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title" style="color:#a855f7;">📤 استعادة نسخة احتياطية</div>
+      <input type="file" id="restoreFile" class="form-control" accept=".json" onchange="window.restoreData(event)">
+    </div>
+  </div>
+
 </div>
 
 <script src="owner-core.js" type="module"></script>
