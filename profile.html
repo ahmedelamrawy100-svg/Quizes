@@ -99,7 +99,41 @@
       to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; }
   }
 
-  @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } }
+  /* تظبيط الموبايل */
+  @media (max-width: 768px) {
+      .top-controls { top: 10px; left: 10px; gap: 5px; }
+      .back-btn, .lang-btn { padding: 6px 10px; font-size: 12px; }
+      
+      .profile-container { margin-top: 70px; padding: 0 10px; gap: 20px; }
+      
+      .header-card { padding: 20px 15px; }
+      .avatar { width: 90px; height: 90px; font-size: 40px; border-width: 3px; }
+      .username { font-size: 24px; }
+      
+      .stats-row { gap: 8px; flex-direction: column; width: 100%; }
+      .stat-badge { width: 100%; justify-content: center; font-size: 14px; padding: 8px; }
+      
+      .rank-box { padding: 8px 15px; width: 100%; justify-content: center; }
+      .rank-value { font-size: 16px; }
+      
+      .progress-container { max-width: 100%; }
+      .xpProgressText { font-size: 11px; }
+      
+      .advanced-stats { grid-template-columns: 1fr; gap: 10px; }
+      .adv-stat-box { padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+      .adv-stat-title { margin-bottom: 0; }
+      .adv-stat-value { font-size: 20px; }
+      
+      .upload-section { flex-direction: column; width: 100%; }
+      .upload-label, .upload-btn { width: 100%; text-align: center; }
+      
+      .friend-card { flex-direction: column; gap: 10px; text-align: center; }
+      .friend-info { flex-direction: column; }
+      .action-btn { width: 100%; text-align: center; }
+      
+      #timelineList { padding-right: 15px; }
+      .timeline-dot { right: -23px; }
+  }
 </style>
 </head>
 <body>
