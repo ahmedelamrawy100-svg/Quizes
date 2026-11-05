@@ -21,19 +21,19 @@
   body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; overflow-x: hidden; }
   
   #loadingScreen { position: fixed; inset: 0; background: #000; z-index: 999999; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 20px; }
-  .loader-spinner { width: 60px; height: 60px; border: 5px solid #333; border-top-color: #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
+  .loader-spinner { width: 60px; height: 60px; border: 5px solid #333; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #cinematicIntro { position: fixed; inset: 0; background: #000; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease-in-out; }
-  #introTitle { font-family: 'Cairo', sans-serif; font-size: 60px; color: #fff; text-shadow: 0 0 30px rgba(255,0,0,0.5); opacity: 0; transition: opacity 2.5s ease-in-out; letter-spacing: 5px; }
-  #enterBtn { margin-top: 30px; padding: 15px 40px; background: transparent; border: 2px solid var(--accent); color: var(--accent); font-family: 'Cairo'; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 5px; opacity: 0; transition: all 0.5s ease-in-out; letter-spacing: 2px; }
-  #enterBtn:hover { background: var(--accent); color: #fff; box-shadow: 0 0 20px var(--accent); }
-
-  #authScreen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 80vh; width: 100%; max-width: 500px; margin-top: 60px;}
+  #authScreen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; width: 100%; max-width: 500px; margin-top: 20px;}
   .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 10px; border: 2px solid #555; background: var(--input-bg); color: var(--text-color); font-family: 'Cairo'; outline: none; text-align: center; font-size: 16px;}
   .auth-input:focus { border-color: var(--accent); }
   .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
   .auth-switch { color: var(--subtitle-color); cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 10px; }
+
+  /* اختيار النوع في التسجيل */
+  .gender-selector { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
+  .gender-box { flex: 1; text-align: center; padding: 15px; background: var(--input-bg); border: 2px solid #555; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 16px;}
+  .gender-box.active { border-color: var(--accent); background: rgba(255,0,0,0.1); color: var(--accent); }
 
   #mainContent { display: none; width: 100%; flex-direction: column; align-items: center; }
   
@@ -102,11 +102,6 @@
 </head>
 <body>
 
-<div id="cinematicIntro">
-    <h1 id="introTitle">Quiz Hub</h1>
-    <button id="enterBtn" onclick="enterHub()">دخول المنصة (Enter)</button>
-</div>
-
 <div id="loadingScreen" style="display: none;">
     <div class="loader-spinner"></div>
 </div>
@@ -115,7 +110,7 @@
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
-  <div class="menu-title" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
+  <div class="menu-title" id="menuTitle" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
   <a href="index.html" class="menu-item" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
   <a href="leaderboard.html" class="menu-item" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
   <a href="users.html" class="menu-item" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
@@ -123,7 +118,7 @@
   <a href="comments.html" class="menu-item" data-ar="💬 المجتمع" data-en="💬 Community">💬 المجتمع</a>
   <a href="inbox.html" class="menu-item" data-ar="📩 صندوق الرسائل" data-en="📩 Inbox">📩 صندوق الرسائل</a>
   <a href="teams.html" class="menu-item" style="color: #ffd700;" data-ar="⚔️ حرب التيمات" data-en="⚔️ Team Battles">⚔️ حرب التيمات</a>
-  <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat">💬 الشات الجماعي</a>
+  <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat" id="chatMenuBtn">💬 الشات الجماعي</a>
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
   
@@ -153,6 +148,12 @@
   <h1 style="color:var(--accent); margin-bottom:20px; font-size: 32px;" id="authTitle" data-ar="🎬 أهلاً بيك" data-en="🎬 Welcome">🎬 أهلاً بيك</h1>
   <p style="margin-bottom: 20px; color: var(--subtitle-color); font-size: 16px;" id="authDesc" data-ar="سجل دخولك عشان نبدأ التحدي!" data-en="Log in to start the challenge!">سجل دخولك عشان نبدأ التحدي!</p>
   
+  <!-- خيارات النوع (تظهر فقط عند إنشاء حساب) -->
+  <div id="genderSection" class="gender-selector" style="display: none;">
+    <div class="gender-box" onclick="selectGender('male')" id="genderMale">👦 ولد</div>
+    <div class="gender-box" onclick="selectGender('female')" id="genderFemale">👧 بنت</div>
+  </div>
+
   <input type="text" id="usernameInput" class="auth-input" placeholder="اسم المستخدم" data-ar="اسم المستخدم" data-en="Username">
   <input type="password" id="passwordInput" class="auth-input" placeholder="كلمة المرور" data-ar="كلمة المرور" data-en="Password">
   
@@ -164,13 +165,13 @@
 <div id="mainContent">
   
   <div class="navbar">
-    <a href="index.html" class="nav-brand">Quiz Hub</a>
+    <a href="index.html" class="nav-brand" id="brandName">Quiz Hub</a>
     <div class="nav-right">
       <button class="icon-btn btn-lang" onclick="toggleLanguage()" id="langBtn">EN</button>
       <button class="icon-btn btn-lang" onclick="toggleTheme()" id="themeBtn" style="font-size: 16px;">☀️</button>
       <button class="icon-btn btn-menu" onclick="toggleMenu()">☰</button>
       <a href="notifications.html" class="icon-btn btn-notify" data-ar="🔔 إشعارات" data-en="🔔 Notifications">🔔 إشعارات</a>
-      <a href="chat.html" class="icon-btn btn-chat" data-ar="💬 الشات" data-en="💬 Chat">💬 الشات</a>
+      <a href="chat.html" id="chatBtn" class="icon-btn btn-chat" data-ar="💬 الشات" data-en="💬 Chat">💬 الشات</a>
       <a href="inbox.html" class="icon-btn btn-messages" data-ar="الرسائل" data-en="Messages">الرسائل</a>
       <a href="profile.html" class="icon-btn btn-profile" data-ar="بروفايلي" data-en="Profile">بروفايلي</a>
     </div>
@@ -178,11 +179,8 @@
   
   <div id="announcement-bar"></div>
 
-  <!-- شريط العروض والمسابقات (بيظهر بس لو الأونر نشر حاجة) -->
   <div id="offersMarquee" style="display: none; width: 100%; max-width: 1200px; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); border-radius: 10px; padding: 10px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; position: relative;">
-      <div id="offersText" style="display: inline-block; font-size: 18px; font-weight: bold; color: var(--gold); animation: marquee 15s linear infinite; padding-left: 100%;">
-          <!-- نص العروض هيتحط هنا -->
-      </div>
+      <div id="offersText" style="display: inline-block; font-size: 18px; font-weight: bold; color: var(--gold); animation: marquee 15s linear infinite; padding-left: 100%;"></div>
   </div>
 
   <div class="header-row">
@@ -253,51 +251,37 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
   
-  window.db = db; window.ref = ref; window.get = get; window.set = set; window.onValue = onValue;
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.update = update; window.onValue = onValue;
   window.auth = auth; 
   window.createUserWithEmailAndPassword = createUserWithEmailAndPassword; 
   window.signInWithEmailAndPassword = signInWithEmailAndPassword; 
   window.signOut = signOut;
 
+  let selectedGender = 'male'; // افتراضي
   let settingsLoaded = false;
 
-  const cachedUser = localStorage.getItem('loggedInUser');
-  
-  if (cachedUser) {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainContent').style.display = 'flex';
-      loadUserSettings(cachedUser);
-  } 
-  else {
-      document.getElementById('authScreen').style.display = 'flex';
-      document.getElementById('mainContent').style.display = 'none';
-  }
-
-  setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; }, 100);
+  onAuthStateChanged(auth, (user) => {
+      if (user) {
+          const username = user.email.split('@')[0].toLowerCase();
+          localStorage.setItem('loggedInUser', username);
+          document.getElementById('authScreen').style.display = 'none';
+          document.getElementById('mainContent').style.display = 'flex';
+          if(!settingsLoaded) { loadUserSettings(username); settingsLoaded = true; }
+      } else {
+          localStorage.removeItem('loggedInUser');
+          document.getElementById('authScreen').style.display = 'flex';
+          document.getElementById('mainContent').style.display = 'none';
+      }
+  });
 
   function loadUserSettings(username) {
-      if (settingsLoaded) return;
-      settingsLoaded = true;
-
-      window.set(window.ref(window.db, 'presence/' + username), { status: 'online', last_seen: Date.now() }).catch(() => {});
-
-      window.get(window.ref(window.db, 'roles/users/' + username)).then(snap => {
-          const role = snap.exists() ? snap.val() : 'Player';
-          const restrictedArea = document.getElementById('restrictedArea');
-          
-          if (role === 'Player' && username.toLowerCase() !== 'ahmed') {
-              if (restrictedArea) restrictedArea.style.display = 'none';
-          } else {
-              if (restrictedArea) restrictedArea.style.display = 'block';
-          }
-      });
-
+      // 1. الإعلان العام
       window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
           const bar = document.getElementById('announcement-bar');
           if (!bar) return;
@@ -305,72 +289,89 @@
           else { bar.style.display = 'none'; }
       });
 
-      // 🎁 عرض العروض والمسابقات اللي الأونر وافق عليها
+      // 2. إظهار / إخفاء "المناطق المحظورة"
+      window.get(window.ref(window.db, 'roles/users/' + username)).then(snap => {
+          const role = snap.exists() ? snap.val() : 'Player';
+          const restrictedArea = document.getElementById('restrictedArea');
+          if (restrictedArea) {
+              if (role === 'Player' && username.toLowerCase() !== 'ahmed') {
+                  restrictedArea.style.display = 'none';
+              } else {
+                  restrictedArea.style.display = 'block';
+              }
+          }
+      });
+
+      // 3. وضع الصيانة
+      window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
+          const isMaintenance = snap.exists() ? snap.val() : false;
+          if (isMaintenance && username.toLowerCase() !== 'ahmed') {
+              document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#000; color:#fff; text-align:center;"><h1 style="font-size: 50px; color: #ff0000;">🚧 الموقع تحت الصيانة 🚧</h1><p style="font-size: 20px; color: #aaa; margin-top: 20px;">جاري تحديث الموقع، يرجى العودة لاحقاً.</p></div>`;
+          }
+      });
+
+      // 4. الحظر والتحذيرات
+      window.onValue(window.ref(window.db, 'banned_users/' + username), snap => {
+          if (snap.exists()) {
+              alert('⛔ أنت محظور! السبب: ' + (snap.val().reason || 'مخالفة'));
+              window.signOut(window.auth).then(() => { localStorage.removeItem('loggedInUser'); window.location.href = 'banned.html'; });
+          }
+      });
+
+      // 5. التحذيرات المنبثقة
+      window.onValue(window.ref(window.db, 'warnings/' + username), snap => {
+          if (snap.exists()) {
+              const warn = snap.val();
+              if (confirm(`⚠️ وصلك تحذير من الإدارة!\nالسبب: ${warn.text || 'غير محدد'}\n\nهل تريد الذهاب للإشعارات؟`)) {
+                  window.location.href = 'notifications.html';
+              }
+          }
+      });
+
+      // 6. العروض والمسابقات
       window.onValue(window.ref(window.db, 'site_events/active_offers'), snap => {
           const marquee = document.getElementById('offersMarquee');
           const text = document.getElementById('offersText');
           if(snap.exists()) {
               let offersHTML = [];
               snap.forEach(child => { offersHTML.push(`🎁 ${child.val().text}`); });
-              if(offersHTML.length > 0) {
-                  text.innerText = offersHTML.join("  |  ");
-                  marquee.style.display = 'block';
-              } else {
-                  marquee.style.display = 'none';
-              }
+              if(offersHTML.length > 0) { text.innerText = offersHTML.join("  |  "); marquee.style.display = 'block'; } else { marquee.style.display = 'none'; }
+          } else { marquee.style.display = 'none'; }
+      });
+
+      // 7. إخفاء/إظهار الشات (من الواجهة ومن المنيو)
+      window.onValue(window.ref(window.db, 'site_settings/chatOff'), snap => {
+          const chatBtn = document.getElementById('chatBtn');
+          const chatMenu = document.getElementById('chatMenuBtn');
+          if (snap.exists() && snap.val() === true) {
+              if (chatBtn) chatBtn.style.display = 'none';
+              if (chatMenu) chatMenu.style.display = 'none';
           } else {
-              marquee.style.display = 'none';
+              if (chatBtn) chatBtn.style.display = 'block';
+              if (chatMenu) chatMenu.style.display = 'block';
           }
       });
 
-      window.onValue(window.ref(window.db, 'site_events/active_contests'), snap => {
-          const marquee = document.getElementById('offersMarquee');
-          const text = document.getElementById('offersText');
-          if(snap.exists()) {
-              let contestsHTML = [];
-              snap.forEach(child => { contestsHTML.push(`🏆 ${child.val().text}`); });
-              if(contestsHTML.length > 0) {
-                  if(text.innerText) text.innerText += "  |  " + contestsHTML.join("  |  ");
-                  else text.innerText = contestsHTML.join("  |  ");
-                  marquee.style.display = 'block';
-              }
+      // 8. تغيير اسم الموقع
+      window.onValue(window.ref(window.db, 'site_settings/siteName'), snap => {
+          const brand = document.getElementById('brandName');
+          const menuTitle = document.getElementById('menuTitle');
+          if (snap.exists() && snap.val()) {
+              brand.innerText = snap.val();
+              menuTitle.innerText = snap.val();
+              document.title = "🎬 " + snap.val() + " - منصة الكويزات";
           }
       });
 
-      window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
-          const isMaintenance = snap.exists() ? snap.val() : false;
-          if (isMaintenance && username.toLowerCase() !== 'ahmed' && username.toLowerCase() !== 'owner') {
-              document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#000; color:#fff; text-align:center;"><h1 style="font-size: 50px; color: #ff0000;">🚧 الموقع تحت الصيانة 🚧</h1><p style="font-size: 20px; color: #aaa; margin-top: 20px;">جاري تحديث الموقع، يرجى العودة لاحقاً.</p></div>`;
-          }
-      });
-
-      window.onValue(window.ref(window.db, 'banned_users/' + username), snap => {
-          if (snap.exists()) {
-              alert('⛔ أنت محظور من الموقع! السبب: ' + (snap.val().reason || 'مخالفة'));
-              window.signOut(window.auth).then(() => { localStorage.removeItem('loggedInUser'); window.location.href = 'banned.html'; });
+      // 9. تغيير لون الموقع الأساسي
+      window.onValue(window.ref(window.db, 'site_settings/colorPrimary'), snap => {
+          if (snap.exists() && snap.val()) {
+              document.documentElement.style.setProperty('--accent', snap.val());
           }
       });
   }
 
-  onAuthStateChanged(auth, (user) => {
-      if (user) {
-          const username = user.email.split('@')[0];
-          localStorage.setItem('loggedInUser', username);
-          if (document.getElementById('mainContent').style.display === 'none') {
-              document.getElementById('authScreen').style.display = 'none';
-              document.getElementById('mainContent').style.display = 'flex';
-              loadUserSettings(username);
-          }
-      } else {
-          setTimeout(() => {
-              if (!auth.currentUser) { 
-                  localStorage.removeItem('loggedInUser');
-                  document.getElementById('authScreen').style.display = 'flex';
-                  document.getElementById('mainContent').style.display = 'none';
-              }
-          }, 2000);
-      }
-  });
+  setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; }, 100);
 </script>
 
 <script>
@@ -380,39 +381,14 @@
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 
-  window.onload = function() {
-      setTimeout(() => {
-          const title = document.getElementById('introTitle');
-          if(title) title.style.opacity = '1';
-      }, 500);
-
-      setTimeout(() => {
-          const btn = document.getElementById('enterBtn');
-          if(btn) {
-              btn.style.opacity = '1';
-              btn.style.borderColor = '#fff';
-              btn.style.color = '#fff';
-          }
-      }, 2000);
-  };
-
-  window.enterHub = function() {
-      const intro = document.getElementById('cinematicIntro');
-      const auth = document.getElementById('authScreen');
-      const main = document.getElementById('mainContent');
-      
-      intro.style.opacity = '0';
-      
-      setTimeout(() => {
-          intro.style.display = 'none';
-          
-          if (auth && auth.style.display !== 'none') {
-              auth.style.opacity = '1';
-          } else if (main && main.style.display !== 'none') {
-              main.style.opacity = '1';
-          }
-      }, 1000); 
-  };
+  // --- دوال اختيار النوع (في التسجيل) ---
+  window.selectGender = function(gender) {
+      selectedGender = gender;
+      document.getElementById('genderMale').classList.remove('active');
+      document.getElementById('genderFemale').classList.remove('active');
+      if(gender === 'male') document.getElementById('genderMale').classList.add('active');
+      else document.getElementById('genderFemale').classList.add('active');
+  }
 
   window.toggleMenu = function() {
     document.getElementById('sideMenu').classList.toggle('open'); 
@@ -435,11 +411,8 @@
 
   function applyLanguage() {
     document.querySelectorAll('[data-ar]').forEach(el => {
-      if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-        el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-      } else {
-        el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-      }
+      if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+      else el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
     });
     document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
     const langBtn = document.getElementById('langBtn');
@@ -463,6 +436,8 @@
       isSignupMode = !isSignupMode;
       document.getElementById('loginBtn').style.display = isSignupMode ? 'none' : 'block';
       document.getElementById('signupBtn').style.display = isSignupMode ? 'block' : 'none';
+      document.getElementById('genderSection').style.display = isSignupMode ? 'flex' : 'none'; 
+      if (isSignupMode) selectGender('male'); 
       applyLanguage();
   }
 
@@ -477,24 +452,26 @@
   window.signupUser = async function() {
       let u = document.getElementById('usernameInput').value.trim().toLowerCase(); 
       const p = document.getElementById('passwordInput').value.trim();
+      
       if(!u || !p) return window.showToast('اكتب الاسم والباسورد', 'error');
+      
       try {
           const userSnap = await window.get(window.ref(window.db, 'usernames/' + u));
-          if (userSnap.exists()) {
-              return window.showToast('الاسم ده محجوز بالفعل، جرب اسم تاني!', 'error');
-          }
+          if (userSnap.exists()) return window.showToast('الاسم ده محجوز بالفعل!', 'error');
+          
           await window.createUserWithEmailAndPassword(window.auth, u + "@quizhub.com", p);
           await window.set(window.ref(window.db, 'usernames/' + u), true);
           await window.set(window.ref(window.db, 'roles/users/' + u), 'Player');
+          
+          await window.update(window.ref(window.db, 'users_data/' + u), { gender: selectedGender });
+          
           window.showToast('تم إنشاء الحساب بنجاح!');
       } catch(e) { window.showToast('Error: ' + e.message, 'error'); }
   }
 
   window.logoutUser = function() {
       const u = localStorage.getItem('loggedInUser');
-      if (u && window.db && window.ref && window.set) {
-          window.set(window.ref(window.db, 'presence/' + u), { status: 'offline', last_seen: Date.now() }).catch(() => {});
-      }
+      if (u && window.db) window.set(window.ref(window.db, 'presence/' + u), { status: 'offline', last_seen: Date.now() }).catch(() => {});
       window.signOut(window.auth);
       localStorage.removeItem('loggedInUser');
       window.location.reload();
@@ -502,23 +479,18 @@
 
   window.switchMainSection = function(section) {
       currentMainSection = section;
-      
       const btnForeign = document.getElementById('btnForeign');
       const btnEgyptian = document.getElementById('btnEgyptian');
       const foreignFilters = document.getElementById('foreignFilters');
       const egyptianFilters = document.getElementById('egyptianFilters');
 
       if (section === 'foreign') {
-          btnForeign.classList.add('active');
-          btnEgyptian.classList.remove('active');
-          foreignFilters.style.display = 'flex';
-          egyptianFilters.style.display = 'none';
+          btnForeign.classList.add('active'); btnEgyptian.classList.remove('active');
+          foreignFilters.style.display = 'flex'; egyptianFilters.style.display = 'none';
           filterForeign('all', document.querySelector('#foreignFilters .sub-btn'));
       } else {
-          btnEgyptian.classList.add('active');
-          btnForeign.classList.remove('active');
-          egyptianFilters.style.display = 'flex';
-          foreignFilters.style.display = 'none';
+          btnEgyptian.classList.add('active'); btnForeign.classList.remove('active');
+          egyptianFilters.style.display = 'flex'; foreignFilters.style.display = 'none';
           filterEgyptian('egyptian', document.querySelector('#egyptianFilters .sub-btn'));
       }
   };
@@ -526,28 +498,18 @@
   window.filterForeign = function(cat, btn) {
     document.querySelectorAll('#foreignFilters .sub-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-
     document.querySelectorAll('.quiz-card').forEach(card => {
         const cardCats = card.dataset.category || '';
-        if ((cat === 'all' && !cardCats.includes('egyptian')) || cardCats.includes(cat)) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = ((cat === 'all' && !cardCats.includes('egyptian')) || cardCats.includes(cat)) ? 'flex' : 'none';
     });
   };
 
   window.filterEgyptian = function(cat, btn) {
     document.querySelectorAll('#egyptianFilters .sub-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
-
     document.querySelectorAll('.quiz-card').forEach(card => {
         const cardCats = card.dataset.category || '';
-        if (cardCats.includes(cat)) {
-            card.style.display = 'flex';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = cardCats.includes(cat) ? 'flex' : 'none';
     });
   };
 
@@ -555,19 +517,18 @@
     const q = e.target.value.toLowerCase();
     document.getElementById('foreignFilters').style.display = 'none';
     document.getElementById('egyptianFilters').style.display = 'none';
-
     document.querySelectorAll('.quiz-card').forEach(card => {
-      const title = card.querySelector('.card-title').innerText.toLowerCase();
-      card.style.display = title.includes(q) ? 'flex' : 'none';
+      card.style.display = card.querySelector('.card-title').innerText.toLowerCase().includes(q) ? 'flex' : 'none';
     });
   });
 
   window.playRandom = function() {
     const cards = Array.from(document.querySelectorAll('.quiz-card')).filter(c => c.style.display !== 'none');
     if(cards.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * cards.length);
-    window.location.href = cards[randomIndex].getAttribute('href');
+    window.location.href = cards[Math.floor(Math.random() * cards.length)].getAttribute('href');
   }
+
+  document.getElementById('genderSection').style.display = 'none';
 
   switchMainSection('foreign');
 </script>
