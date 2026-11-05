@@ -10,7 +10,6 @@
 </head>
 <body>
 
-<!-- شاشة القفل -->
 <div id="passwordLock">
     <div class="lock-box">
         <h2>🔒 منطقة محظورة</h2>
@@ -22,13 +21,13 @@
     </div>
 </div>
 
-<!-- محتوى اللوحة -->
 <div id="ownerContent" style="display: none; width: 100%;">
   <div id="toast-container" style="position:fixed; top:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:10px;"></div>
 
   <div class="sidebar">
     <div class="sidebar-logo" id="panelTitle" data-ar="👑 لوحة الأونر" data-en="👑 Owner Panel">👑 لوحة الأونر</div>
     <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
+    <div class="nav-item" onclick="switchTab('assign', this)" data-ar="👑 تعيين الإدارة" data-en="👑 Assign Roles">👑 تعيين الإدارة</div>
     <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</div>
     <div class="nav-item" onclick="switchTab('ranks', this)" data-ar="🎖️ إدارة الرتب" data-en="🎖️ Ranks">🎖️ إدارة الرتب</div>
     <div class="nav-item" onclick="switchTab('badges', this)" data-ar="🏅 البادجات" data-en="🏅 Badges">🏅 البادجات</div>
@@ -36,8 +35,7 @@
     <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</div>
     <div class="nav-item" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</div>
     <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</div>
-    <!-- تم إضافة تبويب الطلبات هنا -->
-    <div class="nav-item" onclick="switchTab('requests', this)" data-ar="📩 الطلبات" data-en="📩 Requests">📩 الطلبات</div>
+    <div class="nav-item" onclick="switchTab('manager', this)" data-ar="📩 طلبات المنجر" data-en="📩 Manager Reqs">📩 طلبات المنجر</div>
     <div class="nav-item" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</div>
     <div class="nav-item" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</div>
     <div class="nav-item" onclick="switchTab('admins', this)" data-ar="🛡️ الأدمنز" data-en="🛡️ Admins">🛡️ الأدمنز</div>
@@ -55,7 +53,6 @@
       </div>
     </div>
 
-    <!-- الإحصائيات -->
     <div id="tab-dashboard" class="tab active">
       <div class="stats-grid">
         <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
@@ -65,18 +62,22 @@
         <div class="stat-card"><h3>🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
         <div class="stat-card"><h3>💬 تعليقات</h3><div class="num" id="statComments">0</div></div>
         <div class="stat-card"><h3>💡 اقتراحات</h3><div class="num" id="statSuggestions">0</div></div>
-        <div class="stat-card"><h3>🎬 طلبات</h3><div class="num" id="statRequests">0</div></div>
         <div class="stat-card"><h3>👀 زوار اليوم</h3><div class="num" id="statVisitors" style="color:var(--orange);">0</div></div>
       </div>
     </div>
 
-    <!-- اللاعبين -->
+    <!-- تبويب تعيين الإدارة -->
+    <div id="tab-assign" class="tab">
+      <h3 style="color:var(--gold); margin-bottom:15px;">👑 تعيين اللاعبين (إدارة، منجر، بارتنر)</h3>
+      <input type="text" id="assignSearch" class="form-control" placeholder="ابحث عن لاعب..." onkeyup="window.renderAssignList()">
+      <div class="list-container" id="assignList"></div>
+    </div>
+
     <div id="tab-users" class="tab">
       <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
       <div class="list-container" id="usersList"><p>جاري التحميل...</p></div>
     </div>
 
-    <!-- الرتب -->
     <div id="tab-ranks" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
           <h3 style="color:var(--gold); margin-bottom:15px;">🎖️ إعطاء رتبة للاعب</h3>
@@ -97,7 +98,6 @@
       <div class="list-container" id="ranksList"></div>
     </div>
 
-    <!-- البادجات -->
     <div id="tab-badges" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
           <h3 style="color:var(--pink); margin-bottom:15px;">🎯 اختر اللاعب وامنحه بادج</h3>
@@ -117,7 +117,6 @@
       <div class="list-container" id="badgesList"></div>
     </div>
 
-    <!-- التحذيرات -->
     <div id="tab-warnings" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
           <h3 style="color:var(--accent); margin-bottom:15px;">⚠️ إرسال تحذير</h3>
@@ -129,7 +128,6 @@
       <div class="list-container" id="warningsList"></div>
     </div>
 
-    <!-- المحتوى -->
     <div id="tab-content" class="tab">
       <div class="item" style="margin-bottom:15px; display:block;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -154,7 +152,6 @@
       </div>
     </div>
 
-    <!-- الكويزات -->
     <div id="tab-quizzes" class="tab">
       <div class="item" style="display:block; margin-bottom:20px;">
           <h3 style="color:var(--gold); margin-bottom:15px;">➕ إضافة كويز مخصص</h3>
@@ -173,19 +170,19 @@
       <div class="list-container" id="customQuizzesList"></div>
     </div>
 
-    <!-- الغرف -->
     <div id="tab-rooms" class="tab">
       <h3 style="color:var(--blue); margin-bottom:10px;">🚪 الغرف النشطة</h3>
       <div class="list-container" id="roomsList"><p>جاري التحميل...</p></div>
     </div>
 
-    <!-- تبويب الطلبات الجديد -->
-    <div id="tab-requests" class="tab">
-      <h3 style="color:var(--gold); margin-bottom:10px;">📩 طلبات اللاعبين</h3>
-      <div class="list-container" id="requestsOwnerList"><p>جاري التحميل...</p></div>
+    <div id="tab-manager" class="tab">
+      <h3 style="color:var(--gold); margin-bottom:15px;">📩 المسودات المطلوب اعتمادها</h3>
+      <div class="list-container" id="managerDraftsList"><p>لا توجد مسودات.</p></div>
+      
+      <h3 style="color:var(--gold); margin: 25px 0 15px;">📋 طلبات وتقارير المنجر</h3>
+      <div class="list-container" id="managerReqsList"><p>لا توجد طلبات.</p></div>
     </div>
 
-    <!-- النظام -->
     <div id="tab-system" class="tab">
       <div class="item" style="margin-bottom:15px;">
         <div><h3 style="color:var(--accent);">🚧 وضع الصيانة</h3></div>
@@ -205,18 +202,16 @@
           <button class="btn btn-blue" onclick="window.sendBroadcast()">إرسال 📨</button>
         </div>
       </div>
-      <!-- ضفنا زرار مسح الكاش هنا جوه تبويب النظام -->
       <div class="item" style="margin-bottom:15px;">
         <div><h3 style="color:var(--gold);">🧹 مسح الكاش (تحديث الموقع للجميع)</h3></div>
         <button class="btn btn-orange" onclick="window.clearSiteCache()">مسح الكاش 💥</button>
       </div>
       <div class="item" style="margin-bottom:15px;">
         <div><h3 style="color:var(--orange);">👀 تصفير عداد الزوار</h3></div>
-        <button class="btn btn-orange" onclick="window.resetVisitors">تصفير 🔄</button>
+        <button class="btn btn-orange" onclick="window.resetVisitors()">تصفير 🔄</button>
       </div>
     </div>
     
-    <!-- الرسائل -->
     <div id="tab-messages" class="tab">
       <div class="item" style="margin-bottom:15px;">
         <div style="width:100%;">
@@ -226,21 +221,20 @@
           <button class="btn btn-cyan" onclick="window.sendDM()">إرسال 📨</button>
         </div>
       </div>
+      <h3 style="color:var(--cyan); margin: 25px 0 15px;">📥 رسائل الإدارة (أدمن/منجر/بيلدر)</h3>
+      <div class="list-container" id="ownerInboxList"></div>
     </div>
 
-    <!-- الأدمنز -->
     <div id="tab-admins" class="tab">
       <h3 style="color:var(--blue); margin-bottom:10px;">🛡️ إدارة الأدمنز</h3>
       <div class="list-container" id="adminsList"><p>جاري التحميل...</p></div>
     </div>
 
-    <!-- الأمان -->
     <div id="tab-security" class="tab">
       <h3 style="color:var(--accent); margin-bottom:10px;">🔒 قائمة المحظورين</h3>
       <div class="list-container" id="bannedList"><p>جاري التحميل...</p></div>
     </div>
 
-    <!-- المطور -->
     <div id="tab-developer" class="tab">
       <h3 style="color:var(--purple); margin-bottom:10px;">🔧 أدوات المطور</h3>
       <div class="item" style="margin-bottom:15px;">
@@ -257,6 +251,5 @@
 </div>
 
 <script src="owner-core.js" type="module"></script>
-
 </body>
 </html>
