@@ -127,9 +127,8 @@
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
   
-  <!-- 🚫 المناطق المحظورة -->
   <div id="restrictedArea" style="border-top: 2px dashed #ff0000; margin: 10px 0; padding-top: 10px; display: none;">
-  <a href="restricted.html" class="menu-item" style="color: #ff0000; font-weight: 900; background: rgba(255,0,0,0.1); border: 1px solid #ff0000; border-radius: 8px; justify-content: center; margin-top: 10px;" data-ar="🚫 المناطق المحظورة" data-en="🚫 Restricted Areas">🚫 المناطق المحظورة</a>
+      <a href="restricted.html" class="menu-item" style="color: #ff0000; font-weight: 900; background: rgba(255,0,0,0.1); border: 1px solid #ff0000; border-radius: 8px; justify-content: center; margin-top: 10px;" data-ar="🚫 المناطق المحظورة" data-en="🚫 Restricted Areas">🚫 المناطق المحظورة</a>
   </div>
 
   <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
@@ -178,16 +177,12 @@
   </div>
   
   <div id="announcement-bar"></div>
-  
-  <!-- قسم الفعاليات (اللي المنجر بيبعته والأونر بينزله) -->
-  <div id="activePollSection" style="display: none; width: 100%; max-width: 1000px; background: rgba(255, 152, 0, 0.1); border: 2px dashed var(--orange); border-radius: 15px; padding: 20px; margin-bottom: 20px; text-align: center;">
-      <h3 style="color: var(--orange); margin-bottom: 15px;">📊 استفتاء اللاعبين</h3>
-      <p id="pollQuestionText" style="font-size: 20px; font-weight: bold; margin-bottom: 20px;"></p>
-      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <button id="pollOpt1" class="random-btn" style="background: var(--blue);" onclick="votePoll(1)"></button>
-          <button id="pollOpt2" class="random-btn" style="background: var(--blue);" onclick="votePoll(2)"></button>
+
+  <!-- شريط العروض والمسابقات (بيظهر بس لو الأونر نشر حاجة) -->
+  <div id="offersMarquee" style="display: none; width: 100%; max-width: 1200px; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); border-radius: 10px; padding: 10px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; position: relative;">
+      <div id="offersText" style="display: inline-block; font-size: 18px; font-weight: bold; color: var(--gold); animation: marquee 15s linear infinite; padding-left: 100%;">
+          <!-- نص العروض هيتحط هنا -->
       </div>
-      <p id="pollResultsText" style="margin-top: 15px; font-size: 14px; color: var(--subtitle-color);"></p>
   </div>
 
   <div class="header-row">
@@ -249,6 +244,13 @@
   </div>
 </div>
 
+<style>
+@keyframes marquee {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+</style>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -271,7 +273,8 @@
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'flex';
       loadUserSettings(cachedUser);
-  } else {
+  } 
+  else {
       document.getElementById('authScreen').style.display = 'flex';
       document.getElementById('mainContent').style.display = 'none';
   }
@@ -284,13 +287,16 @@
 
       window.set(window.ref(window.db, 'presence/' + username), { status: 'online', last_seen: Date.now() }).catch(() => {});
 
-      // فحص الرتبة عشان نظهر أو نخفي المناطق المحظورة
-      const restrictedArea = document.getElementById('restrictedArea');
-      if (username.toLowerCase() === 'banned' || username.toLowerCase() === 'ahmed') {
-          if (restrictedArea) restrictedArea.style.display = 'block';
-      } else {
-          if (restrictedArea) restrictedArea.style.display = 'none';
-      }
+      window.get(window.ref(window.db, 'roles/users/' + username)).then(snap => {
+          const role = snap.exists() ? snap.val() : 'Player';
+          const restrictedArea = document.getElementById('restrictedArea');
+          
+          if (role === 'Player' && username.toLowerCase() !== 'ahmed') {
+              if (restrictedArea) restrictedArea.style.display = 'none';
+          } else {
+              if (restrictedArea) restrictedArea.style.display = 'block';
+          }
+      });
 
       window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
           const bar = document.getElementById('announcement-bar');
@@ -299,9 +305,41 @@
           else { bar.style.display = 'none'; }
       });
 
+      // 🎁 عرض العروض والمسابقات اللي الأونر وافق عليها
+      window.onValue(window.ref(window.db, 'site_events/active_offers'), snap => {
+          const marquee = document.getElementById('offersMarquee');
+          const text = document.getElementById('offersText');
+          if(snap.exists()) {
+              let offersHTML = [];
+              snap.forEach(child => { offersHTML.push(`🎁 ${child.val().text}`); });
+              if(offersHTML.length > 0) {
+                  text.innerText = offersHTML.join("  |  ");
+                  marquee.style.display = 'block';
+              } else {
+                  marquee.style.display = 'none';
+              }
+          } else {
+              marquee.style.display = 'none';
+          }
+      });
+
+      window.onValue(window.ref(window.db, 'site_events/active_contests'), snap => {
+          const marquee = document.getElementById('offersMarquee');
+          const text = document.getElementById('offersText');
+          if(snap.exists()) {
+              let contestsHTML = [];
+              snap.forEach(child => { contestsHTML.push(`🏆 ${child.val().text}`); });
+              if(contestsHTML.length > 0) {
+                  if(text.innerText) text.innerText += "  |  " + contestsHTML.join("  |  ");
+                  else text.innerText = contestsHTML.join("  |  ");
+                  marquee.style.display = 'block';
+              }
+          }
+      });
+
       window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
           const isMaintenance = snap.exists() ? snap.val() : false;
-          if (isMaintenance && username.toLowerCase() !== 'ahmed' && username.toLowerCase() !== 'owner' && username.toLowerCase() !== 'banned') {
+          if (isMaintenance && username.toLowerCase() !== 'ahmed' && username.toLowerCase() !== 'owner') {
               document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#000; color:#fff; text-align:center;"><h1 style="font-size: 50px; color: #ff0000;">🚧 الموقع تحت الصيانة 🚧</h1><p style="font-size: 20px; color: #aaa; margin-top: 20px;">جاري تحديث الموقع، يرجى العودة لاحقاً.</p></div>`;
           }
       });
