@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>👤 الملف الشخصي - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root { 
@@ -87,6 +88,17 @@
   .timeline-title { font-size: 16px; color: var(--accent); margin-bottom: 5px; }
   .timeline-desc { font-size: 14px; color: var(--text-color); }
 
+  /* تأثير الإطار الناري للبروفايل */
+  .avatar.fire-frame {
+      border-color: #ff5722;
+      box-shadow: 0 0 25px #ff5722, 0 0 50px #ff9800;
+      animation: firePulse 1.5s infinite alternate;
+  }
+  @keyframes firePulse {
+      from { box-shadow: 0 0 15px #ff5722, 0 0 30px #ff9800; }
+      to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; }
+  }
+
   @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -151,6 +163,14 @@
         <div class="badges-container" id="badgesContainer"></div>
     </div>
 
+    <!-- زرار صندوق الغموض -->
+    <div id="lootBoxContainer" style="display: none; margin-top: 20px;">
+        <button id="openBoxBtn" onclick="window.openLootBox()" style="padding: 15px 40px; background: linear-gradient(45deg, #ff9800, #ff5722); color: #fff; border: none; border-radius: 30px; font-family: 'Cairo'; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255, 87, 34, 0.5); transition: 0.3s;">
+            🎁 افتح صندوقك اليومي
+        </button>
+        <p id="lootBoxTimer" style="color: #aaa; font-size: 14px; margin-top: 10px; display: none;"></p>
+    </div>
+
     <div class="upload-section" id="uploadSection" style="display: none;">
       <label for="imageUpload" class="upload-label" id="uploadLabelText">📷 اختر صورة</label>
       <input type="file" id="imageUpload" accept="image/*" onchange="window.previewImage(event)">
@@ -177,11 +197,11 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, get, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, update, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.get = get; window.set = set; window.push = push; window.onValue = onValue; window.remove = remove;
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.update = update; window.push = push; window.onValue = onValue; window.remove = remove;
   
   const IMGBB_API_KEY = "3e7c71a0a091350d70363ef5909198d7";
   const urlParams = new URLSearchParams(window.location.search);
@@ -273,7 +293,10 @@
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'none';
           }
 
-          // إظهار اللقب (Persona) هنا
+          if (userData.profileFrame === 'fire') {
+              avatarEl.classList.add('fire-frame');
+          }
+
           let myPersona = userData.persona;
           if (myPersona) {
               const badge = document.getElementById('personaBadge');
@@ -389,6 +412,12 @@
               historyList.innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
           }
 
+          // إظهار صندوق الغموض لو ده بروفايلي
+          if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
+              document.getElementById('lootBoxContainer').style.display = 'block';
+              checkLootBoxTimer(userData);
+          }
+
           loadFriendsData(dbUser);
 
       } catch (error) {
@@ -497,6 +526,99 @@
         showAlert(t.successTitle, t.removedImg);
       } catch(e) { showAlert(t.errTitle, e.message); }
     }
+  }
+
+  // ==========================================
+  // 🎁 نظام صناديق الغموض (Loot Boxes)
+  // ==========================================
+  
+  function checkLootBoxTimer(userData) {
+      const lastBox = userData.lastLootBox || 0;
+      const now = Date.now();
+      const cooldown = 24 * 60 * 60 * 1000; // 24 ساعة بالميللي ثانية
+      const timeLeft = (lastBox + cooldown) - now;
+      const btn = document.getElementById('openBoxBtn');
+      const timerText = document.getElementById('lootBoxTimer');
+
+      if (timeLeft > 0) {
+          btn.disabled = true;
+          btn.style.background = '#333';
+          btn.style.boxShadow = 'none';
+          btn.style.cursor = 'not-allowed';
+          btn.innerText = '⏳ الصندوق مقفول';
+          timerText.style.display = 'block';
+          
+          // عداد تنازلي
+          setInterval(() => {
+              const newTimeLeft = (lastBox + cooldown) - Date.now();
+              if (newTimeLeft <= 0) {
+                  btn.disabled = false;
+                  btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)';
+                  btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)';
+                  btn.style.cursor = 'pointer';
+                  btn.innerText = '🎁 افتح صندوقك اليومي';
+                  timerText.style.display = 'none';
+                  return;
+              }
+              const hours = Math.floor(newTimeLeft / (1000 * 60 * 60));
+              const minutes = Math.floor((newTimeLeft % (1000 * 60 * 60)) / (1000 * 60));
+              const seconds = Math.floor((newTimeLeft % (1000 * 60)) / 1000);
+              timerText.innerText = `متاح بعد: ${hours}س ${minutes}د ${seconds}ث`;
+          }, 1000);
+      } else {
+          btn.disabled = false;
+          timerText.style.display = 'none';
+      }
+  }
+
+  window.openLootBox = async function() {
+      const btn = document.getElementById('openBoxBtn');
+      const user = profileUser.toLowerCase();
+      
+      btn.innerText = 'جاري الفتح... 🎁';
+      btn.disabled = true;
+
+      try {
+          const rewards = [
+              { type: 'coins', amount: 50, text: '🪙 50 كوينز!' },
+              { type: 'coins', amount: 100, text: '🪙 100 كوينز!' },
+              { type: 'xp', amount: 100, text: '✨ 100 XP!' },
+              { type: 'xp', amount: 200, text: '✨ 200 XP!' },
+              { type: 'frame', text: '🔥 إطار ناري أسطوري!' }
+          ];
+          let randomReward = rewards[Math.floor(Math.random() * 4)]; 
+          if (Math.random() > 0.7) randomReward = rewards[4]; 
+
+          const updates = {};
+          updates[`users_data/${user}/lastLootBox`] = Date.now();
+
+          if (randomReward.type === 'coins') {
+              const coinSnap = await window.get(window.ref(window.db, `users_data/${user}/coins`));
+              let currentCoins = coinSnap.exists() ? coinSnap.val() : 0;
+              updates[`users_data/${user}/coins`] = currentCoins + randomReward.amount;
+          } else if (randomReward.type === 'xp') {
+              const xpSnap = await window.get(window.ref(window.db, `users_data/${user}/xp`));
+              let currentXp = xpSnap.exists() ? xpSnap.val() : 0;
+              updates[`users_data/${user}/xp`] = currentXp + randomReward.amount;
+          } else if (randomReward.type === 'frame') {
+              updates[`users_data/${user}/profileFrame`] = 'fire'; 
+          }
+
+          await window.update(window.ref(window.db), updates);
+
+          confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+          
+          setTimeout(() => {
+              showAlert('🎉 مبروك!', `لقد فتحت الصندوق وحصلت على:\n${randomReward.text}`);
+              setTimeout(() => location.reload(), 2000);
+          }, 500);
+
+      } catch(e) {
+          console.error(e);
+          showAlert('خطأ', 'حدث خطأ أثناء فتح الصندوق.');
+          btn.innerText = '🎁 افتح صندوقك اليومي';
+          btn.disabled = false;
+      }
   }
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
