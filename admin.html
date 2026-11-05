@@ -5,136 +5,552 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🛡️ لوحة الإدارة - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { 
-      --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; 
-      --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; 
-      --input-bg: #000;
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --text: #1a1a1a;
+    --text-secondary: #6b7280;
+    --border: #e5e7eb;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #eff6ff;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --gold: #eab308;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
   }
-  body.light-mode { --bg: #f4f4f4; --sidebar: #fff; --text: #111; --border: #ccc; --gold: #b8860b; --input-bg: #fff; }
-  
+
+  body.dark-mode {
+    --bg: #0f1419;
+    --surface: #1a1f26;
+    --surface-2: #232a33;
+    --text: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border: #2d3748;
+    --primary-light: #0f1e35;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; transition: 0.3s; }
 
-  #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-  .toast { background: var(--sidebar); border-right: 5px solid var(--green); color: var(--text); padding: 15px 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); animation: slideIn 0.3s forwards; font-weight: bold; }
-  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+  }
 
-  .sidebar { width: 260px; background: var(--sidebar); border-left: 1px solid var(--border); padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; overflow-y: auto; }
-  .sidebar-logo { text-align: center; font-size: 22px; font-weight: 900; color: var(--blue); margin-bottom: 30px; }
-  .nav-item { padding: 12px 20px; cursor: pointer; font-weight: bold; color: #888; border-right: 3px solid transparent; transition: 0.3s; }
-  .nav-item:hover, .nav-item.active { background: rgba(0,136,204,0.1); color: var(--blue); border-right-color: var(--blue); }
-  
-  .main { margin-right: 260px; padding: 30px; width: calc(100% - 260px); }
-  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap; gap: 10px; }
-  .header h1 { color: var(--blue); }
+  #adminContent {
+    display: none;
+    width: 100%;
+    max-width: 1280px;
+    animation: fadeUp 0.4s ease;
+  }
 
-  .tab { display: none; animation: fadeIn 0.3s; }
-  .tab.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
-  .stat-card { background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
-  .stat-card h3 { color: #aaa; font-size: 14px; margin-bottom: 8px; }
-  .stat-card .num { font-size: 32px; font-weight: bold; color: var(--blue); }
+  /* ===== Toast ===== */
+  #toast-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-  .list-container { display: flex; flex-direction: column; gap: 10px; }
-  .item { background: var(--sidebar); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-  
-  .btn { padding: 6px 12px; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.3s; }
-  .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+  .toast {
+    background: var(--surface);
+    border-right: 4px solid var(--success);
+    color: var(--text);
+    padding: 14px 18px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    font-weight: 600;
+    font-size: 14px;
+    animation: slideIn 0.3s ease;
+    min-width: 240px;
+  }
+
+  .toast.error { border-right-color: var(--danger); }
+
+  @keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* ===== Header ===== */
+  .top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    padding: 16px 24px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--primary), #60a5fa);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  }
+
+  .brand-text h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .brand-text p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-family: 'Cairo';
+  }
+
+  .icon-btn:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+  }
+
+  .btn-back {
+    padding: 10px 18px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-back:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* ===== Nav Tabs ===== */
+  .tabs-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    padding: 6px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Cairo';
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tab-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+  }
+
+  /* ===== Tab Content ===== */
+  .tab-content {
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* ===== Stats Grid ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+  }
+
+  .stat-card .stat-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .stat-card.gold .stat-value { color: var(--gold); }
+  .stat-card.green .stat-value { color: var(--success); }
+  .stat-card.purple .stat-value { color: #a855f7; }
+
+  /* ===== Section ===== */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .section-title.danger { color: var(--danger); }
+  .section-title.gold { color: var(--gold); }
+
+  /* ===== List ===== */
+  .list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: all 0.2s;
+  }
+
+  .item:hover {
+    border-color: var(--primary);
+  }
+
+  .item h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .item p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* ===== Form ===== */
+  .form-control {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: 'Cairo';
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background: var(--surface);
+  }
+
+  .form-control::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+
+  /* ===== Buttons ===== */
+  .btn {
+    padding: 9px 16px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Cairo';
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn:active {
+    transform: translateY(0);
+  }
+
+  .btn-blue { background: var(--primary); color: #fff; }
+  .btn-blue:hover { background: var(--primary-hover); }
+
+  .btn-red { background: var(--danger); color: #fff; }
+  .btn-red:hover { background: #dc2626; }
+
+  .btn-green { background: var(--success); color: #fff; }
+  .btn-green:hover { background: #059669; }
+
   .btn-gold { background: var(--gold); color: #000; }
-  .btn-red { background: var(--accent); color: #fff; }
-  .btn-green { background: var(--green); color: #fff; }
-  .btn-blue { background: var(--blue); color: #fff; }
-  .btn-orange { background: #ff9800; color: #fff; }
+  .btn-gold:hover { background: #ca8a04; }
 
-  .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); margin-bottom: 10px; outline: none; font-family: 'Cairo'; }
-  
-  .header-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; font-size: 14px; }
-  .header-btn:hover { background: var(--blue); border-color: var(--blue); }
-  body.light-mode .header-btn { background: #ddd; color: #111; border-color: #aaa; }
-  body.light-mode .header-btn:hover { background: var(--blue); color: #fff; }
+  .btn-orange { background: var(--warning); color: #fff; }
+  .btn-orange:hover { background: #d97706; }
 
-  @media (max-width: 900px) {
-    body { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; }
-    .main { margin-right: 0; width: 100%; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-2);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    .top-header { padding: 12px 16px; }
+    .brand-text h1 { font-size: 16px; }
+    .stat-card .stat-value { font-size: 24px; }
+    .tab-btn { font-size: 13px; padding: 9px 12px; }
+    .item { padding: 12px 14px; }
   }
 </style>
 </head>
 <body>
 
-<div id="adminContent" style="display: none; width: 100%;">
+<div id="adminContent">
   <div id="toast-container"></div>
 
-  <div class="sidebar">
-    <div class="sidebar-logo" id="panelTitle" data-ar="🛡️ أهلاً " data-en="🛡️ Welcome ">🛡️ أهلاً </div>
-    <div class="nav-item active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</div>
-    <div class="nav-item" onclick="switchTab('users', this)" data-ar="👥 إدارة اللاعبين" data-en="👥 Players">👥 إدارة اللاعبين</div>
-    <div class="nav-item" onclick="switchTab('content', this)" data-ar="📝 إدارة المحتوى" data-en="📝 Content">📝 إدارة المحتوى</div>
-    <div class="nav-item" onclick="switchTab('rooms', this)" data-ar="🚪 إدارة الغرف" data-en="🚪 Rooms">🚪 إدارة الغرف</div>
-    <div class="nav-item" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</div>
-    <div class="nav-item" onclick="switchTab('tickets', this)" data-ar="🎫 تذاكر الدعم" data-en="🎫 Tickets">🎫 تذاكر الدعم</div>
-    <div class="nav-item" onclick="switchTab('owner_msg', this)" data-ar="📩 رسائل الأونر" data-en="📩 Owner Msg">📩 رسائل الأونر</div>
-    <div class="nav-item" style="margin-top: auto; color: var(--accent);" onclick="location.href='index.html'" data-ar="⬅ العودة للرئيسية" data-en="⬅ Back to Home">⬅ العودة للرئيسية</div>
+  <!-- Header -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div class="brand-text">
+        <h1 id="panelTitle">لوحة الإدارة</h1>
+        <p>مرحباً <span id="adminName">Admin</span></p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" title="تبديل الثيم">🌙</button>
+      <a href="index.html" class="btn-back">⬅ رجوع</a>
+    </div>
   </div>
 
-  <div class="main">
-    <div class="header">
-      <h1 id="pageTitle" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</h1>
-      <div>
-          <button class="header-btn" onclick="window.toggleTheme()" id="themeBtn" style="font-size: 16px; padding: 6px 10px;">☀️</button>
-          <button class="header-btn" onclick="window.toggleLanguage()" id="langBtn">AR</button>
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('dashboard', this)">📊 الإحصائيات</button>
+    <button class="tab-btn" onclick="switchTab('users', this)">👥 اللاعبين</button>
+    <button class="tab-btn" onclick="switchTab('content', this)">📝 المحتوى</button>
+    <button class="tab-btn" onclick="switchTab('rooms', this)">🚪 الغرف</button>
+    <button class="tab-btn" onclick="switchTab('warnings', this)">⚠️ التحذيرات</button>
+    <button class="tab-btn" onclick="switchTab('tickets', this)">🎫 الدعم</button>
+    <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 الأونر</button>
+  </div>
+
+  <!-- ============ Dashboard ============ -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">👥 اللاعبين</div>
+        <div class="stat-value" id="statUsers">0</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-label">🎮 كويزات اتلعبت</div>
+        <div class="stat-value" id="statPlays">0</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-label">🚪 غرف نشطة</div>
+        <div class="stat-value" id="statRooms">0</div>
       </div>
     </div>
+  </div>
 
-    <div id="tab-dashboard" class="tab active">
-      <div class="stats-grid">
-        <div class="stat-card"><h3 data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</h3><div class="num" id="statUsers">0</div></div>
-        <div class="stat-card"><h3 data-ar="🎮 كويزات اتلعبت" data-en="🎮 Plays">🎮 كويزات اتلعبت</h3><div class="num" id="statPlays" style="color:var(--gold);">0</div></div>
-        <div class="stat-card"><h3 data-ar="🚪 غرف نشطة" data-en="🚪 Rooms">🚪 غرف نشطة</h3><div class="num" id="statRooms" style="color:var(--purple);">0</div></div>
+  <!-- ============ Users ============ -->
+  <div id="tab-users" class="tab-content">
+    <div class="section">
+      <div class="section-title">👥 إدارة اللاعبين</div>
+      <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
+      <div class="list-container" id="usersList">
+        <div class="item">جاري التحميل...</div>
       </div>
     </div>
+  </div>
 
-    <div id="tab-users" class="tab">
-      <input type="text" id="searchUser" class="form-control" data-ar="🔍 ابحث عن لاعب..." data-en="🔍 Search for a player..." placeholder="🔍 ابحث عن لاعب..." onkeyup="renderUsers()">
-      <div class="list-container" id="usersList"><p data-ar="جاري التحميل..." data-en="Loading...">جاري التحميل...</p></div>
+  <!-- ============ Content ============ -->
+  <div id="tab-content" class="tab-content">
+    <div class="section">
+      <div class="section-title danger">💬 التعليقات</div>
+      <div class="list-container" id="commentsList"></div>
     </div>
 
-    <div id="tab-content" class="tab">
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💬 التعليقات" data-en="💬 Comments">💬 التعليقات</h3>
-      <div class="list-container" id="commentsList" style="margin-bottom: 20px;"></div>
-      
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="💡 الاقتراحات" data-en="💡 Suggestions">💡 الاقتراحات</h3>
-      <div class="list-container" id="suggestionsList" style="margin-bottom: 20px;"></div>
-      
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎬 طلبات الكويزات" data-en="🎬 Quiz Requests">🎬 طلبات الكويزات</h3>
+    <div class="section">
+      <div class="section-title danger">💡 الاقتراحات</div>
+      <div class="list-container" id="suggestionsList"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title danger">🎬 طلبات الكويزات</div>
       <div class="list-container" id="requestsList"></div>
     </div>
+  </div>
 
-    <div id="tab-rooms" class="tab">
-      <h3 style="color:var(--blue); margin-bottom:10px;" data-ar="🚪 الغرف النشطة حالياً" data-en="🚪 Active Rooms">🚪 الغرف النشطة حالياً</h3>
+  <!-- ============ Rooms ============ -->
+  <div id="tab-rooms" class="tab-content">
+    <div class="section">
+      <div class="section-title">🚪 الغرف النشطة حالياً</div>
       <div class="list-container" id="roomsList"></div>
     </div>
+  </div>
 
-    <div id="tab-warnings" class="tab">
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="⚠️ التحذيرات المسجلة" data-en="⚠️ Warnings">⚠️ التحذيرات المسجلة</h3>
+  <!-- ============ Warnings ============ -->
+  <div id="tab-warnings" class="tab-content">
+    <div class="section">
+      <div class="section-title danger">⚠️ التحذيرات المسجلة</div>
       <div class="list-container" id="warningsList"></div>
     </div>
+  </div>
 
-    <div id="tab-tickets" class="tab">
-      <h3 style="color:var(--accent); margin-bottom:10px;" data-ar="🎫 تذاكر الدعم الفني (من المنجر)" data-en="🎫 Support Tickets (From Manager)">🎫 تذاكر الدعم الفني (من المنجر)</h3>
+  <!-- ============ Tickets ============ -->
+  <div id="tab-tickets" class="tab-content">
+    <div class="section">
+      <div class="section-title">🎫 تذاكر الدعم الفني</div>
       <div class="list-container" id="adminTicketsList"></div>
     </div>
+  </div>
 
-    <div id="tab-owner_msg" class="tab">
-      <h3 style="color:var(--gold); margin-bottom:15px;">📩 إرسال رسالة للأونر</h3>
-      <textarea id="adminMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
-      <button class="btn btn-green" onclick="window.sendToOwner()">إرسال 📨</button>
-      <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
-      <div class="list-container" id="ownerRepliesList"></div>
+  <!-- ============ Owner Msg ============ -->
+  <div id="tab-owner_msg" class="tab-content">
+    <div class="section">
+      <div class="section-title gold">📩 إرسال رسالة للأونر</div>
+      <textarea id="adminMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
+      <button class="btn btn-green" onclick="window.sendToOwner()" style="width:100%;">إرسال 📨</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title gold">📋 الردود من الأونر</div>
+      <div class="list-container" id="ownerRepliesList">
+        <div class="item">لا توجد ردود بعد</div>
+      </div>
     </div>
   </div>
 </div>
@@ -142,21 +558,26 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-  
+
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.set = set; window.remove = remove; window.push = push;
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get;
+  window.set = set; window.remove = remove; window.push = push;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) window.location.href = 'index.html';
 
+  // التحقق من الصلاحية
   if (currentUser.toLowerCase() === 'ahmed') {
-      document.getElementById('adminContent').style.display = 'flex';
+      document.getElementById('adminContent').style.display = 'block';
+      document.getElementById('adminName').innerText = currentUser;
       initData();
   } else {
       window.get(window.ref(window.db, 'roles/admins/' + currentUser)).then(snap => {
           if (snap.exists()) {
-              document.getElementById('adminContent').style.display = 'flex';
+              document.getElementById('adminContent').style.display = 'block';
+              document.getElementById('adminName').innerText = currentUser;
               initData();
           } else {
               document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">⛔ وصول مرفوض. أنت لست أدمن.</h1>';
@@ -164,83 +585,60 @@
       });
   }
 
-  window.showToast = function(msg, type='success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div'); toast.className = 'toast';
-      if(type === 'error') toast.style.borderRightColor = 'var(--accent)';
-      toast.innerText = msg; container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-  }
-
-  window.switchTab = function(id, el) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('tab-' + id).classList.add('active'); el.classList.add('active');
-    
-    let currentLang = localStorage.getItem('lang') || 'ar';
-    const titlesAr = { dashboard: '📊 الإحصائيات', users: '👥 إدارة اللاعبين', content: '📝 إدارة المحتوى', rooms: '🚪 إدارة الغرف', warnings: '⚠️ التحذيرات', tickets: '🎫 تذاكر الدعم', owner_msg: '📩 رسائل الأونر' };
-    const titlesEn = { dashboard: '📊 Dashboard', users: '👥 Players', content: '📝 Content', rooms: '🚪 Rooms', warnings: '⚠️ Warnings', tickets: '🎫 Tickets', owner_msg: '📩 Owner Msg' };
-    
-    document.getElementById('pageTitle').innerText = currentLang === 'ar' ? titlesAr[id] : titlesEn[id];
-  };
-
-  window.toggleLanguage = function() {
-      let currentLang = localStorage.getItem('lang') || 'ar';
-      currentLang = currentLang === 'ar' ? 'en' : 'ar';
-      localStorage.setItem('lang', currentLang);
-      applyLanguage();
-  }
-
-  function applyLanguage() {
-      let currentLang = localStorage.getItem('lang') || 'ar';
-      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-      
-      const elements = document.querySelectorAll('[data-ar]');
-      elements.forEach(el => {
-          if(el.tagName === 'INPUT') {
-              el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-          } else {
-              el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-          }
-      });
-
-      if(currentUser) {
-        document.getElementById('panelTitle').innerText = currentLang === 'ar' ? `🛡️ أهلاً ${currentUser}` : `🛡️ Welcome ${currentUser}`;
-      }
+  // الثيم
+  if (localStorage.getItem('adminTheme') === 'dark') {
+      document.body.classList.add('dark-mode');
+      setTimeout(() => { const btn = document.getElementById('themeBtn'); if (btn) btn.innerText = '☀️'; }, 100);
   }
 
   window.toggleTheme = function() {
-      const body = document.body; const btn = document.getElementById('themeBtn');
-      body.classList.toggle('light-mode');
-      if (body.classList.contains('light-mode')) { btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); } 
-      else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
-  }
+      const isDark = document.body.classList.toggle('dark-mode');
+      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+      localStorage.setItem('adminTheme', isDark ? 'dark' : 'light');
+  };
 
-  if (localStorage.getItem('theme') === 'light') { 
-      document.body.classList.add('light-mode'); 
-      document.getElementById('themeBtn').innerText = '🌙';
-  }
+  // Toast
+  window.showToast = function(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast' + (type === 'error' ? ' error' : '');
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+  };
 
-  applyLanguage();
+  // Tabs
+  window.switchTab = function(id, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(n => n.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      el.classList.add('active');
+  };
 
   let allUsers = {}, allScores = {}, allRooms = {};
   let isDataLoaded = false;
 
   function initData() {
-      if(isDataLoaded) return;
+      if (isDataLoaded) return;
       isDataLoaded = true;
 
-      window.onValue(window.ref(window.db, 'usernames'), snap => { 
-          allUsers = snap.val() || {}; 
-          document.getElementById('statUsers').innerText = Object.keys(allUsers).length; 
-          window.renderUsers(); 
+      window.onValue(window.ref(window.db, 'usernames'), snap => {
+          allUsers = snap.val() || {};
+          document.getElementById('statUsers').innerText = Object.keys(allUsers).length;
+          window.renderUsers();
       });
+
       window.onValue(window.ref(window.db, 'scores'), snap => {
-        allScores = snap.val() || {}; let plays = 0;
-        for (let u in allScores) { for (let q in allScores[u]) { plays += Object.keys(allScores[u][q]).length; } }
-        document.getElementById('statPlays').innerText = plays;
+          allScores = snap.val() || {};
+          let plays = 0;
+          for (let u in allScores) {
+              for (let q in allScores[u]) {
+                  plays += Object.keys(allScores[u][q]).length;
+              }
+          }
+          document.getElementById('statPlays').innerText = plays;
       });
+
       window.onValue(window.ref(window.db, 'rooms'), snap => {
           allRooms = snap.val() || {};
           document.getElementById('statRooms').innerText = Object.keys(allRooms).length;
@@ -252,21 +650,25 @@
       loadContent('quiz_requests', 'requestsList');
       loadWarnings();
 
+      // تذاكر الدعم
       window.onValue(window.ref(window.db, 'support_tickets'), snap => {
           const list = document.getElementById('adminTicketsList');
-          if(!list) return;
+          if (!list) return;
           list.innerHTML = '';
-          if(!snap.exists()) { list.innerHTML = '<div class="item">لا توجد تذاكر دعم.</div>'; return; }
-          
+          if (!snap.exists()) {
+              list.innerHTML = '<div class="item">لا توجد تذاكر دعم.</div>';
+              return;
+          }
           const data = snap.val();
           Object.keys(data).reverse().forEach(key => {
               const t = data[key];
-              const div = document.createElement('div'); div.className = 'item';
+              const div = document.createElement('div');
+              div.className = 'item';
               div.innerHTML = `
                   <div>
                       <h3 style="color:var(--gold);">🎫 تذكرة #${key.slice(-4)}</h3>
                       <p>${t.text}</p>
-                      <p style="font-size:12px; color:#888;">من: ${t.by}</p>
+                      <p style="font-size:12px; color:var(--text-secondary);">من: ${t.by}</p>
                   </div>
                   <button class="btn btn-green" onclick="window.resolveTicket('${key}')">تم الحل ✅</button>
               `;
@@ -274,12 +676,16 @@
           });
       });
 
+      // ردود الأونر
       window.onValue(window.ref(window.db, 'messages/' + currentUser), snap => {
           const list = document.getElementById('ownerRepliesList');
-          if(!list || !snap.exists()) return;
+          if (!list || !snap.exists()) return;
           list.innerHTML = '';
           Object.values(snap.val()).reverse().forEach(msg => {
-              list.innerHTML += `<div class="item"><div><h4 style="color:var(--blue);">👑 من الأونر</h4><p>${msg.text}</p></div></div>`;
+              const div = document.createElement('div');
+              div.className = 'item';
+              div.innerHTML = `<div><h3 style="color:var(--primary);">👑 من الأونر</h3><p>${msg.text}</p></div>`;
+              list.appendChild(div);
           });
       });
   }
@@ -291,94 +697,99 @@
 
   window.sendToOwner = async function() {
       const text = document.getElementById('adminMsgInput').value;
-      if(!text) return;
+      if (!text) return;
       await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Admin: ' + currentUser, text: text, time: Date.now() });
       showToast('تم إرسال الرسالة للأونر!');
       document.getElementById('adminMsgInput').value = '';
-  }
+  };
 
   window.renderUsers = function() {
-    const container = document.getElementById('usersList'); if(!container) return;
-    container.innerHTML = '';
-    let currentLang = localStorage.getItem('lang') || 'ar';
-    const search = document.getElementById('searchUser').value.toLowerCase();
-    
-    Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
-      const div = document.createElement('div'); div.className = 'item';
-      div.innerHTML = `
-        <div>
-          <h3>${u}</h3>
-        </div>
-        <div style="display:flex; gap:5px; flex-wrap:wrap;">
-          <button class="btn btn-blue" onclick="window.editXP('${u}')">${currentLang === 'en' ? 'Edit XP' : 'تعديل XP'}</button>
-          <button class="btn btn-gold" onclick="window.sendDM('${u}')">${currentLang === 'en' ? 'Message' : 'رسالة'}</button>
-          <button class="btn btn-orange" onclick="window.warnUser('${u}')">${currentLang === 'en' ? 'Warn ⚠️' : 'تحذير ⚠️'}</button>
-        </div>
-      `;
-      container.appendChild(div);
-    });
+      const container = document.getElementById('usersList');
+      if (!container) return;
+      container.innerHTML = '';
+      const search = document.getElementById('searchUser').value.toLowerCase();
+
+      Object.keys(allUsers).filter(u => u.toLowerCase().includes(search)).forEach(u => {
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `
+              <div>
+                  <h3>👤 ${u}</h3>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button class="btn btn-blue" onclick="window.editXP('${u}')">تعديل XP</button>
+                  <button class="btn btn-gold" onclick="window.sendDM('${u}')">رسالة</button>
+                  <button class="btn btn-orange" onclick="window.warnUser('${u}')">تحذير ⚠️</button>
+              </div>
+          `;
+          container.appendChild(div);
+      });
   };
 
   window.renderRooms = function() {
-      const list = document.getElementById('roomsList'); if(!list) return;
+      const list = document.getElementById('roomsList');
+      if (!list) return;
       list.innerHTML = '';
-      let currentLang = localStorage.getItem('lang') || 'ar';
-      if(Object.keys(allRooms).length === 0) { 
-          list.innerHTML = `<div class="item">${currentLang === 'en' ? 'No active rooms.' : 'لا توجد غرف نشطة.'}</div>`; 
-          return; 
+      if (Object.keys(allRooms).length === 0) {
+          list.innerHTML = '<div class="item">لا توجد غرف نشطة.</div>';
+          return;
       }
-      for(let room in allRooms) {
-          const div = document.createElement('div'); div.className = 'item';
-          div.innerHTML = `<div><p>${currentLang === 'en' ? 'Room Code:' : 'كود الغرفة:'} <b style="color:var(--gold)">${room}</b></p></div><button class="btn btn-red" onclick="window.deleteRoom('${room}')">${currentLang === 'en' ? 'Delete 🗑️' : 'مسح 🗑️'}</button>`;
+      for (let room in allRooms) {
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `
+              <div><p>كود الغرفة: <b style="color:var(--gold)">${room}</b></p></div>
+              <button class="btn btn-red" onclick="window.deleteRoom('${room}')">مسح 🗑️</button>
+          `;
           list.appendChild(div);
       }
   };
 
   function loadContent(node, elId) {
-    window.onValue(window.ref(window.db, node), snap => {
-      const list = document.getElementById(elId); if(!list) return;
-      list.innerHTML = '';
-      let currentLang = localStorage.getItem('lang') || 'ar';
-      
-      if (!snap.exists()) { 
-          list.innerHTML = `<div class="item">${currentLang === 'en' ? 'No content.' : 'لا يوجد محتوى.'}</div>`; 
-          return; 
-      }
-      
-      Object.keys(snap.val()).reverse().forEach(key => {
-        const c = snap.val()[key]; const div = document.createElement('div'); div.className = 'item';
-        div.innerHTML = `
-          <div>
-            <p style="color:var(--gold); font-size:12px;">👤 ${c.user}</p>
-            <p>${c.text}</p>
-          </div>
-          <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">${currentLang === 'en' ? 'Delete 🗑️' : 'مسح 🗑️'}</button>
-        `;
-        list.appendChild(div);
+      window.onValue(window.ref(window.db, node), snap => {
+          const list = document.getElementById(elId);
+          if (!list) return;
+          list.innerHTML = '';
+          if (!snap.exists()) {
+              list.innerHTML = '<div class="item">لا يوجد محتوى.</div>';
+              return;
+          }
+          Object.keys(snap.val()).reverse().forEach(key => {
+              const c = snap.val()[key];
+              const div = document.createElement('div');
+              div.className = 'item';
+              div.innerHTML = `
+                  <div>
+                      <p style="color:var(--gold); font-size:12px;">👤 ${c.user || 'Unknown'}</p>
+                      <p>${c.text || ''}</p>
+                  </div>
+                  <button class="btn btn-red" onclick="window.deleteItem('${node}', '${key}')">مسح 🗑️</button>
+              `;
+              list.appendChild(div);
+          });
       });
-    });
   }
 
   function loadWarnings() {
       window.onValue(window.ref(window.db, 'warnings'), snap => {
-          const list = document.getElementById('warningsList'); if(!list) return;
+          const list = document.getElementById('warningsList');
+          if (!list) return;
           list.innerHTML = '';
-          let currentLang = localStorage.getItem('lang') || 'ar';
-          
-          if(!snap.exists()) {
-              list.innerHTML = `<div class="item">${currentLang === 'en' ? 'No warnings.' : 'لا توجد تحذيرات.'}</div>`;
+          if (!snap.exists()) {
+              list.innerHTML = '<div class="item">لا توجد تحذيرات.</div>';
               return;
           }
           const data = snap.val();
           Object.keys(data).forEach(user => {
               const warn = data[user];
-              const div = document.createElement('div'); div.className = 'item';
+              const div = document.createElement('div');
+              div.className = 'item';
               div.innerHTML = `
                   <div>
                       <h3 style="color:var(--gold);">👤 ${user}</h3>
-                      <p>${currentLang === 'en' ? 'Reason:' : 'السبب:'} ${warn.text}</p>
+                      <p>السبب: ${warn.text}</p>
                   </div>
-                  <button class="btn btn-red" onclick="window.removeWarning('${user}')">${currentLang === 'en' ? 'Remove 🗑️' : 'إزالة 🗑️'}</button>
+                  <button class="btn btn-red" onclick="window.removeWarning('${user}')">إزالة 🗑️</button>
               `;
               list.appendChild(div);
           });
@@ -386,11 +797,11 @@
   }
 
   window.removeWarning = (user) => {
-      if(confirm('Are you sure? / متأكد؟')) {
+      if (confirm('متأكد؟')) {
           window.remove(window.ref(window.db, 'warnings/' + user));
-          showToast('Removed');
+          showToast('تم الإزالة');
       }
-  }
+  };
 
   window.editXP = async (u) => {
       const xpSnap = await window.get(window.ref(window.db, 'users_data/' + u + '/xp'));
@@ -398,39 +809,39 @@
       const newXp = prompt(`XP for ${u}:`, xp);
       if (newXp !== null && !isNaN(newXp)) {
           await window.set(window.ref(window.db, 'users_data/' + u + '/xp'), parseInt(newXp));
-          showToast('XP updated');
+          showToast('تم تحديث XP');
       }
-  }
+  };
 
   window.sendDM = (u) => {
-      const msg = prompt(`Message for ${u}:`);
-      if(msg) {
+      const msg = prompt(`رسالة لـ ${u}:`);
+      if (msg) {
           window.push(window.ref(window.db, 'messages/' + u), { from: 'Admin', text: msg, time: Date.now() });
-          showToast('Sent!');
+          showToast('تم الإرسال!');
       }
-  }
+  };
 
   window.warnUser = async (u) => {
-      const msg = prompt(`Reason for warning ${u}:`);
-      if(msg) {
+      const msg = prompt(`سبب التحذير لـ ${u}:`);
+      if (msg) {
           await window.set(window.ref(window.db, 'warnings/' + u), { text: msg, date: Date.now() });
-          showToast(`Warning sent`);
+          showToast('تم إرسال التحذير');
       }
-  }
+  };
 
   window.deleteRoom = (room) => {
-      if(confirm('Delete room? / مسح الغرفة؟')) {
+      if (confirm('مسح الغرفة؟')) {
           window.remove(window.ref(window.db, 'rooms/' + room));
-          showToast('Deleted');
+          showToast('تم المسح');
       }
-  }
+  };
 
   window.deleteItem = (node, key) => {
-    if(confirm('Delete? / متأكد؟')) {
-      window.remove(window.ref(window.db, node + '/' + key));
-      showToast('Deleted');
-    }
-  }
+      if (confirm('متأكد؟')) {
+          window.remove(window.ref(window.db, node + '/' + key));
+          showToast('تم المسح');
+      }
+  };
 </script>
 </body>
 </html>
