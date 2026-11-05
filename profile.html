@@ -29,7 +29,7 @@
   .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
   .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
   
-  .profile-container { width: 100%; max-width: 800px; margin-top: 50px; display: flex; flex-direction: column; gap: 30px; }
+  .profile-container { width: 100%; max-width: 800px; margin-top: 60px; display: flex; flex-direction: column; gap: 30px; }
   .header-card { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; box-shadow: 0 10px 30px rgba(255,0,0,0.1); }
   .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; transition: 0.3s; overflow: hidden; }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -100,39 +100,10 @@
   }
 
   /* تظبيط الموبايل */
-  @media (max-width: 768px) {
-      .top-controls { top: 10px; left: 10px; gap: 5px; }
-      .back-btn, .lang-btn { padding: 6px 10px; font-size: 12px; }
-      
-      .profile-container { margin-top: 70px; padding: 0 10px; gap: 20px; }
-      
-      .header-card { padding: 20px 15px; }
-      .avatar { width: 90px; height: 90px; font-size: 40px; border-width: 3px; }
-      .username { font-size: 24px; }
-      
-      .stats-row { gap: 8px; flex-direction: column; width: 100%; }
-      .stat-badge { width: 100%; justify-content: center; font-size: 14px; padding: 8px; }
-      
-      .rank-box { padding: 8px 15px; width: 100%; justify-content: center; }
-      .rank-value { font-size: 16px; }
-      
-      .progress-container { max-width: 100%; }
-      .xpProgressText { font-size: 11px; }
-      
-      .advanced-stats { grid-template-columns: 1fr; gap: 10px; }
-      .adv-stat-box { padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-      .adv-stat-title { margin-bottom: 0; }
-      .adv-stat-value { font-size: 20px; }
-      
-      .upload-section { flex-direction: column; width: 100%; }
-      .upload-label, .upload-btn { width: 100%; text-align: center; }
-      
-      .friend-card { flex-direction: column; gap: 10px; text-align: center; }
-      .friend-info { flex-direction: column; }
-      .action-btn { width: 100%; text-align: center; }
-      
-      #timelineList { padding-right: 15px; }
-      .timeline-dot { right: -23px; }
+  @media (max-width: 600px) { 
+      .advanced-stats { grid-template-columns: 1fr; } 
+      .stats-row { flex-direction: column; gap: 10px; }
+      .stat-badge { justify-content: center; }
   }
 </style>
 </head>
@@ -190,6 +161,7 @@
         </div>
     </div>
 
+    <!-- صندوق التحذير -->
     <div id="warningBox"><span id="warningText"></span></div>
 
     <div class="badges-section" id="badgesSection" style="display: none;">
@@ -415,12 +387,22 @@
               });
           } else { badgesSection.style.display = 'none'; }
 
-          const warnSnap = await window.get(window.ref(window.db, 'warnings/' + dbUser));
-          const warnData = warnSnap.val();
-          if (warnData && warnData.text) { 
+          // التحذير (تم إصلاحه ليتجاهل حالة الأحرف)
+          const warnSnap = await window.get(window.ref(window.db, 'warnings'));
+          let myWarning = null;
+          if (warnSnap.exists()) {
+              const warningsData = warnSnap.val();
+              for (let u in warningsData) {
+                  if (u.toLowerCase() === dbUser) { myWarning = warningsData[u]; break; }
+              }
+          }
+
+          if (myWarning && myWarning.text) { 
               document.getElementById('warningBox').style.display = 'block'; 
-              document.getElementById('warningText').innerText = translations[currentLang].warnPrefix + warnData.text; 
-          } else { document.getElementById('warningBox').style.display = 'none'; }
+              document.getElementById('warningText').innerText = translations[currentLang].warnPrefix + myWarning.text; 
+          } else { 
+              document.getElementById('warningBox').style.display = 'none'; 
+          }
 
           const historySnap = await window.get(window.ref(window.db, 'users_data/' + dbUser + '/history'));
           const historyList = document.getElementById('timelineList');
