@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚫 المناطق المحظورة - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { 
+      --bg: #080808; --panel: #111; --text: #fff; --border: #333; 
+      --red: #ff0000; --gold: #ffd700; --blue: #0088cc; --orange: #ff9800; 
+      --pink: #e91e63; --cyan: #00bcd4; --green: #00ffcc;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  
+  #lockScreen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+  .lock-box { background: var(--panel); border: 2px solid var(--red); border-radius: 15px; padding: 40px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(255, 0, 0, 0.2); }
+  .lock-box h2 { color: var(--red); margin-bottom: 20px; font-size: 24px; }
+  .lock-box p { color: #aaa; margin-bottom: 20px; font-size: 14px; }
+  .lock-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; font-size: 16px; text-align: center; margin-bottom: 15px; outline: none; }
+  .lock-input:focus { border-color: var(--red); }
+  .lock-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; background: var(--red); color: #fff; transition: 0.3s; }
+  .lock-btn:hover { background: #cc0000; }
+  #errorMsg { color: var(--red); font-weight: bold; font-size: 14px; margin-bottom: 10px; display: none; }
+
+  #restrictedContent { display: none; width: 100%; max-width: 900px; animation: fadeIn 0.5s; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed var(--red); padding-bottom: 15px; margin-bottom: 30px; }
+  .header h1 { color: var(--red); font-size: 28px; text-shadow: 0 0 15px rgba(255,0,0,0.4); }
+  .btn-back { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #555; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; }
+  .btn-back:hover { background: var(--red); border-color: var(--red); }
+  
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 15px; padding: 25px; text-align: center; transition: 0.3s; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+  .card i { font-size: 40px; margin-bottom: 10px; }
+  .card h3 { font-size: 20px; font-weight: 900; margin-bottom: 5px; }
+  .card p { font-size: 13px; color: #aaa; }
+
+  .c-owner { border-color: var(--gold); } .c-owner:hover { box-shadow: 0 0 20px rgba(255,215,0,0.3); } .c-owner h3 { color: var(--gold); }
+  .c-admin { border-color: var(--blue); } .c-admin:hover { box-shadow: 0 0 20px rgba(0,136,204,0.3); } .c-admin h3 { color: var(--blue); }
+  .c-manager { border-color: var(--orange); } .c-manager:hover { box-shadow: 0 0 20px rgba(255,152,0,0.3); } .c-manager h3 { color: var(--orange); }
+  .c-partner { border-color: var(--pink); } .c-partner:hover { box-shadow: 0 0 20px rgba(233,30,99,0.3); } .c-partner h3 { color: var(--pink); }
+  .c-tester { border-color: var(--cyan); } .c-tester:hover { box-shadow: 0 0 20px rgba(0,188,212,0.3); } .c-tester h3 { color: var(--cyan); }
+  .c-builder { border-color: var(--green); } .c-builder:hover { box-shadow: 0 0 20px rgba(0,255,204,0.3); } .c-builder h3 { color: var(--green); }
+</style>
+</head>
+<body>
+
+<!-- شاشة القفل -->
+<div id="lockScreen">
+    <div class="lock-box">
+        <h2>⛔ منطقة محظورة</h2>
+        <p>هذه المنطقة مخصصة للإدارة العليا فقط. يرجى إدخال بيانات الدخول.</p>
+        <div id="errorMsg">بيانات الدخول غير صحيحة!</div>
+        <input type="text" id="restrictedUser" class="lock-input" placeholder="اسم المستخدم (Username)" value="banned">
+        <input type="password" id="restrictedPass" class="lock-input" placeholder="كلمة المرور (Password)" onkeypress="if(event.key==='Enter') window.checkRestrictedPass()">
+        <button class="lock-btn" onclick="window.checkRestrictedPass()">دخول (Unlock)</button>
+        <a href="index.html" style="display:block; margin-top:15px; color:#888; text-decoration:none; font-size:14px;">إلغاء والعودة</a>
+    </div>
+</div>
+
+<!-- المحتوى -->
+<div id="restrictedContent">
+  <div class="header">
+    <h1>⚠️ المناطق المحظورة</h1>
+    <a href="index.html" class="btn-back">⬅ رجوع للرئيسية</a>
+  </div>
+
+  <div class="grid">
+      <a href="owner.html" class="card c-owner"><div>👑</div><h3>لوحة الأونر</h3><p>التحكم الكامل في الموقع، اللاعبين، والنظام.</p></a>
+      <a href="admin.html" class="card c-admin"><div>🛡️</div><h3>لوحة الإدارة</h3><p>إدارة اللاعبين، المحتوى، والغرف.</p></a>
+      <a href="manager.html" class="card c-manager"><div>📋</div><h3>لوحة المدير</h3><p>تخطيط الفعاليات، التقارير، وإدارة المجتمع.</p></a>
+      <a href="partner.html" class="card c-partner"><div>🤝</div><h3>لوحة الشركاء</h3><p>إدارة التسويق، الإعلانات، والشراكات.</p></a>
+      <a href="tester.html" class="card c-tester"><div>🧪</div><h3>لوحة المختبرين</h3><p>فحص الموقع، اكتشاف الأخطاء، وتجربة الميزات الجديدة.</p></a>
+      <a href="quizzes.html" class="card c-builder"><div>🏗️</div><h3>كويز بيلدر</h3><p>صناعة كويزات جديدة وإضافتها للموقع.</p></a>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig); const auth = getAuth(app);
+
+  window.checkRestrictedPass = async function() {
+      let user = document.getElementById('restrictedUser').value.trim().toLowerCase();
+      let pass = document.getElementById('restrictedPass').value;
+      const errorMsg = document.getElementById('errorMsg');
+
+      // التأكد إن الاسم هو banned
+      if (user !== 'banned') {
+          errorMsg.innerText = "هذا الحساب غير مصرح له بالدخول!";
+          errorMsg.style.display = 'block';
+          return;
+      }
+
+      try {
+          // بنحاول نسجل دخول بالاسم والباسورد اللي في الفايربيز
+          await signInWithEmailAndPassword(auth, user + "@quizhub.com", pass);
+          
+          // لو نجح
+          document.getElementById('lockScreen').style.display = 'none';
+          document.getElementById('restrictedContent').style.display = 'block';
+          sessionStorage.setItem('isRestrictedAuthed', 'true');
+          
+      } catch (error) {
+          // لو فشل (باسورد غلط)
+          errorMsg.innerText = "كلمة المرور غير صحيحة!";
+          errorMsg.style.display = 'block';
+          document.getElementById('restrictedPass').value = '';
+      }
+  }
+
+  window.onload = function() {
+      if (sessionStorage.getItem('isRestrictedAuthed') === 'true') {
+          document.getElementById('lockScreen').style.display = 'none';
+          document.getElementById('restrictedContent').style.display = 'block';
+      }
+  }
+</script>
+
+</body>
+</html>
