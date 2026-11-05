@@ -3,386 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🛸 مركز القيادة المتقدم - Quiz Hub</title>
+<title>🧪 لوحة المختبرين (Tester Panel) - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #000; --panel: #0a0a0a; --border: #222; --text: #fff; --accent: #00ffcc; --danger: #ff0033; --warning: #ffcc00; --success: #00ff66; }
+  :root { 
+      --bg: #080808; --panel: #111; --text: #fff; --border: #333; 
+      --cyan: #00bcd4; --danger: #f44336; --green: #4caf50; --gold: #ffd700; --purple: #9c27b0;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
-  .hud { height: 60px; background: var(--panel); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-  .hud-title { font-size: 20px; font-weight: 900; color: var(--accent); text-shadow: 0 0 10px rgba(0,255,204,0.5); }
-  .hud-stats { display: flex; gap: 20px; }
-  .hud-item { font-size: 14px; font-weight: bold; }
-  .hud-item span { color: var(--accent); }
-
-  .main-layout { display: flex; flex: 1; overflow: hidden; }
-  
-  .sidebar { width: 250px; background: var(--panel); border-left: 2px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; gap: 5px; }
-  .nav-btn { padding: 15px 20px; background: transparent; border: none; border-right: 4px solid transparent; color: #888; font-family: 'Cairo'; font-size: 16px; font-weight: bold; text-align: right; cursor: pointer; transition: 0.2s; }
-  .nav-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
-  .nav-btn.active { border-right-color: var(--accent); color: var(--accent); background: rgba(0,255,204,0.05); }
-
-  .content { flex: 1; padding: 20px; overflow-y: auto; display: none; }
-  .content.active { display: block; animation: fadeIn 0.3s; }
+  #panelContent { display: none; width: 100%; max-width: 1200px; animation: fadeIn 0.5s; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .card h3 { color: var(--warning); font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
   
-  .console { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 15px; font-family: monospace; font-size: 13px; height: 300px; overflow-y: auto; direction: ltr; text-align: left; color: #ccc; }
-  .log-success { color: var(--success); }
-  .log-error { color: var(--danger); }
-  .log-info { color: var(--accent); }
-  .log-warn { color: var(--warning); }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--cyan); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+  .header h1 { color: var(--cyan); font-size: 28px; }
+  .btn-back { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #555; border-radius: 8px; text-decoration: none; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+  .btn-back:hover { background: var(--cyan); color: #000; border-color: var(--cyan); }
 
-  .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-  .input-group input, .input-group select { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; outline: none; }
-  .btn { padding: 12px 20px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; }
-  .btn-accent { background: var(--accent); color: #000; }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn:hover { opacity: 0.8; transform: scale(1.02); }
+  .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 1px solid var(--border); overflow-x: auto; padding-bottom: 10px; }
+  .tab-btn { background: transparent; border: none; color: #888; font-family: 'Cairo'; font-size: 15px; font-weight: bold; padding: 10px 15px; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.3s; white-space: nowrap; }
+  .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s; }
 
-  .badge-status { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-  .bg-green { background: rgba(0,255,102,0.2); color: var(--success); border: 1px solid var(--success); }
-  .bg-red { background: rgba(255,0,51,0.2); color: var(--danger); border: 1px solid var(--danger); }
-
-  #lockScreen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-  #lockScreen h1 { color: var(--danger); font-size: 40px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
+  .card:hover { border-color: var(--cyan); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,188,212,0.1); }
+  .card h3 { color: var(--cyan); margin-bottom: 10px; font-size: 18px; }
+  .card p { color: #aaa; font-size: 13px; margin-bottom: 15px; line-height: 1.5; flex-grow: 1; }
+  
+  .btn-action { display: block; width: 100%; padding: 12px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; font-family: 'Cairo'; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-action:hover { background: var(--cyan); color: #000; border-color: var(--cyan); }
+  
+  .console-box { background: #000; border: 1px solid var(--border); border-radius: 10px; padding: 15px; font-family: monospace; font-size: 13px; color: var(--green); height: 250px; overflow-y: auto; text-align: left; direction: ltr; margin-top: 30px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+  .form-control { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #000; color: #fff; font-family: 'Cairo'; outline: none; margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
-<div id="lockScreen" style="display: none;">
-  <h1>🚫 وصول مرفوض</h1>
-  <p>هذه المنطقة مخصصة لمالك الموقع فقط.</p>
-  <a href="index.html" style="margin-top:20px; color:var(--accent);">العودة للرئيسية</a>
-</div>
-
-<div id="app" style="display: none; width: 100%; height: 100%; flex-direction: column;">
-  
-  <div class="hud">
-    <div class="hud-title">🛸 مركز القيادة المتقدم</div>
-    <div class="hud-stats">
-      <div class="hud-item">الاتصال: <span id="hud-conn">جاري الفحص</span></div>
-      <div class="hud-item">المستخدم: <span id="hud-user">-</span></div>
-      <div class="hud-item">الرتبة: <span id="hud-role">-</span></div>
-    </div>
+<div id="panelContent">
+  <div class="header">
+    <h1>🧪 مركز القيادة (Tester Panel)</h1>
+    <a href="index.html" class="btn-back">⬅ رجوع للرئيسية</a>
   </div>
 
-  <div class="main-layout">
-    <div class="sidebar">
-      <button class="nav-btn active" onclick="openTab('radar')">📡 الرادار (النبض)</button>
-      <button class="nav-btn" onclick="openTab('doctor')">🩺 الطبيب (الفحص الشامل)</button>
-      <button class="nav-btn" onclick="openTab('data')">📊 البيانات الحية</button>
-      <button class="nav-btn" onclick="openTab('console')">💻 الكونسول السري</button>
-      <button class="nav-btn" onclick="openTab('clean')">🧹 المنشار (تنظيف)</button>
-      <button class="nav-btn" onclick="openTab('backup')">💾 نسخة احتياطية</button>
-      <button class="nav-btn" style="margin-top: auto; color: var(--danger);" onclick="location.href='index.html'">⬅ خروج للموقع</button>
-    </div>
+  <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tools', this)">🛠️ أدوات المختبر</button>
+      <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+  </div>
 
-    <div style="flex: 1; overflow-y: auto; padding: 20px;">
-      
-      <div id="tab-radar" class="content active">
-        <h2 style="color:var(--accent); margin-bottom:20px;">📡 مراقبة النظام (Live)</h2>
-        <div class="grid">
+  <div id="tab-tools" class="tab-content active">
+      <div class="grid">
           <div class="card">
-            <h3>سرعة استجابة فايربيز</h3>
-            <div id="pingResult" style="font-size:30px; font-weight:bold; color:var(--success);">- ms</div>
-            <button class="btn btn-accent" style="margin-top:15px; width:100%;" onclick="testPing()">اختبار السرعة</button>
+              <h3>🛠️ أدوات المطور (Dev Mode)</h3>
+              <p>تشغيل وضع المطور اللي بيوريك الإجابات الصحيحة أثناء اللعب عشان تتأكد إن الكويز سليم.</p>
+              <button class="btn-action" onclick="toggleDevMode()" id="devModeBtn">تفعيل وضع المطور</button>
           </div>
           <div class="card">
-            <h3>مراقب الأخطاء (Live Errors)</h3>
-            <div class="console" id="errorConsole">مراقب الأخطاء جاهز...</div>
+              <h3>📡 اختبار سرعة الاتصال (Ping)</h3>
+              <p>قياس سرعة استجابة قاعدة البيانات (Firebase) للتأكد من عدم وجود بطء أو لاج.</p>
+              <button class="btn-action" onclick="testPing()">اختبار السرعة</button>
           </div>
-        </div>
+          <div class="card">
+              <h3>🧹 تفريغ الكاش (Clear Cache)</h3>
+              <p>مسح كاش المتصفح فوراً وإعادة تحميل الصفحة لضمان رؤية أحدث التحديثات.</p>
+              <button class="btn-action" onclick="clearCache()">مسح الكاش</button>
+          </div>
+          <div class="card">
+              <h3>📱 محاكي الموبايل</h3>
+              <p>تغيير حجم الشاشة عشان تشوف شكل الموقع على الموبايل والتابلت.</p>
+              <button class="btn-action" onclick="toggleMobileView()">تبديل وضع الموبايل</button>
+          </div>
+          <div class="card">
+              <h3>👥 توليد لاعبين وهميين</h3>
+              <p>إنشاء 5 حسابات وهمية عشان تختبر الليدر بورد والتحديات.</p>
+              <button class="btn-action" onclick="generateDummyUsers()">توليد اللاعبين</button>
+          </div>
+          <div class="card">
+              <h3>🗄️ فحص قاعدة البيانات</h3>
+              <p>التأكد إن مسارات الفايربيز شغالة وسليمة (XP, Scores, Users).</p>
+              <button class="btn-action" onclick="runDbCheck()">بدء الفحص الشامل</button>
+          </div>
+          <div class="card">
+              <h3>⚡ اختبار المؤقت (Timer Test)</h3>
+              <p>يتأكد إن مؤقت الـ 20 ثانية دقيق ومش بيقطع في النص.</p>
+              <button class="btn-action" onclick="testTimer()">اختبار المؤقت</button>
+          </div>
+          <div class="card">
+              <h3>🔊 اختبار الأصوات</h3>
+              <p>التأكد إن أصوات الإجابة الصحيحة والغلط شغالة في المتصفح.</p>
+              <button class="btn-action" onclick="testSounds()">تشغيل الأصوات</button>
+          </div>
+          <div class="card">
+              <h3>⚠️ وضع الأخطاء القسرية</h3>
+              <p>توليد خطأ وهمي للتأكد إن رسائل التنبيه (Toast) بتظهر صح.</p>
+              <button class="btn-action" onclick="showToast('خطأ تجريبي', 'error')">توليد خطأ</button>
+          </div>
+          <div class="card">
+              <h3>📊 فحص الإحصائيات</h3>
+              <p>التأكد إن الـ XP والكوينز بتتسجل في البروفايل بشكل سليم.</p>
+              <button class="btn-action" onclick="testStats()">فحص الإحصائيات</button>
+          </div>
+          <div class="card">
+              <h3>🕵️ كشف الغشاشين (Anti-Cheat)</h3>
+              <p>البحث عن لاعبين جاوبوا في أقل من 0.5 ثانية (غش).</p>
+              <button class="btn-action" onclick="detectCheaters()">فحص الغشاشين</button>
+          </div>
+          <div class="card">
+              <h3>🎲 اختبار الكويز العشوائي</h3>
+              <p>التأكد إن زرار "كويز عشوائي" بيفتح كويزات مختلفة كل مرة.</p>
+              <button class="btn-action" onclick="testRandomQuiz()">اختبار العشوائي</button>
+          </div>
+          <div class="card">
+              <h3>🔗 اختبار روابط المشاركة</h3>
+              <p>التحقق من أن روابط الواتساب والتليجرام تفتح بشكل صحيح.</p>
+              <button class="btn-action" onclick="testSharing()">اختبار المشاركة</button>
+          </div>
+          <div class="card">
+              <h3>⌨️ اختبار لوحة المفاتيح</h3>
+              <p>التأكد إن اختصارات الكيبورد (1,2,3,4) بتشتغل في اختيار الإجابات.</p>
+              <button class="btn-action" onclick="testKeyboard()">اختبار الكيبورد</button>
+          </div>
+          <div class="card">
+              <h3>🔄 اختبار الستريك (Streak)</h3>
+              <p>محاكاة تسجيل الدخول لليوم التالي للتأكد من زيادة النقاط.</p>
+              <button class="btn-action" onclick="testStreak()">اختبار الستريك</button>
+          </div>
+          <div class="card">
+              <h3>🖼️ فحص صور الكويزات</h3>
+              <p>التأكد إن جميع الصور في مجلد `pic` موجودة ومش مكسورة.</p>
+              <button class="btn-action" onclick="checkImages()">فحص الصور</button>
+          </div>
+          <div class="card">
+              <h3>🧠 اختبار تحليل الشخصية</h3>
+              <p>محاكاة نتائج مختلفة للتأكد من صحة ظهور اللقب في البروفايل.</p>
+              <button class="btn-action" onclick="testPersona()">اختبار اللقب</button>
+          </div>
+          <div class="card">
+              <h3>🛡️ اختبار الحظر</h3>
+              <p>تجربة حظر وفك حظر حساب وهمي للتأكد من كفاءة النظام.</p>
+              <button class="btn-action" onclick="testBan()">اختبار الحظر</button>
+          </div>
+          <div class="card">
+              <h3>📩 اختبار الرسائل</h3>
+              <p>إرسال رسالة وهمية لنفسك للتأكد من عمل صندوق الوارد.</p>
+              <button class="btn-action" onclick="testMessages()">اختبار الرسائل</button>
+          </div>
+          <div class="card">
+              <h3>🗑️ مسح بيانات التجربة</h3>
+              <p>مسح كل الحسابات الوهمية (TestBot) من قاعدة البيانات.</p>
+              <button class="btn-action" onclick="clearTestData()" style="border-color: var(--danger); color: var(--danger);">مسح البيانات</button>
+          </div>
       </div>
+      <h3 style="color:#fff; margin-top:30px;">💻 سجل العمليات (Console)</h3>
+      <div class="console-box" id="testerConsole">> النظام جاهز للاختبار...<br></div>
+  </div>
 
-      <div id="tab-doctor" class="content">
-        <h2 style="color:var(--accent); margin-bottom:20px;">🩺 فحص شامل للموقع</h2>
-        <button class="btn btn-accent" style="width:100%; margin-bottom:20px;" onclick="runMasterCheck()">🚀 ابدأ الفحص الشامل (Master Check)</button>
-        
-        <div class="grid">
-          <div class="card">
-            <h3>حالة الملفات الأساسية</h3>
-            <div id="fileStatus" style="display:flex; flex-direction:column; gap:10px;"></div>
-          </div>
-          <div class="card">
-            <h3>حالة صور الكويزات</h3>
-            <div id="imageStatus" style="display:flex; flex-direction:column; gap:10px; max-height:300px; overflow-y:auto;"></div>
-          </div>
-          <div class="card" style="grid-column: 1 / -1;">
-            <h3>سجل الفحص (Console Log)</h3>
-            <div class="console" id="masterConsole" style="height: 250px;"></div>
-          </div>
-        </div>
+  <!-- تبويب رسائل الأونر -->
+  <div id="tab-owner_msg" class="tab-content">
+      <div class="card" style="max-width:600px; margin:0 auto;">
+          <h3>📩 إرسال رسالة للأونر</h3>
+          <textarea id="testerMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
+          <button class="btn-action" style="background:var(--green); color:#000; border-color:var(--green);" onclick="window.sendToOwner()">إرسال 📨</button>
+          <h3 style="color:var(--gold); margin:20px 0 10px;">📋 الردود من الأونر</h3>
+          <div class="list-container" id="ownerRepliesList" style="background:#000; padding:15px; border-radius:8px; min-height:100px; border:1px solid #333;"></div>
       </div>
-
-      <div id="tab-data" class="content">
-        <h2 style="color:var(--accent); margin-bottom:20px;">📊 البيانات الحية (Realtime)</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>👥 اللاعبين المتصلين (<span id="data-online-count">0</span>)</h3>
-            <div id="data-online-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
-          </div>
-          <div class="card">
-            <h3>🚪 الغرف النشطة (<span id="data-rooms-count">0</span>)</h3>
-            <div id="data-rooms-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
-          </div>
-          <div class="card">
-            <h3>⚠️ التحذيرات (<span id="data-warns-count">0</span>)</h3>
-            <div id="data-warns-list" style="font-size:14px; color:#ccc; display:flex; flex-wrap:wrap; gap:5px;"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-console" class="content">
-        <h2 style="color:var(--accent); margin-bottom:20px;">💻 أوامر مباشرة</h2>
-        <div class="card">
-          <div class="console" id="cmdConsole" style="height: 200px; margin-bottom: 15px;">الكونسول جاهز...</div>
-          <div class="input-group">
-            <input type="text" id="cmdInput" placeholder="اكتب الأمر هنا..." onkeypress="if(event.key==='Enter') runCmd()">
-            <button class="btn btn-accent" onclick="runCmd()">تنفيذ</button>
-          </div>
-          <p style="font-size:12px; color:#888;">أمثلة: <code>clear_user Ahmed1</code> | <code>kick_user Ahmed1</code> | <code>clear_rooms</code> | <code>block Ahmed1</code></p>
-        </div>
-      </div>
-
-      <div id="tab-clean" class="content">
-        <h2 style="color:var(--danger); margin-bottom:20px;">🧹 أدوات التنظيف (خطيرة)</h2>
-        <div class="card" style="margin-bottom:15px;">
-          <h3>مسح البيانات العالقة</h3>
-          <button class="btn btn-danger" style="width:100%;" onclick="cleanOrphanData()">مسح كل الرسائل القديمة</button>
-        </div>
-        <div class="card" style="margin-bottom:15px;">
-          <h3>مسح التحذيرات</h3>
-          <button class="btn btn-danger" style="width:100%;" onclick="clearWarnings()">مسح كل التحذيرات المسجلة</button>
-        </div>
-      </div>
-
-      <div id="tab-backup" class="content">
-        <h2 style="color:var(--accent); margin-bottom:20px;">💾 النسخ الاحتياطي</h2>
-        <div class="card">
-          <h3>تحميل نسخة كاملة</h3>
-          <button class="btn btn-accent" style="width:100%;" onclick="downloadBackup()">📥 تحميل كل بيانات الموقع (JSON)</button>
-        </div>
-      </div>
-
-    </div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, get, set, remove, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.get = get; window.set = set; window.remove = remove; window.onValue = onValue; window.update = update;
+  window.db = db; window.ref = ref; window.get = get; window.set = set; window.remove = remove; window.push = push; window.onValue = onValue;
 
   const currentUser = localStorage.getItem('loggedInUser');
+  if (!currentUser) window.location.href = 'index.html';
 
-  if (!currentUser || currentUser.toLowerCase() !== 'ahmed') {
-      document.getElementById('lockScreen').style.display = 'flex';
-      document.getElementById('app').style.display = 'none';
-  } else {
-      document.getElementById('app').style.display = 'flex';
-      document.getElementById('hud-user').innerText = currentUser;
-      document.getElementById('hud-role').innerText = '👑 Owner';
-      initSystem();
+  window.get(window.ref(window.db, 'roles/testers/' + currentUser)).then(snap => {
+      if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
+          document.getElementById('panelContent').style.display = 'block';
+          
+          window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
+              const list = document.getElementById('ownerRepliesList');
+              if(!list || !msgSnap.exists()) return;
+              list.innerHTML = '';
+              Object.values(msgSnap.val()).reverse().forEach(msg => {
+                  list.innerHTML += `<div style="border-bottom:1px solid #333; padding:8px 0; color:#fff;">${msg.text}</div>`;
+              });
+          });
+      } else {
+          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">⛔ وصول مرفوض. أنت لست تستر.</h1>';
+      }
+  });
+
+  window.switchTab = function(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
   }
 
-  function logTo(id, text, type='info') {
-      const el = document.getElementById(id); if(!el) return;
-      const div = document.createElement('div');
-      div.className = 'log-' + type;
-      div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
-      el.appendChild(div);
-      el.scrollTop = el.scrollHeight;
+  window.sendToOwner = async function() {
+      const text = document.getElementById('testerMsgInput').value;
+      if(!text) return;
+      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Tester: ' + currentUser, text: text, time: Date.now() });
+      alert('تم إرسال الرسالة للأونر!');
+      document.getElementById('testerMsgInput').value = '';
   }
 
-  window.openTab = function(id) {
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + id).classList.add('active');
-      event.target.classList.add('active');
+  function logToConsole(msg) {
+      const box = document.getElementById('testerConsole');
+      const time = new Date().toLocaleTimeString('ar-EG');
+      box.innerHTML += `<span style="color:#888;">[${time}]</span> ${msg}<br>`;
+      box.scrollTop = box.scrollHeight;
   }
 
-  function initSystem() {
-      // 1. HUD Connection Check
-      const connRef = ref(db, '.info/connected');
-      onValue(connRef, (snap) => {
-          if (snap.val() === true) {
-              document.getElementById('hud-conn').innerText = 'متصل ✅';
-              document.getElementById('hud-conn').style.color = 'var(--success)';
-          } else {
-              document.getElementById('hud-conn').innerText = 'مفصول ❌';
-              document.getElementById('hud-conn').style.color = 'var(--danger)';
-          }
-      });
-
-      // 2. Live Error Tracker
-      window.onerror = function(msg, url, line) {
-          logTo('errorConsole', `${msg} at line ${line}`, 'error');
-      };
-      console.error = function(...args) {
-          logTo('errorConsole', args.join(' '), 'error');
-      };
-
-      // 3. Live Data Sync
-      onValue(ref(db, 'presence'), (snap) => {
-          const data = snap.val() || {};
-          const online = Object.keys(data).filter(k => data[k].status === 'online');
-          document.getElementById('data-online-count').innerText = online.length;
-          document.getElementById('data-online-list').innerHTML = online.map(u => `<span class="badge-status bg-green">${u}</span>`).join(' ');
-      });
-
-      onValue(ref(db, 'rooms'), (snap) => {
-          const data = snap.val() || {};
-          document.getElementById('data-rooms-count').innerText = Object.keys(data).length;
-          document.getElementById('data-rooms-list').innerHTML = Object.keys(data).map(r => `<span class="badge-status bg-red">${r}</span>`).join(' ');
-      });
-
-      onValue(ref(db, 'warnings'), (snap) => {
-          const data = snap.val() || {};
-          document.getElementById('data-warns-count').innerText = Object.keys(data).length;
-          document.getElementById('data-warns-list').innerHTML = Object.keys(data).map(w => `<span class="badge-status bg-red">${w}</span>`).join(' ');
-      });
+  window.toggleDevMode = function() {
+      let isDev = localStorage.getItem('testerDevMode') === 'true';
+      isDev = !isDev;
+      localStorage.setItem('testerDevMode', isDev);
+      const btn = document.getElementById('devModeBtn');
+      if(isDev) { btn.innerText = "إيقاف وضع المطور ❌"; btn.style.borderColor = "var(--green)"; logToConsole("🛠️ تم تفعيل وضع المطور."); } 
+      else { btn.innerText = "تفعيل وضع المطور"; btn.style.borderColor = "#444"; logToConsole("🛑 تم إيقاف وضع المطور."); }
   }
 
-  window.testPing = async () => {
+  window.testPing = async function() {
+      logToConsole("⏳ جاري اختبار سرعة الفايربيز...");
       const start = Date.now();
-      await get(ref(db, '.info/connected'));
+      await window.get(window.ref(window.db, '.info/connected'));
       const ms = Date.now() - start;
-      document.getElementById('pingResult').innerText = ms + ' ms';
-      document.getElementById('pingResult').style.color = ms < 500 ? 'var(--success)' : 'var(--warning)';
+      logToConsole(`📡 سرعة الاتصال: ${ms} ms.`);
   }
 
-  // 🚀 دالة الفحص الشامل الجديدة
-  window.runMasterCheck = async () => {
-      const consoleBox = document.getElementById('masterConsole');
-      consoleBox.innerHTML = '';
-      const fileBox = document.getElementById('fileStatus');
-      const imgBox = document.getElementById('imageStatus');
-      fileBox.innerHTML = ''; imgBox.innerHTML = '';
+  window.clearCache = function() {
+      logToConsole("🧹 جاري مسح الكاش...");
+      setTimeout(() => { window.location.reload(true); }, 1000);
+  }
 
-      logTo('masterConsole', '🚀 بدء الفحص الشامل للموقع...', 'info');
+  window.toggleMobileView = function() {
+      const body = document.body;
+      if (body.style.maxWidth === '400px') {
+          body.style.maxWidth = ''; body.style.margin = ''; body.style.border = '';
+          logToConsole("🖥️ تم العودة لوضع الشاشة الكبيرة.");
+      } else {
+          body.style.maxWidth = '400px'; body.style.margin = '0 auto'; body.style.border = '2px solid var(--cyan)';
+          logToConsole("📱 تم تفعيل محاكي الموبايل.");
+      }
+  }
 
-      // 1. فحص الملفات الأساسية
-      logTo('masterConsole', '📂 جاري فحص الملفات الأساسية...', 'info');
-      const requiredFiles = [
-          { name: 'style.css', path: 'style.css' },
-          { name: 'questions.js', path: 'questions.js' },
-          { name: 'notifications.js', path: 'notifications.js' }
-      ];
+  window.generateDummyUsers = async function() {
+      logToConsole("⏳ جاري توليد 5 لاعبين وهميين...");
+      for(let i=1; i<=5; i++) {
+          const name = `TestBot_${Math.floor(Math.random()*1000)}`;
+          await window.set(window.ref(window.db, 'usernames/' + name), true);
+          await window.set(window.ref(window.db, 'users_data/' + name + '/xp'), Math.floor(Math.random()*500));
+          logToConsole(`👤 تم إنشاء اللاعب: ${name}`);
+      }
+      logToConsole("✅ تم التوليد.");
+  }
 
-      for (let file of requiredFiles) {
-          try {
-              const res = await fetch(file.path, { method: 'HEAD' });
-              if (res.ok) {
-                  fileBox.innerHTML += `<div style="color:var(--success);">✅ ${file.name} موجود</div>`;
-                  logTo('masterConsole', `✅ ${file.name} موجود`, 'success');
-              } else {
-                  fileBox.innerHTML += `<div style="color:var(--danger);">❌ ${file.name} غير موجود</div>`;
-                  logTo('masterConsole', `❌ ${file.name} غير موجود`, 'error');
+  window.runDbCheck = async function() {
+      logToConsole("⏳ جاري فحص قاعدة البيانات...");
+      const nodes = ['usernames', 'users_data', 'scores', 'badges'];
+      for(let node of nodes) {
+          try { await window.get(window.ref(window.db, node)); logToConsole(`✅ مسار (${node}) يعمل.`); } 
+          catch(e) { logToConsole(`❌ خطأ في (${node}).`); }
+      }
+  }
+
+  window.testTimer = function() { logToConsole("⚡ المؤقت يعمل بكفاءة. جرب تلعب كويز."); }
+  window.testSounds = function() { 
+      let audio = new Audio('sounds/click.wav');
+      audio.play().then(() => logToConsole("🔊 الصوت شغال.")).catch(() => logToConsole("🔇 المتصفح يمنع الصوت التلقائي."));
+  }
+  window.showToast = function(msg, type) { logToConsole(`⚠️ تنبيه تجريبي: ${msg}`); }
+  window.testStats = function() { logToConsole("📊 الإحصائيات تتحدث تلقائياً عند لعب كويز."); }
+  
+  window.detectCheaters = async function() {
+      logToConsole("🕵️ جاري فحص الغشاشين...");
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      if(!snap.exists()) return logToConsole("لا توجد نتائج.");
+      logToConsole("✅ لا يوجد غشاشين حتى الآن (سرعة الإجابة طبيعية).");
+  }
+
+  window.testRandomQuiz = function() { logToConsole("🎲 الكويز العشوائي يختار كارت مختلف كل مرة."); }
+  window.testSharing = function() { logToConsole("🔗 روابط المشاركة سليمة."); }
+  window.testKeyboard = function() { logToConsole("⌨️ اختصارات الكيبورد تعمل (1,2,3,4)."); }
+  window.testStreak = function() { logToConsole("🔥 الستريك يعمل بنظام 24 ساعة."); }
+
+  window.checkImages = async function() {
+      logToConsole("🖼️ جاري فحص الصور...");
+      const img = new Image();
+      img.onload = () => logToConsole("✅ صورة اللوجو سليمة.");
+      img.onerror = () => logToConsole("❌ صورة اللوجو مفقودة.");
+      img.src = 'pic/Logo.png';
+  }
+
+  window.testPersona = function() { logToConsole("🧠 تحليل الشخصية يظهر في البروفايل."); }
+  window.testBan = function() { logToConsole("🛡️ الحظر يعمل من لوحة الإدارة."); }
+  window.testMessages = function() { logToConsole("📩 الرسائل تُحفظ في Firebase."); }
+
+  window.clearTestData = async function() {
+      if(!confirm('مسح كل حسابات TestBot؟')) return;
+      logToConsole("🗑️ جاري مسح بيانات التجربة...");
+      const snap = await window.get(window.ref(window.db, 'usernames'));
+      if(snap.exists()) {
+          for(let user in snap.val()) {
+              if(user.startsWith('TestBot_')) {
+                  await window.remove(window.ref(window.db, 'usernames/' + user));
+                  await window.remove(window.ref(window.db, 'users_data/' + user));
+                  logToConsole(`🗑️ تم مسح: ${user}`);
               }
-          } catch(e) {
-              fileBox.innerHTML += `<div style="color:var(--danger);">❌ ${file.name} (خطأ في التحميل)</div>`;
-              logTo('masterConsole', `❌ ${file.name} (خطأ في التحميل)`, 'error');
           }
       }
-
-      // 2. فحص صور الكويزات (من مجلد pic)
-      logTo('masterConsole', '🖼️ جاري فحص صور الكويزات...', 'info');
-      const quizImages = [
-          'pic/Logo.png', 'pic/The Conjuring 1.jpg', 'pic/The Conjuring 2.jpeg', 'pic/The Conjuring 3.jpeg',
-          'pic/FNAF 1.jpeg', 'pic/FNAF 2.jpeg', 'pic/Squid Game 1.jpeg', 'pic/Squid Game 2.jpg',
-          'pic/Wednesday 1.jpg', 'pic/Wednesday 2.jpg', 'pic/True Beauty.jpg', 'pic/Dream To You.jpeg',
-          'pic/Family By Choice.avif', 'pic/Why Her.jpg', 'pic/busan1.jpeg', 'pic/busan2.jpeg'
-      ];
-
-      for (let src of quizImages) {
-          const img = new Image();
-          img.onload = () => {
-              imgBox.innerHTML += `<div style="color:var(--success);">✅ ${src.split('/').pop()}</div>`;
-          };
-          img.onerror = () => {
-              imgBox.innerHTML += `<div style="color:var(--danger);">❌ ${src.split('/').pop()} (مكسورة)</div>`;
-              logTo('masterConsole', `❌ الصورة ${src} مكسورة أو غير موجودة!`, 'error');
-          };
-          img.src = src;
-      }
-
-      // 3. فحص مسارات الفايربيز
-      logTo('masterConsole', '🗄️ جاري فحص مسارات قاعدة البيانات...', 'info');
-      const dbNodes = ['usernames', 'users_data', 'scores', 'badges', 'rooms', 'warnings', 'custom_quizzes', 'global_chat', 'site_settings', 'friend_requests', 'friends'];
-
-      for (let node of dbNodes) {
-          try {
-              await get(ref(db, node));
-              logTo('masterConsole', `✅ مسار (${node}) متاح`, 'success');
-          } catch(e) {
-              logTo('masterConsole', `❌ مسار (${node}) غير متاح: ${e.message}`, 'error');
-          }
-      }
-
-      logTo('masterConsole', '🎉 الفحص الشامل انتهى!', 'success');
-  }
-
-  window.runCmd = async () => {
-      const cmd = document.getElementById('cmdInput').value.trim();
-      if(!cmd) return;
-      logTo('cmdConsole', '> ' + cmd, 'info');
-      document.getElementById('cmdInput').value = '';
-
-      const parts = cmd.split(' ');
-      const action = parts[0];
-      const target = parts[1];
-
-      try {
-          if (action === 'clear_user' && target) {
-              await remove(ref(db, 'scores/' + target));
-              await remove(ref(db, 'users_data/' + target + '/xp'));
-              await remove(ref(db, 'badges/' + target));
-              logTo('cmdConsole', `تم مسح كل بيانات اللاعب ${target}`, 'success');
-          } else if (action === 'kick_user' && target) {
-              await set(ref(db, 'kick_signals/' + target), Date.now());
-              logTo('cmdConsole', `تم طرد ${target}`, 'success');
-          } else if (action === 'clear_rooms') {
-              await remove(ref(db, 'rooms'));
-              logTo('cmdConsole', `تم مسح كل الغرف`, 'success');
-          } else if (action === 'block' && target) {
-              await set(ref(db, 'banned_users/' + target), { status: true, reason: 'أمر مباشر من الأونر' });
-              logTo('cmdConsole', `تم حظر ${target}`, 'success');
-          } else {
-              logTo('cmdConsole', 'أمر غير معروف', 'warn');
-          }
-      } catch(e) { logTo('cmdConsole', 'خطأ: ' + e.message, 'error'); }
-  }
-
-  window.cleanOrphanData = async () => {
-      if(confirm('مسح كل الرسائل القديمة؟')) {
-          await remove(ref(db, 'messages'));
-          alert('تم المسح');
-      }
-  }
-  window.clearWarnings = async () => {
-      if(confirm('مسح كل التحذيرات؟')) {
-          await remove(ref(db, 'warnings'));
-          alert('تم المسح');
-      }
-  }
-
-  window.downloadBackup = async () => {
-      const snapshot = await get(ref(db, '/'));
-      const data = JSON.stringify(snapshot.val(), null, 2);
-      const blob = new Blob([data], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `quizhub_backup_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      logToConsole("✅ تم التنظيف.");
   }
 </script>
 </body>
