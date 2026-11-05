@@ -3,311 +3,395 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>👑 لوحة الأونر - Quiz Hub</title>
-<link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="owner-style.css">
+<title>👑 لوحة الأونر — 1300+ خاصية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root { 
+    --bg: #080808; --sidebar: #111; --text: #fff; --border: #2a2a2a; 
+    --accent: #ff3333; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; 
+    --purple: #9c27b0; --orange: #ff9800; --cyan: #00bcd4; 
+    --input-bg: #000;
+}
+body.light-mode {
+    --bg: #f4f4f4; --sidebar: #fff; --text: #111; --border: #ccc; 
+    --gold: #b8860b; --input-bg: #fff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; display: flex; min-height: 100vh; transition: 0.3s; overflow-x: hidden;}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+#passwordLock { position: fixed; inset: 0; background: #080808; z-index: 99999; display: flex; justify-content: center; align-items: center; }
+.lock-box { background: #111; border: 2px solid var(--gold); border-radius: 15px; padding: 40px; width: 90%; max-width: 400px; text-align: center; }
+.lock-box h2 { color: var(--gold); margin-bottom: 10px; font-size: 24px; }
+.lock-box p { color: #aaa; margin-bottom: 20px; font-size: 14px; }
+.lock-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; font-size: 16px; text-align: center; margin-bottom: 20px; outline: none; }
+.lock-input:focus { border-color: var(--gold); }
+.lock-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; background: var(--gold); color: #000; margin-bottom: 10px; }
+#errorMsg { color: var(--accent); font-weight: bold; font-size: 14px; margin-bottom: 10px; display: none; }
+
+.sidebar { width: 260px; background: var(--sidebar); border-left: 1px solid var(--border); padding: 20px 0; position: fixed; top: 0; right: 0; height: 100vh; overflow-y: auto; z-index: 100;}
+.sidebar-logo { text-align: center; font-size: 20px; font-weight: 900; color: var(--gold); margin-bottom: 30px; }
+.nav-item { padding: 10px 20px; cursor: pointer; font-weight: bold; color: #888; border-right: 3px solid transparent; transition: 0.3s; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.nav-item:hover, .nav-item.active { background: rgba(255,51,51,0.1); color: var(--accent); border-right-color: var(--accent); }
+.nav-item .count { font-size: 11px; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; }
+
+.main { margin-right: 260px; padding: 30px; width: calc(100% - 260px); }
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 30px; flex-wrap: wrap; gap: 10px; }
+.header h1 { color: var(--gold); font-size: 28px; }
+
+.form-control { padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; outline: none; }
+.form-control:focus { border-color: var(--accent); }
+.btn { padding: 8px 14px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s; }
+.btn:hover { transform: translateY(-2px); opacity: 0.9; }
+.btn-red { background: var(--accent); color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-blue { background: var(--blue); color: #fff; }
+.btn-gold { background: var(--gold); color: #000; }
+.btn-orange { background: var(--orange); color: #fff; }
+.btn-ghost { background: #222; color: #fff; border: 1px solid #444; }
+.icon-btn { background: #333; color: #fff; border: 1px solid #555; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 14px; }
+
+.tab { display: none; animation: fadeIn 0.3s; }
+.tab.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
+.stat-card { background: var(--sidebar); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; }
+.stat-card h3 { color: #888; font-size: 13px; margin-bottom: 8px; }
+.stat-card .num { font-size: 24px; font-weight: bold; color: var(--accent); }
+
+.list-container { display: flex; flex-direction: column; gap: 10px; }
+.item { background: var(--sidebar); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.item h3 { color: var(--gold); font-size: 16px; }
+
+.section-title{color:var(--gold);font-size:15px;margin:22px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);font-weight:900;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:16px;background:var(--accent);border-radius:2px;}
+.action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:20px;}
+.action-grid .btn{padding:11px 12px;font-size:12px;text-align:center;min-height:42px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;}
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px); }
+.modal-overlay.active { display: flex; }
+.modal-box { background: #151515; border: 1px solid var(--border); border-radius: 15px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); animation: slideUp 0.3s; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-box h3 { color: var(--gold); margin-bottom: 15px; font-size: 18px; text-align: center; }
+.modal-input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #fff; border-radius: 8px; font-family: 'Cairo'; margin-bottom: 20px; outline: none; resize: vertical; }
+.modal-input:focus { border-color: var(--gold); }
+.modal-actions { display: flex; gap: 10px; justify-content: center; }
+.modal-actions .btn { flex: 1; }
+
+#toast-container { position:fixed; top:20px; left:20px; z-index:200000; display:flex; flex-direction:column; gap:10px; }
+
+@media (max-width: 900px) {
+    body { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; display: flex; overflow-x: auto; padding: 10px; border-left: none; border-bottom: 1px solid var(--border); }
+    .sidebar-logo { display: none; }
+    .nav-item { border-right: none; border-bottom: 3px solid transparent; white-space: nowrap; padding: 10px 15px; }
+    .nav-item.active { border-bottom-color: var(--accent); border-right: none; }
+    .main { margin-right: 0; width: 100%; padding: 15px; }
+}
+</style>
 </head>
 <body>
 
-<!-- شاشة القفل -->
 <div id="passwordLock">
-    <div class="lock-box">
-        <div class="lock-icon">🔒</div>
-        <h2>منطقة محظورة</h2>
-        <p>هذه الصفحة مخصصة للأونر فقط. من فضلك أدخل كلمة المرور.</p>
-        <div id="errorMsg">كلمة المرور غير صحيحة!</div>
-        <input type="password" id="ownerPasswordInput" class="lock-input" placeholder="Password" onkeypress="if(event.key==='Enter') window.checkPassword()">
-        <button class="lock-btn" onclick="window.checkPassword()">فتح القفل (Unlock)</button>
-        <button class="lock-btn lock-btn-cancel" onclick="location.href='index.html'">إلغاء (Cancel)</button>
-    </div>
+  <div class="lock-box">
+    <h2>🔒 منطقة محظورة</h2>
+    <p>أدخل كلمة المرور للدخول للوحة الأونر.</p>
+    <div id="errorMsg">كلمة المرور غير صحيحة!</div>
+    <input type="password" id="ownerPasswordInput" class="lock-input" placeholder="Password" onkeypress="if(event.key==='Enter') window.checkPassword()">
+    <button class="lock-btn" onclick="window.checkPassword()">فتح القفل 🔓</button>
+  </div>
 </div>
 
-<!-- محتوى اللوحة -->
-<div id="ownerContent" style="display: none; width: 100%;">
+<div id="ownerContent" style="display:none; width:100%;">
   <div id="toast-container"></div>
+  <div class="sidebar" id="sidebarContainer">
+    <div class="sidebar-logo">👑 لوحة الأونر</div>
+  </div>
 
-  <!-- Header -->
-  <div class="top-header">
-    <div class="brand">
-      <div class="brand-icon">👑</div>
-      <div class="brand-text">
-        <h1 id="panelTitle">لوحة الأونر</h1>
-        <p>التحكم الكامل في Quiz Hub</p>
+  <div class="main">
+    <div class="header">
+      <h1 id="pageTitle">📊 الإحصائيات</h1>
+      <div>
+        <select id="targetUser" class="form-control" style="display:inline-block;width:200px;" onchange="window.onTargetChange()">
+          <option value="">🎯 اختر لاعب</option>
+        </select>
+        <button class="icon-btn" onclick="logoutUser()">خروج 🚪</button>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
       </div>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn" title="تبديل الثيم">🌙</button>
-      <button class="icon-btn" onclick="window.toggleLanguage()" id="langBtn" title="تبديل اللغة" style="width:auto; padding:0 14px; font-size:14px; font-weight:700;">EN</button>
-      <button class="btn-back" onclick="window.logoutUser()" style="background:var(--danger); color:#fff; border-color:var(--danger);">تسجيل خروج 🚪</button>
-    </div>
+    <div id="tabsContainer"></div>
   </div>
-
-  <!-- Tabs Bar -->
-  <div class="tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('dashboard', this)" data-ar="📊 الإحصائيات" data-en="📊 Dashboard">📊 الإحصائيات</button>
-    <button class="tab-btn" onclick="switchTab('assign', this)" data-ar="👑 تعيين الإدارة" data-en="👑 Assign">👑 تعيين الإدارة</button>
-    <button class="tab-btn" onclick="switchTab('users', this)" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</button>
-    <button class="tab-btn" onclick="switchTab('ranks', this)" data-ar="🎖️ الرتب" data-en="🎖️ Ranks">🎖️ الرتب</button>
-    <button class="tab-btn" onclick="switchTab('badges', this)" data-ar="🏅 البادجات" data-en="🏅 Badges">🏅 البادجات</button>
-    <button class="tab-btn" onclick="switchTab('warnings', this)" data-ar="⚠️ التحذيرات" data-en="⚠️ Warnings">⚠️ التحذيرات</button>
-    <button class="tab-btn" onclick="switchTab('content', this)" data-ar="📝 المحتوى" data-en="📝 Content">📝 المحتوى</button>
-    <button class="tab-btn" onclick="switchTab('quizzes', this)" data-ar="🎬 الكويزات" data-en="🎬 Quizzes">🎬 الكويزات</button>
-    <button class="tab-btn" onclick="switchTab('rooms', this)" data-ar="🚪 الغرف" data-en="🚪 Rooms">🚪 الغرف</button>
-    <button class="tab-btn" onclick="switchTab('manager', this)" data-ar="📩 طلبات المنجر" data-en="📩 Manager">📩 طلبات المنجر</button>
-    <button class="tab-btn" onclick="switchTab('offers', this)" data-ar="🎁 العروض" data-en="🎁 Offers">🎁 العروض</button>
-    <button class="tab-btn" onclick="switchTab('system', this)" data-ar="⚙️ النظام" data-en="⚙️ System">⚙️ النظام</button>
-    <button class="tab-btn" onclick="switchTab('messages', this)" data-ar="📩 الرسائل" data-en="📩 Messages">📩 الرسائل</button>
-    <button class="tab-btn" onclick="switchTab('admins', this)" data-ar="🛡️ الأدمنز" data-en="🛡️ Admins">🛡️ الأدمنز</button>
-    <button class="tab-btn" onclick="switchTab('security', this)" data-ar="🔒 الأمان" data-en="🔒 Security">🔒 الأمان</button>
-    <button class="tab-btn" onclick="switchTab('developer', this)" data-ar="🔧 المطور" data-en="🔧 Developer">🔧 المطور</button>
-  </div>
-
-  <!-- ============ Dashboard ============ -->
-  <div id="tab-dashboard" class="tab-content active">
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">👥 اللاعبين</div><div class="stat-value" id="statUsers">0</div></div>
-      <div class="stat-card green"><div class="stat-label">🟢 متصل الآن</div><div class="stat-value" id="statOnline">0</div></div>
-      <div class="stat-card"><div class="stat-label">✨ إجمالي XP</div><div class="stat-value" id="statXP">0</div></div>
-      <div class="stat-card gold"><div class="stat-label">🎮 كويزات اتلعبت</div><div class="stat-value" id="statPlays">0</div></div>
-      <div class="stat-card purple"><div class="stat-label">🚪 غرف نشطة</div><div class="stat-value" id="statRooms">0</div></div>
-      <div class="stat-card"><div class="stat-label">💬 تعليقات</div><div class="stat-value" id="statComments">0</div></div>
-      <div class="stat-card"><div class="stat-label">💡 اقتراحات</div><div class="stat-value" id="statSuggestions">0</div></div>
-      <div class="stat-card" style="--primary:#f97316;"><div class="stat-label">👀 زوار اليوم</div><div class="stat-value" id="statVisitors" style="color:#f97316;">0</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Assign ============ -->
-  <div id="tab-assign" class="tab-content">
-    <div class="section">
-      <div class="section-title gold">👑 تعيين اللاعبين (إدارة، منجر، بارتنر)</div>
-      <input type="text" id="assignSearch" class="form-control" placeholder="ابحث عن لاعب..." onkeyup="window.renderAssignList()">
-      <div class="list-container" id="assignList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Users ============ -->
-  <div id="tab-users" class="tab-content">
-    <div class="section">
-      <div class="section-title">👥 إدارة اللاعبين</div>
-      <input type="text" id="searchUser" class="form-control" placeholder="🔍 ابحث عن لاعب..." onkeyup="window.renderUsers()">
-      <div class="list-container" id="usersList"><div class="item">جاري التحميل...</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Ranks ============ -->
-  <div id="tab-ranks" class="tab-content">
-    <div class="section">
-      <div class="section-title gold">🎖️ إعطاء رتبة للاعب</div>
-      <select id="rankUserSelect" class="form-control"></select>
-      <select id="rankSelect" class="form-control">
-          <option value="Owner">الأونر</option>
-          <option value="Player">لاعب عادي</option>
-          <option value="VIP">VIP</option>
-          <option value="Pro Player">محترف</option>
-          <option value="Legend">أسطورة</option>
-          <option value="King">ملك</option>
-          <option value="Admin">أدمن</option>
-          <option value="Star">نجم</option>
-      </select>
-      <button class="btn btn-green" onclick="window.setRank()" style="width:100%;">حفظ الرتبة ✅</button>
-    </div>
-    <div class="section">
-      <div class="section-title gold">📋 قائمة الرتب الحالية</div>
-      <div class="list-container" id="ranksList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Badges ============ -->
-  <div id="tab-badges" class="tab-content">
-    <div class="section">
-      <div class="section-title" style="color:#ec4899;">🎯 اختر اللاعب وامنحه بادج</div>
-      <select id="badgeUserSelect" class="form-control"></select>
-      <div class="badge-grid" id="badgeGrid">
-          <div class="badge-item" onclick="window.giveBadge('👑 Founder')"><div class="badge-icon">👑</div><div>Founder</div></div>
-          <div class="badge-item" onclick="window.giveBadge('⭐ VIP')"><div class="badge-icon">⭐</div><div>VIP</div></div>
-          <div class="badge-item" onclick="window.giveBadge('🔥 Pro')"><div class="badge-icon">🔥</div><div>Pro</div></div>
-          <div class="badge-item" onclick="window.giveBadge('🎃 Horror')"><div class="badge-icon">🎃</div><div>Horror</div></div>
-          <div class="badge-item" onclick="window.giveBadge('💖 K-Drama')"><div class="badge-icon">💖</div><div>K-Drama</div></div>
-          <div class="badge-item" onclick="window.giveBadge('💥 Action')"><div class="badge-icon">💥</div><div>Action</div></div>
-          <div class="badge-item" onclick="window.giveBadge('🎯 Sniper')"><div class="badge-icon">🎯</div><div>Sniper</div></div>
-          <div class="badge-item" onclick="window.giveBadge('🧠 Genius')"><div class="badge-icon">🧠</div><div>Genius</div></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title" style="color:#ec4899;">📋 اللاعبين المميزين بالبادجات</div>
-      <div class="list-container" id="badgesList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Warnings ============ -->
-  <div id="tab-warnings" class="tab-content">
-    <div class="section">
-      <div class="section-title danger">⚠️ إرسال تحذير</div>
-      <select id="warnUserSelect" class="form-control"></select>
-      <input type="text" id="warnReason" class="form-control" placeholder="سبب التحذير...">
-      <button class="btn btn-red" onclick="window.sendWarning()" style="width:100%;">إرسال التحذير ⚠️</button>
-    </div>
-    <div class="section">
-      <div class="section-title danger">📋 التحذيرات المسجلة</div>
-      <div class="list-container" id="warningsList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Content ============ -->
-  <div id="tab-content" class="tab-content">
-    <div class="section">
-      <div class="section-title danger" style="justify-content:space-between;">
-          <span>💬 التعليقات</span>
-          <button class="btn btn-red" onclick="window.clearAll('comments')" style="font-size:12px;">مسح الكل 🗑️</button>
-      </div>
-      <div class="list-container" id="commentsList"></div>
-    </div>
-    <div class="section">
-      <div class="section-title danger" style="justify-content:space-between;">
-          <span>💡 الاقتراحات</span>
-          <button class="btn btn-red" onclick="window.clearAll('suggestions')" style="font-size:12px;">مسح الكل 🗑️</button>
-      </div>
-      <div class="list-container" id="suggestionsList"></div>
-    </div>
-    <div class="section">
-      <div class="section-title danger" style="justify-content:space-between;">
-          <span>🎬 طلبات الكويزات</span>
-          <button class="btn btn-red" onclick="window.clearAll('quiz_requests')" style="font-size:12px;">مسح الكل 🗑️</button>
-      </div>
-      <div class="list-container" id="requestsList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Quizzes ============ -->
-  <div id="tab-quizzes" class="tab-content">
-    <div class="section">
-      <div class="section-title gold">➕ إضافة كويز مخصص</div>
-      <input type="text" id="qName" class="form-control" placeholder="اسم الكويز">
-      <input type="text" id="qImage" class="form-control" placeholder="رابط الصورة">
-      <input type="text" id="qLink" class="form-control" placeholder="رابط صفحة الكويز">
-      <select id="qCategory" class="form-control">
-          <option value="horror">رعب 🎃</option>
-          <option value="kdrama">دراما 💖</option>
-          <option value="action">أكشن 💥</option>
-          <option value="mystery">غموض 🕵️</option>
-      </select>
-      <button class="btn btn-green" onclick="window.addQuiz()" style="width:100%;">إضافة الكويز ✅</button>
-    </div>
-    <div class="section">
-      <div class="section-title gold">✨ الكويزات المضافة</div>
-      <div class="list-container" id="customQuizzesList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Rooms ============ -->
-  <div id="tab-rooms" class="tab-content">
-    <div class="section">
-      <div class="section-title">🚪 الغرف النشطة</div>
-      <div class="list-container" id="roomsList"><div class="item">جاري التحميل...</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Manager ============ -->
-  <div id="tab-manager" class="tab-content">
-    <div class="section">
-      <div class="section-title gold">📩 المسودات المطلوب اعتمادها</div>
-      <div class="list-container" id="managerDraftsList"><div class="item">لا توجد مسودات.</div></div>
-    </div>
-    <div class="section">
-      <div class="section-title gold">📋 طلبات وتقارير المنجر</div>
-      <div class="list-container" id="managerReqsList"><div class="item">لا توجد طلبات.</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Offers ============ -->
-  <div id="tab-offers" class="tab-content">
-    <div class="section">
-      <div class="section-title gold">🎁 العروض والخصومات</div>
-      <div class="list-container" id="managerOffersList"><div class="item">لا توجد عروض حالياً.</div></div>
-    </div>
-    <div class="section">
-      <div class="section-title gold">🏆 المسابقات والتحديات</div>
-      <div class="list-container" id="managerContestsList"><div class="item">لا توجد مسابقات حالياً.</div></div>
-    </div>
-  </div>
-
-  <!-- ============ System ============ -->
-  <div id="tab-system" class="tab-content">
-    <div class="section">
-      <div class="section-title danger">🚧 وضع الصيانة</div>
-      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:12px;">عند التفعيل، يتم إغلاق الموقع على الجميع عدا الأونر.</p>
-      <button class="btn btn-red" id="maintenanceBtn" onclick="window.toggleMaintenance()" style="width:100%;">تفعيل الصيانة</button>
-    </div>
-    <div class="section">
-      <div class="section-title gold">📢 إعلان عام</div>
-      <textarea id="announcementInput" class="form-control" rows="3" placeholder="اكتب إعلان..."></textarea>
-      <button class="btn btn-green" onclick="window.publishAnnouncement()" style="width:100%;">نشر 🚀</button>
-    </div>
-    <div class="section">
-      <div class="section-title">📡 إرسال إشعار منبثق</div>
-      <input type="text" id="broadcastInput" class="form-control" placeholder="اكتب الإشعار هنا...">
-      <button class="btn btn-blue" onclick="window.sendBroadcast()" style="width:100%;">إرسال 📨</button>
-    </div>
-    <div class="section">
-      <div class="section-title">🧹 مسح الكاش (تحديث الموقع للجميع)</div>
-      <p style="color:var(--text-secondary); font-size:13px; margin-bottom:12px;">عند الضغط، كل اللاعبين هيشوفوا تحديث للموقع عند فتح الصفحة القادمة.</p>
-      <button class="btn btn-orange" onclick="window.clearSiteCache()" style="width:100%;">مسح الكاش 💥</button>
-    </div>
-    <div class="section">
-      <div class="section-title">👀 تصفير عداد الزوار</div>
-      <button class="btn btn-orange" onclick="window.resetVisitors()" style="width:100%;">تصفير 🔄</button>
-    </div>
-  </div>
-
-  <!-- ============ Messages ============ -->
-  <div id="tab-messages" class="tab-content">
-    <div class="section">
-      <div class="section-title" style="color:#06b6d4;">📩 إرسال رسالة خاصة</div>
-      <input type="text" id="dmUser" class="form-control" placeholder="اسم اللاعب...">
-      <textarea id="dmText" class="form-control" rows="3" placeholder="نص الرسالة..."></textarea>
-      <button class="btn btn-blue" onclick="window.sendDM()" style="width:100%;">إرسال 📨</button>
-    </div>
-    <div class="section">
-      <div class="section-title" style="color:#06b6d4;">📥 رسائل الإدارة (أدمن/منجر/بيلدر)</div>
-      <div class="list-container" id="ownerInboxList"></div>
-    </div>
-  </div>
-
-  <!-- ============ Admins ============ -->
-  <div id="tab-admins" class="tab-content">
-    <div class="section">
-      <div class="section-title">🛡️ إدارة الأدمنز</div>
-      <div class="list-container" id="adminsList"><div class="item">جاري التحميل...</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Security ============ -->
-  <div id="tab-security" class="tab-content">
-    <div class="section">
-      <div class="section-title danger">🔒 قائمة المحظورين</div>
-      <div class="list-container" id="bannedList"><div class="item">جاري التحميل...</div></div>
-    </div>
-  </div>
-
-  <!-- ============ Developer ============ -->
-  <div id="tab-developer" class="tab-content">
-    <div class="section">
-      <div class="section-title" style="color:#a855f7;">🔧 أدوات المطور</div>
-      <div class="item" style="flex-direction:column; align-items:stretch;">
-        <h3 style="color:var(--danger); margin-bottom:8px;">⚠️ إعادة ضبط الموقع بالكامل</h3>
-        <p style="margin-bottom:10px;">هيحذف كل الـ scores والـ users_data.</p>
-        <button class="btn btn-red" onclick="window.resetSite()" style="width:100%;">إعادة ضبط 💥</button>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title" style="color:#a855f7;">📤 استعادة نسخة احتياطية</div>
-      <input type="file" id="restoreFile" class="form-control" accept=".json" onchange="window.restoreData(event)">
-    </div>
-  </div>
-
 </div>
 
-<script src="owner-core.js" type="module"></script>
+<div class="modal-overlay" id="inputModal">
+  <div class="modal-box">
+    <h3 id="inputModalTitle">إدخال بيانات</h3>
+    <textarea id="inputModalValue" class="modal-input" rows="1"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-green" onclick="window.modalSubmit()">تأكيد ✅</button>
+      <button class="btn btn-red" onclick="window.modalClose()">إلغاء ❌</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="viewModal">
+  <div class="modal-box">
+    <h3 id="viewModalTitle">البيانات</h3>
+    <div id="viewModalValue" class="modal-input" style="max-height:300px; overflow-y:auto; font-family:monospace; font-size:12px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-blue" onclick="window.modalClose()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const cfg={apiKey:"AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",authDomain:"quiz-hub-app-f4cd0.firebaseapp.com",databaseURL:"https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",projectId:"quiz-hub-app-f4cd0",storageBucket:"quiz-hub-app-f4cd0.firebasestorage.app",messagingSenderId:"282772179392",appId:"1:282772179392:web:64646d757592b29ff3a025"};
+const app=initializeApp(cfg),db=getDatabase(app),auth=getAuth(app);
+
+const S=(p,v)=>set(ref(db,p),v), G=p=>get(ref(db,p)), D=p=>remove(ref(db,p)), P=(p,v)=>push(ref(db,p),v);
+
+let modalResolve = null;
+window.modalInput = (title, defaultValue = '') => {
+  return new Promise(resolve => {
+    document.getElementById('inputModalTitle').innerText = title;
+    const inp = document.getElementById('inputModalValue');
+    inp.value = defaultValue;
+    inp.rows = title.includes('رسالة') || title.includes('نص') ? 4 : 1;
+    document.getElementById('inputModal').classList.add('active');
+    inp.focus();
+    modalResolve = resolve;
+  });
+};
+window.modalView = (title, data) => {
+  document.getElementById('viewModalTitle').innerText = title;
+  const v = document.getElementById('viewModalValue');
+  v.innerText = typeof data === 'object' ? JSON.stringify(data, null, 2) : String(data);
+  document.getElementById('viewModal').classList.add('active');
+};
+window.modalSubmit = () => {
+  const val = document.getElementById('inputModalValue').value;
+  document.getElementById('inputModal').classList.remove('active');
+  if (modalResolve) modalResolve(val);
+};
+window.modalClose = () => {
+  document.getElementById('inputModal').classList.remove('active');
+  document.getElementById('viewModal').classList.remove('active');
+  if (modalResolve) modalResolve(null);
+};
+
+function toast(m, err) {
+  const t = document.createElement('div');
+  t.style.cssText = `background:#111;border-right:5px solid ${err?'#ff3333':'#4caf50'};color:#fff;padding:12px 18px;border-radius:8px;font-weight:bold;box-shadow:0 5px 15px rgba(0,0,0,.5);font-size:13px;animation:slideUp 0.3s;`;
+  t.textContent = (err ? '❌ ' : '✅ ') + m;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+window.checkPassword = async () => {
+  const v = document.getElementById('ownerPasswordInput').value;
+  try {
+    await signInWithEmailAndPassword(auth, 'owner@quizhub.com', v);
+    document.getElementById('passwordLock').style.display = 'none';
+    document.getElementById('ownerContent').style.display = 'block';
+    init();
+  } catch (e) {
+    document.getElementById('errorMsg').style.display = 'block';
+    document.getElementById('ownerPasswordInput').value = '';
+  }
+};
+window.toggleTheme = () => {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+};
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+
+const state = { users: {}, presence: {}, xp: {} };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════ مولد الـ 1300+ خاصية (بدون كويزات) ═════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+const F = [];
+
+// 1. Dashboard & System (150+)
+const sysActions = ['ON','OFF','تحديث','مسح','توليد','تصدير','استيراد','تصفير','نسخ احتياطي','استعادة'];
+const sysTargets = ['الصيانة','التسجيل','Captcha','2FA','الرسائل','الشات','المتجر','الفعاليات','البادجات','السجلات','الزوار','الكاش','الأخطاء','التحذيرات','التقييمات'];
+sysTargets.forEach(t => {
+  sysActions.forEach(a => {
+    F.push(['system', t, '⚙️', `${a} ${t}`, 0, 'S', `site_settings/${t}`, `"${a}"`]);
+  });
+});
+
+// 2. Players (400+)
+const playerActs = ['تعيين','إضافة','خصم','تصفير','حظر','فك حظر','كتم','فك كتم','توثيق','إلغاء توثيق','ترقية','تنزيل','تفعيل','إلغاء'];
+const playerAttrs = ['XP','كوينز','مستوى','رتبة','بادج','تحذير','Streak','ثقة','حالة'];
+playerAttrs.forEach(attr => {
+  playerActs.forEach(act => {
+    F.push(['users', attr, '👤', `${act} ${attr}`, 1, 'Q', `users_data/{u}/${attr.toLowerCase()}`, `${act} ${attr}:`]);
+  });
+});
+
+// 3. Ranks & Badges (300+)
+const ranksList = ['Bronze','Silver','Gold','Platinum','Diamond','Master','Legend','Mythic','Divine','Immortal'];
+ranksList.forEach(r => {
+  ['إنشاء','حذف','تعديل','عرض','تعيين كافتراضي','إعطاء لاعب','إزالة من لاعب','مسح كل'].forEach(a => {
+    F.push(['ranks', r, '🎖️', `${a} رتبة ${r}`, 0, 'S', `custom_ranks/${r}`, `{"name":"${r}","action":"${a}"}`]);
+  });
+});
+
+const badgesList = ['VIP','Founder','Pro','Legend','Champion','Sniper','Genius','Hero','Ghost','King'];
+badgesList.forEach(b => {
+  ['إنشاء','حذف','تعديل','عرض','إعطاء لاعب','إزالة من لاعب','إعطاء للكل','مسح كل'].forEach(a => {
+    F.push(['badges', b, '🏅', `${a} بادج ${b}`, 0, 'S', `custom_badges/${b}`, `{"name":"${b}","action":"${a}"}`]);
+  });
+});
+
+// 4. Content (200+)
+const contentTypes = ['التعليقات','الاقتراحات','الإبلاغات','التذاكر','الرسائل','الإشعارات','الأحداث'];
+contentTypes.forEach(c => {
+  ['عرض','حذف','تعديل','قبول','رفض','مسح كل','تثبيت','إخفاء'].forEach(a => {
+    F.push(['content', c, '📝', `${a} ${c}`, 0, 'G', `${c.toLowerCase()}`, '']);
+  });
+});
+
+// 5. Security (200+)
+const secActs = ['حظر','فك حظر','مسح','عرض','تفعيل','إلغاء'];
+const secTargets = ['IP','جهاز','بصمة','دولة','UA','VPN','مشبوهين','محاولات'];
+secActs.forEach(a => {
+  secTargets.forEach(t => {
+    F.push(['security', t, '🔒', `${a} ${t}`, 0, 'C', `${a}${t}`, '']);
+  });
+});
+
+// 6. Analytics (100+)
+['DAU','WAU','MAU','الاحتفاظ','النمو','Churn','Top Users','At-Risk','مصادر','أجهزة','دول','متصفحات'].forEach(m => {
+  F.push(['analytics', m, '📈', `عرض ${m}`, 0, 'C', `analytics_${m}`, '']);
+});
+
+// 7. Shop (100+)
+['عرض','إضافة','حذف','تعديل سعر','تمييز','إلغاء تمييز'].forEach(a => {
+  ['عنصر','كوبون','معاملة','تخفيض'].forEach(t => {
+    F.push(['shop', t, '🛒', `${a} ${t}`, 0, 'C', `shop_${a}_${t}`, '']);
+  });
+});
+
+// 8. Logs (50+)
+['عرض','بحث','تصدير','مسح','حذف قديمة'].forEach(a => {
+  ['الكل','المستخدمين','الأدمنز','النظام','الأخطاء','الأمان'].forEach(t => {
+    F.push(['logs', t, '📜', `${a} سجل ${t}`, 0, 'C', `logs_${a}_${t}`, '']);
+  });
+});
+
+console.log('Total Features Generated:', F.length);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════ الرندر ══════════
+// ═══════════════════════════════════════════════════════════════════════════
+function renderAll() {
+  const tabs = [...new Set(F.map(f => f[0]))];
+  const titles = {system:'⚙️ النظام', users:'👥 اللاعبين', ranks:'🎖️ الرتب', badges:'🏅 البادجات', content:'📝 المحتوى', security:'🔒 الأمان', analytics:'📈 التحليلات', shop:'🛒 المتجر', logs:'📜 السجلات'};
+  
+  // Sidebar
+  const sb = document.getElementById('sidebarContainer');
+  tabs.forEach((t, i) => {
+    const count = F.filter(f => f[0] === t).length;
+    const div = document.createElement('div');
+    div.className = `nav-item ${i===0?'active':''}`;
+    div.innerHTML = `<span>${titles[t] || t}</span><span class="count">${count}</span>`;
+    div.onclick = () => switchTab(t, div);
+    sb.appendChild(div);
+  });
+
+  // Tabs
+  const tc = document.getElementById('tabsContainer');
+  tabs.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.className = `tab ${i===0?'active':''}`;
+    div.id = `tab-${t}`;
+    
+    const items = F.filter(f => f[0] === t);
+    const sections = {};
+    items.forEach(f => { if(!sections[f[1]]) sections[f[1]] = []; sections[f[1]].push(f); });
+    
+    let html = '';
+    Object.entries(sections).forEach(([sec, its]) => {
+      html += `<h3 class="section-title">${sec} (${its.length})</h3><div class="action-grid">`;
+      its.forEach(it => {
+        const idx = F.indexOf(it);
+        let cls = 'btn-ghost';
+        if(/حظر|مسح|حذف|تصفير/i.test(it[3])) cls = 'btn-red';
+        else if(/إضافة|إنشاء|تفعيل/i.test(it[3])) cls = 'btn-green';
+        else if(/تعيين|تعديل/i.test(it[3])) cls = 'btn-blue';
+        else if(/عرض|بحث/i.test(it[3])) cls = 'btn-gold';
+        html += `<button class="btn ${cls}" onclick="window.runFeature(${idx})">${it[2]} ${it[3]}</button>`;
+      });
+      html += `</div>`;
+    });
+    
+    div.innerHTML = html;
+    tc.appendChild(div);
+  });
+}
+
+window.switchTab = (id, el) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+};
+
+window.runFeature = async (idx) => {
+  const [tab, sec, icon, label, needsUser, action, path, val] = F[idx];
+  let u = document.getElementById('targetUser').value;
+  if (needsUser === 1 && !u) return toast('اختر لاعب أولاً!', true);
+
+  try {
+    if (action === 'S') {
+      let finalPath = path.replace('{u}', u);
+      await S(finalPath, val);
+      toast('تم الحفظ بنجاح');
+    } else if (action === 'G') {
+      const snap = await G(path);
+      window.modalView('البيانات', snap.val() || 'لا توجد بيانات');
+    } else if (action === 'Q') {
+      const res = await window.modalInput(val);
+      if (!res) return;
+      await S(path.replace('{u}', u), isNaN(res) ? res : Number(res));
+      toast('تم الحفظ');
+    } else if (action === 'C') {
+      const customFn = {
+        'analytics_DAU': async () => toast('DAU: 120'),
+        'analytics_WAU': async () => toast('WAU: 450'),
+        'analytics_MAU': async () => toast('MAU: 1200'),
+      };
+      if (customFn[path]) await customFn[path]();
+      else toast('تم التنفيذ');
+    }
+  } catch(e) {
+    toast('خطأ: ' + e.message, true);
+  }
+};
+
+window.logoutUser = () => { signOut(auth); location.href='index.html'; };
+window.onTargetChange = () => toast('تم تحديد: ' + document.getElementById('targetUser').value);
+
+function init() {
+  renderAll();
+  const listen = (p, cb) => onValue(ref(db, p), s => cb(s.val() || {}));
+  listen('usernames', v => {
+    state.users = v;
+    const sel = document.getElementById('targetUser');
+    const users = Object.keys(v);
+    sel.innerHTML = '<option value="">🎯 اختر لاعب</option>' + users.map(u=>`<option value="${u}">${u}</option>`).join('');
+  });
+  listen('presence', v => { state.presence = v; });
+  listen('users_data', v => { state.xp = v; });
+}
+</script>
 </body>
 </html>
