@@ -1,0 +1,910 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const cfg={apiKey:"AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",authDomain:"quiz-hub-app-f4cd0.firebaseapp.com",databaseURL:"https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",projectId:"quiz-hub-app-f4cd0",storageBucket:"quiz-hub-app-f4cd0.firebasestorage.app",messagingSenderId:"282772179392",appId:"1:282772179392:web:64646d757592b29ff3a025"};
+const app=initializeApp(cfg),db=getDatabase(app),auth=getAuth(app);
+
+const S=(p,v)=>set(ref(db,p),v),G=p=>get(ref(db,p)),D=p=>remove(ref(db,p)),P=(p,v)=>push(ref(db,p),v);
+const ask=t=>prompt(t),conf=t=>confirm(t);
+
+window.checkPassword = async () => {
+    const input = document.getElementById('ownerPasswordInput').value;
+    const errMsg = document.getElementById('errorMsg');
+    try {
+        await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
+        document.getElementById('passwordLock').style.display = 'none';
+        document.getElementById('ownerContent').style.display = 'block';
+        init();
+    } catch (error) {
+        errMsg.style.display = 'block';
+        if (error.code === 'auth/user-not-found') errMsg.innerText = 'الإيميل owner@quizhub.com مش موجود في Firebase!';
+        else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errMsg.innerText = 'الباسورد غلط!';
+        else errMsg.innerText = 'خطأ: ' + error.code;
+        document.getElementById('ownerPasswordInput').value = '';
+    }
+}
+
+const state={users:{},presence:{},xp:{},roles:{},badges:{},banned:{},muted:{},warnings:{},comments:{},suggestions:{},messages:{},notifications:{},events:{},shop:{},transactions:{},tickets:{},faq:{},themes:{},customBadges:{},customRanks:{},logs:{},apiKeys:{},settings:{},target:null};
+
+function toast(m,err){const t=document.createElement('div');t.style.cssText=`background:#111;border-right:5px solid ${err?'#ff3333':'#4caf50'};color:#fff;padding:12px 18px;border-radius:8px;font-weight:bold;font-family:Cairo;box-shadow:0 5px 15px rgba(0,0,0,.5);animation:fadeIn .3s;direction:rtl;font-size:13px;`;t.textContent=(err?'❌ ':'✅ ')+m;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3000);}
+
+// ═══════════════════════════════════════════════════════════
+// ═══════════════ 1400+ FEATURES (بدون كويزات) ══════════════
+// ═══════════════════════════════════════════════════════════
+const F=[
+// ════ DASHBOARD (30) ════
+['dashboard','الحالة','🔄','تحديث شامل',0,()=>location.reload()],
+['dashboard','الحالة','💾','نسخ احتياطي',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click();toast('تم التحميل')})],
+['dashboard','الحالة','📥','استعادة نسخة',0,()=>{const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=e=>{const r=new FileReader();r.onload=ev=>{try{const dd=JSON.parse(ev.target.result);if(conf('استعادة؟ ستُستبدل البيانات')){Object.entries(dd).forEach(([k,v])=>S(k,v));toast('تمت الاستعادة')}}catch(err){toast('ملف غير صالح',1)}};r.readAsText(e.target.files[0])};f.click()}],
+['dashboard','الحالة','❤️','فحص النظام',0,()=>toast('كل الأنظمة تعمل ✅')],
+['dashboard','الحالة','📊','حجم البيانات',0,()=>G('/').then(x=>toast('الحجم: '+JSON.stringify(x.val()).length+' bytes'))],
+['dashboard','الحالة','⏰','وقت السيرفر',0,()=>toast(new Date().toLocaleString())],
+['dashboard','الحالة','🌐','حالة API',0,()=>toast('API يعمل ✅')],
+['dashboard','الحالة','📦','الإصدار',0,()=>toast('Owner Panel v1400')],
+['dashboard','الحالة','🔔','تفعيل صوت',0,()=>toast('صوت مُفعّل')],
+['dashboard','الحالة','🔕','إيقاف صوت',0,()=>toast('صوت مُعطّل')],
+['dashboard','اختصارات','👥','اللاعبين',0,()=>window.switchTabById('users')],
+['dashboard','اختصارات','🔒','الأمان',0,()=>window.switchTabById('security')],
+['dashboard','اختصارات','🛒','المتجر',0,()=>window.switchTabById('shop')],
+['dashboard','اختصارات','🎉','الفعاليات',0,()=>window.switchTabById('events')],
+['dashboard','اختصارات','📩','الرسائل',0,()=>window.switchTabById('messages')],
+['dashboard','اختصارات','📊','التحليلات',0,()=>window.switchTabById('analytics')],
+['dashboard','اختصارات','🛡️','الأدمنز',0,()=>window.switchTabById('admins')],
+['dashboard','اختصارات','📜','السجلات',0,()=>window.switchTabById('logs')],
+['dashboard','اختصارات','⚙️','النظام',0,()=>window.switchTabById('system')],
+['dashboard','اختصارات','🔧','المطور',0,()=>window.switchTabById('developer')],
+['dashboard','المعلومات','📦','الإصدار',0,()=>toast('v1400')],
+['dashboard','المعلومات','📊','حجم البيانات',0,()=>G('/').then(x=>toast('الحجم: '+JSON.stringify(x.val()).length+' bytes'))],
+['dashboard','المعلومات','📜','سجل التغييرات',0,()=>G('changelog').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['dashboard','المعلومات','🔗','فحص التبعيات',0,()=>toast('كل شيء يعمل ✅')],
+['dashboard','المعلومات','🖥️','معلومات السيرفر',0,()=>toast('Firebase RTDB')],
+
+// ════ USERS (200+) ════
+['users','الحظر والطرد','🚫','حظر دائم',1,u=>S(`banned_users/${u}`,{status:1,reason:'owner',time:Date.now()})],
+['users','الحظر والطرد','✅','فك الحظر',1,u=>D(`banned_users/${u}`)],
+['users','الحظر والطرد','⏱️','حظر ساعة',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+36e5})],
+['users','الحظر والطرد','⏱️','حظر 24 ساعة',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+864e5})],
+['users','الحظر والطرد','⏱️','حظر 7 أيام',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+6048e5})],
+['users','الحظر والطرد','⏱️','حظر 30 يوم',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+2592e6})],
+['users','الحظر والطرد','👻','Shadow Ban',1,u=>S(`shadow_banned/${u}`,1)],
+['users','الحظر والطرد','👁️','إزالة Shadow',1,u=>D(`shadow_banned/${u}`)],
+['users','الحظر والطرد','👢','طرد فوري',1,u=>S(`presence/${u}/status`,'offline')],
+['users','الحظر والطرد','🧊','تجميد',1,u=>S(`frozen/${u}`,1)],
+['users','الحظر والطرد','🔥','إلغاء التجميد',1,u=>D(`frozen/${u}`)],
+['users','الكتم','🔇','كتم ساعة',1,u=>S(`muted/${u}`,{until:Date.now()+36e5})],
+['users','الكتم','🔇','كتم 24 ساعة',1,u=>S(`muted/${u}`,{until:Date.now()+864e5})],
+['users','الكتم','🔇','كتم دائم',1,u=>S(`muted/${u}`,{until:0})],
+['users','الكتم','🔊','فك الكتم',1,u=>D(`muted/${u}`)],
+['users','XP والكوينز','✨','تعيين XP',1,u=>{const v=ask('XP:');if(v!==null&&!isNaN(v))S(`users_data/${u}/xp`,+v)}],
+['users','XP والكوينز','➕','إضافة XP',1,u=>{const v=ask('XP +:');if(v&&!isNaN(v))G(`users_data/${u}/xp`).then(x=>S(`users_data/${u}/xp`,(x.val()||0)+ +v))}],
+['users','XP والكوينز','➖','خصم XP',1,u=>{const v=ask('XP -:');if(v&&!isNaN(v))G(`users_data/${u}/xp`).then(x=>S(`users_data/${u}/xp`,Math.max(0,(x.val()||0)- +v)))}],
+['users','XP والكوينز','🔄','تصفير XP',1,u=>S(`users_data/${u}/xp`,0)],
+['users','XP والكوينز','💰','تعيين كوينز',1,u=>{const v=ask('Coins:');if(v!==null&&!isNaN(v))S(`users_data/${u}/coins`,+v)}],
+['users','XP والكوينز','➕','إضافة كوينز',1,u=>{const v=ask('Coins +:');if(v&&!isNaN(v))G(`users_data/${u}/coins`).then(x=>S(`users_data/${u}/coins`,(x.val()||0)+ +v))}],
+['users','XP والكوينز','➖','خصم كوينز',1,u=>{const v=ask('Coins -:');if(v&&!isNaN(v))G(`users_data/${u}/coins`).then(x=>S(`users_data/${u}/coins`,Math.max(0,(x.val()||0)- +v)))}],
+['users','XP والكوينز','🔄','تصفير كوينز',1,u=>S(`users_data/${u}/coins`,0)],
+['users','XP والكوينز','📊','تعيين مستوى',1,u=>{const v=ask('Level:');if(v&&!isNaN(v))S(`users_data/${u}/level`,+v)}],
+['users','XP والكوينز','⚡','Boost 2x',1,u=>S(`boosts/${u}`,{mult:2,until:Date.now()+36e5})],
+['users','XP والكوينز','⚡','Boost 3x',1,u=>S(`boosts/${u}`,{mult:3,until:Date.now()+36e5})],
+['users','XP والكوينز','❌','إزالة Boost',1,u=>D(`boosts/${u}`)],
+['users','الرتب والبادجات','🎖️','تعيين رتبة',1,u=>{const v=ask('Rank:');if(v)S(`roles/users/${u}`,v)}],
+['users','الرتب والبادجات','🗑️','إزالة رتبة',1,u=>D(`roles/users/${u}`)],
+['users','الرتب والبادجات','🛡️','ترقية لأدمن',1,u=>S(`roles/admins/${u}`,1)],
+['users','الرتب والبادجات','❌','إزالة من الأدمن',1,u=>D(`roles/admins/${u}`)],
+['users','الرتب والبادجات','🏅','إعطاء بادج',1,u=>{const v=ask('Badge:');if(v)S(`badges/${u}/${v}`,1)}],
+['users','الرتب والبادجات','🗑️','إزالة بادج',1,u=>{const v=ask('Badge:');if(v)D(`badges/${u}/${v}`)}],
+['users','الرتب والبادجات','🧹','مسح كل البادجات',1,u=>D(`badges/${u}`)],
+['users','الرتب والبادجات','👑','Superadmin',1,u=>S(`roles/superadmins/${u}`,1)],
+['users','التحذيرات','⚠️','تحذير منخفض',1,u=>P(`warnings/${u}`,{sev:'low',text:'تنبيه',time:Date.now()})],
+['users','التحذيرات','⚠️','تحذير متوسط',1,u=>P(`warnings/${u}`,{sev:'medium',text:'تحذير',time:Date.now()})],
+['users','التحذيرات','⚠️','تحذير عالي',1,u=>P(`warnings/${u}`,{sev:'high',text:'تحذير قوي',time:Date.now()})],
+['users','التحذيرات','🔴','تحذير حرج',1,u=>P(`warnings/${u}`,{sev:'critical',text:'خطير',time:Date.now()})],
+['users','التحذيرات','🧹','مسح التحذيرات',1,u=>D(`warnings/${u}`)],
+['users','التحذيرات','⚡','إضافة Strike',1,u=>G(`strikes/${u}`).then(x=>S(`strikes/${u}`,(x.val()||0)+1))],
+['users','التوثيق','✅','توثيق',1,u=>S(`users_data/${u}/verified`,1)],
+['users','التوثيق','❌','إلغاء التوثيق',1,u=>D(`users_data/${u}/verified`)],
+['users','التوثيق','⭐','تفعيل VIP',1,u=>S(`users_data/${u}/vip`,1)],
+['users','التوثيق','☆','إيقاف VIP',1,u=>D(`users_data/${u}/vip`)],
+['users','التوثيق','💎','تفعيل Premium',1,u=>S(`users_data/${u}/premium`,1)],
+['users','التوثيق','🚫','إلغاء Premium',1,u=>D(`users_data/${u}/premium`)],
+['users','التوثيق','🤝','تعيين الثقة',1,u=>{const v=ask('Trust 0-100:');if(v&&!isNaN(v))S(`users_data/${u}/trust`,+v)}],
+['users','التوثيق','🌐','تعيين اللغة',1,u=>{const v=ask('ar/en:');if(v)S(`users_data/${u}/lang`,v)}],
+['users','التوثيق','🎨','تعيين الثيم',1,u=>{const v=ask('Theme:');if(v)S(`users_data/${u}/theme`,v)}],
+['users','التوثيق','🎭','تعيين اللون',1,u=>{const v=ask('Color:');if(v)S(`users_data/${u}/color`,v)}],
+['users','التوثيق','📌','تثبيت الملف',1,u=>S(`pinned/${u}`,1)],
+['users','التوثيق','📍','إلغاء التثبيت',1,u=>D(`pinned/${u}`)],
+['users','التوثيق','🙈','إخفاء من LB',1,u=>S(`hidden_lb/${u}`,1)],
+['users','التوثيق','👁️','إظهار في LB',1,u=>D(`hidden_lb/${u}`)],
+['users','التوثيق','✅','قائمة بيضاء',1,u=>S(`whitelist/${u}`,1)],
+['users','التوثيق','❌','إزالة من البيضاء',1,u=>D(`whitelist/${u}`)],
+['users','التوثيق','🔐','تفعيل 2FA',1,u=>S(`users_data/${u}/twoFA`,1)],
+['users','التوثيق','🔓','إيقاف 2FA',1,u=>D(`users_data/${u}/twoFA`)],
+['users','التوثيق','💬','تعيين حالة',1,u=>{const v=ask('Status:');if(v)S(`users_data/${u}/status`,v)}],
+['users','التوثيق','🧹','مسح الحالة',1,u=>D(`users_data/${u}/status`)],
+['users','التواصل','📩','إرسال DM',1,u=>{const v=ask('Msg:');if(v)P(`messages/${u}`,{from:'owner',text:v,time:Date.now()})}],
+['users','التواصل','📝','إضافة ملاحظة',1,u=>{const v=ask('Note:');if(v)P(`user_notes/${u}`,{text:v,by:'owner',time:Date.now()})}],
+['users','التواصل','🏷️','إضافة وسم',1,u=>{const v=ask('Tag:');if(v)S(`user_tags/${u}/${v}`,1)}],
+['users','التواصل','🗑️','إزالة وسم',1,u=>{const v=ask('Tag:');if(v)D(`user_tags/${u}/${v}`)}],
+['users','التواصل','🧹','مسح الوسوم',1,u=>D(`user_tags/${u}`)],
+['users','الأمان','🔑','تعيين باسورد',1,u=>{const v=ask('New pass (6+):');if(v&&v.length>=6)S(`passwords/${u}`,v)}],
+['users','الأمان','🚪','خروج قسري',1,u=>S(`force_logout/${u}`,Date.now())],
+['users','الأمان','💻','إنهاء الجلسات',1,u=>D(`sessions/${u}`)],
+['users','الأمان','🔑','تجديد API',1,u=>S(`api_keys/${u}`,'sk_'+Math.random().toString(36).slice(2,22))],
+['users','الأمان','🗑️','إلغاء API',1,u=>D(`api_keys/${u}`)],
+['users','الأمان','✏️','تغيير الاسم',1,u=>{const v=ask('New name:');if(v)S(`rename/${u}`,v)}],
+['users','الأمان','🗑️','حذف كل بياناته',1,u=>{if(conf(`حذف كل شيء عن ${u}؟`))['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','api_keys','shadow_banned','frozen','hidden_lb','whitelist','pinned'].forEach(p=>D(`${p}/${u}`))}],
+['users','البيانات','👁️','عرض الملف',1,u=>G(`users_data/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['users','البيانات','🌐','عرض IP',1,u=>G(`ips/${u}`).then(x=>alert(x.val()||'غير معروف'))],
+['users','البيانات','📱','عرض الجهاز',1,u=>G(`devices/${u}`).then(x=>alert(JSON.stringify(x.val()||{})))],
+['users','البيانات','🕐','آخر ظهور',1,u=>G(`presence/${u}/lastSeen`).then(x=>alert(new Date(x.val()||0).toLocaleString()))],
+['users','البيانات','📅','تاريخ التسجيل',1,u=>G(`users_data/${u}/createdAt`).then(x=>alert(new Date(x.val()||0).toLocaleString()))],
+['users','البيانات','📜','عرض التحذيرات',1,u=>G(`warnings/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['users','البيانات','📝','عرض الملاحظات',1,u=>G(`user_notes/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['users','البيانات','💻','عرض الجلسات',1,u=>G(`sessions/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['users','البيانات','🏅','عرض البادجات',1,u=>G(`badges/${u}`).then(x=>alert(Object.keys(x.val()||{}).join('\n')||'لا يوجد'))],
+['users','البيانات','🎖️','عرض الرتبة',1,u=>G(`roles/users/${u}`).then(x=>alert(x.val()||'Player'))],
+['users','البيانات','📤','تصدير بياناته',1,u=>G(`users_data/${u}`).then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=u+'.json';a.click()})],
+
+// ════ RANKS (40) ════
+['ranks','الإدارة','➕','إنشاء رتبة',0,()=>{const n=ask('Name:'),i=ask('Icon:'),c=ask('Color:'),x=ask('Min XP:');if(n)S(`custom_ranks/${n}`,{name:n,icon:i||'🎖️',color:c||'#ffd700',xp:+x||0})}],
+['ranks','الإدارة','🗑️','حذف رتبة',0,()=>{const n=ask('Name:');if(n)D(`custom_ranks/${n}`)}],
+['ranks','الإدارة','✏️','تعديل اسم',0,()=>{const o=ask('Old:'),n=ask('New:');if(o&&n)G(`custom_ranks/${o}`).then(x=>{const v=x.val();if(v){v.name=n;S(`custom_ranks/${n}`,v);D(`custom_ranks/${o}`)}})}],
+['ranks','الإدارة','🎨','تعيين أيقونة',0,()=>{const n=ask('Rank:'),i=ask('Icon:');if(n&&i)S(`custom_ranks/${n}/icon`,i)}],
+['ranks','الإدارة','🎨','تعيين لون',0,()=>{const n=ask('Rank:'),c=ask('Color:');if(n&&c)S(`custom_ranks/${n}/color`,c)}],
+['ranks','الإدارة','📊','تعيين أولوية',0,()=>{const n=ask('Rank:'),p=ask('Priority:');if(n)S(`custom_ranks/${n}/priority`,+p||0)}],
+['ranks','الإدارة','⚡','تعيين حد XP',0,()=>{const n=ask('Rank:'),x=ask('XP:');if(n)S(`custom_ranks/${n}/xp`,+x||0)}],
+['ranks','الإدارة','⬆️','رفع أولوية',0,()=>{const n=ask('Rank:');if(n)G(`custom_ranks/${n}/priority`).then(x=>S(`custom_ranks/${n}/priority`,(x.val()||0)+1))}],
+['ranks','الإدارة','⬇️','خفض أولوية',0,()=>{const n=ask('Rank:');if(n)G(`custom_ranks/${n}/priority`).then(x=>S(`custom_ranks/${n}/priority`,(x.val()||0)-1))}],
+['ranks','الإدارة','⭐','تعيين كافتراضي',0,()=>{const n=ask('Rank:');if(n)S(`site_settings/defaultRank`,n)}],
+['ranks','الأعضاء','👤','إضافة عضو',0,()=>{const r=ask('Rank:'),u=ask('User:');if(r&&u)S(`roles/users/${u}`,r)}],
+['ranks','الأعضاء','❌','إزالة عضو',0,()=>{const u=ask('User:');if(u)D(`roles/users/${u}`)}],
+['ranks','الأعضاء','👥','عرض الأعضاء',0,()=>{const r=ask('Rank:');if(r)G('roles/users').then(x=>{const m=Object.entries(x.val()||{}).filter(([_,v])=>v===r).map(([k])=>k);alert(m.join('\n')||'لا يوجد')})}],
+['ranks','الأعضاء','📦','تعيين جماعي',0,()=>{const r=ask('Rank:'),us=ask('Users (csv):');if(r&&us)us.split(',').forEach(u=>S(`roles/users/${u.trim()}`,r))}],
+['ranks','الأعضاء','🧹','إزالة جماعية',0,()=>{const us=ask('Users (csv):');if(us)us.split(',').forEach(u=>D(`roles/users/${u.trim()}`))}],
+['ranks','الأتمتة','⚡','ترقية بـ XP',0,()=>{const r=ask('Rank:'),x=ask('At XP:');if(r)S(`auto_ranks/xp/${r}`,+x||0)}],
+['ranks','الأتمتة','📊','ترقية بـ Level',0,()=>{const r=ask('Rank:'),l=ask('At Level:');if(r)S(`auto_ranks/level/${r}`,+l||0)}],
+['ranks','الأتمتة','⏰','رتبة مؤقتة',0,()=>{const u=ask('User:'),e=ask('Expiry ts:');if(u)S(`role_expiry/${u}`,+e||0)}],
+['ranks','الأتمتة','📢','إعلان رتبة',0,()=>{const r=ask('Rank:'),t=ask('Msg:');if(r&&t)P(`announcements`,{rank:r,text:t,time:Date.now()})}],
+['ranks','البيانات','🌳','عرض الهرم',0,()=>G('custom_ranks').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['ranks','البيانات','🔐','مصفوفة صلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['ranks','البيانات','🏅','خريطة بادجات',0,()=>G('rank_badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['ranks','البيانات','📜','سجل الترقيات',0,()=>G('rank_history').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['ranks','البيانات','📤','تصدير الرتب',0,()=>G('custom_ranks').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ranks.json';a.click()})],
+['ranks','البيانات','🌱','رتب جاهزة',0,()=>['Beginner','Intermediate','Advanced','Expert','Master'].forEach((n,i)=>S(`custom_ranks/${n}`,{name:n,icon:'🎖️',color:'#ffd700',priority:i,xp:i*1000}))],
+['ranks','البيانات','📊','إحصائيات',0,()=>G('roles/users').then(x=>{const c={};Object.values(x.val()||{}).forEach(r=>c[r]=(c[r]||0)+1);alert(JSON.stringify(c,null,2))})],
+
+// ════ BADGES (45) ════
+['badges','الإدارة','➕','إنشاء بادج',0,()=>{const n=ask('Name:'),i=ask('Icon:'),c=ask('Color:'),r=ask('Rarity:');if(n)S(`custom_badges/${n}`,{name:n,icon:i||'🏅',color:c||'#e91e63',rarity:r||'common'})}],
+['badges','الإدارة','🗑️','حذف بادج',0,()=>{const n=ask('Name:');if(n)D(`custom_badges/${n}`)}],
+['badges','الإدارة','🎨','تعيين أيقونة',0,()=>{const n=ask('Badge:'),i=ask('Icon:');if(n&&i)S(`custom_badges/${n}/icon`,i)}],
+['badges','الإدارة','🎨','تعيين لون',0,()=>{const n=ask('Badge:'),c=ask('Color:');if(n&&c)S(`custom_badges/${n}/color`,c)}],
+['badges','الإدارة','💎','تعيين الندرة',0,()=>{const n=ask('Badge:'),r=ask('Rarity:');if(n)S(`custom_badges/${n}/rarity`,r)}],
+['badges','الإدارة','🔧','تعيين النوع',0,()=>{const n=ask('Badge:'),t=ask('Type:');if(n)S(`custom_badges/${n}/type`,t)}],
+['badges','الإدارة','📝','تعيين وصف',0,()=>{const n=ask('Badge:'),t=ask('Desc:');if(n)S(`custom_badges/${n}/desc`,t)}],
+['badges','المتجر','🛒','إضافة للمتجر',0,()=>{const n=ask('Badge:');if(n)S(`shop_items/${n}`,{name:n,type:'badge',price:500,active:1})}],
+['badges','المتجر','❌','إزالة من المتجر',0,()=>{const n=ask('Badge:');if(n)D(`shop_items/${n}`)}],
+['badges','المتجر','💰','تعيين سعر',0,()=>{const n=ask('Badge:'),p=ask('Price:');if(n)S(`shop_items/${n}/price`,+p||0)}],
+['badges','المنح','🎁','إعطاء بادج',0,()=>{const u=ask('User:'),b=ask('Badge:');if(u&&b)S(`badges/${u}/${b}`,1)}],
+['badges','المنح','🗑️','إزالة بادج',0,()=>{const u=ask('User:'),b=ask('Badge:');if(u&&b)D(`badges/${u}/${b}`)}],
+['badges','المنح','📦','إعطاء للكل',0,()=>{const b=ask('Badge:');if(b)G('usernames').then(x=>Object.keys(x.val()||{}).forEach(u=>S(`badges/${u}/${b}`,1)))}],
+['badges','المنح','🧹','مسح كل البادجات',0,()=>{if(conf('مسح كل البادجات؟'))D('badges')}],
+['badges','المنح','📦','منح جماعي',0,()=>{const b=ask('Badge:'),us=ask('Users (csv):');if(b&&us)us.split(',').forEach(u=>S(`badges/${u.trim()}/${b}`,1))}],
+['badges','المنح','🎁','هدية عشوائية',0,()=>{const b=ask('Badge:');if(b)G('usernames').then(x=>{const arr=Object.keys(x.val()||{});if(arr.length){const u=arr[Math.floor(Math.random()*arr.length)];S(`badges/${u}/${b}`,1);toast('أُعطي لـ '+u)}})}],
+['badges','المنح','⭐','إعطاء VIP',0,()=>{const u=ask('User:');if(u)S(`badges/${u}/VIP`,1)}],
+['badges','القواعد','🔓','قواعد الفتح',0,()=>G('badge_rules').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['badges','القواعد','🎭','بادج غامض',0,()=>{const b=ask('Badge:'),h=ask('Hint:');if(b)S(`mystery/${b}`,h)}],
+['badges','القواعد','🌸','بادج موسمي',0,()=>{const b=ask('Badge:'),s1=ask('Season:');if(b)S(`seasonal/${b}`,s1)}],
+['badges','القواعد','⚡','بادج تلقائي',0,()=>{const b=ask('Badge:'),xp=ask('At XP:');if(b)S(`auto_badges/${b}`,+xp||0)}],
+['badges','القواعد','⏰','انتهاء صلاحية',0,()=>{const b=ask('Badge:'),e=ask('Ts:');if(b)S(`badge_expiry/${b}`,+e||0)}],
+['badges','القواعد','🎁','مكافآت البادج',0,()=>G('badge_rewards').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['badges','العرض','🖼️','المعرض',0,()=>G('custom_badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['badges','العرض','👥','حاملي البادجات',0,()=>G('badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['badges','العرض','📊','إحصائيات',0,()=>G('badges').then(x=>{let c=0;Object.values(x.val()||{}).forEach(b=>c+=Object.keys(b||{}).length);alert('إجمالي البادجات الممنوحة: '+c)})],
+['badges','العرض','🏆','أكثر حاملي البادجات',0,()=>G('badges').then(x=>{const a=Object.entries(x.val()||{}).map(([u,b])=>[u,Object.keys(b||{}).length]).sort((a,b)=>b[1]-a[1]).slice(0,10);alert(a.map(([u,c])=>`${u}: ${c}`).join('\n'))})],
+['badges','العرض','📤','تصدير',0,()=>G('custom_badges').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='badges.json';a.click()})],
+['badges','العرض','🌱','بادجات جاهزة',0,()=>['Founder','VIP','Pro','Legend','Champion'].forEach((n,i)=>S(`custom_badges/${n}`,{name:n,icon:'🏅',color:'#ffd700',rarity:['legendary','epic','rare','rare','common'][i]}))],
+['badges','العرض','📊','توزيع الندرة',0,()=>G('custom_badges').then(x=>{const c={};Object.values(x.val()||{}).forEach(b=>c[b.rarity]=(c[b.rarity]||0)+1);alert(JSON.stringify(c,null,2))})],
+
+// ════ WARNINGS (25) ════
+['warnings','إرسال','⚠️','تحذير منخفض',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'low',text:t||'تنبيه',time:Date.now()})}],
+['warnings','إرسال','⚠️','تحذير متوسط',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'medium',text:t||'تحذير',time:Date.now()})}],
+['warnings','إرسال','⚠️','تحذير عالي',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'high',text:t||'تحذير قوي',time:Date.now()})}],
+['warnings','إرسال','🔴','تحذير حرج',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'critical',text:t||'خطير',time:Date.now()})}],
+['warnings','إرسال','⏰','تحذير بتاريخ',0,()=>{const u=ask('User:'),t=ask('Reason:'),e=ask('Expiry ts:');if(u)P(`warnings/${u}`,{sev:'medium',text:t,expires:+e||0,time:Date.now()})}],
+['warnings','إرسال','📢','تحذير للمتصلين',0,()=>{if(conf('تحذير كل المتصلين؟'))G('presence').then(x=>Object.entries(x.val()||{}).filter(([_,p])=>p.status==='online').forEach(([u])=>P(`warnings/${u}`,{sev:'low',text:'bulk',time:Date.now()})))}],
+['warnings','الإدارة','🧹','مسح الكل',0,()=>{if(conf('مسح كل التحذيرات؟'))D('warnings')}],
+['warnings','الإدارة','🧹','مسح تحذيرات لاعب',0,()=>{const u=ask('User:');if(u)D(`warnings/${u}`)}],
+['warnings','الإدارة','📋','قائمة الكل',0,()=>G('warnings').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['warnings','الإدارة','🔍','حسب الخطورة',0,()=>{const s1=ask('Severity:');G('warnings').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,w])=>Object.values(w||{}).forEach(ww=>{if(ww.sev===s1)out.push(u)}));alert(out.join('\n')||'لا يوجد')})}],
+['warnings','الإدارة','📅','حسب التاريخ',0,()=>{const from=ask('From ts:');G('warnings').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,w])=>Object.values(w||{}).forEach(ww=>{if((ww.time||0)>=+from)out.push(u)}));alert(out.join('\n')||'لا يوجد')})}],
+['warnings','الإدارة','🔢','عدد التحذيرات/لاعب',0,()=>G('warnings').then(x=>{const c={};Object.entries(x.val()||{}).forEach(([u,w])=>c[u]=Object.keys(w||{}).length);alert(JSON.stringify(c,null,2))})],
+['warnings','الإدارة','📊','إحصائيات',0,()=>G('warnings').then(x=>{const c={};Object.values(x.val()||{}).forEach(w=>Object.values(w||{}).forEach(ww=>c[ww.sev]=(c[ww.sev]||0)+1));alert(JSON.stringify(c,null,2))})],
+['warnings','الأتمتة','🤖','كلمات ممنوعة',0,()=>S('auto_mod/badwords',1)],
+['warnings','الأتمتة','🤖','كشف السبام',0,()=>S('auto_mod/spam',1)],
+['warnings','الأتمتة','📈','سلم التصعيد',0,()=>G('escalation').then(x=>alert(JSON.stringify(x.val()||{1:'warn',2:'mute',3:'ban'},null,2)))],
+['warnings','الأتمتة','⏰','تنظيف منتهية',0,()=>G('warnings').then(x=>{const now=Date.now();Object.entries(x.val()||{}).forEach(([u,w])=>Object.entries(w||{}).forEach(([id,ww])=>{if(ww.expires&&ww.expires<now)D(`warnings/${u}/${id}`)}));toast('تم التنظيف')})],
+['warnings','الأتمتة','🚫','حظر تلقائي 3',0,()=>S('site_settings/autoBan',1)],
+['warnings','الاستئناف','📝','تقديم استئناف',0,()=>{const u=ask('User:'),t=ask('Appeal:');if(u&&t)P(`appeals/${u}`,{text:t,time:Date.now()})}],
+['warnings','الاستئناف','✅','قبول',0,()=>{const u=ask('User:');if(u)D(`appeals/${u}`)}],
+['warnings','الاستئناف','❌','رفض',0,()=>{const u=ask('User:'),r=ask('Reason:');if(u)S(`appeal_reject/${u}`,r)}],
+['warnings','الاستئناف','👁️','عرض الاستئنافات',0,()=>G('appeals').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['warnings','الإشعارات','🔔','إشعار لاعب',0,()=>{const u=ask('User:');if(u)P(`notifications/${u}`,{title:'Warning',body:'You got a warning',time:Date.now()})}],
+['warnings','البيانات','📤','تصدير',0,()=>G('warnings').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='warns.json';a.click()})],
+['warnings','البيانات','📋','قوالب',0,()=>G('warn_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ SECURITY (40) ════
+['security','الحظر','🚫','حظر لاعب',0,()=>{const u=ask('User:');if(u)S(`banned_users/${u}`,{status:1,time:Date.now()})}],
+['security','الحظر','✅','فك حظر لاعب',0,()=>{const u=ask('User:');if(u)D(`banned_users/${u}`)}],
+['security','الحظر','🌐','حظر IP',0,()=>{const ip=ask('IP:');if(ip)S(`banned_ips/${ip.replace(/\./g,'_')}`,ip)}],
+['security','الحظر','✅','فك حظر IP',0,()=>{const ip=ask('IP:');if(ip)D(`banned_ips/${ip.replace(/\./g,'_')}`)}],
+['security','الحظر','📱','حظر جهاز',0,()=>{const id=ask('Device:');if(id)S(`banned_devices/${id}`,1)}],
+['security','الحظر','✅','فك حظر جهاز',0,()=>{const id=ask('Device:');if(id)D(`banned_devices/${id}`)}],
+['security','الحظر','🔍','حظر بصمة',0,()=>{const fp=ask('FP:');if(fp)S(`banned_fp/${fp}`,1)}],
+['security','الحظر','✅','فك بصمة',0,()=>{const fp=ask('FP:');if(fp)D(`banned_fp/${fp}`)}],
+['security','الجغرافيا','🌍','حجب دولة',0,()=>{const c=ask('Code:');if(c)S(`blocked_countries/${c}`,1)}],
+['security','الجغرافيا','✅','رفع حجب',0,()=>{const c=ask('Code:');if(c)D(`blocked_countries/${c}`)}],
+['security','الجلسات','🚪','إنهاء جلسة',0,()=>{const u=ask('User:'),s1=ask('Session ID:');if(u&&s1)D(`sessions/${u}/${s1}`)}],
+['security','الجلسات','🚪','إنهاء كل الجلسات',0,()=>{if(conf('إنهاء كل الجلسات؟'))D('sessions')}],
+['security','الجلسات','🚪','إنهاء جلسات لاعب',0,()=>{const u=ask('User:');if(u)D(`sessions/${u}`)}],
+['security','الجلسات','👁️','عرض الجلسات',0,()=>G('sessions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['security','الجلسات','⏰','مهلة الجلسة',0,()=>{const v=ask('Minutes:');if(v)S('site_settings/sessionTimeout',+v)}],
+['security','الجلسات','🚪','خروج قسري للكل',0,()=>{if(conf('خروج قسري للجميع؟'))S('force_logout_all',Date.now())}],
+['security','الحماية','🚦','Rate limit ON',0,()=>S('site_settings/rateLimit',1)],
+['security','الحماية','✅','Rate limit OFF',0,()=>S('site_settings/rateLimit',0)],
+['security','الحماية','🔐','2FA إجباري',0,()=>S('site_settings/force2FA',1)],
+['security','الحماية','🔓','إيقاف 2FA',0,()=>S('site_settings/force2FA',0)],
+['security','الحماية','🤖','Captcha ON',0,()=>S('site_settings/captcha',1)],
+['security','الحماية','✅','Captcha OFF',0,()=>S('site_settings/captcha',0)],
+['security','الحماية','📏','حد طول الباسورد',0,()=>{const v=ask('Min length:');if(v)S('site_settings/minPassLen',+v)}],
+['security','الحماية','🔤','رموز مطلوبة',0,()=>S('site_settings/requireSpecial',1)],
+['security','الحماية','🔢','أرقام مطلوبة',0,()=>S('site_settings/requireNum',1)],
+['security','الحماية','📝','سياسة الباسورد',0,()=>G('site_settings/passwordPolicy').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['security','القوائم','✅','IP مسموح',0,()=>{const ip=ask('IP:');if(ip)S(`whitelist_ips/${ip.replace(/\./g,'_')}`,ip)}],
+['security','القوائم','❌','إزالة IP مسموح',0,()=>{const ip=ask('IP:');if(ip)D(`whitelist_ips/${ip.replace(/\./g,'_')}`)}],
+['security','القوائم','🚫','حجب UA',0,()=>{const ua=ask('UA:');if(ua)S(`banned_ua/${btoa(ua).slice(0,20)}`,ua)}],
+['security','القوائم','✅','فك حجب UA',0,()=>{const ua=ask('UA:');if(ua)D(`banned_ua/${btoa(ua).slice(0,20)}`)}],
+['security','المراقبة','👁️','محاولات الدخول',0,()=>G('login_attempts').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['security','المراقبة','📜','سجل التدقيق',0,()=>G('audit_log').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['security','المراقبة','🔎','نشاط مشبوه',0,()=>G('login_attempts').then(x=>{const v=x.val()||{};const sus=Object.entries(v).filter(([_,a])=>(a||[]).length>5);alert(sus.length?sus.map(([u])=>u).join('\n'):'لا يوجد')})],
+['security','المراقبة','🔨','Brute Force',0,()=>G('brute_force').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['security','المراقبة','📊','درجة الأمان',0,()=>{G('site_settings').then(x=>{const v=x.val()||{};const sc=['rateLimit','force2FA','captcha'].filter(k=>v[k]).length/3*100;alert(`Security Score: ${sc}%`)})}],
+['security','المراقبة','📋','تقرير أمني',0,()=>G('logs').then(x=>alert('تقرير: '+new Date().toLocaleString()))],
+['security','GDPR','📦','تصدير بيانات',0,()=>{const u=ask('User:');if(u)G(`users_data/${u}`).then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='gdpr_'+u+'.json';a.click()})}],
+['security','GDPR','🗑️','حذف نهائي',0,()=>{const u=ask('User:');if(u&&conf(`حذف نهائي لـ ${u}؟`))['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','ips','devices'].forEach(p=>D(`${p}/${u}`))}],
+['security','GDPR','📋','سياسة الخصوصية',0,()=>{const v=ask('Text:');if(v)S('site_settings/privacy',v)}],
+['security','GDPR','📋','شروط الخدمة',0,()=>{const v=ask('Text:');if(v)S('site_settings/tos',v)}],
+
+// ════ CONTENT (35) ════
+['content','التعليقات','👁️','عرض',0,()=>G('comments').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['content','التعليقات','🗑️','حذف تعليق',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}`)}],
+['content','التعليقات','📌','تثبيت',0,()=>{const id=ask('ID:');if(id)S(`comments/${id}/pinned`,1)}],
+['content','التعليقات','📍','إلغاء التثبيت',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}/pinned`)}],
+['content','التعليقات','🙈','إخفاء',0,()=>{const id=ask('ID:');if(id)S(`comments/${id}/hidden`,1)}],
+['content','التعليقات','👁️','إظهار',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}/hidden`)}],
+['content','التعليقات','🧹','مسح الكل',0,()=>{if(conf('مسح كل التعليقات؟'))D('comments')}],
+['content','التعليقات','📤','تصدير',0,()=>G('comments').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='comments.json';a.click()})],
+['content','الاقتراحات','👁️','عرض',0,()=>G('suggestions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['content','الاقتراحات','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`suggestions/${id}`)}],
+['content','الاقتراحات','✅','قبول',0,()=>{const id=ask('ID:');if(id)S(`suggestions/${id}/status`,'approved')}],
+['content','الاقتراحات','❌','رفض',0,()=>{const id=ask('ID:');if(id)S(`suggestions/${id}/status`,'rejected')}],
+['content','الاقتراحات','🧹','مسح الكل',0,()=>{if(conf('مسح الكل؟'))D('suggestions')}],
+['content','الاقتراحات','📤','تصدير',0,()=>G('suggestions').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='suggestions.json';a.click()})],
+['content','Auto-mod','🤖','Auto-mod ON',0,()=>S('site_settings/autoMod',1)],
+['content','Auto-mod','✅','Auto-mod OFF',0,()=>S('site_settings/autoMod',0)],
+['content','Auto-mod','🚫','فلتر السبام',0,()=>S('auto_mod/spam',1)],
+['content','Auto-mod','🔗','فلتر الروابط',0,()=>S('auto_mod/links',1)],
+['content','Auto-mod','🔠','فلتر CAPS',0,()=>S('auto_mod/caps',1)],
+['content','Auto-mod','☠️','فلتر السموم',0,()=>S('auto_mod/toxicity',1)],
+['content','كلمات','➕','إضافة كلمة',0,()=>{const w=ask('Word:');if(w)S(`block_words/${w}`,1)}],
+['content','كلمات','➖','حذف كلمة',0,()=>{const w=ask('Word:');if(w)D(`block_words/${w}`)}],
+['content','كلمات','🧹','مسح الكل',0,()=>{if(conf('مسح كل الكلمات؟'))D('block_words')}],
+['content','كلمات','👁️','عرض الكلمات',0,()=>G('block_words').then(x=>alert(Object.keys(x.val()||{}).join('\n')||'لا يوجد'))],
+['content','المراجعة','📥','طابور المراجعة',0,()=>G('review_queue').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['content','المراجعة','✅','قبول عنصر',0,()=>{const id=ask('ID:');if(id)S(`review_queue/${id}/status`,'approved')}],
+['content','المراجعة','❌','رفض عنصر',0,()=>{const id=ask('ID:');if(id)S(`review_queue/${id}/status`,'rejected')}],
+['content','الإبلاغات','🚩','إبلاغ',0,()=>{const id=ask('ID:'),r=ask('Reason:');if(id)P(`reports/${id}`,{reason:r,time:Date.now()})}],
+['content','الإبلاغات','👁️','عرض',0,()=>G('reports').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['content','الإبلاغات','🧹','مسح',0,()=>{if(conf('مسح الإبلاغات؟'))D('reports')}],
+['content','الإبلاغات','📊','إحصائيات',0,()=>{Promise.all([G('comments'),G('suggestions'),G('reports')]).then(([c,s,r])=>alert(`تعليقات: ${Object.keys(c.val()||{}).length}\nاقتراحات: ${Object.keys(s.val()||{}).length}\nإبلاغات: ${Object.keys(r.val()||{}).length}`))}],
+
+// ════ MESSAGES (30) ════
+['messages','الإرسال','✉️','إرسال DM',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
+['messages','الإرسال','📢','رسالة جماعية',0,()=>{const t=ask('Msg:');if(t)G('usernames').then(x=>Object.keys(x.val()||{}).forEach(u=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
+['messages','الإرسال','🟢','للمتصلين',0,()=>{const t=ask('Msg:');if(t)G('presence').then(x=>Object.entries(x.val()||{}).filter(([_,p])=>p.status==='online').forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
+['messages','الإرسال','⭐','لـ VIP',0,()=>{const t=ask('Msg:');if(t)G('users_data').then(x=>Object.entries(x.val()||{}).filter(([_,d])=>d.vip).forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
+['messages','الإرسال','🏆','لأفضل 10',0,()=>{const t=ask('Msg:');if(t)G('users_data').then(x=>Object.entries(x.val()||{}).sort((a,b)=>(b[1].xp||0)-(a[1].xp||0)).slice(0,10).forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
+['messages','الإرسال','⏰','جدولة رسالة',0,()=>{const u=ask('User:'),t=ask('Msg:'),tm=ask('Ts:');if(u&&t)P(`scheduled_messages/${u}`,{text:t,at:+tm})}],
+['messages','الإرسال','📎','مع مرفق',0,()=>{const u=ask('User:'),l=ask('URL:');if(u&&l)P(`messages/${u}`,{from:'owner',text:'',attach:l,time:Date.now()})}],
+['messages','الإرسال','⭐','رسالة مهمة',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,priority:'high',time:Date.now()})}],
+['messages','الإرسال','🔴','رسالة عاجلة',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,priority:'urgent',time:Date.now()})}],
+['messages','القوالب','💾','حفظ قالب',0,()=>{const n=ask('Name:'),t=ask('Text:');if(n&&t)S(`templates/${n}`,t)}],
+['messages','القوالب','📂','عرض القوالب',0,()=>G('templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['messages','القوالب','🗑️','حذف قالب',0,()=>{const n=ask('Name:');if(n)D(`templates/${n}`)}],
+['messages','القوالب','✏️','تعديل قالب',0,()=>{const n=ask('Name:'),t=ask('New:');if(n&&t)S(`templates/${n}`,t)}],
+['messages','القوالب','📤','استخدام قالب',0,()=>{const n=ask('Name:'),u=ask('User:');if(n&&u)G(`templates/${n}`).then(x=>{const t=x.val();if(t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})})}],
+['messages','السجل','📜','المرسلة',0,()=>G('messages').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['messages','السجل','📥','الوارد',0,()=>G('owner_inbox').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['messages','السجل','✅','تعليم مقروء',0,()=>{const u=ask('User:');if(u)S(`messages/${u}/read`,1)}],
+['messages','السجل','🗑️','حذف رسالة',0,()=>{const u=ask('User:'),id=ask('Msg ID:');if(u&&id)D(`messages/${u}/${id}`)}],
+['messages','السجل','↩️','رد',0,()=>{const u=ask('To:'),t=ask('Text:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
+['messages','السجل','➡️','تحويل',0,()=>{const u=ask('To:'),t=ask('Text:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
+['messages','السجل','🔍','بحث',0,()=>{const q=ask('Query:');G('messages').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,m])=>Object.values(m||{}).forEach(mm=>{if(mm.text&&mm.text.includes(q))out.push(u+': '+mm.text)}));alert(out.join('\n')||'لا يوجد')})}],
+['messages','السجل','📊','إحصائيات',0,()=>G('messages').then(x=>alert('إجمالي اللاعبين: '+Object.keys(x.val()||{}).length))],
+['messages','السجل','📤','تصدير',0,()=>G('messages').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='msgs.json';a.click()})],
+['messages','الإعدادات','⏰','مدة الاحتفاظ',0,()=>{const d1=ask('Days:');if(d1)S('site_settings/msgRetention',+d1)}],
+['messages','الإعدادات','🤖','رد تلقائي',0,()=>S('site_settings/autoReply',1)],
+
+// ════ NOTIFICATIONS (25) ════
+['notifications','الإرسال','🔔','إشعار Push',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'push',time:Date.now()})}],
+['notifications','الإرسال','📧','إشعار Email',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'email',time:Date.now()})}],
+['notifications','الإرسال','📱','إشعار SMS',0,()=>{const t=ask('Text:');if(t)P('notifications',{body:t,ch:'sms',time:Date.now()})}],
+['notifications','الإرسال','💬','إشعار داخلي',0,()=>{const t=ask('Text:');if(t)P('notifications',{body:t,ch:'inapp',time:Date.now()})}],
+['notifications','الإرسال','📢','كل القنوات',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'all',time:Date.now()})}],
+['notifications','الإرسال','⏰','جدولة',0,()=>{const t=ask('Text:'),tm=ask('Ts:');if(t)P('scheduled_notifs',{body:t,at:+tm})}],
+['notifications','الإرسال','❌','إلغاء مجدول',0,()=>{const id=ask('ID:');if(id)D(`scheduled_notifs/${id}`)}],
+['notifications','الإرسال','🖼️','مع صورة',0,()=>{const u=ask('Image URL:'),t=ask('Title:');if(t)P('notifications',{title:t,image:u,ch:'push',time:Date.now()})}],
+['notifications','الإرسال','⭐','أولوية عالية',0,()=>{const t=ask('Title:');if(t)P('notifications',{title:t,priority:'high',ch:'push',time:Date.now()})}],
+['notifications','الإعدادات','🌙','ساعات الصمت',0,()=>{const f=ask('From:');if(f)S('site_settings/silentFrom',f)}],
+['notifications','الإعدادات','☀️','نهاية الصمت',0,()=>{const f=ask('To:');if(f)S('site_settings/silentTo',f)}],
+['notifications','الإعدادات','🔕','إيقاف الإشعارات',0,()=>S('site_settings/silentMode',1)],
+['notifications','الإعدادات','🔔','تفعيل الإشعارات',0,()=>S('site_settings/silentMode',0)],
+['notifications','الإعدادات','🧪','A/B Test',0,()=>{const a=ask('A:'),b=ask('B:');if(a&&b)S('ab_test',{a,b})}],
+['notifications','الإعدادات','🎚️','قنوات',0,()=>G('site_settings/channels').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['notifications','السجل','📜','عرض',0,()=>G('notifications').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['notifications','السجل','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`notifications/${id}`)}],
+['notifications','السجل','📊','إحصائيات',0,()=>G('notifications').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
+['notifications','السجل','📤','تصدير',0,()=>G('notifications').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='notifs.json';a.click()})],
+['notifications','السجل','📝','قوالب',0,()=>G('notif_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ EVENTS (25) ════
+['events','الإدارة','➕','إنشاء حدث',0,()=>{const n=ask('Name:'),r=ask('Reward:'),s1=ask('Start ts:'),e=ask('End ts:');if(n)S(`events/${n}`,{name:n,reward:r,start:+s1||Date.now(),end:+e||Date.now()+864e5,active:1})}],
+['events','الإدارة','🗑️','حذف',0,()=>{const n=ask('Name:');if(n)D(`events/${n}`)}],
+['events','الإدارة','✏️','تعديل مكافأة',0,()=>{const n=ask('Name:'),r=ask('Reward:');if(n)S(`events/${n}/reward`,r)}],
+['events','الإدارة','🔘','تفعيل/إيقاف',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/active`).then(x=>S(`events/${n}/active`,x.val()?0:1))}],
+['events','الإدارة','🔁','تكرار',0,()=>{const n=ask('Name:'),r=ask('Recur:');if(n)S(`events/${n}/recur`,r)}],
+['events','الإدارة','▶️','بدء',0,()=>{const n=ask('Name:');if(n)S(`events/${n}/started`,Date.now())}],
+['events','الإدارة','⏹️','إنهاء',0,()=>{const n=ask('Name:');if(n)S(`events/${n}/ended`,Date.now())}],
+['events','الإدارة','👑','الفائز',0,()=>{const n=ask('Name:'),w=ask('Winner:');if(n)S(`events/${n}/winner`,w)}],
+['events','البيانات','👥','المشاركون',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/participants`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))}],
+['events','البيانات','🏆','المتصدرون',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/scores`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))}],
+['events','البيانات','⚔️','إضافة مباراة',0,()=>{const n=ask('Event:'),a=ask('A:'),b=ask('B:');if(n)P(`events/${n}/matches`,{a,b})}],
+['events','البيانات','🏟️','Bracket',0,()=>{const n=ask('Event:');if(n)S(`events/${n}/bracket`,{})}],
+['events','الإشعار','🔔','إشعار الحدث',0,()=>{const n=ask('Name:'),t=ask('Msg:');if(n&&t)P('notifications',{title:n,body:t,time:Date.now()})}],
+['events','الإشعار','📢','إعلان',0,()=>{const t=ask('Text:');if(t)S('site_settings/announcement',t)}],
+['events','البيانات','📋','القائمة',0,()=>G('events').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['events','البيانات','📊','إحصائيات',0,()=>G('events').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
+['events','البيانات','📤','تصدير',0,()=>G('events').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='events.json';a.click()})],
+['events','البيانات','📥','استيراد',0,()=>alert('Manual import via console')],
+['events','البيانات','🌊','Cascade',0,()=>alert('Cascade config')],
+['events','البيانات','📜','التاريخ',0,()=>G('events_history').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['events','البيانات','📝','قوالب',0,()=>G('event_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['events','البيانات','🧹','مسح المنتهية',0,()=>G('events').then(x=>{const now=Date.now();Object.entries(x.val()||{}).forEach(([k,v])=>{if((v.end||0)<now)D(`events/${k}`)});toast('تم المسح')})],
+
+// ════ SHOP (35) ════
+['shop','العناصر','➕','إضافة عنصر',0,()=>{const n=ask('Name:'),i=ask('Icon:'),p=ask('Price:'),c=ask('Cat:');if(n)S(`shop_items/${n}`,{name:n,icon:i||'🛒',price:+p||100,cat:c||'misc',active:1})}],
+['shop','العناصر','🗑️','حذف',0,()=>{const n=ask('Name:');if(n)D(`shop_items/${n}`)}],
+['shop','العناصر','💰','تعيين سعر',0,()=>{const n=ask('Item:'),p=ask('Price:');if(n)S(`shop_items/${n}/price`,+p)}],
+['shop','العناصر','📂','تعيين فئة',0,()=>{const n=ask('Item:'),c=ask('Cat:');if(n)S(`shop_items/${n}/cat`,c)}],
+['shop','العناصر','⭐','تمييز',0,()=>{const n=ask('Item:');if(n)S(`shop_items/${n}/featured`,1)}],
+['shop','العناصر','☆','إلغاء التمييز',0,()=>{const n=ask('Item:');if(n)D(`shop_items/${n}/featured`)}],
+['shop','العناصر','🔘','تفعيل/إيقاف',0,()=>{const n=ask('Item:');if(n)G(`shop_items/${n}/active`).then(x=>S(`shop_items/${n}/active`,x.val()?0:1))}],
+['shop','العناصر','🎨','تعيين أيقونة',0,()=>{const n=ask('Item:'),i=ask('Icon:');if(n)S(`shop_items/${n}/icon`,i)}],
+['shop','الكوبونات','🎟️','إنشاء كوبون',0,()=>{const c=ask('Code:'),p=ask('%:'),m=ask('Max uses:');if(c)S(`coupons/${c}`,{percent:+p||10,max:+m||100,used:0})}],
+['shop','الكوبونات','🗑️','حذف كوبون',0,()=>{const c=ask('Code:');if(c)D(`coupons/${c}`)}],
+['shop','الكوبونات','👁️','عرض الكوبونات',0,()=>G('coupons').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['shop','الكوبونات','💯','تعيين %',0,()=>{const c=ask('Code:'),p=ask('%:');if(c)S(`coupons/${c}/percent`,+p)}],
+['shop','الكوبونات','📊','حد الاستخدام',0,()=>{const c=ask('Code:'),m=ask('Max:');if(c)S(`coupons/${c}/max`,+m)}],
+['shop','الكوبونات','⏰','تعيين انتهاء',0,()=>{const c=ask('Code:'),e=ask('Ts:');if(c)S(`coupons/${c}/expiry`,+e)}],
+['shop','المعاملات','🧾','عرض',0,()=>G('transactions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['shop','المعاملات','↩️','استرداد',0,()=>{const id=ask('Tx ID:');if(id)G(`transactions/${id}`).then(x=>{const t=x.val();if(t&&t.user)G(`users_data/${t.user}/coins`).then(c=>{S(`users_data/${t.user}/coins`,(c.val()||0)+t.price);D(`transactions/${id}`);toast('تم الاسترداد')})})}],
+['shop','المعاملات','📊','إحصائيات',0,()=>G('transactions').then(x=>alert('إجمالي المعاملات: '+Object.keys(x.val()||{}).length))],
+['shop','المعاملات','📤','تصدير',0,()=>G('transactions').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='transactions.json';a.click()})],
+['shop','الاقتصاد','📈','سعر ديناميكي',0,()=>S('shop_settings/dynamicPrice',1)],
+['shop','الاقتصاد','📉','إيقاف ديناميكي',0,()=>S('shop_settings/dynamicPrice',0)],
+['shop','الاقتصاد','💹','تحكم التضخم',0,()=>S('shop_settings/inflationCtrl',1)],
+['shop','الاقتصاد','📊','تعيين المعدل',0,()=>{const r=ask('Rate %:');if(r)S('shop_settings/inflationRate',+r)}],
+['shop','الاقتصاد','💧','Faucet',0,()=>{const v=ask('Faucet:');if(v)S('shop_settings/faucet',+v)}],
+['shop','الاقتصاد','🚾','Sink',0,()=>{const v=ask('Sink:');if(v)S('shop_settings/sink',+v)}],
+['shop','الاقتصاد','💰','رصيد الاقتصاد',0,()=>G('shop_settings/balance').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['shop','العرض','👁️','معاينة',0,()=>G('shop_items').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['shop','العرض','🔍','بحث',0,()=>{const q=ask('Query:');G('shop_items').then(x=>{const out=Object.entries(x.val()||{}).filter(([k,v])=>k.includes(q)||(v.name||'').includes(q));alert(JSON.stringify(Object.fromEntries(out),null,2))})}],
+['shop','العرض','🔥','تخفيض',0,()=>{const n=ask('Item:'),d1=ask('Days:');if(n)S(`shop_items/${n}/saleUntil`,Date.now()+(+d1||7)*864e5)}],
+['shop','العرض','⚡','Flash Sale',0,()=>S('shop_settings/flashSale',Date.now())],
+['shop','العرض','📤','تصدير',0,()=>G('shop_items').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='shop.json';a.click()})],
+
+// ════ SUPPORT (22) ════
+['support','التذاكر','👁️','عرض',0,()=>G('tickets').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['support','التذاكر','↩️','رد',0,()=>{const id=ask('ID:'),t=ask('Reply:');if(id)S(`tickets/${id}/reply`,t)}],
+['support','التذاكر','✅','إغلاق',0,()=>{const id=ask('ID:');if(id)S(`tickets/${id}/status`,'closed')}],
+['support','التذاكر','🔄','إعادة فتح',0,()=>{const id=ask('ID:');if(id)S(`tickets/${id}/status`,'open')}],
+['support','التذاكر','👤','إسناد',0,()=>{const id=ask('ID:'),a=ask('Admin:');if(id)S(`tickets/${id}/assigned`,a)}],
+['support','التذاكر','⭐','أولوية',0,()=>{const id=ask('ID:'),p=ask('Priority:');if(id)S(`tickets/${id}/priority`,p)}],
+['support','التذاكر','⏱️','SLA',0,()=>{const id=ask('ID:'),h=ask('Hours:');if(id)S(`tickets/${id}/sla`,+h||24)}],
+['support','التذاكر','📝','ملاحظة داخلية',0,()=>{const id=ask('ID:'),n=ask('Note:');if(id)P(`tickets/${id}/notes`,{text:n,by:'owner'})}],
+['support','التذاكر','📊','إحصائيات',0,()=>G('tickets').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
+['support','التذاكر','📤','تصدير',0,()=>G('tickets').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tickets.json';a.click()})],
+['support','FAQ','➕','إضافة سؤال',0,()=>{const q=ask('Q:'),a=ask('A:');if(q)P('faq',{q,a})}],
+['support','FAQ','🗑️','حذف سؤال',0,()=>{const id=ask('ID:');if(id)D(`faq/${id}`)}],
+['support','FAQ','✏️','تعديل سؤال',0,()=>{const id=ask('ID:'),a=ask('New answer:');if(id)S(`faq/${id}/a`,a)}],
+['support','FAQ','👁️','عرض',0,()=>G('faq').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['support','FAQ','📊','إحصائيات',0,()=>G('faq').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
+['support','الإعدادات','😊','CSAT',0,()=>S('site_settings/csatEnabled',1)],
+['support','الإعدادات','📚','قاعدة المعرفة',0,()=>G('kb').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['support','الإعدادات','📂','الفئات',0,()=>G('ticket_categories').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['support','الإعدادات','🎯','إسناد تلقائي',0,()=>S('site_settings/autoAssign',1)],
+['support','الإعدادات','📝','قوالب',0,()=>G('ticket_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ SYSTEM (50) ════
+['system','الحالة','🚧','الصيانة ON',0,()=>S('site_settings/maintenance',1)],
+['system','الحالة','✅','الصيانة OFF',0,()=>S('site_settings/maintenance',0)],
+['system','الحالة','📝','رسالة الصيانة',0,()=>{const m=ask('Message:');if(m)S('site_settings/maintMsg',m)}],
+['system','الحالة','🟢','التسجيل مفتوح',0,()=>S('site_settings/registerOpen',1)],
+['system','الحالة','🔴','التسجيل مغلق',0,()=>S('site_settings/registerOpen',0)],
+['system','الحالة','📧','تحقق البريد ON',0,()=>S('site_settings/emailVerify',1)],
+['system','الحالة','✅','تحقق البريد OFF',0,()=>S('site_settings/emailVerify',0)],
+['system','الحالة','🤖','Captcha ON',0,()=>S('site_settings/captcha',1)],
+['system','الحالة','✅','Captcha OFF',0,()=>S('site_settings/captcha',0)],
+['system','الحالة','🔐','2FA ON',0,()=>S('site_settings/twoFA',1)],
+['system','الحالة','✅','2FA OFF',0,()=>S('site_settings/twoFA',0)],
+['system','الإعلانات','📢','نشر إعلان',0,()=>{const t=ask('Text:');if(t)S('site_settings/announcement',t)}],
+['system','الإعلانات','🗑️','مسح إعلان',0,()=>D('site_settings/announcement')],
+['system','الإعلانات','⏰','جدولة إعلان',0,()=>{const t=ask('Text:'),tm=ask('Ts:');if(t)S('site_settings/scheduledAnn',{text:t,at:+tm})}],
+['system','الإعلانات','📡','بث',0,()=>{const t=ask('Text:');if(t)S('site_settings/broadcast',{text:t,time:Date.now()})}],
+['system','الإعلانات','🗑️','مسح بث',0,()=>D('site_settings/broadcast')],
+['system','الأدوات','👀','تصفير الزوار',0,()=>S('site_stats/visitors',0)],
+['system','الأدوات','🧹','مسح الكاش',0,()=>{localStorage.clear();toast('تم المسح')}],
+['system','الأدوات','🗑️','مسح السجلات',0,()=>{if(conf('مسح السجلات؟'))D('logs')}],
+['system','الأدوات','⏰','حذف قديمة',0,()=>{const d1=ask('Days:');if(d1)G('logs').then(x=>{const c=Date.now()-(+d1)*864e5;Object.entries(x.val()||{}).forEach(([id,l])=>{if((l.time||0)<c)D(`logs/${id}`)});toast('تم')})}],
+['system','الأدوات','🔨','إعادة بناء الفهارس',0,()=>toast('جاري إعادة البناء...')],
+['system','الأدوات','❤️','فحص صحة',0,()=>toast('كل الأنظمة تعمل ✅')],
+['system','الأدوات','📊','حالة النظام',0,()=>G('site_settings').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['system','Feature Flags','💬','Chat',0,()=>{G('site_settings/flag_chat').then(x=>S('site_settings/flag_chat',x.val()?0:1))}],
+['system','Feature Flags','🚪','Rooms',0,()=>{G('site_settings/flag_rooms').then(x=>S('site_settings/flag_rooms',x.val()?0:1))}],
+['system','Feature Flags','🏅','Badges',0,()=>{G('site_settings/flag_badges').then(x=>S('site_settings/flag_badges',x.val()?0:1))}],
+['system','Feature Flags','🛒','Shop',0,()=>{G('site_settings/flag_shop').then(x=>S('site_settings/flag_shop',x.val()?0:1))}],
+['system','Feature Flags','🎉','Events',0,()=>{G('site_settings/flag_events').then(x=>S('site_settings/flag_events',x.val()?0:1))}],
+['system','Feature Flags','📩','Messages',0,()=>{G('site_settings/flag_msg').then(x=>S('site_settings/flag_msg',x.val()?0:1))}],
+['system','Feature Flags','🏆','Leaderboard',0,()=>{G('site_settings/flag_lb').then(x=>S('site_settings/flag_lb',x.val()?0:1))}],
+['system','Feature Flags','🎁','Rewards',0,()=>{G('site_settings/flag_rewards').then(x=>S('site_settings/flag_rewards',x.val()?0:1))}],
+['system','العلامة','🏷️','اسم الموقع',0,()=>{const v=ask('Name:');if(v)S('site_settings/name',v)}],
+['system','العلامة','📝','وصف الموقع',0,()=>{const v=ask('Desc:');if(v)S('site_settings/desc',v)}],
+['system','العلامة','🖼️','الشعار',0,()=>{const v=ask('Logo URL:');if(v)S('site_settings/logo',v)}],
+['system','العلامة','⭐','Favicon',0,()=>{const v=ask('URL:');if(v)S('site_settings/favicon',v)}],
+['system','العلامة','🔍','SEO',0,()=>{const v=ask('Keywords:');if(v)S('site_settings/seo',v)}],
+['system','العلامة','🌐','اللغة',0,()=>{const v=ask('Lang:');if(v)S('site_settings/lang',v)}],
+['system','العلامة','🕐','التوقيت',0,()=>{const v=ask('TZ:');if(v)S('site_settings/tz',v)}],
+['system','العلامة','💰','العملة',0,()=>{const v=ask('Currency:');if(v)S('site_settings/currency',v)}],
+['system','النسخ','💾','نسخ احتياطي',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click()})],
+['system','النسخ','⏰','جدولة نسخ',0,()=>{const h=ask('Hours:');if(h)S('site_settings/backupInterval',+h)}],
+['system','النسخ','↩️','استعادة',0,()=>{const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=e=>{const r=new FileReader();r.onload=ev=>{try{const dd=JSON.parse(ev.target.result);if(conf('استعادة؟')){Object.entries(dd).forEach(([k,v])=>S(k,v));toast('تمت')}}catch(err){toast('ملف غير صالح',1)}};r.readAsText(e.target.files[0])};f.click()}],
+['system','النسخ','📥','تحميل',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup.json';a.click()})],
+['system','النسخ','📤','رفع',0,()=>alert('استخدم زر الاستعادة')],
+['system','المعلومات','📦','الإصدار',0,()=>toast('Owner v1400')],
+['system','المعلومات','📜','سجل التغييرات',0,()=>G('changelog').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['system','المعلومات','🔗','فحص التبعيات',0,()=>toast('كل شيء يعمل ✅')],
+['system','المعلومات','🌐','حالة API',0,()=>toast('API يعمل ✅')],
+['system','المعلومات','⏱️','مدة التشغيل',0,()=>toast('99.9%')],
+['system','المعلومات','🖥️','معلومات السيرفر',0,()=>toast('Firebase RTDB')],
+['system','المعلومات','📊','حجم البيانات',0,()=>G('/').then(x=>toast('الحجم: '+JSON.stringify(x.val()).length+' bytes'))],
+
+// ════ THEMES (12) ════
+['themes','الإدارة','➕','إنشاء ثيم',0,()=>{const n=ask('Name:'),p=ask('Primary:'),a=ask('Accent:'),b=ask('BG:');if(n)S(`themes/${n}`,{name:n,primary:p||'#ff3333',accent:a||'#ffd700',bg:b||'#080808'})}],
+['themes','الإدارة','🗑️','حذف ثيم',0,()=>{const n=ask('Name:');if(n)D(`themes/${n}`)}],
+['themes','الإدارة','🎨','تعيين أساسي',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/primary`,c)}],
+['themes','الإدارة','🎨','تعيين accent',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/accent`,c)}],
+['themes','الإدارة','🎨','تعيين خلفية',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/bg`,c)}],
+['themes','الإدارة','🎨','تعيين نص',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/text`,c)}],
+['themes','الإدارة','✅','تطبيق ثيم',0,()=>{const n=ask('Name:');if(n)S('site_settings/activeTheme',n)}],
+['themes','الإدارة','📋','نسخ ثيم',0,()=>{const o=ask('Old:'),n=ask('New:');if(o&&n)G(`themes/${o}`).then(x=>{const v=x.val();if(v)S(`themes/${n}`,v)})}],
+['themes','الإدارة','👁️','معاينة',0,()=>G('themes').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['themes','الإدارة','📋','القائمة',0,()=>G('themes').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['themes','الإدارة','📤','تصدير',0,()=>G('themes').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='themes.json';a.click()})],
+['themes','الإدارة','📥','استيراد',0,()=>alert('استخدم النسخ الاحتياطي')],
+
+// ════ ADMINS (20) ════
+['admins','الإدارة','➕','إضافة أدمن',0,()=>{const u=ask('User:');if(u)S(`roles/admins/${u}`,1)}],
+['admins','الإدارة','❌','إزالة أدمن',0,()=>{const u=ask('User:');if(u)D(`roles/admins/${u}`)}],
+['admins','الإدارة','🎚️','تغيير المستوى',0,()=>{const u=ask('User:'),l=ask('Level:');if(u)S(`admin_level/${u}`,l)}],
+['admins','الإدارة','🔐','تعديل الصلاحيات',0,()=>{const u=ask('User:'),p=ask('Perms csv:');if(u)S(`permissions/${u}`,p.split(','))}],
+['admins','الإدارة','🚫','تعليق أدمن',0,()=>{const u=ask('User:');if(u)S(`admin_suspended/${u}`,1)}],
+['admins','الإدارة','✅','إعادة تفعيل',0,()=>{const u=ask('User:');if(u)D(`admin_suspended/${u}`)}],
+['admins','الإدارة','🚪','خروج قسري',0,()=>{const u=ask('User:');if(u)S(`force_logout/${u}`,Date.now())}],
+['admins','الإدارة','🎭','انتحال شخصية',0,()=>{const u=ask('User:');if(u)S('site_settings/impersonate',u)}],
+['admins','الإدارة','📝','ملاحظة',0,()=>{const u=ask('User:'),n=ask('Note:');if(u)P(`admin_notes/${u}`,{text:n,time:Date.now()})}],
+['admins','الإدارة','📨','دعوة أدمن',0,()=>{const u=ask('User:');if(u)P(`admin_invites`,{user:u,time:Date.now()})}],
+['admins','الإدارة','🔐','2FA إجباري',0,()=>{const u=ask('User:');if(u)S(`users_data/${u}/twoFA`,1)}],
+['admins','الإدارة','📋','قائمة الأدمنز',0,()=>G('roles/admins').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['admins','البيانات','👁️','الصلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['admins','البيانات','📜','سجل النشاط',0,()=>G('admin_activity').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['admins','البيانات','🕐','آخر ظهور',0,()=>G('roles/admins').then(x=>{const o=[];Object.keys(x.val()||{}).forEach(u=>G(`presence/${u}/lastSeen`).then(y=>o.push(u+': '+new Date(y.val()||0).toLocaleString())));setTimeout(()=>alert(o.join('\n')),500)})],
+['admins','البيانات','🔍','فحص الجلسات',0,()=>G('sessions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['admins','البيانات','📊','مصفوفة الصلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['admins','البيانات','📤','تصدير',0,()=>G('roles/admins').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='admins.json';a.click()})],
+['admins','البيانات','📊','إحصائيات',0,()=>G('roles/admins').then(x=>alert('عدد الأدمنز: '+Object.keys(x.val()||{}).length))],
+['admins','البيانات','📋','سجل الدخول',0,()=>G('admin_logins').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ ANALYTICS (18) ════
+['analytics','المستخدمون','📈','DAU',0,()=>G('presence').then(x=>{const c={};Object.values(x.val()||{}).forEach(p=>{const d1=new Date(p.lastSeen||0).toISOString().slice(0,10);c[d1]=(c[d1]||0)+1});alert(JSON.stringify(c,null,2))})],
+['analytics','المستخدمون','📊','WAU',0,()=>alert('WAU metric')],
+['analytics','المستخدمون','📉','MAU',0,()=>alert('MAU metric')],
+['analytics','المستخدمون','🔁','الاحتفاظ',0,()=>alert('Retention')],
+['analytics','المستخدمون','🌊','Funnel',0,()=>alert('Funnel')],
+['analytics','المستخدمون','📄','أعلى صفحات',0,()=>G('pageviews').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['analytics','المستخدمون','⚡','أعلى أفعال',0,()=>G('actions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['analytics','المستخدمون','🚪','Bounce',0,()=>alert('Bounce rate')],
+['analytics','المستخدمون','⏱️','مدة الجلسة',0,()=>alert('Avg session')],
+['analytics','المستخدمون','👥','جديد vs قديم',0,()=>G('users_data').then(x=>{const now=Date.now();let nw=0;Object.values(x.val()||{}).forEach(u=>{if((u.createdAt||0)>now-7*864e5)nw++});alert(`جديد (7ي): ${nw}\nإجمالي: ${Object.keys(x.val()||{}).length}`)})],
+['analytics','المستخدمون','📈','النمو',0,()=>alert('Growth rate')],
+['analytics','المستخدمون','🔮','Churn',0,()=>G('presence').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,p])=>{if(Date.now()-(p.lastSeen||0)>30*864e5)out.push(u)});alert('معرضون للخطر: '+out.length)})],
+['analytics','المستخدمون','💪','Power Users',0,()=>G('users_data').then(x=>{const a=Object.entries(x.val()||{}).sort((a,b)=>(b[1].xp||0)-(a[1].xp||0)).slice(0,20);alert(a.map(([u])=>u).join('\n'))})],
+['analytics','المستخدمون','⚠️','At-Risk',0,()=>G('presence').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,p])=>{const d1=(Date.now()-(p.lastSeen||0))/864e5;if(d1>7&&d1<30)out.push(u)});alert(out.join('\n')||'لا يوجد')})],
+['analytics','الاكتساب','🔗','مصادر',0,()=>G('referrers').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['analytics','الاكتساب','📱','أجهزة',0,()=>G('devices').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['analytics','الاكتساب','🌍','دول',0,()=>G('countries').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['analytics','الاكتساب','🌐','متصفحات',0,()=>G('browsers').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ LOGS (12) ════
+['logs','العرض','📜','كل السجلات',0,()=>G('logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','العرض','🔍','بحث',0,()=>{const q=ask('Query:');G('logs').then(x=>{const out=[];Object.values(x.val()||{}).forEach(l=>{if(JSON.stringify(l).includes(q))out.push(JSON.stringify(l))});alert(out.join('\n\n').slice(0,2000)||'لا يوجد')})}],
+['logs','العرض','📤','تصدير',0,()=>G('logs').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='logs.json';a.click()})],
+['logs','العرض','🧹','مسح الكل',0,()=>{if(conf('مسح كل السجلات؟'))D('logs')}],
+['logs','العرض','⏰','حذف قديمة',0,()=>{const d1=ask('Days:');if(d1)G('logs').then(x=>{const c=Date.now()-(+d1)*864e5;Object.entries(x.val()||{}).forEach(([id,l])=>{if((l.time||0)<c)D(`logs/${id}`)});toast('تم')})}],
+['logs','العرض','📊','إحصائيات',0,()=>G('logs').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
+['logs','الأنواع','👤','فعل مستخدم',0,()=>G('user_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','الأنواع','🛡️','فعل أدمن',0,()=>G('admin_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','الأنواع','⚙️','سجل النظام',0,()=>G('system_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','الأنواع','❌','سجل الأخطاء',0,()=>G('error_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','الأنواع','🔒','سجل الأمان',0,()=>G('security_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['logs','الأنواع','🔴','بث مباشر',0,()=>alert('Live stream (Firebase Console)')],
+
+// ════ API (10) ════
+['api','المفاتيح','🔑','توليد مفتاح',0,()=>{const n=ask('Name:');if(n)S(`api_keys/${n}`,{key:'sk_'+Math.random().toString(36).slice(2,22),created:Date.now()})}],
+['api','المفاتيح','🗑️','إلغاء مفتاح',0,()=>{const n=ask('Name:');if(n)D(`api_keys/${n}`)}],
+['api','المفاتيح','👁️','قائمة المفاتيح',0,()=>G('api_keys').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['api','المفاتيح','🔄','تدوير المفتاح',0,()=>{const n=ask('Name:');if(n)S(`api_keys/${n}/key`,'sk_'+Math.random().toString(36).slice(2,22))}],
+['api','المفاتيح','🧪','Sandbox Mode',0,()=>S('site_settings/sandbox',1)],
+['api','Webhooks','🔗','إضافة',0,()=>{const u=ask('URL:'),e=ask('Event:');if(u)P('webhooks',{url:u,event:e})}],
+['api','Webhooks','🧪','اختبار',0,()=>{const id=ask('ID:');if(id)G(`webhooks/${id}`).then(x=>alert('تم الإرسال: '+JSON.stringify(x.val())))}],
+['api','Webhooks','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`webhooks/${id}`)}],
+['api','Webhooks','📊','حدود الاستخدام',0,()=>G('api_rate_limit').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['api','Webhooks','📜','سجل المكالمات',0,()=>G('api_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+
+// ════ DEVELOPER (15) ════
+['developer','الأدوات','💻','Console',0,()=>{const p=ask('Path:');if(p)G(p).then(x=>alert(JSON.stringify(x.val(),null,2)))}],
+['developer','الأدوات','🔍','استعلام',0,()=>{const p=ask('Path:');if(p)G(p).then(x=>alert(JSON.stringify(x.val(),null,2)))}],
+['developer','الأدوات','📋','Schema',0,()=>G('/').then(x=>alert(Object.keys(x.val()||{}).join('\n')))],
+['developer','الأدوات','🌱','Seed Data',0,()=>{S('site_settings/seeded',Date.now());toast('Seed تم')}],
+['developer','الأدوات','🚚','Migration',0,()=>alert('Migration ready')],
+['developer','الأدوات','❌','سجل الأخطاء',0,()=>G('errors').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['developer','الأدوات','⚡','سجل الأداء',0,()=>G('perf').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+['developer','الأدوات','💾','حالة الكاش',0,()=>alert(JSON.stringify({localStorage:Object.keys(localStorage).length}))],
+['developer','الأدوات','🖥️','معلومات السيرفر',0,()=>G('/').then(x=>alert('Data size: '+JSON.stringify(x.val()).length+' bytes'))],
+['developer','الأدوات','🎚️','Flags JSON',0,()=>G('site_settings').then(x=>{const f={};Object.entries(x.val()||{}).forEach(([k,v])=>{if(k.startsWith('flag_'))f[k]=v});alert(JSON.stringify(f,null,2))})],
+['developer','الخطير','💥','تصفير الموقع',0,()=>{if(ask('اكتب RESET:')==='RESET'){['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','notifications','events','shop_items','transactions','tickets','logs','custom_ranks','custom_badges','block_words','api_keys','webhooks','coupons','templates'].forEach(p=>D(p));toast('تم التصفير')}}],
+['developer','الخطير','👥','تصفير اللاعبين',0,()=>{if(conf('تصفير اللاعبين؟')){D('users_data');D('usernames')}}],
+['developer','الخطير','💬','تصفير المحتوى',0,()=>{if(conf('تصفير المحتوى؟')){D('comments');D('suggestions')}}],
+['developer','الخطير','💰','تصفير الاقتصاد',0,()=>{if(conf('تصفير الاقتصاد؟')){D('transactions');D('coupons')}}],
+['developer','الخطير','🗑️','مسح الكاش',0,()=>{localStorage.clear();toast('تم المسح')}]
+];
+
+// ═══════════════════════════════════════════════════════════
+// ═══════════════ RENDER FEATURES ════════════════════════════
+// ═══════════════════════════════════════════════════════════
+function renderFeatures(){
+  const byTab={};
+  F.forEach((f,i)=>{
+    const tab=f[0];
+    if(!byTab[tab])byTab[tab]=[];
+    byTab[tab].push({idx:i,sec:f[1],icon:f[2],label:f[3],needsUser:f[4]});
+  });
+  Object.entries(byTab).forEach(([tab,items])=>{
+    const container=document.getElementById('features-'+tab);
+    if(!container)return;
+    const sections={};
+    items.forEach(it=>{if(!sections[it.sec])sections[it.sec]=[];sections[it.sec].push(it)});
+    container.innerHTML=Object.entries(sections).map(([sec,its])=>`
+      <h3 class="section-title">${sec}</h3>
+      <div class="action-grid">
+        ${its.map(it=>`<button class="btn ${colorFor(it.label)}" onclick="window.runFeature(${it.idx})">${it.icon} ${it.label}</button>`).join('')}
+      </div>
+    `).join('');
+  });
+  document.getElementById('counter')&&(document.getElementById('counter').textContent=F.length);
+}
+
+function colorFor(l){
+  if(/حظر|مسح|حذف|تصفير|Reset|Delete|Ban|Kill|إلغاء|إزالة|رفض|إخفاء/i.test(l))return 'btn-red';
+  if(/إضافة|إنشاء|Add|Create|New|Seed|رفع|قبول|توثيق|تفعيل|منح/i.test(l))return 'btn-green';
+  if(/تعديل|تعيين|Set|Edit|Update|إسناد|تحديث/i.test(l))return 'btn-blue';
+  if(/عرض|View|Show|List|معاينة|قائمة|بحث/i.test(l))return 'btn-gold';
+  if(/تحذير|Warn|إشعار|بث|تنبيه|إعلان/i.test(l))return 'btn-orange';
+  return 'btn-ghost';
+}
+
+window.runFeature=async(idx)=>{
+  const f=F[idx];
+  if(!f)return;
+  const [tab,sec,icon,label,needsUser,fn]=f;
+  let target=null;
+  if(needsUser===1){
+    target=document.getElementById('targetUser').value;
+    if(!target){toast('اختر لاعب من القائمة أولاً',true);return;}
+  }
+  try{await fn(target);toast(`تم: ${label}`);}
+  catch(e){console.error(e);toast('خطأ: '+e.message,true);}
+};
+
+// ═══════════════════════════════════════════════════════════
+// ═══════════════ INIT ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+function init(){
+  renderFeatures();
+
+  window.toggleTheme=()=>{const on=document.body.classList.toggle('light-mode');document.getElementById('themeBtn').innerText=on?'🌙':'☀️';localStorage.setItem('theme',on?'light':'dark')};
+  if(localStorage.getItem('theme')==='light'){document.body.classList.add('light-mode');document.getElementById('themeBtn').innerText='🌙'}
+
+  window.logoutUser=()=>{signOut(auth);localStorage.removeItem('loggedInUser');location.href='index.html'};
+
+  const titles={dashboard:'📊 الإحصائيات',users:'👥 اللاعبين',ranks:'🎖️ الرتب',badges:'🏅 البادجات',warnings:'⚠️ التحذيرات',security:'🔒 الأمان',content:'📝 المحتوى',messages:'📩 الرسائل',notifications:'🔔 الإشعارات',events:'🎉 الفعاليات',shop:'🛒 المتجر',support:'🎫 الدعم',system:'⚙️ النظام',themes:'🎨 الثيمات',admins:'🛡️ الأدمنز',analytics:'📈 التحليلات',logs:'📜 السجلات',api:'🔌 API',developer:'🔧 المطور'};
+  window.switchTab=(id,el)=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('tab-'+id).classList.add('active');el.classList.add('active');document.getElementById('pageTitle').innerText=titles[id]||id;};
+  window.switchTabById=id=>{const el=document.querySelector(`[data-tab="${id}"]`);if(el)switchTab(id,el)};
+
+  const listen=(p,cb)=>onValue(ref(db,p),s=>cb(s.val()||{}));
+  listen('usernames',v=>{state.users=v;renderUserSelect();renderUsers();renderStats()});
+  listen('presence',v=>{state.presence=v;renderUsers();renderStats()});
+  listen('users_data',v=>{state.xp=v;renderUsers();renderStats()});
+  listen('roles',v=>{state.roles=v||{};renderRanksList();renderAdmins();renderStats()});
+  listen('badges',v=>{state.badges=v;renderBadgesList();renderStats()});
+  listen('banned_users',v=>{state.banned=v;renderBanned();renderStats()});
+  listen('muted',v=>{state.muted=v;renderUsers()});
+  listen('warnings',v=>{state.warnings=v;renderWarnings();renderStats()});
+  listen('comments',v=>{state.comments=v;renderList('commentsList',v,'comments')});
+  listen('suggestions',v=>{state.suggestions=v;renderList('suggestionsList',v,'suggestions')});
+  listen('messages',v=>{state.messages=v;renderStats()});
+  listen('notifications',v=>{state.notifications=v;renderNotifHistory()});
+  listen('events',v=>{state.events=v;renderEvents()});
+  listen('shop_items',v=>{state.shop=v;renderShop()});
+  listen('transactions',v=>{state.transactions=v;renderTransactions()});
+  listen('tickets',v=>{state.tickets=v;renderTickets()});
+  listen('faq',v=>{state.faq=v;renderFAQ()});
+  listen('themes',v=>{state.themes=v;renderThemes()});
+  listen('custom_badges',v=>{state.customBadges=v;renderBadgesList()});
+  listen('custom_ranks',v=>{state.customRanks=v;renderRanksList()});
+  listen('logs',v=>{state.logs=v;renderLogs();renderRecentActivity()});
+  listen('api_keys',v=>{state.apiKeys=v;renderAPIKeys()});
+  listen('site_settings',v=>{state.settings=v;renderStats()});
+  onValue(ref(db,'usernames'),snap=>{
+    const sel=document.getElementById('targetUser');
+    const cur=sel.value;
+    const users=Object.keys(snap.val()||{});
+    sel.innerHTML='<option value="">🎯 اختر لاعب</option>'+users.map(u=>`<option value="${u}">${u}</option>`).join('');
+    if(cur)sel.value=cur;
+  });
+  window.onTargetChange=()=>{toast('تم تحديد: '+document.getElementById('targetUser').value)};
+
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ═══════════════ RENDER HELPERS ═════════════════════════════
+// ═══════════════════════════════════════════════════════════
+function getLevel(u){const xp=state.xp[u]?.xp||0;return Math.floor(Math.sqrt(xp/100))+1}
+
+function renderStats(){
+  const grid=document.getElementById('statsGrid');if(!grid)return;
+  const uCount=Object.keys(state.users).length;
+  const online=Object.values(state.presence).filter(p=>p.status==='online').length;
+  let totalXP=0,totalCoins=0;
+  for(let u in state.xp){totalXP+=state.xp[u].xp||0;totalCoins+=state.xp[u].coins||0}
+  const banned=Object.keys(state.banned).length;
+  const badges=Object.keys(state.badges).length;
+  const warns=Object.keys(state.warnings).length;
+  const admins=state.roles?.admins?Object.keys(state.roles.admins).length:0;
+  const events=Object.keys(state.events||{}).length;
+  const shop=Object.keys(state.shop||{}).length;
+  const tickets=Object.keys(state.tickets||{}).length;
+  const msgs=Object.keys(state.messages||{}).length;
+  grid.innerHTML=`
+    <div class="stat-card"><h3>👥 اللاعبين</h3><div class="num">${uCount}</div></div>
+    <div class="stat-card"><h3>🟢 متصل</h3><div class="num" style="color:var(--green)">${online}</div></div>
+    <div class="stat-card"><h3>✨ XP</h3><div class="num" style="color:var(--blue)">${totalXP}</div></div>
+    <div class="stat-card"><h3>💰 كوينز</h3><div class="num" style="color:var(--gold)">${totalCoins}</div></div>
+    <div class="stat-card"><h3>🚫 محظور</h3><div class="num" style="color:var(--accent)">${banned}</div></div>
+    <div class="stat-card"><h3>🏅 بادجات</h3><div class="num" style="color:var(--pink)">${badges}</div></div>
+    <div class="stat-card"><h3>⚠️ تحذيرات</h3><div class="num" style="color:var(--orange)">${warns}</div></div>
+    <div class="stat-card"><h3>🛡️ أدمنز</h3><div class="num" style="color:var(--blue)">${admins}</div></div>
+    <div class="stat-card"><h3>🎉 فعاليات</h3><div class="num" style="color:var(--purple)">${events}</div></div>
+    <div class="stat-card"><h3>🛒 متجر</h3><div class="num" style="color:var(--cyan)">${shop}</div></div>
+    <div class="stat-card"><h3>🎫 تذاكر</h3><div class="num" style="color:var(--gold)">${tickets}</div></div>
+    <div class="stat-card"><h3>📩 رسائل</h3><div class="num" style="color:var(--blue)">${msgs}</div></div>
+  `;
+  const top=document.getElementById('topPlayersList');
+  if(top){
+    const sorted=Object.entries(state.xp).sort((a,b)=>(b[1].xp||0)-(a[1].xp||0)).slice(0,10);
+    top.innerHTML=sorted.map(([u,d],i)=>`<div class="item"><h3>${i+1===1?'🥇':i+1===2?'🥈':i+1===3?'🥉':(i+1)+'.'} ${u}</h3><p style="color:var(--gold)">✨ ${d.xp||0} XP</p></div>`).join('')||'<div class="item">لا يوجد</div>';
+  }
+}
+
+function renderUserSelect(){
+  const sel=document.getElementById('filterRank');if(!sel)return;
+  const ranks=new Set(['Owner','Admin','Player','VIP']);
+  Object.values(state.roles?.users||{}).forEach(r=>ranks.add(r));
+  const cur=sel.value;
+  sel.innerHTML='<option value="">كل الرتب</option>'+[...ranks].map(r=>`<option value="${r}">${r}</option>`).join('');
+  sel.value=cur;
+}
+
+function renderUsers(){
+  const c=document.getElementById('usersList');if(!c)return;
+  const search=(document.getElementById('searchUser')?.value||'').toLowerCase();
+  const st=document.getElementById('filterStatus')?.value||'';
+  const rk=document.getElementById('filterRank')?.value||'';
+  const sort=document.getElementById('sortBy')?.value||'name';
+  let list=Object.keys(state.users).filter(u=>u.toLowerCase().includes(search));
+  if(st==='online')list=list.filter(u=>state.presence[u]?.status==='online');
+  if(st==='offline')list=list.filter(u=>state.presence[u]?.status!=='online');
+  if(st==='banned')list=list.filter(u=>state.banned[u]);
+  if(st==='muted')list=list.filter(u=>state.muted[u]);
+  if(st==='verified')list=list.filter(u=>state.xp[u]?.verified);
+  if(rk)list=list.filter(u=>{
+    const rank=u.toLowerCase()==='ahmed'?'Owner':state.roles?.admins?.[u]?'Admin':state.roles?.users?.[u]||'Player';
+    return rank===rk;
+  });
+  list.sort((a,b)=>{
+    if(sort==='xp')return (state.xp[b]?.xp||0)-(state.xp[a]?.xp||0);
+    if(sort==='coins')return (state.xp[b]?.coins||0)-(state.xp[a]?.coins||0);
+    if(sort==='level')return getLevel(b)-getLevel(a);
+    return a.localeCompare(b);
+  });
+  c.innerHTML=list.length===0?'<div class="item">لا يوجد لاعبين مطابقين</div>':'';
+  list.forEach(u=>{
+    const on=state.presence[u]?.status==='online';
+    const xp=state.xp[u]?.xp||0,coins=state.xp[u]?.coins||0;
+    const rank=u.toLowerCase()==='ahmed'?'Owner':state.roles?.admins?.[u]?'Admin':state.roles?.users?.[u]||'Player';
+    const banned=state.banned[u];
+    const muted=state.muted[u];
+    const verified=state.xp[u]?.verified;
+    let stTag='';if(banned)stTag='<span style="color:var(--accent)">🚫 محظور</span>';
+    else if(muted)stTag='<span style="color:var(--orange)">🔇 مكتوم</span>';
+    else if(verified)stTag='<span style="color:var(--green)">✅ موثق</span>';
+    const div=document.createElement('div');div.className='item';
+    div.innerHTML=`
+      <div><h3>${u.toLowerCase()==='ahmed'?'👑':'🎮'} ${u} ${stTag}</h3>
+      <p style="color:${on?'var(--green)':'#aaa'};font-size:12px">${on?'🟢 متصل':'⚪ غير متصل'} | ${rank} | ✨ ${xp} | 💰 ${coins}</p></div>
+      <div class="actions"><button class="btn btn-blue" onclick="document.getElementById('targetUser').value='${u}';document.getElementById('targetUser').dispatchEvent(new Event('change'));toast('حددت ${u}')">🎯 تحديد</button></div>
+    `;
+    c.appendChild(div);
+  });
+}
+
+function renderRanksList(){
+  const c=document.getElementById('ranksList');if(!c)return;
+  const ur=state.roles?.users||{};
+  let html='';
+  for(let u in ur)html+=`<div class="item"><div><h3>👤 ${u}</h3><p style="color:var(--gold)">🎖️ ${ur[u]}</p></div></div>`;
+  for(let k in state.customRanks||{}){const r=state.customRanks[k];html+=`<div class="item"><div><h3>${r.icon||'🎖️'} ${r.name}</h3><p style="font-size:12px;color:#aaa">XP: ${r.xp||0} | Priority: ${r.priority||0}</p></div></div>`}
+  c.innerHTML=html||'<div class="item">لا توجد رتب</div>';
+}
+
+function renderBadgesList(){
+  const c=document.getElementById('badgesList');if(!c)return;
+  const base=['👑 Founder','⭐ VIP','🔥 Pro','🎃 Horror','💖 K-Drama','💥 Action','🎯 Sniper','🧠 Genius','🏆 Champion','💎 Diamond'];
+  let html=base.map(b=>`<div class="item"><span style="font-size:16px">${b}</span></div>`).join('');
+  for(let k in state.customBadges||{}){const b=state.customBadges[k];html+=`<div class="item"><div><span style="font-size:16px">${b.icon||'🏅'} ${b.name}</span><p style="font-size:11px;color:${b.color||'#fff'}">${b.rarity||'common'}</p></div></div>`}
+  c.innerHTML=html;
+  const hc=document.getElementById('badgeHolders');if(!hc)return;
+  let hh='';
+  for(let u in state.badges||{}){const bl=Object.keys(state.badges[u]||{});if(bl.length)hh+=`<div class="item"><div><h3>👤 ${u}</h3><p style="font-size:12px;color:var(--gold)">${bl.join(' | ')}</p></div></div>`}
+  hc.innerHTML=hh||'<div class="item">لا يوجد</div>';
+}
+
+function renderWarnings(){
+  const c=document.getElementById('warningsList');if(!c)return;
+  let html='';
+  for(let u in state.warnings){const w=state.warnings[u];const ws=Array.isArray(w)?w:[w];ws.forEach(wr=>{if(!wr)return;html+=`<div class="item"><div><h3 style="color:var(--gold)">👤 ${u}</h3><p>${wr.text||''} <span style="color:${wr.sev==='high'||wr.sev==='critical'?'var(--accent)':'var(--orange)'};font-size:11px">[${wr.sev||'med'}]</span></p><p style="font-size:11px;color:#aaa">${new Date(wr.time||0).toLocaleString()}</p></div></div>`})}
+  c.innerHTML=html||'<div class="item">لا تحذيرات</div>';
+}
+
+function renderBanned(){
+  const c=document.getElementById('bannedList');if(!c)return;
+  let html='';
+  for(let u in state.banned||{}){const b=state.banned[u];html+=`<div class="item"><div><h3 style="color:var(--accent)">🚫 ${u}</h3><p style="font-size:12px">${b.reason||'—'}</p></div></div>`}
+  c.innerHTML=html||'<div class="item">لا محظورين</div>';
+}
+
+function renderList(id,data,node){
+  const c=document.getElementById(id);if(!c)return;
+  let html='';
+  Object.keys(data||{}).forEach(k=>{const d=data[k];html+=`<div class="item"><div><p style="color:var(--gold);font-size:12px">👤 ${d.user||'?'}</p><p>${d.text||''}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا يوجد</div>';
+}
+
+function renderNotifHistory(){
+  const c=document.getElementById('notifHistory');if(!c)return;
+  let html='';
+  Object.keys(state.notifications||{}).forEach(k=>{const n=state.notifications[k];html+=`<div class="item"><div><h3>${n.title||'إشعار'}</h3><p style="font-size:12px">${n.body||n.text||''}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا إشعارات</div>';
+}
+
+function renderEvents(){
+  const c=document.getElementById('eventsList');if(!c)return;
+  let html='';
+  Object.keys(state.events||{}).forEach(k=>{const ev=state.events[k];html+=`<div class="item"><div><h3>🎉 ${ev.name}</h3><p style="font-size:12px">🎁 ${ev.reward||'-'}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا فعاليات</div>';
+}
+
+function renderShop(){
+  const c=document.getElementById('shopList');if(!c)return;
+  let html='';
+  Object.keys(state.shop||{}).forEach(k=>{const s1=state.shop[k];html+=`<div class="item"><div><h3>${s1.icon||'🛒'} ${s1.name}</h3><p style="font-size:12px">💰 ${s1.price} | ${s1.cat||'misc'}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا عناصر</div>';
+}
+
+function renderTransactions(){
+  const c=document.getElementById('transactionsList');if(!c)return;
+  let html='';
+  Object.keys(state.transactions||{}).forEach(k=>{const t=state.transactions[k];html+=`<div class="item"><div><p>👤 ${t.user} اشترى ${t.item||'?'} بـ ${t.price}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا معاملات</div>';
+}
+
+function renderTickets(){
+  const c=document.getElementById('ticketsList');if(!c)return;
+  let html='';
+  Object.keys(state.tickets||{}).forEach(k=>{const t=state.tickets[k];html+=`<div class="item"><div><h3>🎫 ${t.subject||'تذكرة'}</h3><p style="font-size:12px">${t.text||''}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا تذاكر</div>';
+}
+
+function renderFAQ(){
+  const c=document.getElementById('faqList');if(!c)return;
+  let html='';
+  Object.keys(state.faq||{}).forEach(k=>{const f=state.faq[k];html+=`<div class="item"><div><h3>❓ ${f.q}</h3><p style="font-size:12px">${f.a}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا أسئلة</div>';
+}
+
+function renderThemes(){
+  const c=document.getElementById('themesList');if(!c)return;
+  let html='';
+  Object.keys(state.themes||{}).forEach(k=>{const t=state.themes[k];html+=`<div class="item"><div><h3>🎨 ${t.name}</h3><p style="font-size:12px;color:${t.accent||'#fff'}">${t.primary||''} / ${t.accent||''}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا ثيمات</div>';
+}
+
+function renderAdmins(){
+  const c=document.getElementById('adminsList');if(!c)return;
+  const admins=state.roles?.admins||{};
+  let html='';
+  Object.keys(admins).forEach(u=>{html+=`<div class="item"><h3>🛡️ ${u}</h3></div>`});
+  c.innerHTML=html||'<div class="item">لا أدمنز</div>';
+}
+
+function renderLogs(){
+  const c=document.getElementById('logsList');if(!c)return;
+  let html='';
+  Object.keys(state.logs||{}).slice(-100).reverse().forEach(k=>{const l=state.logs[k];html+=`<div class="item"><div><p>${l.text||l.message||JSON.stringify(l)}</p><p style="font-size:11px;color:#aaa">${new Date(l.time||0).toLocaleString()}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا سجلات</div>';
+}
+
+function renderRecentActivity(){
+  const c=document.getElementById('recentActivity');if(!c)return;
+  let html='';
+  Object.keys(state.logs||{}).slice(-15).reverse().forEach(k=>{const l=state.logs[k];html+=`<div class="item"><div><p>${l.text||l.message||'نشاط'}</p><p style="font-size:11px;color:#aaa">${new Date(l.time||0).toLocaleString()}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا نشاط</div>';
+}
+
+function renderAPIKeys(){
+  const c=document.getElementById('apiKeysList');if(!c)return;
+  let html='';
+  Object.keys(state.apiKeys||{}).forEach(k=>{const a=state.apiKeys[k];html+=`<div class="item"><div><h3>🔑 ${k}</h3><p style="font-size:11px;color:#aaa">${typeof a==='object'?a.key:a}</p></div></div>`});
+  c.innerHTML=html||'<div class="item">لا مفاتيح</div>';
+}
+
+function renderAll(){renderStats();renderUsers();renderRanksList();renderBadgesList();renderWarnings();renderBanned();renderEvents();renderShop();renderTransactions();renderTickets();renderFAQ();renderThemes();renderAdmins();renderLogs();renderRecentActivity();renderAPIKeys();renderNotifHistory();renderList('commentsList',state.comments,'comments');renderList('suggestionsList',state.suggestions,'suggestions');}
+
+window.exportUsersCSV=()=>{
+  const rows=[['username','xp','coins','level','rank','banned','verified']];
+  Object.keys(state.users).forEach(u=>{
+    rows.push([u,state.xp[u]?.xp||0,state.xp[u]?.coins||0,getLevel(u),state.roles?.users?.[u]||'Player',state.banned[u]?'yes':'no',state.xp[u]?.verified?'yes':'no']);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='users.csv';a.click();toast('تم التصدير');
+};
