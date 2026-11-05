@@ -30,7 +30,6 @@
   .auth-btn { width: 100%; padding: 15px; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Cairo'; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
   .auth-switch { color: var(--subtitle-color); cursor: pointer; text-decoration: underline; font-size: 14px; margin-top: 10px; }
 
-  /* اختيار النوع في التسجيل */
   .gender-selector { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
   .gender-box { flex: 1; text-align: center; padding: 15px; background: var(--input-bg); border: 2px solid #555; border-radius: 10px; cursor: pointer; transition: 0.3s; font-weight: bold; font-size: 16px;}
   .gender-box.active { border-color: var(--accent); background: rgba(255,0,0,0.1); color: var(--accent); }
@@ -122,8 +121,9 @@
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
   
+  <!-- ✅ التعديل: زرار المناطق المحظورة ظاهر دايماً -->
   <div id="restrictedArea" style="border-top: 2px dashed #ff0000; margin: 10px 0; padding-top: 10px; display: block;">
- <a href="restricted.html" class="menu-item" style="color: #ff0000; font-weight: 900; background: rgba(255,0,0,0.1); border: 1px solid #ff0000; border-radius: 8px; justify-content: center; margin-top: 10px;" data-ar="🚫 المناطق المحظورة" data-en="🚫 Restricted Areas">🚫 المناطق المحظورة</a>
+    <a href="restricted.html" class="menu-item" style="color: #ff0000; font-weight: 900; background: rgba(255,0,0,0.1); border: 1px solid #ff0000; border-radius: 8px; justify-content: center; margin-top: 10px;" data-ar="🚫 المناطق المحظورة" data-en="🚫 Restricted Areas">🚫 المناطق المحظورة</a>
   </div>
 
   <div style="border-top: 1px solid var(--card-border); margin: 10px 0;"></div>
@@ -148,7 +148,6 @@
   <h1 style="color:var(--accent); margin-bottom:20px; font-size: 32px;" id="authTitle" data-ar="🎬 أهلاً بيك" data-en="🎬 Welcome">🎬 أهلاً بيك</h1>
   <p style="margin-bottom: 20px; color: var(--subtitle-color); font-size: 16px;" id="authDesc" data-ar="سجل دخولك عشان نبدأ التحدي!" data-en="Log in to start the challenge!">سجل دخولك عشان نبدأ التحدي!</p>
   
-  <!-- خيارات النوع (تظهر فقط عند إنشاء حساب) -->
   <div id="genderSection" class="gender-selector" style="display: none;">
     <div class="gender-box" onclick="selectGender('male')" id="genderMale">👦 ولد</div>
     <div class="gender-box" onclick="selectGender('female')" id="genderFemale">👧 بنت</div>
@@ -263,7 +262,7 @@
   window.signInWithEmailAndPassword = signInWithEmailAndPassword; 
   window.signOut = signOut;
 
-  let selectedGender = 'male'; // افتراضي
+  let selectedGender = 'male';
   let settingsLoaded = false;
 
   onAuthStateChanged(auth, (user) => {
@@ -289,18 +288,11 @@
           else { bar.style.display = 'none'; }
       });
 
-      // 2. إظهار / إخفاء "المناطق المحظورة"
-      window.get(window.ref(window.db, 'roles/users/' + username)).then(snap => {
-          const role = snap.exists() ? snap.val() : 'Player';
-          const restrictedArea = document.getElementById('restrictedArea');
-          if (restrictedArea) {
-              if (role === 'Player' && username.toLowerCase() !== 'ahmed') {
-                  restrictedArea.style.display = 'none';
-              } else {
-                  restrictedArea.style.display = 'block';
-              }
-          }
-      });
+      // ✅ التعديل: زرار المناطق المحظورة ظاهر دايماً (شيلنا الشرط اللي كان بيخفيه)
+      const restrictedArea = document.getElementById('restrictedArea');
+      if (restrictedArea) {
+          restrictedArea.style.display = 'block';
+      }
 
       // 3. وضع الصيانة
       window.onValue(window.ref(window.db, 'site_settings/maintenance'), snap => {
@@ -339,7 +331,7 @@
           } else { marquee.style.display = 'none'; }
       });
 
-      // 7. إخفاء/إظهار الشات (من الواجهة ومن المنيو)
+      // 7. إخفاء/إظهار الشات
       window.onValue(window.ref(window.db, 'site_settings/chatOff'), snap => {
           const chatBtn = document.getElementById('chatBtn');
           const chatMenu = document.getElementById('chatMenuBtn');
@@ -381,7 +373,6 @@
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 
-  // --- دوال اختيار النوع (في التسجيل) ---
   window.selectGender = function(gender) {
       selectedGender = gender;
       document.getElementById('genderMale').classList.remove('active');
