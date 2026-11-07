@@ -4,208 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>💬 الشات الجماعي - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root { 
-    --bg-color: #000; 
-    --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); 
-    --text-color: #fff; 
-    --subtitle-color: #aaa; 
-    --card-bg: #111; 
-    --border-color: #333; 
-    --accent: #ff0000; 
+    --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); 
+    --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --border-color: #333; --accent: #ff0000; 
   }
   body.light-mode { 
-    --bg-color: #f4f4f4; 
-    --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%); 
-    --text-color: #111; 
-    --subtitle-color: #555; 
-    --card-bg: #fff; 
-    --border-color: #ccc; 
+    --bg-color: #f4f4f4; --bg-gradient: radial-gradient(circle at center, #ffffff 0%, #e0e0e0 100%); 
+    --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --border-color: #ccc; 
   }
-  
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg-gradient); background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
   
-  body { 
-    background: var(--bg-gradient); 
-    background-color: var(--bg-color); 
-    color: var(--text-color); 
-    font-family: 'Cairo', sans-serif; 
-    height: 100vh; 
-    height: 100dvh; /* عشان مشكلة شريط العنوان في الموبايل */
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden; 
-  }
-  
-  /* الأزرار العلوية */
-  .top-controls { 
-    position: absolute; 
-    top: 12px; 
-    left: 12px; 
-    display: flex; 
-    gap: 8px; 
-    z-index: 1000; 
-  }
-  
-  .ctrl-btn { 
-    background: rgba(30, 30, 30, 0.9); 
-    color: #fff; 
-    border: 1px solid #555; 
-    padding: 6px 12px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: bold; 
-    font-family: 'Cairo'; 
-    transition: 0.3s; 
-    text-decoration: none; 
-    font-size: 13px;
-  }
-  
+  .top-controls { position: absolute; top: 12px; left: 12px; display: flex; gap: 8px; z-index: 1000; }
+  .ctrl-btn { background: rgba(30, 30, 30, 0.9); color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; text-decoration: none; font-size: 13px; }
   .ctrl-btn:hover { background: #ff0000; border-color: #ff0000; }
   
-  /* حاوية الشات */
-  .chat-container { 
-    width: 100%; 
-    max-width: 700px; 
-    height: 100%; 
-    background: var(--card-bg); 
-    display: flex; 
-    flex-direction: column; 
-    margin: 0 auto; 
-    position: relative;
-  }
+  .chat-container { width: 100%; max-width: 700px; height: 100%; background: var(--card-bg); display: flex; flex-direction: column; margin: 0 auto; position: relative; }
+  .chat-header { background: #ff0000; color: #fff; padding: 15px; padding-top: 55px; font-weight: bold; font-size: 18px; z-index: 10; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: center; gap: 10px; flex-shrink: 0; }
   
-  /* الهيدر */
-  .chat-header { 
-    background: #ff0000; 
-    color: #fff; 
-    padding: 15px; 
-    padding-top: 55px; /* مساحة عشان الأزرار اللي فوق */
-    font-weight: bold; 
-    font-size: 18px; 
-    z-index: 10; 
-    text-align: center; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  
-  /* مساحة الرسايل */
-  .chat-messages { 
-    flex: 1; 
-    padding: 15px; 
-    overflow-y: auto; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .msg { 
-    padding: 10px 15px; 
-    border-radius: 15px; 
-    max-width: 85%; 
-    font-size: 14px; 
-    line-height: 1.5; 
-    position: relative; 
-    word-wrap: break-word;
-  }
-  
-  .msg.me { 
-    background: #ff0000; 
-    color: #fff; 
-    align-self: flex-end; 
-    border-bottom-left-radius: 2px; 
-  }
-  
-  .msg.them { 
-    background: #333; 
-    color: #fff; 
-    align-self: flex-start; 
-    border-bottom-right-radius: 2px; 
-  }
-  
+  .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+  .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 14px; line-height: 1.5; position: relative; word-wrap: break-word; }
+  .msg.me { background: #ff0000; color: #fff; align-self: flex-end; border-bottom-left-radius: 2px; }
+  .msg.them { background: #333; color: #fff; align-self: flex-start; border-bottom-right-radius: 2px; }
   body.light-mode .msg.them { background: #eee; color: #111; }
   
-  .msg-user { 
-    font-size: 12px; 
-    font-weight: bold; 
-    margin-bottom: 5px; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    flex-wrap: wrap;
-  }
-  
-  .msg-avatar { 
-    width: 25px; 
-    height: 25px; 
-    border-radius: 50%; 
-    background: #555; 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    overflow: hidden; 
-    cursor: pointer; 
-    border: 1px solid #777; 
-    font-size: 12px;
-  }
-  
+  .msg-user { font-size: 12px; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .msg-avatar { width: 25px; height: 25px; border-radius: 50%; background: #555; display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: pointer; border: 1px solid #777; font-size: 12px; }
   .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
   
-  .rank-badge { 
-    font-size: 9px; 
-    padding: 1px 5px; 
-    border-radius: 5px; 
-    background: rgba(255,255,255,0.2); 
-    color: #fff; 
-  }
+  /* ✅ علامة التوثيق */
+  .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 9px; font-weight: bold; margin-right: 4px; vertical-align: middle; }
   
+  .rank-badge { font-size: 9px; padding: 1px 5px; border-radius: 5px; background: rgba(255,255,255,0.2); color: #fff; }
   .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; display: block; text-align: left; }
 
-  /* حقل الكتابة */
-  .chat-input-container { 
-    display: flex; 
-    padding: 10px 12px; 
-    border-top: 1px solid var(--border-color); 
-    gap: 8px; 
-    background: var(--card-bg); 
-    flex-shrink: 0;
-    padding-bottom: max(10px, env(safe-area-inset-bottom)); /* عشان أزرار الآيفون */
-  }
-  
-  .chat-input-container input { 
-    flex: 1; 
-    padding: 12px 15px; 
-    border-radius: 25px; 
-    border: 1px solid var(--border-color); 
-    background: var(--bg-color); 
-    color: var(--text-color); 
-    font-family: 'Cairo'; 
-    font-size: 14px; 
-    outline: none; 
-  }
-  
-  .chat-input-container button { 
-    padding: 0 18px; 
-    background: #ff0000; 
-    color: #fff; 
-    border: none; 
-    border-radius: 25px; 
-    font-weight: bold; 
-    font-family: 'Cairo'; 
-    cursor: pointer; 
-    font-size: 14px;
-  }
+  .chat-input-container { display: flex; padding: 10px 12px; border-top: 1px solid var(--border-color); gap: 8px; background: var(--card-bg); flex-shrink: 0; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .chat-input-container input { flex: 1; padding: 12px 15px; border-radius: 25px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-family: 'Cairo'; font-size: 14px; outline: none; }
+  .chat-input-container button { padding: 0 18px; background: #ff0000; color: #fff; border: none; border-radius: 25px; font-weight: bold; font-family: 'Cairo'; cursor: pointer; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -231,8 +70,7 @@
   import { getDatabase, ref, push, onValue, query, limitToLast, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); 
-  const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
   
   window.db = db; window.ref = ref; window.push = push; window.onValue = onValue; 
   window.query = query; window.limitToLast = limitToLast; window.get = get;
@@ -256,7 +94,6 @@
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
     document.getElementById('loadingText').innerText = translations[currentLang].loading;
     
-    // ضبط اتجاه الزراير لو الوضع إنجليزي
     const topControls = document.querySelector('.top-controls');
     if (currentLang === 'en') {
         topControls.style.left = 'auto';
@@ -279,6 +116,7 @@
   let allUsersData = {};
   let allAdmins = {}; 
   let allRanks = {}; 
+  let verifiedUsers = {}; // ✅ متغير للتوثيق
   let isDataLoaded = false; 
 
   async function fetchData() {
@@ -291,6 +129,10 @@
           
           const userSnap = await window.get(window.ref(window.db, 'roles/users'));
           if (userSnap.exists()) allRanks = userSnap.val();
+
+          // ✅ جلب الموثقين
+          const verifiedSnap = await window.get(window.ref(window.db, 'verified_users'));
+          if (verifiedSnap.exists()) verifiedUsers = verifiedSnap.val();
           
           isDataLoaded = true;
           loadMessages();
@@ -361,10 +203,17 @@
         let avatarHTML = senderName.charAt(0).toUpperCase();
         if (pic) avatarHTML = `<img src="${pic}">`;
 
+        // ✅ فحص التوثيق
+        let isVerified = false;
+        for(let v in verifiedUsers) {
+            if(v.toLowerCase() === senderName.toLowerCase()) { isVerified = true; break; }
+        }
+        let badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
+
         div.innerHTML = `
           <div class="msg-user" style="color: ${rank.color};">
               <div class="msg-avatar" onclick="window.location.href='profile.html?user=${senderName}'">${avatarHTML}</div>
-              <span onclick="window.location.href='profile.html?user=${senderName}'" style="cursor:pointer; text-decoration:underline;">${senderName}</span> 
+              <span onclick="window.location.href='profile.html?user=${senderName}'" style="cursor:pointer; text-decoration:underline;">${senderName}</span>${badge}
               <span class="rank-badge" style="border: 1px solid ${rank.color};">${rank.text}</span>
           </div>
           <div>${msg.text || ''}</div>
@@ -373,7 +222,6 @@
         chatMessages.appendChild(div);
       });
       
-      // النزول لآخر رسالة أوتوماتيك
       setTimeout(() => {
           chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 100);
@@ -404,8 +252,6 @@
     fetchData();
   };
 </script>
-
 <script src="notifications.js"></script>
-
 </body>
 </html>
