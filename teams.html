@@ -28,7 +28,6 @@
   .header-title { text-align: center; color: var(--gold); font-size: 40px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
   .subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; font-size: 16px; }
 
-  /* التصنيفات الرئيسية */
   .main-teams-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 40px; }
   .main-team-card { 
       background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; 
@@ -48,7 +47,6 @@
   .main-team-status { font-size: 12px; margin-top: 10px; background: #222; padding: 4px 10px; border-radius: 10px; color: var(--subtitle); }
   .main-team-status.joined { background: var(--green); color: #fff; }
 
-  /* الفرق الفرعية */
   .clans-section { width: 100%; max-width: 1100px; border-top: 2px dashed var(--border); padding-top: 30px; display: none; }
   .clans-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -96,7 +94,6 @@
   .btn-admin { background: var(--purple); color: #fff; flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 12px; cursor: pointer; }
   .btn-admin-danger { background: var(--accent); color: #fff; }
 
-  /* المودال */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
   .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 25px; width: 95%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
   .modal-title { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; }
@@ -107,7 +104,6 @@
   .btn-force-add { background: var(--green); color: #fff; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
   .btn-close-modal { background: #555; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; margin-top: 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
 
-  /* الرسايل المخصصة */
   #customDialog { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; justify-content: center; align-items: center; }
   #customDialog .dialog-box { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 25px; width: 90%; max-width: 400px; text-align: center; }
   #customDialog h3 { color: var(--text); margin-bottom: 15px; font-size: 18px; line-height: 1.5; }
@@ -202,24 +198,15 @@
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
-  let currentLang = localStorage.getItem('lang') || 'ar';
-  
-  // ✅ تعريف الأونر بإنه الحساب ahmed فقط لا غير
-  const isOwner = (currentUser.toLowerCase() === 'ahmed');
-  
-  // باقي الإدارة (عشان الطرد الفوري لو حبيت تفرقهم)
-  const adminRoles = ['Owner', 'Admin', 'Partner', 'Manager', 'Tester', 'Builder'];
-  let isAdmin = isOwner; // لو عايز الإدارة كمان تطرد فوري، خليها true
-
-  if (!isAdmin) {
-      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
-          const role = snap.exists() ? snap.val() : 'Player';
-          if (adminRoles.includes(role)) isAdmin = true;
-          renderMainTeams();
-      });
-  } else {
-      renderMainTeams();
+  // ✅ تصليح مشكلة اللغة (عشان مفيش الصفحة تفصل)
+  let currentLang = localStorage.getItem('lang');
+  if (!currentLang || (currentLang !== 'ar' && currentLang !== 'en')) {
+      currentLang = 'ar';
   }
+  
+  const isOwner = (currentUser.toLowerCase() === 'ahmed');
+  const adminRoles = ['Owner', 'Admin', 'Partner', 'Manager', 'Tester', 'Builder'];
+  let isAdmin = isOwner; 
 
   let myMainTeams = []; 
   let myClans = []; 
@@ -292,32 +279,35 @@
   ];
 
   function applyLanguage() {
-      const t = translations[currentLang];
-      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-      
-      document.querySelectorAll('[data-ar]').forEach(el => {
-          if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-              el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-          } else {
-              el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-          }
-      });
+      try {
+          const t = translations[currentLang] || translations['ar'];
+          document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+          
+          document.querySelectorAll('[data-ar]').forEach(el => {
+              if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                  el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+              } else {
+                  el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+              }
+          });
 
-      document.getElementById('backBtn').innerText = t.back;
-      document.getElementById('mainTitle').innerText = t.title;
-      document.getElementById('subtitle').innerText = t.subtitle;
-      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-      
-      if (currentCategory) {
-          const catData = mainCategories.find(c => c.id === currentCategory);
-          if (catData) {
-              const catName = currentLang === 'ar' ? catData.nameAr : catData.nameEn;
-              document.getElementById('currentClanTitle').innerText = t.clansOf + ' ' + catName;
+          if (document.getElementById('backBtn')) document.getElementById('backBtn').innerText = t.back;
+          if (document.getElementById('mainTitle')) document.getElementById('mainTitle').innerText = t.title;
+          if (document.getElementById('subtitle')) document.getElementById('subtitle').innerText = t.subtitle;
+          if (document.getElementById('langBtn')) document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+          
+          if (currentCategory) {
+              const catData = mainCategories.find(c => c.id === currentCategory);
+              if (catData) {
+                  const catName = currentLang === 'ar' ? catData.nameAr : catData.nameEn;
+                  if (document.getElementById('currentClanTitle')) document.getElementById('currentClanTitle').innerText = t.clansOf + ' ' + catName;
+              }
           }
+          renderMainTeams();
+      } catch (e) {
+          console.error("Error in applyLanguage:", e);
+          renderMainTeams();
       }
-
-      renderMainTeams();
-      if(currentCategory) renderClans(currentCategory);
   }
 
   window.toggleLanguage = function() {
@@ -395,35 +385,40 @@
   });
 
   function renderMainTeams() {
-      const container = document.getElementById('mainTeamsContainer');
-      const t = translations[currentLang];
-      container.innerHTML = '';
+      try {
+          const container = document.getElementById('mainTeamsContainer');
+          if (!container) return;
+          const t = translations[currentLang] || translations['ar'];
+          container.innerHTML = '';
 
-      mainCategories.forEach(cat => {
-          const score = teamsScores[cat.id] || 0;
-          const isJoined = myMainTeams.includes(cat.id);
-          const catName = currentLang === 'ar' ? cat.nameAr : cat.nameEn;
+          mainCategories.forEach(cat => {
+              const score = teamsScores[cat.id] || 0;
+              const isJoined = myMainTeams.includes(cat.id);
+              const catName = currentLang === 'ar' ? cat.nameAr : cat.nameEn;
 
-          let statusHTML = '';
-          if (isJoined) {
-              statusHTML = `<div class="main-team-status joined" onclick="leaveMainTeam('${cat.id}', event)">${t.joinedMain} ❌</div>`; 
-          } else if (myMainTeams.length >= 3 && !isOwner) {
-              statusHTML = `<div class="main-team-status">${t.maxMainLimit}</div>`;
-          } else {
-              statusHTML = `<div class="main-team-status" onclick="joinMainTeam('${cat.id}', event)">${t.joinMain} ➡</div>`;
-          }
+              let statusHTML = '';
+              if (isJoined) {
+                  statusHTML = `<div class="main-team-status joined" onclick="leaveMainTeam('${cat.id}', event)">${t.joinedMain} ❌</div>`; 
+              } else if (myMainTeams.length >= 3 && !isOwner) {
+                  statusHTML = `<div class="main-team-status">${t.maxMainLimit}</div>`;
+              } else {
+                  statusHTML = `<div class="main-team-status" onclick="joinMainTeam('${cat.id}', event)">${t.joinMain} ➡</div>`;
+              }
 
-          const div = document.createElement('div');
-          div.className = `main-team-card ${cat.class} ${isJoined ? 'active-team' : ''}`;
-          div.onclick = () => openClans(cat.id, catName);
-          div.innerHTML = `
-              <div class="main-team-icon">${cat.icon}</div>
-              <div class="main-team-name">${catName}</div>
-              <div class="main-team-score">${score} ${t.points}</div>
-              ${statusHTML}
-          `;
-          container.appendChild(div);
-      });
+              const div = document.createElement('div');
+              div.className = `main-team-card ${cat.class} ${isJoined ? 'active-team' : ''}`;
+              div.onclick = () => openClans(cat.id, catName);
+              div.innerHTML = `
+                  <div class="main-team-icon">${cat.icon}</div>
+                  <div class="main-team-name">${catName}</div>
+                  <div class="main-team-score">${score} ${t.points}</div>
+                  ${statusHTML}
+              `;
+              container.appendChild(div);
+          });
+      } catch (e) {
+          console.error("Error in renderMainTeams:", e);
+      }
   }
 
   window.joinMainTeam = async function(teamId, event) {
@@ -471,103 +466,108 @@
   };
 
   function renderClans(catId) {
-      const grid = document.getElementById('clansGrid');
-      const t = translations[currentLang];
-      grid.innerHTML = '';
+      try {
+          const grid = document.getElementById('clansGrid');
+          if (!grid) return;
+          const t = translations[currentLang] || translations['ar'];
+          grid.innerHTML = '';
 
-      const categoryQuizzes = {
-          horror: ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'],
-          action: ['squidgame', 'spiderman', 'spiderman2026', 'avengers', 'avatar', 'venom', 'birdsofprey'],
-          thriller: ['fall'],
-          mystery: ['wednesday', 'knivesout'],
-          egyptian: ['elharifa']
-      };
-      const quizzes = categoryQuizzes[catId] || [];
+          const categoryQuizzes = {
+              horror: ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'],
+              action: ['squidgame', 'spiderman', 'spiderman2026', 'avengers', 'avatar', 'venom', 'birdsofprey'],
+              thriller: ['fall'],
+              mystery: ['wednesday', 'knivesout'],
+              egyptian: ['elharifa']
+          };
+          const quizzes = categoryQuizzes[catId] || [];
 
-      let clansWithScores = Object.entries(allClans)
-          .map(([id, data]) => {
-              let teamScore = 0;
-              for(let u in allUsersData) {
-                  if(allUsersData[u].joined_clans && allUsersData[u].joined_clans[id]) {
-                      let userScores = allScoresData[u] || {};
-                      for (let quiz in userScores) {
-                          if (quizzes.includes(quiz.toLowerCase())) {
-                              let attempts = Object.values(userScores[quiz]);
-                              attempts.forEach(a => {
-                                  teamScore += (a.score || 0);
-                              });
+          let clansWithScores = Object.entries(allClans)
+              .map(([id, data]) => {
+                  let teamScore = 0;
+                  for(let u in allUsersData) {
+                      if(allUsersData[u].joined_clans && allUsersData[u].joined_clans[id]) {
+                          let userScores = allScoresData[u] || {};
+                          for (let quiz in userScores) {
+                              if (quizzes.includes(quiz.toLowerCase())) {
+                                  let attempts = Object.values(userScores[quiz]);
+                                  attempts.forEach(a => {
+                                      teamScore += (a.score || 0);
+                                  });
+                              }
                           }
                       }
                   }
-              }
-              return { id, ...data, totalScore: teamScore };
-          })
-          .filter(c => c.category === catId && c.name)
-          .sort((a, b) => b.totalScore - a.totalScore);
+                  return { id, ...data, totalScore: teamScore };
+              })
+              .filter(c => c.category === catId && c.name)
+              .sort((a, b) => b.totalScore - a.totalScore);
 
-      if (clansWithScores.length === 0) {
-          grid.innerHTML = `<div style="text-align:center; color:var(--subtitle); grid-column:1/-1; padding:20px;">${t.noClans}</div>`;
-          return;
-      }
-
-      clansWithScores.forEach((clan, index) => {
-          const isMember = myClans.includes(clan.id);
-          const isClanOwner = clan.owner === currentUser;
-          const isOwnerTeam = (clan.owner.toLowerCase() === 'ahmed');
-          
-          const isTopClan = (index === 0 && clan.totalScore > 0);
-          
-          let privacyHTML = clan.isPublic 
-              ? `<span class="badge-privacy badge-public">${t.publicBadge}</span>` 
-              : `<span class="badge-privacy badge-private">${t.privateBadge}</span>`;
-
-          let actionHTML = '';
-          actionHTML += `<button class="btn-action btn-view" onclick="openClanModal('${clan.id}', true)">${t.viewMembers}</button>`;
-
-          if (isClanOwner) {
-              actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
-          } else if (isMember) {
-              actionHTML += `<button class="btn-action btn-leave" onclick="leaveClan('${clan.id}')">${t.leaveClan}</button>`;
-          } else if (myClans.length >= 3 && !isOwner) {
-              actionHTML += `<button class="btn-action btn-disabled">${t.maxClans}</button>`;
-          } else {
-              if(clan.isPublic || isOwner) {
-                  actionHTML += `<button class="btn-action btn-join" onclick="joinClan('${clan.id}', true)">${t.joinClan}</button>`;
-              } else {
-                  actionHTML += `<button class="btn-action btn-request" onclick="joinClan('${clan.id}', false)">${t.requestBtn}</button>`;
-              }
+          if (clansWithScores.length === 0) {
+              grid.innerHTML = `<div style="text-align:center; color:var(--subtitle); grid-column:1/-1; padding:20px;">${t.noClans}</div>`;
+              return;
           }
 
-          if (isOwner && !isClanOwner) {
-               actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
-          }
-
-          const div = document.createElement('div');
-          div.className = `clan-card ${isOwnerTeam ? 'owner-team' : ''} ${isTopClan ? 'top-clan' : ''}`;
-          div.innerHTML = `
-              <div class="clan-header">
-                  <div>
-                      <div class="clan-name">
-                          ${clan.name} 
-                          ${isOwnerTeam ? '<span class="badge-owner-team">👑 Owner Team</span>' : ''}
-                          ${isTopClan ? `<span class="winner-badge">${t.topClan}</span>` : ''}
-                      </div>
-                      <div class="clan-owner">${t.owner} <b>${clan.owner}</b></div>
-                  </div>
-                  ${privacyHTML}
-              </div>
+          clansWithScores.forEach((clan, index) => {
+              const isMember = myClans.includes(clan.id);
+              const isClanOwner = clan.owner === currentUser;
+              const isOwnerTeam = (clan.owner.toLowerCase() === 'ahmed');
               
-              <div class="clan-score-box">
-                  <span style="font-size:12px; color:var(--subtitle);">${t.clanXP}</span>
-                  <span class="clan-score">${clan.totalScore} ${t.points}</span>
-              </div>
+              const isTopClan = (index === 0 && clan.totalScore > 0);
+              
+              let privacyHTML = clan.isPublic 
+                  ? `<span class="badge-privacy badge-public">${t.publicBadge}</span>` 
+                  : `<span class="badge-privacy badge-private">${t.privateBadge}</span>`;
 
-              <div class="clan-actions">
-                  ${actionHTML}
-              </div>
-          `;
-          grid.appendChild(div);
-      });
+              let actionHTML = '';
+              actionHTML += `<button class="btn-action btn-view" onclick="openClanModal('${clan.id}', true)">${t.viewMembers}</button>`;
+
+              if (isClanOwner) {
+                  actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
+              } else if (isMember) {
+                  actionHTML += `<button class="btn-action btn-leave" onclick="leaveClan('${clan.id}')">${t.leaveClan}</button>`;
+              } else if (myClans.length >= 3 && !isOwner) {
+                  actionHTML += `<button class="btn-action btn-disabled">${t.maxClans}</button>`;
+              } else {
+                  if(clan.isPublic || isOwner) {
+                      actionHTML += `<button class="btn-action btn-join" onclick="joinClan('${clan.id}', true)">${t.joinClan}</button>`;
+                  } else {
+                      actionHTML += `<button class="btn-action btn-request" onclick="joinClan('${clan.id}', false)">${t.requestBtn}</button>`;
+                  }
+              }
+
+              if (isOwner && !isClanOwner) {
+                   actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
+              }
+
+              const div = document.createElement('div');
+              div.className = `clan-card ${isOwnerTeam ? 'owner-team' : ''} ${isTopClan ? 'top-clan' : ''}`;
+              div.innerHTML = `
+                  <div class="clan-header">
+                      <div>
+                          <div class="clan-name">
+                              ${clan.name} 
+                              ${isOwnerTeam ? '<span class="badge-owner-team">👑 Owner Team</span>' : ''}
+                              ${isTopClan ? `<span class="winner-badge">${t.topClan}</span>` : ''}
+                          </div>
+                          <div class="clan-owner">${t.owner} <b>${clan.owner}</b></div>
+                      </div>
+                      ${privacyHTML}
+                  </div>
+                  
+                  <div class="clan-score-box">
+                      <span style="font-size:12px; color:var(--subtitle);">${t.clanXP}</span>
+                      <span class="clan-score">${clan.totalScore} ${t.points}</span>
+                  </div>
+
+                  <div class="clan-actions">
+                      ${actionHTML}
+                  </div>
+              `;
+              grid.appendChild(div);
+          });
+      } catch (e) {
+          console.error("Error in renderClans:", e);
+      }
   }
 
   window.createClan = async function() {
@@ -642,10 +642,7 @@
       
       const isClanOwner = clan.owner === currentUser;
       
-      // ✅ تصليح جذري: شريط الإضافة يظهر ONLY لو أنت أونر (ahmed)
       document.getElementById('forceAddSection').style.display = (isOwner && !isViewOnly) ? 'flex' : 'none';
-      
-      // زرار الحذف يظهر لصاحب الفريق والأونر
       document.getElementById('deleteClanBtn').style.display = (!isViewOnly && (isClanOwner || isOwner)) ? 'block' : 'none';
 
       document.getElementById('modalTitle').innerText = isViewOnly ? t.viewMembers + ' - ' + clan.name : t.manageTeamTitle + ' ' + clan.name;
@@ -682,7 +679,7 @@
   window.manageClan = function(clanId) { openClanModal(clanId, false); };
 
   window.requestKick = async function(clanId, user) {
-      if (isOwner || isAdmin) { // الطرد الفوري لسه شغال للأونر والأدمن
+      if (isOwner || isAdmin) {
           const confirmKick = await showSiteConfirm(translations[currentLang].confirmKickAdmin);
           if (!confirmKick) return;
           
@@ -712,7 +709,6 @@
       }
   };
 
-  // ✅ تصليح جذري: منع الكل من الإضافة القسرية ما عدا الأونر
   window.forceAddMember = async function() {
       if (!isOwner) {
           return showToast(translations[currentLang].unauthorized, true);
@@ -733,6 +729,21 @@
 
   window.closeModal = function() { document.getElementById('manageModal').style.display = 'none'; };
 
+  // ✅ 1. رسم الكروت فوراً عشان الصفحة متفضلش فاضية
+  renderMainTeams();
+
+  // ✅ 2. التأكد من الصلاحيات
+  if (!isAdmin) {
+      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
+          const role = snap.exists() ? snap.val() : 'Player';
+          if (adminRoles.includes(role)) {
+              isAdmin = true;
+              renderMainTeams(); // إعادة الرسم لو كان إداري
+          }
+      }).catch(e => console.error("Error fetching role:", e));
+  }
+
+  // ✅ 3. تشغيل الترجمة عند التحميل
   window.onload = () => {
       applyLanguage();
   };
