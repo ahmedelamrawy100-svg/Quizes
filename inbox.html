@@ -58,6 +58,7 @@
     <div class="tab active" onclick="switchTab('friends', this)" id="tabFriends">👥 الأصدقاء</div>
     <div class="tab" onclick="switchTab('admin', this)" id="tabAdmin">📩 الإدارة</div>
     <div class="tab" onclick="switchTab('requests', this)" id="tabRequests">🤝 طلبات</div>
+    <div class="tab" onclick="switchTab('teamRequests', this)" id="tabTeamRequests">⚔️ طلبات الفرق</div>
     <div class="tab" onclick="switchTab('ownerReq', this)" id="tabOwnerReq">📩 للأونر</div>
   </div>
 
@@ -79,6 +80,13 @@
     </div>
   </div>
 
+  <!-- ✅ قسم طلبات الفرق الجديد -->
+  <div id="tab-teamRequests" class="tab-content">
+    <div class="card-list" id="teamRequestsList">
+      <div class="no-data">جاري تحميل الطلبات...</div>
+    </div>
+  </div>
+
   <div id="tab-ownerReq" class="tab-content">
     <div class="request-box">
       <h3 id="ownerReqTitle">📩 إرسال طلب جديد للأونر</h3>
@@ -95,11 +103,11 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, remove, push, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.remove = remove; window.push = push;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.remove = remove; window.push = push; window.get = get;
 </script>
 
 <script>
@@ -112,23 +120,25 @@
   const translations = {
     ar: { 
       back: "⬅ رجوع", title: "💬 صندوق الرسائل", 
-      tabFriends: "👥 الأصدقاء", tabAdmin: "📩 الإدارة", tabRequests: "🤝 طلبات", tabOwnerReq: "📩 للأونر", 
-      noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", noRequests: "لا توجد طلبات صداقة جديدة.", noOwnerReq: "لا توجد طلبات سابقة.", 
+      tabFriends: "👥 الأصدقاء", tabAdmin: "📩 الإدارة", tabRequests: "🤝 طلبات", tabTeamRequests: "⚔️ طلبات الفرق", tabOwnerReq: "📩 للأونر", 
+      noFriends: "ليس لديك أصدقاء بعد.", noAdmin: "لا توجد رسائل من الإدارة.", noRequests: "لا توجد طلبات صداقة جديدة.", noTeamReq: "لا توجد طلبات انضمام لفرقك.", noOwnerReq: "لا توجد طلبات سابقة.", 
       msg: "💬 محادثة", accept: "قبول", reject: "رفض", fromAdmin: "👑 من: ", 
       ownerReqTitle: "📩 إرسال طلب جديد للأونر", ownerReqDesc: "اكتب طلبك (مثلاً: عايز رتبة VIP، أو بادج معين)، والأونر هيراجعه وهيرد عليك.", 
       reqPlaceholder: "اكتب طلبك هنا...", btnSendReq: "إرسال الطلب 🚀", myReqTitle: "📋 طلباتك السابقة",
       reqSent: "تم إرسال طلبك بنجاح! الأونر هيراجعه.", 
-      statusPending: "⏳ قيد الانتظار", statusApproved: "✅ تم القبول", writeFirst: "اكتب طلبك الأول!" 
+      statusPending: "⏳ قيد الانتظار", statusApproved: "✅ تم القبول", writeFirst: "اكتب طلبك الأول!",
+      wantsToJoin: "عايز ينضم لفريق"
     },
     en: { 
       back: "⬅ Back", title: "💬 Inbox", 
-      tabFriends: "👥 Friends", tabAdmin: "📩 Admin", tabRequests: "🤝 Requests", tabOwnerReq: "📩 Owner", 
-      noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", noRequests: "No new friend requests.", noOwnerReq: "No previous requests.", 
+      tabFriends: "👥 Friends", tabAdmin: "📩 Admin", tabRequests: "🤝 Requests", tabTeamRequests: "⚔️ Team Requests", tabOwnerReq: "📩 Owner", 
+      noFriends: "You have no friends yet.", noAdmin: "No messages from admin.", noRequests: "No new friend requests.", noTeamReq: "No join requests for your teams.", noOwnerReq: "No previous requests.", 
       msg: "💬 Chat", accept: "Accept", reject: "Reject", fromAdmin: "👑 From: ", 
       ownerReqTitle: "📩 Send New Request to Owner", ownerReqDesc: "Write your request (e.g., I want a VIP rank or a specific badge). The Owner will review it.", 
       reqPlaceholder: "Write your request here...", btnSendReq: "Send Request 🚀", myReqTitle: "📋 Your Previous Requests",
       reqSent: "Request sent successfully! The Owner will review it.", 
-      statusPending: "⏳ Pending", statusApproved: "✅ Approved", writeFirst: "Write your request first!" 
+      statusPending: "⏳ Pending", statusApproved: "✅ Approved", writeFirst: "Write your request first!",
+      wantsToJoin: "wants to join team"
     }
   };
 
@@ -140,6 +150,7 @@
     document.getElementById('tabFriends').innerText = t.tabFriends;
     document.getElementById('tabAdmin').innerText = t.tabAdmin;
     document.getElementById('tabRequests').innerText = t.tabRequests;
+    document.getElementById('tabTeamRequests').innerText = t.tabTeamRequests;
     document.getElementById('tabOwnerReq').innerText = t.tabOwnerReq;
     document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
     
@@ -152,6 +163,7 @@
     loadFriends(); 
     loadAdminMessages(); 
     loadRequests();
+    loadTeamRequests(); 
     loadMyOwnerRequests();
   }
 
@@ -200,9 +212,7 @@
     });
   }
 
-  // ** التعديل هنا: عشان رسايل الأدمن تظهر صح **
   function loadAdminMessages() {
-    // بنقرا كل الرسايل اللي في المسار الرئيسي messages
     window.onValue(window.ref(window.db, 'messages'), (snapshot) => {
       const allData = snapshot.val();
       const adminList = document.getElementById('adminMessagesList');
@@ -211,7 +221,6 @@
       
       if (!allData) { adminList.innerHTML = `<div class="no-data">${t.noAdmin}</div>`; return; }
 
-      // بندور على المسار اللي فيه اسم اللاعب الحالي (بغض النظر عن الحروف)
       let myMessages = null;
       for (let key in allData) {
           if (key.toLowerCase() === currentUser.toLowerCase()) {
@@ -286,6 +295,75 @@
     await window.remove(window.ref(window.db, 'friend_requests/' + myKey + '/' + sender));
     alert(currentLang === 'en' ? 'Friend request rejected.' : 'تم رفض طلب الصداقة.');
   }
+
+  // ✅ دالة إدارة طلبات الفرق (خاصة بصاحب الفريق)
+  function loadTeamRequests() {
+    const list = document.getElementById('teamRequestsList');
+    const t = translations[currentLang];
+    
+    // بنجيب كل الفرق اللي أنت صاحبها
+    window.get(window.ref(window.db, 'clans')).then(snap => {
+        const allClans = snap.val() || {};
+        const myClans = Object.entries(allClans).filter(([id, data]) => data.owner === currentUser).map(([id]) => id);
+        
+        if (myClans.length === 0) {
+            list.innerHTML = `<div class="no-data">${t.noTeamReq}</div>`;
+            return;
+        }
+
+        window.onValue(window.ref(window.db, 'team_requests'), (reqSnap) => {
+            const allRequests = reqSnap.val() || {};
+            let html = '';
+            let found = false;
+
+            myClans.forEach(clanId => {
+                if (allRequests[clanId]) {
+                    Object.keys(allRequests[clanId]).forEach(user => {
+                        found = true;
+                        html += `
+                            <div class="friend-card" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                                <div>
+                                    <b>👤 ${user}</b> ${t.wantsToJoin} <b>${allClans[clanId].name}</b>
+                                </div>
+                                <div style="display: flex; gap: 10px; width: 100%;">
+                                    <button class="btn-accept" onclick="acceptTeamRequest('${clanId}', '${user}')" style="flex:1;">${t.accept}</button>
+                                    <button class="btn-reject" onclick="rejectTeamRequest('${clanId}', '${user}')" style="flex:1;">${t.reject}</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            if (!found) {
+                list.innerHTML = `<div class="no-data">${t.noTeamReq}</div>`;
+            } else {
+                list.innerHTML = html;
+            }
+        });
+    });
+  }
+
+  window.acceptTeamRequest = async function(clanId, user) {
+    try {
+        // ضيف اللاعب للفريق
+        await window.set(window.ref(window.db, `users_data/${user}/joined_clans/${clanId}`), true);
+        // امسح الطلب
+        await window.remove(window.ref(window.db, `team_requests/${clanId}/${user}`));
+        alert(currentLang === 'ar' ? 'تم قبول اللاعب في الفريق!' : 'Player accepted into the team!');
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+  };
+
+  window.rejectTeamRequest = async function(clanId, user) {
+    try {
+        await window.remove(window.ref(window.db, `team_requests/${clanId}/${user}`));
+        alert(currentLang === 'ar' ? 'تم رفض الطلب.' : 'Request rejected.');
+    } catch(e) {
+        alert('Error: ' + e.message);
+    }
+  };
 
   window.sendAdminRequest = async function() {
     const input = document.getElementById('reqReason');
