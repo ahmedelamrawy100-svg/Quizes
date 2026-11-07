@@ -3,36 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title data-ar="⚔️ حرب التيمات - Quiz Hub" data-en="⚔️ Team Battles - Quiz Hub">⚔️ حرب التيمات - Quiz Hub</title>
+<title>⚔️ الفرق والكلاانات - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  /* المتغيرات للوضع الليلي (الافتراضي) */
   :root { 
-      --bg: #080808; 
-      --text: #fff; 
-      --card-bg: #111; 
-      --border: #333; 
-      --accent: #ff0000; 
-      --gold: #ffd700; 
-      --green: #4caf50; 
-      --subtitle: #aaa;
+      --bg: #080808; --text: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; 
+      --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --subtitle: #aaa; --input-bg: #000;
   }
-  
-  /* المتغيرات للوضع النهاري */
-  body.light-mode { 
-      --bg: #f4f4f4; 
-      --text: #111; 
-      --card-bg: #fff; 
-      --border: #ccc; 
-      --gold: #b8860b; 
-      --subtitle: #555;
-  }
-
+  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; --subtitle: #555; --input-bg: #fff; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
   
-  .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
   body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
   
@@ -41,22 +24,71 @@
   .ctrl-btn:hover { background: var(--accent); border-color: var(--accent); }
   body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
   
-  .header-title { text-align: center; color: var(--gold); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,215,0,0.3); }
-  .subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; }
+  .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,0,0,0.3); }
+  .subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; font-size: 16px; }
 
-  .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 900px; }
-  .team-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; position: relative; }
-  .team-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+  .create-team-box { width: 100%; max-width: 800px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 30px; }
+  .create-team-box h3 { color: var(--gold); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 18px;}
+  .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .form-input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; outline: none; min-width: 200px; }
+  .form-input:focus { border-color: var(--accent); }
+  .btn-create { padding: 12px 25px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  .btn-create:hover { transform: scale(1.05); }
+  .radio-group { display: flex; gap: 15px; align-items: center; margin-top: 10px; flex-wrap: wrap;}
+  .radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: bold; font-size: 14px;}
+
+  .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+  .team-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; gap: 15px; }
+  .team-card:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
   
-  .team-icon { font-size: 50px; margin-bottom: 10px; }
-  .team-name { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
-  .team-score { font-size: 28px; font-weight: bold; color: var(--accent); margin-bottom: 15px; }
+  .owner-team-card { border-color: var(--gold); background: linear-gradient(145deg, var(--card-bg), rgba(255,215,0,0.05)); }
+
+  .team-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;}
+  .team-name { font-size: 20px; font-weight: 900; color: var(--text); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .team-owner { font-size: 13px; color: var(--subtitle); margin-top: 5px; }
+  .badge-owner-team { background: var(--gold); color: #000; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 10px; display: inline-block; vertical-align: middle; box-shadow: 0 0 10px rgba(255,215,0,0.5);}
+  .badge-privacy { font-size: 11px; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
+  .badge-public { background: rgba(76, 175, 80, 0.2); color: var(--green); border: 1px solid var(--green);}
+  .badge-private { background: rgba(255, 0, 0, 0.2); color: var(--accent); border: 1px solid var(--accent);}
+
+  .team-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+  .btn-action { flex: 1; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px; text-align: center; min-width: 90px; }
+  .btn-join { background: var(--green); color: #fff; }
+  .btn-join:hover { background: #388e3c; }
+  .btn-request { background: var(--blue); color: #fff; }
+  .btn-request:hover { background: #005f8d; }
+  .btn-manage { background: var(--gold); color: #000; }
+  .btn-manage:hover { background: #ffcc00; }
+  .btn-leave { background: var(--accent); color: #fff; }
+  .btn-leave:hover { background: #cc0000; }
+  .btn-disabled { background: #333; color: #777; cursor: not-allowed; border: 1px solid #444;}
   
-  .btn-join { background: #333; color: #fff; border: 1px solid #555; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; width: 100%; transition: 0.3s; }
-  .btn-join:hover { background: var(--gold); color: #000; border-color: var(--gold); }
-  .btn-joined { background: var(--green); color: #fff; border: none; cursor: not-allowed; }
-  body.light-mode .btn-join { background: #eee; color: #111; border-color: #ccc; }
-  body.light-mode .btn-join:hover { background: var(--gold); color: #000; }
+  /* أزرار الإدارة */
+  .admin-actions { display: flex; gap: 8px; width: 100%; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 5px;}
+  .btn-admin { background: var(--purple); color: #fff; flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.3s; }
+  .btn-admin:hover { background: #7b1fa2; }
+  .btn-admin-danger { background: var(--accent); color: #fff; }
+  .btn-admin-danger:hover { background: #cc0000; }
+
+  /* مودال الإدارة */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+  .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 25px; width: 95%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
+  .modal-title { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+  
+  .search-user-box { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-user-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; outline: none; }
+  .btn-force-add { background: var(--green); color: #fff; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
+
+  .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); border-radius: 5px; margin-bottom: 5px;}
+  .member-name { font-weight: bold; font-size: 16px; }
+  .btn-kick { background: var(--accent); color: #fff; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 12px; }
+  
+  .btn-close-modal { background: #555; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; margin-top: 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s;}
+  .btn-close-modal:hover { background: #333; }
+
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 99999; opacity: 0; transition: 0.3s; visibility: hidden;}
+  .toast.show { opacity: 1; top: 30px; visibility: visible;}
+  .toast.error { background: var(--accent); }
 </style>
 </head>
 <body>
@@ -69,156 +101,438 @@
   </div>
 </div>
 
-<h1 class="header-title" id="mainTitle" data-ar="⚔️ حرب التيمات" data-en="⚔️ Team Battles">⚔️ حرب التيمات</h1>
-<p class="subtitle" id="subtitle" data-ar="انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!" data-en="Join your team, play quizzes, and raise your team's score to win the Team Battles!">انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!</p>
+<h1 class="header-title" id="mainTitle" data-ar="⚔️ الفرق والكلاانات" data-en="⚔️ Teams & Clans">⚔️ الفرق والكلاانات</h1>
+<p class="subtitle" id="subtitle" data-ar="اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع! (مسموح لك بـ 3 فرق كحد أقصى)" data-en="Create your team, join your friends, and be the strongest! (Max 3 teams)">اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع! (مسموح لك بـ 3 فرق كحد أقصى)</p>
 
-<div class="teams-grid" id="teamsContainer">
-  <!-- التيمات هتظهر هنا -->
+<!-- صندوق إنشاء فريق -->
+<div class="create-team-box">
+  <h3 data-ar="➕ إنشاء فريق جديد" data-en="➕ Create New Team">➕ إنشاء فريق جديد</h3>
+  <div class="form-row">
+    <input type="text" id="newTeamName" class="form-input" placeholder="اسم الفريق..." data-ar="اسم الفريق..." data-en="Team name...">
+    <button class="btn-create" onclick="createTeam()" data-ar="إنشاء" data-en="Create">إنشاء</button>
+  </div>
+  <div class="radio-group">
+    <label><input type="radio" name="privacy" value="public" checked> <span data-ar="عام (أي حد يقدر ينضم)" data-en="Public (Anyone can join)">عام (أي حد يقدر ينضم)</span></label>
+    <label><input type="radio" name="privacy" value="private"> <span data-ar="خاص (محتاج موافقة)" data-en="Private (Needs approval)">خاص (محتاج موافقة)</span></label>
+  </div>
 </div>
+
+<!-- شبكة عرض الفرق -->
+<div class="teams-grid" id="teamsGrid">
+  <div style="text-align:center; color:var(--subtitle); grid-column: 1/-1;" data-ar="جاري تحميل الفرق..." data-en="Loading teams...">جاري تحميل الفرق...</div>
+</div>
+
+<!-- مودال إدارة الأعضاء والطلبات -->
+<div class="modal-overlay" id="manageModal">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">إدارة الفريق</div>
+    
+    <!-- إضافة عضو بالقوة (للإدارة فقط) -->
+    <div id="forceAddSection" style="display: none;">
+        <div class="search-user-box">
+            <input type="text" id="forceAddUser" placeholder="اسم اللاعب لإضافته قسرياً..." data-ar="اسم اللاعب لإضافته قسرياً..." data-en="Username to force add...">
+            <button class="btn-force-add" onclick="forceAddMember()" data-ar="إضافة" data-en="Add">إضافة</button>
+        </div>
+    </div>
+
+    <!-- قائمة الطلبات -->
+    <div id="requestsSection"></div>
+    
+    <!-- قائمة الأعضاء -->
+    <div id="membersSection" style="margin-top: 20px;">
+        <h4 style="color:var(--accent); margin-bottom:10px;" data-ar="أعضاء الفريق:" data-en="Team Members:">أعضاء الفريق:</h4>
+        <div id="membersList"></div>
+    </div>
+
+    <button class="btn-close-modal" onclick="closeModal()" data-ar="إغلاق" data-en="Close">إغلاق</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">تمت العملية بنجاح</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, get, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.get = get;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.get = get; window.update = update; window.remove = remove; window.push = push;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
   let currentLang = localStorage.getItem('lang') || 'ar';
-  let userTeam = null;
-  let teamsScores = {};
+  
+  let isAdmin = false; // هل المستخدم الحالي إداري؟
+  let myTeams = []; // الفرق اللي أنا فيها
+  let allTeams = {}; // كل الفرق
+  let allUsersData = {}; // عشان أعرف مين فين
+  let myRequests = {}; // الطلبات اللي أنا بعتها
+  
+  let currentManageTeamId = null;
 
-  // التحقق من الثيم المحفوظ
-  if (localStorage.getItem('theme') === 'light') { 
-      document.body.classList.add('light-mode'); 
-      document.getElementById('themeBtn').innerText = '🌙';
-  }
-
+  // تطبيق الثيم
+  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌙'; }
+  
   window.toggleTheme = function() {
-      const body = document.body;
-      const btn = document.getElementById('themeBtn');
+      const body = document.body; const btn = document.getElementById('themeBtn');
       body.classList.toggle('light-mode');
-      if (body.classList.contains('light-mode')) {
-          btn.innerText = '🌙';
-          localStorage.setItem('theme', 'light');
-      } else {
-          btn.innerText = '☀️';
-          localStorage.setItem('theme', 'dark');
-      }
+      if (body.classList.contains('light-mode')) { btn.innerText = '🌙'; localStorage.setItem('theme', 'light'); } 
+      else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
   };
 
+  // الترجمة
   const translations = {
     ar: {
-      back: "⬅ رجوع",
-      title: "⚔️ حرب التيمات",
-      subtitle: "انضم لفريقك، العب كويزات، وارفع نقاط تيمك عشان تكسبوا حرب التيمات!",
-      points: "نقطة",
-      join: "انضم للفريق",
-      joined: "✅ أنت في هذا الفريق",
-      otherTeam: "أنت في فريق آخر",
-      confirmJoin: "هل أنت متأكد؟ لا يمكنك تغيير الفريق بعد الانضمام!",
-      joinedSuccess: "تم الانضمام للفريق بنجاح! ابدأ العب كويزات عشان ترفع نقاط تيمك."
+        back: "⬅ رجوع", title: "⚔️ الفرق والكلاانات", subtitle: "اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع!",
+        createTitle: "➕ إنشاء فريق جديد", teamNamePh: "اسم الفريق...", createBtn: "إنشاء",
+        publicOpt: "عام (أي حد يقدر ينضم)", privateOpt: "خاص (محتاج موافقة)",
+        loading: "جاري تحميل الفرق...", ownerLabel: "صاحب الفريق:",
+        manageBtn: "⚙️ إدارة", leaveBtn: "🚪 مغادرة", pendingBtn: "⏳ قيد الانتظار",
+        maxLimit: "وصلت للحد الأقصى (3 فرق)", joinBtn: "➕ انضمام", requestBtn: "📩 طلب انضمام",
+        modalTitle: "إدارة فريق:", noRequests: "مفيش طلبات انضمام حالياً.", accept: "قبول ✅", reject: "رفض ❌", close: "إغلاق",
+        publicBadge: "🌍 عام", privateBadge: "🔒 خاص", ownerTeamBadge: "👑 Owner Team",
+        adminEdit: "✏️ تعديل", adminDelete: "🗑️ حذف", adminTools: "🛠️ أدوات الإدارة", membersLabel: "أعضاء الفريق:", kickBtn: "طرد ❌", forceAddPh: "اسم اللاعب للإضافة...", addBtn: "إضافة"
     },
     en: {
-      back: "⬅ Back",
-      title: "⚔️ Team Battles",
-      subtitle: "Join your team, play quizzes, and raise your team's score to win the Team Battles!",
-      points: "Points",
-      join: "Join Team",
-      joined: "✅ You are in this team",
-      otherTeam: "You are in another team",
-      confirmJoin: "Are you sure? You cannot change teams after joining!",
-      joinedSuccess: "Successfully joined the team! Start playing quizzes to raise your team's score."
+        back: "⬅ Back", title: "⚔️ Teams & Clans", subtitle: "Create your team, join your friends, and be the strongest!",
+        createTitle: "➕ Create New Team", teamNamePh: "Team name...", createBtn: "Create",
+        publicOpt: "Public (Anyone can join)", privateOpt: "Private (Needs approval)",
+        loading: "Loading teams...", ownerLabel: "Owner:",
+        manageBtn: "⚙️ Manage", leaveBtn: "🚪 Leave", pendingBtn: "⏳ Pending",
+        maxLimit: "Max limit reached (3 teams)", joinBtn: "➕ Join", requestBtn: "📩 Request Join",
+        modalTitle: "Manage Team:", noRequests: "No join requests currently.", accept: "Accept ✅", reject: "Reject ❌", close: "Close",
+        publicBadge: "🌍 Public", privateBadge: "🔒 Private", ownerTeamBadge: "👑 Owner Team",
+        adminEdit: "✏️ Edit", adminDelete: "🗑️ Delete", adminTools: "🛠️ Admin Tools", membersLabel: "Team Members:", kickBtn: "Kick ❌", forceAddPh: "Username to force add...", addBtn: "Add"
     }
-  };
-
-  const teams = [
-    { id: 'horror', nameAr: 'فريق الرعب', nameEn: 'Horror Team', icon: '🎃' },
-    { id: 'action', nameAr: 'فريق الأكشن', nameEn: 'Action Team', icon: '💥' },
-    { id: 'mystery', nameAr: 'فريق الغموض', nameEn: 'Mystery Team', icon: '🕵️' },
-    { id: 'thriller', nameAr: 'فريق التشويق', nameEn: 'Thriller Team', icon: '🎬' },
-    { id: 'egyptian', nameAr: 'فريق المصري', nameEn: 'Egyptian Team', icon: '🇪🇬' }
-  ];
-
-  window.toggleLanguage = function() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', currentLang);
-    applyLanguage();
-    renderTeams();
   };
 
   function applyLanguage() {
-    const t = translations[currentLang];
-    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-    document.getElementById('backBtn').innerText = t.back;
-    document.getElementById('mainTitle').innerText = t.title;
-    document.getElementById('subtitle').innerText = t.subtitle;
-    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-    
-    document.querySelectorAll('[data-ar]').forEach(el => {
-        if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-            el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-        } else {
-            el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
-        }
-    });
-  }
-
-  window.onValue(window.ref(window.db, 'teams'), (snapshot) => {
-    teamsScores = snapshot.val() || {};
-    renderTeams();
-  });
-
-  window.get(window.ref(window.db, 'users_data/' + currentUser + '/team')).then(snap => {
-    userTeam = snap.exists() ? snap.val() : null;
-    renderTeams();
-  });
-
-  function renderTeams() {
-    const container = document.getElementById('teamsContainer');
-    const t = translations[currentLang];
-    container.innerHTML = '';
-
-    teams.forEach(team => {
-      const score = teamsScores[team.id] || 0;
-      const isJoined = userTeam === team.id;
-      const teamName = currentLang === 'ar' ? team.nameAr : team.nameEn;
+      const t = translations[currentLang];
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       
-      const div = document.createElement('div');
-      div.className = 'team-card';
-      div.innerHTML = `
-        <div class="team-icon">${team.icon}</div>
-        <div class="team-name">${teamName}</div>
-        <div class="team-score">${score} ${t.points}</div>
-        <button class="btn-join ${isJoined ? 'btn-joined' : ''}" 
-                onclick="joinTeam('${team.id}')" 
-                ${isJoined || userTeam ? 'disabled' : ''}>
-          ${isJoined ? t.joined : (userTeam ? t.otherTeam : t.join)}
-        </button>
-      `;
-      container.appendChild(div);
-    });
+      document.getElementById('backBtn').innerText = t.back;
+      document.getElementById('mainTitle').innerText = t.title;
+      document.getElementById('subtitle').innerText = t.subtitle;
+      document.getElementById('newTeamName').placeholder = t.teamNamePh;
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+
+      document.querySelectorAll('[data-ar]').forEach(el => {
+          if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+              el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          } else {
+              el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+          }
+      });
+      
+      renderTeams(); 
   }
 
-  window.joinTeam = async function(teamId) {
-    const t = translations[currentLang];
-    if (userTeam) return;
-    if (!confirm(t.confirmJoin)) return;
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
 
-    try {
-      await window.set(window.ref(window.db, 'users_data/' + currentUser + '/team'), teamId);
-      userTeam = teamId;
-      alert(t.joinedSuccess);
+  function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.className = isError ? 'toast show error' : 'toast show';
+      setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  // 1. فحص صلاحيات الإدارة
+  window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
+      const role = snap.exists() ? snap.val() : 'Player';
+      const adminRoles = ['Owner', 'Admin', 'Partner', 'Manager', 'Tester', 'Builder'];
+      if(currentUser.toLowerCase() === 'ahmed' || adminRoles.includes(role)) {
+          isAdmin = true;
+      }
       renderTeams();
-    } catch (e) {
-      alert('Error: ' + e.message);
-    }
-  };
+  });
 
-  applyLanguage();
+  // 2. جلب الفرق
+  window.onValue(window.ref(window.db, 'teams'), (snap) => {
+      allTeams = snap.val() || {};
+      renderTeams();
+  });
+
+  // 3. جلب بيانات اللاعبين (عشان نعرف مين فين)
+  window.onValue(window.ref(window.db, 'users_data'), (snap) => {
+      allUsersData = snap.val() || {};
+  });
+
+  // 4. جلب فرقي وطلباتي
+  window.onValue(window.ref(window.db, `users_data/${currentUser}/joined_teams`), (snap) => {
+      myTeams = snap.exists() ? Object.keys(snap.val()) : [];
+      renderTeams();
+  });
+
+  window.onValue(window.ref(window.db, 'team_requests'), (snap) => {
+      const data = snap.val() || {};
+      myRequests = {};
+      for(let teamId in data) {
+          if(data[teamId][currentUser]) { myRequests[teamId] = true; }
+      }
+      renderTeams();
+  });
+
+  // ------------------ دوال الأونر والإدارة ------------------
+
+  window.editTeamName = async function(teamId, currentName) {
+      const newName = prompt(currentLang === 'ar' ? 'اكتب اسم الفريق الجديد:' : 'Enter new team name:', currentName);
+      if(!newName || newName.trim() === '') return;
+      try {
+          await window.update(window.ref(window.db, 'teams/' + teamId), { name: newName.trim() });
+          showToast(currentLang === 'ar' ? 'تم تعديل اسم الفريق!' : 'Team name updated!');
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.deleteTeam = async function(teamId) {
+      if(!confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف الفريق نهائياً؟' : 'Are you sure you want to delete this team?')) return;
+      try {
+          await window.remove(window.ref(window.db, 'teams/' + teamId));
+          // مسح الطلبات المرتبطة بيه
+          await window.remove(window.ref(window.db, 'team_requests/' + teamId));
+          showToast(currentLang === 'ar' ? 'تم حذف الفريق نهائياً.' : 'Team deleted.');
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.kickMember = async function(teamId, user) {
+      if(!confirm(`هل أنت متأكد من طرد ${user} من الفريق؟`)) return;
+      try {
+          await window.remove(window.ref(window.db, `users_data/${user}/joined_teams/${teamId}`));
+          showToast(`تم طرد ${user} من الفريق.`);
+          manageTeam(teamId); // تحديث المودال
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.forceAddMember = async function() {
+      const user = document.getElementById('forceAddUser').value.trim().toLowerCase();
+      if(!user) return;
+      
+      if(!allUsersData[user]) {
+          return showToast('اللاعب غير موجود!', true);
+      }
+
+      try {
+          await window.set(window.ref(window.db, `users_data/${user}/joined_teams/${currentManageTeamId}`), true);
+          await window.remove(window.ref(window.db, `team_requests/${currentManageTeamId}/${user}`));
+          showToast(`تم إضافة ${user} للفريق بالقوة.`);
+          document.getElementById('forceAddUser').value = '';
+          manageTeam(currentManageTeamId); // تحديث المودال
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  // ------------------ دوال اللاعب العادي ------------------
+
+  window.createTeam = async function() {
+      const name = document.getElementById('newTeamName').value.trim();
+      const privacy = document.querySelector('input[name="privacy"]:checked').value;
+      
+      if(!name) return showToast(currentLang === 'ar' ? 'اكتب اسم الفريق!' : 'Enter a team name!', true);
+      if(!isAdmin && myTeams.length >= 3) return showToast(translations[currentLang].maxLimit, true);
+
+      for(let id in allTeams) {
+          if(allTeams[id].name.toLowerCase() === name.toLowerCase()) {
+              return showToast(currentLang === 'ar' ? 'فيه فريق بالاسم ده!' : 'Name already exists!', true);
+          }
+      }
+
+      try {
+          const teamId = 'team_' + Date.now();
+          await window.set(window.ref(window.db, 'teams/' + teamId), { name: name, owner: currentUser, isPublic: privacy === 'public', createdAt: Date.now() });
+          await window.set(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`), true);
+          document.getElementById('newTeamName').value = '';
+          showToast(currentLang === 'ar' ? 'تم إنشاء الفريق! 🎉' : 'Team created! 🎉');
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.joinTeam = async function(teamId, isPublic) {
+      if(!isAdmin && myTeams.length >= 3) return showToast(translations[currentLang].maxLimit, true);
+      if(myTeams.includes(teamId)) return;
+
+      try {
+          if(isPublic || isAdmin) { // الإدارة تدخل أي فريق عام أو خاص على طول
+              await window.set(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`), true);
+              showToast(currentLang === 'ar' ? 'تم الانضمام!' : 'Joined!');
+          } else {
+              await window.set(window.ref(window.db, `team_requests/${teamId}/${currentUser}`), 'pending');
+              showToast(currentLang === 'ar' ? 'تم إرسال الطلب.' : 'Request sent.');
+          }
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.leaveTeam = async function(teamId) {
+      if(!confirm(currentLang === 'ar' ? 'مغادرة الفريق؟' : 'Leave team?')) return;
+      try {
+          await window.remove(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`));
+          showToast(currentLang === 'ar' ? 'تم المغادرة.' : 'Left.');
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.manageTeam = async function(teamId) {
+      currentManageTeamId = teamId;
+      const t = translations[currentLang];
+      
+      // 1. عرض قسم الإضافة القسرية لو إداري
+      document.getElementById('forceAddSection').style.display = isAdmin ? 'flex' : 'none';
+
+      // 2. جلب الطلبات
+      const snap = await window.get(window.ref(window.db, 'team_requests/' + teamId));
+      const requests = snap.exists() ? Object.keys(snap.val()) : [];
+      const reqList = document.getElementById('requestsSection');
+      reqList.innerHTML = `<h4 style="color:var(--gold); margin-bottom:10px;">${currentLang === 'ar' ? 'طلبات الانضمام:' : 'Join Requests:'}</h4>`;
+      
+      if(requests.length === 0) {
+          reqList.innerHTML += `<div style="text-align:center; color:var(--subtitle); font-size:14px; margin-bottom:15px;">${t.noRequests}</div>`;
+      } else {
+          requests.forEach(user => {
+              reqList.innerHTML += `
+                  <div class="member-item">
+                      <span class="member-name">👤 ${user}</span>
+                      <div style="display:flex; gap:5px;">
+                          <button class="btn-accept" onclick="acceptRequest('${teamId}', '${user}')">${t.accept}</button>
+                          <button class="btn-reject" onclick="rejectRequest('${teamId}', '${user}')">${t.reject}</button>
+                      </div>
+                  </div>
+              `;
+          });
+      }
+
+      // 3. جلب الأعضاء الحاليين
+      const memberList = document.getElementById('membersList');
+      memberList.innerHTML = '';
+      let members = [];
+      for(let u in allUsersData) {
+          if(allUsersData[u].joined_teams && allUsersData[u].joined_teams[teamId]) {
+              members.push(u);
+          }
+      }
+
+      if(members.length === 0) {
+          memberList.innerHTML = `<div style="text-align:center; color:var(--subtitle); padding:10px;">لا يوجد أعضاء.</div>`;
+      } else {
+          members.forEach(user => {
+              let kickBtn = isAdmin ? `<button class="btn-kick" onclick="kickMember('${teamId}', '${user}')">${t.kickBtn}</button>` : '';
+              memberList.innerHTML += `
+                  <div class="member-item">
+                      <span class="member-name">👤 ${user} ${allTeams[teamId].owner === user ? '👑' : ''}</span>
+                      ${kickBtn}
+                  </div>
+              `;
+          });
+      }
+      
+      document.getElementById('modalTitle').innerText = t.modalTitle + ' ' + allTeams[teamId].name;
+      document.getElementById('manageModal').style.display = 'flex';
+  }
+
+  window.acceptRequest = async function(teamId, user) {
+      try {
+          const userTeamsSnap = await window.get(window.ref(window.db, `users_data/${user}/joined_teams`));
+          const userTeams = userTeamsSnap.exists() ? Object.keys(userTeamsSnap.val()) : [];
+          if(userTeams.length >= 3) {
+              return showToast('اللاعب في 3 فرق بالفعل!', true);
+          }
+          await window.set(window.ref(window.db, `users_data/${user}/joined_teams/${teamId}`), true);
+          await window.remove(window.ref(window.db, `team_requests/${teamId}/${user}`));
+          showToast('تم القبول!');
+          manageTeam(teamId); 
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.rejectRequest = async function(teamId, user) {
+      try {
+          await window.remove(window.ref(window.db, `team_requests/${teamId}/${user}`));
+          showToast('تم الرفض!');
+          manageTeam(teamId); 
+      } catch(e) { showToast(e.message, true); }
+  }
+
+  window.closeModal = function() { document.getElementById('manageModal').style.display = 'none'; }
+
+  // ------------------ رسم الفرق ------------------
+  function renderTeams() {
+      const grid = document.getElementById('teamsGrid');
+      if(!grid) return;
+      
+      const t = translations[currentLang];
+      grid.innerHTML = '';
+
+      const teamArray = Object.entries(allTeams).map(([id, data]) => ({ id, ...data }));
+      teamArray.sort((a, b) => b.createdAt - a.createdAt);
+
+      if(teamArray.length === 0) {
+          grid.innerHTML = `<div style="text-align:center; color:var(--subtitle); grid-column: 1/-1;">${currentLang === 'ar' ? 'لا يوجد فرق بعد. كن الأول!' : 'No teams yet. Be the first!'}</div>`;
+          return;
+      }
+
+      teamArray.forEach(team => {
+          const isMember = myTeams.includes(team.id);
+          const isOwner = team.owner === currentUser;
+          const hasRequested = myRequests[team.id];
+          const isOwnerTeam = (team.owner.toLowerCase() === 'ahmed' && team.isPublic);
+          
+          const div = document.createElement('div');
+          div.className = `team-card ${isOwnerTeam ? 'owner-team-card' : ''}`;
+          
+          let badgeHTML = isOwnerTeam ? `<span class="badge-owner-team">${t.ownerTeamBadge}</span>` : '';
+          let privacyHTML = team.isPublic 
+              ? `<span class="badge-privacy badge-public">${t.publicBadge}</span>` 
+              : `<span class="badge-privacy badge-private">${t.privateBadge}</span>`;
+
+          // أزرار اللاعب العادي
+          let actionHTML = '';
+          if(isOwner) {
+              actionHTML = `<button class="btn-action btn-manage" onclick="manageTeam('${team.id}')">${t.manageBtn}</button>`;
+          } else if(isMember) {
+              actionHTML = `<button class="btn-action btn-leave" onclick="leaveTeam('${team.id}')">${t.leaveBtn}</button>`;
+          } else if(hasRequested) {
+              actionHTML = `<button class="btn-action btn-disabled" disabled>${t.pendingBtn}</button>`;
+          } else if(!isAdmin && myTeams.length >= 3) {
+              actionHTML = `<button class="btn-action btn-disabled" disabled>${t.maxLimit}</button>`;
+          } else {
+              if(team.isPublic || isAdmin) {
+                  actionHTML = `<button class="btn-action btn-join" onclick="joinTeam('${team.id}', true)">${t.joinBtn}</button>`;
+              } else {
+                  actionHTML = `<button class="btn-action btn-request" onclick="joinTeam('${team.id}', false)">${t.requestBtn}</button>`;
+              }
+          }
+
+          // أزرار الإدارة (تظهر فقط لو isAdmin == true)
+          let adminToolsHTML = '';
+          if(isAdmin) {
+              adminToolsHTML = `
+                  <div class="admin-actions">
+                      <button class="btn-admin" onclick="editTeamName('${team.id}', '${team.name}')">${t.adminEdit}</button>
+                      <button class="btn-admin" onclick="manageTeam('${team.id}')">${t.adminTools}</button>
+                      <button class="btn-admin btn-admin-danger" onclick="deleteTeam('${team.id}')">${t.adminDelete}</button>
+                  </div>
+              `;
+          }
+
+          div.innerHTML = `
+              <div class="team-header">
+                  <div>
+                      <div class="team-name">${team.name} ${badgeHTML}</div>
+                      <div class="team-owner">${t.ownerLabel} <b>${team.owner}</b></div>
+                  </div>
+                  ${privacyHTML}
+              </div>
+              <div class="team-actions">
+                  ${actionHTML}
+              </div>
+              ${adminToolsHTML}
+          `;
+          grid.appendChild(div);
+      });
+  }
+
+  // التشغيل
+  window.onload = () => {
+      applyLanguage();
+  };
 </script>
 </body>
 </html>
