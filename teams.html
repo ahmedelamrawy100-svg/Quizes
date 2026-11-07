@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚔️ الفرق والكلاانات - Quiz Hub</title>
+<title>⚔️ حرب التيمات والفرق - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root { 
       --bg: #080808; --text: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; 
       --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --subtitle: #aaa; --input-bg: #000;
+      --horror: #ff5722; --action: #2196f3; --mystery: #9c27b0; --thriller: #ff9800; --egyptian: #4caf50;
   }
-  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; --subtitle: #555; --input-bg: #fff; }
+  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; --gold: #b8860b; --subtitle: #555; --input-bg: #fff;}
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
   
-  .top-bar { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .top-bar { width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
   .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
   body.light-mode .back-btn { background: #fff; color: #111; border-color: #aaa; }
   
@@ -24,12 +25,38 @@
   .ctrl-btn:hover { background: var(--accent); border-color: var(--accent); }
   body.light-mode .ctrl-btn { background: #fff; color: #111; border-color: #aaa; }
   
-  .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,0,0,0.3); }
+  .header-title { text-align: center; color: var(--gold); font-size: 40px; margin-bottom: 10px; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
   .subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; font-size: 16px; }
 
-  .create-team-box { width: 100%; max-width: 800px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 30px; }
-  .create-team-box h3 { color: var(--gold); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; font-size: 18px;}
-  .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  /* التصنيفات الرئيسية */
+  .main-teams-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 40px; }
+  .main-team-card { 
+      background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; 
+      display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.3s;
+  }
+  .main-team-card:hover { transform: translateY(-5px); }
+  .main-team-card.horror { border-color: var(--horror); } .main-team-card.horror:hover { box-shadow: 0 0 20px rgba(255,87,34,0.3); }
+  .main-team-card.action { border-color: var(--action); } .main-team-card.action:hover { box-shadow: 0 0 20px rgba(33,150,243,0.3); }
+  .main-team-card.mystery { border-color: var(--mystery); } .main-team-card.mystery:hover { box-shadow: 0 0 20px rgba(156,39,176,0.3); }
+  .main-team-card.thriller { border-color: var(--thriller); } .main-team-card.thriller:hover { box-shadow: 0 0 20px rgba(255,152,0,0.3); }
+  .main-team-card.egyptian { border-color: var(--egyptian); } .main-team-card.egyptian:hover { box-shadow: 0 0 20px rgba(76,175,80,0.3); }
+  .main-team-card.active-team { border-width: 4px; box-shadow: 0 0 25px var(--gold); }
+
+  .main-team-icon { font-size: 50px; margin-bottom: 10px; }
+  .main-team-name { font-size: 20px; font-weight: 900; }
+  .main-team-score { font-size: 24px; font-weight: bold; color: var(--accent); margin-top: 5px; }
+  .main-team-status { font-size: 12px; margin-top: 10px; background: #222; padding: 4px 10px; border-radius: 10px; color: var(--subtitle); }
+  .main-team-status.joined { background: var(--green); color: #fff; }
+
+  /* الفرق الفرعية */
+  .clans-section { width: 100%; max-width: 1100px; border-top: 2px dashed var(--border); padding-top: 30px; display: none; }
+  .clans-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  
+  .clans-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .clans-title { font-size: 24px; color: var(--gold); font-weight: bold; display: flex; align-items: center; gap: 10px;}
+  
+  .create-clan-box { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 15px; display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
   .form-input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; outline: none; min-width: 200px; }
   .form-input:focus { border-color: var(--accent); }
   .btn-create { padding: 12px 25px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; }
@@ -37,56 +64,60 @@
   .radio-group { display: flex; gap: 15px; align-items: center; margin-top: 10px; flex-wrap: wrap;}
   .radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: bold; font-size: 14px;}
 
-  .teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
-  .team-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; position: relative; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; gap: 15px; }
-  .team-card:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+  .clans-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; width: 100%; }
+  .clan-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; display: flex; flex-direction: column; gap: 15px; transition: 0.3s; position: relative; }
+  .clan-card:hover { border-color: var(--gold); }
+  .clan-card.owner-team { border-color: var(--gold); background: linear-gradient(145deg, var(--card-bg), rgba(255,215,0,0.05)); }
+  .clan-card.top-clan { border-color: var(--gold); box-shadow: 0 0 15px rgba(255,215,0,0.3); }
   
-  .owner-team-card { border-color: var(--gold); background: linear-gradient(145deg, var(--card-bg), rgba(255,215,0,0.05)); }
-
-  .team-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;}
-  .team-name { font-size: 20px; font-weight: 900; color: var(--text); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-  .team-owner { font-size: 13px; color: var(--subtitle); margin-top: 5px; }
-  .badge-owner-team { background: var(--gold); color: #000; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 10px; display: inline-block; vertical-align: middle; box-shadow: 0 0 10px rgba(255,215,0,0.5);}
+  .clan-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .clan-name { font-size: 20px; font-weight: bold; color: var(--text); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .clan-owner { font-size: 12px; color: var(--subtitle); margin-top: 5px; }
+  .badge-owner-team { background: var(--gold); color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; }
   .badge-privacy { font-size: 11px; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
   .badge-public { background: rgba(76, 175, 80, 0.2); color: var(--green); border: 1px solid var(--green);}
   .badge-private { background: rgba(255, 0, 0, 0.2); color: var(--accent); border: 1px solid var(--accent);}
-
-  .team-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
-  .btn-action { flex: 1; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 13px; text-align: center; min-width: 90px; }
-  .btn-join { background: var(--green); color: #fff; }
-  .btn-join:hover { background: #388e3c; }
-  .btn-request { background: var(--blue); color: #fff; }
-  .btn-request:hover { background: #005f8d; }
-  .btn-manage { background: var(--gold); color: #000; }
-  .btn-manage:hover { background: #ffcc00; }
-  .btn-leave { background: var(--accent); color: #fff; }
-  .btn-leave:hover { background: #cc0000; }
-  .btn-disabled { background: #333; color: #777; cursor: not-allowed; border: 1px solid #444;}
   
-  /* أزرار الإدارة */
-  .admin-actions { display: flex; gap: 8px; width: 100%; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 5px;}
-  .btn-admin { background: var(--purple); color: #fff; flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.3s; }
-  .btn-admin:hover { background: #7b1fa2; }
-  .btn-admin-danger { background: var(--accent); color: #fff; }
-  .btn-admin-danger:hover { background: #cc0000; }
+  .clan-score-box { background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+  body.light-mode .clan-score-box { background: rgba(0,0,0,0.05); }
+  .clan-score { font-size: 18px; font-weight: bold; color: var(--gold); }
+  .winner-badge { background: var(--gold); color: #000; font-weight: bold; font-size: 12px; padding: 3px 8px; border-radius: 5px; display: inline-block; margin-bottom: 5px; }
 
-  /* مودال الإدارة */
+  .clan-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; }
+  .btn-action { flex: 1; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 13px; text-align: center; min-width: 90px; transition: 0.3s;}
+  .btn-join { background: var(--green); color: #fff; }
+  .btn-request { background: var(--blue); color: #fff; }
+  .btn-manage { background: var(--gold); color: #000; }
+  .btn-leave { background: var(--accent); color: #fff; }
+  .btn-view { background: #555; color: #fff; }
+  .btn-disabled { background: #333; color: #777; cursor: not-allowed; }
+  
+  .admin-actions { display: flex; gap: 8px; width: 100%; border-top: 1px dashed var(--border); padding-top: 10px; margin-top: 5px;}
+  .btn-admin { background: var(--purple); color: #fff; flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 12px; cursor: pointer; }
+  .btn-admin-danger { background: var(--accent); color: #fff; }
+
+  /* المودال */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
   .modal-box { background: var(--card-bg); border: 2px solid var(--gold); border-radius: 15px; padding: 25px; width: 95%; max-width: 600px; max-height: 85vh; overflow-y: auto; }
   .modal-title { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 20px; text-align: center; }
-  
-  .search-user-box { display: flex; gap: 10px; margin-bottom: 20px; }
-  .search-user-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; outline: none; }
-  .btn-force-add { background: var(--green); color: #fff; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
-
-  .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); border-radius: 5px; margin-bottom: 5px;}
-  .member-name { font-weight: bold; font-size: 16px; }
+  .member-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.1); border-radius: 5px; margin-bottom: 5px; }
   .btn-kick { background: var(--accent); color: #fff; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 12px; }
-  
-  .btn-close-modal { background: #555; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; margin-top: 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; transition: 0.3s;}
-  .btn-close-modal:hover { background: #333; }
+  .search-user-box { display: flex; gap: 10px; margin-bottom: 20px; }
+  .search-user-box input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; }
+  .btn-force-add { background: var(--green); color: #fff; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
+  .btn-close-modal { background: #555; color: #fff; border: none; padding: 12px; border-radius: 8px; width: 100%; margin-top: 20px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; }
 
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 99999; opacity: 0; transition: 0.3s; visibility: hidden;}
+  /* الرسايل المخصصة */
+  #customDialog { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100000; justify-content: center; align-items: center; }
+  #customDialog .dialog-box { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 25px; width: 90%; max-width: 400px; text-align: center; }
+  #customDialog h3 { color: var(--text); margin-bottom: 15px; font-size: 18px; line-height: 1.5; }
+  #customDialog input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-family: 'Cairo'; margin-bottom: 15px; outline: none; display: none;}
+  #customDialog .dialog-actions { display: flex; gap: 10px; justify-content: center; }
+  #customDialog button { flex: 1; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; font-size: 14px; }
+  #customDialog .btn-ok { background: var(--accent); color: #fff; }
+  #customDialog .btn-cancel { background: #333; color: #fff; }
+
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 99999; opacity: 0; transition: 0.3s; visibility: hidden; text-align: center;}
   .toast.show { opacity: 1; top: 30px; visibility: visible;}
   .toast.error { background: var(--accent); }
 </style>
@@ -101,79 +132,105 @@
   </div>
 </div>
 
-<h1 class="header-title" id="mainTitle" data-ar="⚔️ الفرق والكلاانات" data-en="⚔️ Teams & Clans">⚔️ الفرق والكلاانات</h1>
-<p class="subtitle" id="subtitle" data-ar="اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع! (مسموح لك بـ 3 فرق كحد أقصى)" data-en="Create your team, join your friends, and be the strongest! (Max 3 teams)">اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع! (مسموح لك بـ 3 فرق كحد أقصى)</p>
+<h1 class="header-title" id="mainTitle" data-ar="⚔️ حرب التيمات" data-en="⚔️ Team Battles">⚔️ حرب التيمات</h1>
+<p class="subtitle" id="subtitle" data-ar="انضم للتصنيف الأساسي بتاعك، واعمل فريق فرعي مع أصحابك عشان تسيطروا!" data-en="Join your main category, and create a sub-team with your friends to dominate!">انضم للتصنيف الأساسي بتاعك، واعمل فريق فرعي مع أصحابك عشان تسيطروا!</p>
 
-<!-- صندوق إنشاء فريق -->
-<div class="create-team-box">
-  <h3 data-ar="➕ إنشاء فريق جديد" data-en="➕ Create New Team">➕ إنشاء فريق جديد</h3>
-  <div class="form-row">
-    <input type="text" id="newTeamName" class="form-input" placeholder="اسم الفريق..." data-ar="اسم الفريق..." data-en="Team name...">
-    <button class="btn-create" onclick="createTeam()" data-ar="إنشاء" data-en="Create">إنشاء</button>
-  </div>
-  <div class="radio-group">
-    <label><input type="radio" name="privacy" value="public" checked> <span data-ar="عام (أي حد يقدر ينضم)" data-en="Public (Anyone can join)">عام (أي حد يقدر ينضم)</span></label>
-    <label><input type="radio" name="privacy" value="private"> <span data-ar="خاص (محتاج موافقة)" data-en="Private (Needs approval)">خاص (محتاج موافقة)</span></label>
-  </div>
+<div class="main-teams-container" id="mainTeamsContainer"></div>
+
+<div class="clans-section" id="clansSection">
+    <div class="clans-header">
+        <div class="clans-title" id="currentClanTitle">فرق التصنيف</div>
+        <button class="btn-close-modal" style="width:auto; margin:0; padding:8px 20px; background:#333;" onclick="closeClans()" data-ar="✖ إغلاق" data-en="✖ Close">✖ إغلاق</button>
+    </div>
+
+    <div class="create-clan-box" id="createClanBox">
+        <input type="text" id="newClanName" class="form-input" placeholder="اسم الفريق الفرعي..." data-ar="اسم الفريق الفرعي..." data-en="Sub-team name...">
+        <button class="btn-create" onclick="createClan()" data-ar="إنشاء فريق" data-en="Create Team">إنشاء فريق</button>
+    </div>
+    <div class="radio-group" id="createClanPrivacy" style="margin-bottom:20px;">
+        <label><input type="radio" name="clan_privacy" value="public" checked> <span data-ar="عام (أي حد يقدر ينضم)" data-en="Public">عام</span></label>
+        <label><input type="radio" name="clan_privacy" value="private"> <span data-ar="خاص (محتاج موافقة)" data-en="Private">خاص</span></label>
+    </div>
+
+    <div class="clans-grid" id="clansGrid"></div>
 </div>
 
-<!-- شبكة عرض الفرق -->
-<div class="teams-grid" id="teamsGrid">
-  <div style="text-align:center; color:var(--subtitle); grid-column: 1/-1;" data-ar="جاري تحميل الفرق..." data-en="Loading teams...">جاري تحميل الفرق...</div>
-</div>
-
-<!-- مودال إدارة الأعضاء والطلبات -->
 <div class="modal-overlay" id="manageModal">
   <div class="modal-box">
     <div class="modal-title" id="modalTitle">إدارة الفريق</div>
     
-    <!-- إضافة عضو بالقوة (للإدارة فقط) -->
+    <!-- قسم الإضافة (للأونر فقط) -->
     <div id="forceAddSection" style="display: none;">
         <div class="search-user-box">
-            <input type="text" id="forceAddUser" placeholder="اسم اللاعب لإضافته قسرياً..." data-ar="اسم اللاعب لإضافته قسرياً..." data-en="Username to force add...">
+            <input type="text" id="forceAddUser" placeholder="اسم اللاعب للإضافة..." data-ar="اسم اللاعب للإضافة..." data-en="Username to force add...">
             <button class="btn-force-add" onclick="forceAddMember()" data-ar="إضافة" data-en="Add">إضافة</button>
         </div>
     </div>
 
-    <!-- قائمة الطلبات -->
-    <div id="requestsSection"></div>
-    
-    <!-- قائمة الأعضاء -->
-    <div id="membersSection" style="margin-top: 20px;">
-        <h4 style="color:var(--accent); margin-bottom:10px;" data-ar="أعضاء الفريق:" data-en="Team Members:">أعضاء الفريق:</h4>
-        <div id="membersList"></div>
-    </div>
+    <h4 style="color:var(--gold); margin-bottom:10px;" data-ar="أعضاء الفريق:" data-en="Team Members:">أعضاء الفريق:</h4>
+    <div id="membersList"></div>
+
+    <button id="deleteClanBtn" class="btn-admin-danger" style="width:100%; margin-top:15px; padding:12px; border-radius:8px; font-size:15px; font-weight:bold; display:none; font-family:'Cairo'; cursor:pointer;" onclick="deleteTeam()" data-ar="🗑️ حذف الفريق نهائياً" data-en="🗑️ Delete Team Permanently">
+        🗑️ حذف الفريق نهائياً
+    </button>
 
     <button class="btn-close-modal" onclick="closeModal()" data-ar="إغلاق" data-en="Close">إغلاق</button>
   </div>
 </div>
 
-<div class="toast" id="toast">تمت العملية بنجاح</div>
+<div id="customDialog">
+    <div class="dialog-box">
+        <h3 id="dialogMessage">هل أنت متأكد؟</h3>
+        <input type="text" id="dialogInput">
+        <div class="dialog-actions">
+            <button class="btn-ok" id="dialogOkBtn">تأكيد</button>
+            <button class="btn-cancel" id="dialogCancelBtn">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast">تمت العملية</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, get, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, onValue, set, get, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.get = get; window.update = update; window.remove = remove; window.push = push;
+  window.db = db; window.ref = ref; window.onValue = onValue; window.set = set; window.get = get; window.update = update; window.remove = remove;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) { window.location.href = 'index.html'; }
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   
-  let isAdmin = false; // هل المستخدم الحالي إداري؟
-  let myTeams = []; // الفرق اللي أنا فيها
-  let allTeams = {}; // كل الفرق
-  let allUsersData = {}; // عشان أعرف مين فين
-  let myRequests = {}; // الطلبات اللي أنا بعتها
+  // ✅ تعريف الأونر بإنه الحساب ahmed فقط لا غير
+  const isOwner = (currentUser.toLowerCase() === 'ahmed');
   
-  let currentManageTeamId = null;
+  // باقي الإدارة (عشان الطرد الفوري لو حبيت تفرقهم)
+  const adminRoles = ['Owner', 'Admin', 'Partner', 'Manager', 'Tester', 'Builder'];
+  let isAdmin = isOwner; // لو عايز الإدارة كمان تطرد فوري، خليها true
 
-  // تطبيق الثيم
+  if (!isAdmin) {
+      window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
+          const role = snap.exists() ? snap.val() : 'Player';
+          if (adminRoles.includes(role)) isAdmin = true;
+          renderMainTeams();
+      });
+  } else {
+      renderMainTeams();
+  }
+
+  let myMainTeams = []; 
+  let myClans = []; 
+  let allClans = {}; 
+  let allUsersData = {};
+  let allScoresData = {}; 
+  let teamsScores = {};
+  let currentCategory = null;
+  let currentManageClanId = null;
+
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌙'; }
-  
   window.toggleTheme = function() {
       const body = document.body; const btn = document.getElementById('themeBtn');
       body.classList.toggle('light-mode');
@@ -181,42 +238,63 @@
       else { btn.innerText = '☀️'; localStorage.setItem('theme', 'dark'); }
   };
 
-  // الترجمة
   const translations = {
     ar: {
-        back: "⬅ رجوع", title: "⚔️ الفرق والكلاانات", subtitle: "اعمل فريقك، انضم لأصحابك، وخليك الأقوى في الموقع!",
-        createTitle: "➕ إنشاء فريق جديد", teamNamePh: "اسم الفريق...", createBtn: "إنشاء",
-        publicOpt: "عام (أي حد يقدر ينضم)", privateOpt: "خاص (محتاج موافقة)",
-        loading: "جاري تحميل الفرق...", ownerLabel: "صاحب الفريق:",
-        manageBtn: "⚙️ إدارة", leaveBtn: "🚪 مغادرة", pendingBtn: "⏳ قيد الانتظار",
-        maxLimit: "وصلت للحد الأقصى (3 فرق)", joinBtn: "➕ انضمام", requestBtn: "📩 طلب انضمام",
-        modalTitle: "إدارة فريق:", noRequests: "مفيش طلبات انضمام حالياً.", accept: "قبول ✅", reject: "رفض ❌", close: "إغلاق",
-        publicBadge: "🌍 عام", privateBadge: "🔒 خاص", ownerTeamBadge: "👑 Owner Team",
-        adminEdit: "✏️ تعديل", adminDelete: "🗑️ حذف", adminTools: "🛠️ أدوات الإدارة", membersLabel: "أعضاء الفريق:", kickBtn: "طرد ❌", forceAddPh: "اسم اللاعب للإضافة...", addBtn: "إضافة"
+        back: "⬅ رجوع", title: "⚔️ حرب التيمات", subtitle: "انضم للتصنيف الأساسي بتاعك، واعمل فريق فرعي مع أصحابك عشان تسيطروا!",
+        points: "نقطة", joinMain: "انضم للتصنيف", joinedMain: "✅ تصنيفك الأساسي", otherMain: "أنت في تصنيف آخر", 
+        confirmMain: "هل أنت متأكد؟ لا يمكنك تغيير التصنيف الأساسي بعد الانضمام!", joinedMainSuccess: "تم الانضمام للتصنيف بنجاح!",
+        maxMainLimit: "وصلت للحد الأقصى (3 تصنيفات)",
+        horror: "الرعب", action: "الأكشن", mystery: "الغموض", thriller: "التشويق", egyptian: "المصري",
+        createClanTitle: "إنشاء فريق فرعي جديد", clanNamePh: "اسم الفريق...", createBtn: "إنشاء", 
+        clansOf: "فرق تصنيف", noClans: "لا يوجد فرق فرعية هنا بعد. كن الأول!", 
+        members: "عضو", owner: "صاحب الفريق:", manage: "إدارة", joinClan: "انضمام", leaveClan: "مغادرة", 
+        maxClans: "وصلت للحد الأقصى (3 فرق فرعية)", pending: "قيد الانتظار", 
+        kick: "طلب طرد ❌", invite: "دعوة", invitePh: "اسم اللاعب...", 
+        ok: "تأكيد", cancel: "إلغاء", close: "إغلاق", mustJoinMain: "لازم تنضم لتصنيف أساسي الأول عشان تقدر تعمل فريق فرعي!",
+        enterKickReason: "اكتب سبب طرد هذا اللاعب:", kickRequestSent: "تم إرسال طلب الطرد للأونر للموافقة.",
+        inviteSuccess: "تم إرسال الدعوة للاعب!", userNotFound: "اللاعب غير موجود!", cannotKickOwner: "لا يمكنك طرد صاحب الفريق!",
+        leaveMain: "خروج من التصنيف", deleteTeam: "🗑️ حذف الفريق نهائياً", confirmDelete: "هل أنت متأكد من حذف الفريق نهائياً؟", deleted: "تم حذف الفريق!",
+        publicBadge: "🌍 عام", privateBadge: "🔒 خاص", requestBtn: "📩 طلب انضمام", viewMembers: "👥 عرض الأعضاء",
+        confirmKickAdmin: "هل أنت متأكد من طرد هذا اللاعب فوراً؟", kickSuccess: "تم طرد اللاعب بنجاح.",
+        topClan: "👑 المتصدر", clanXP: "نقاط الفريق في التصنيف:",
+        manageTeamTitle: "إدارة فريق: ",
+        unauthorized: "غير مصرح لك! الأونر فقط هو من يمكنه إضافة اللاعبين بالقوة."
     },
     en: {
-        back: "⬅ Back", title: "⚔️ Teams & Clans", subtitle: "Create your team, join your friends, and be the strongest!",
-        createTitle: "➕ Create New Team", teamNamePh: "Team name...", createBtn: "Create",
-        publicOpt: "Public (Anyone can join)", privateOpt: "Private (Needs approval)",
-        loading: "Loading teams...", ownerLabel: "Owner:",
-        manageBtn: "⚙️ Manage", leaveBtn: "🚪 Leave", pendingBtn: "⏳ Pending",
-        maxLimit: "Max limit reached (3 teams)", joinBtn: "➕ Join", requestBtn: "📩 Request Join",
-        modalTitle: "Manage Team:", noRequests: "No join requests currently.", accept: "Accept ✅", reject: "Reject ❌", close: "Close",
-        publicBadge: "🌍 Public", privateBadge: "🔒 Private", ownerTeamBadge: "👑 Owner Team",
-        adminEdit: "✏️ Edit", adminDelete: "🗑️ Delete", adminTools: "🛠️ Admin Tools", membersLabel: "Team Members:", kickBtn: "Kick ❌", forceAddPh: "Username to force add...", addBtn: "Add"
+        back: "⬅ Back", title: "⚔️ Team Battles", subtitle: "Join your main category, and create a sub-team with your friends to dominate!",
+        points: "Points", joinMain: "Join Category", joinedMain: "✅ Your Main Category", otherMain: "You are in another category", 
+        confirmMain: "Are you sure? You cannot change your main category after joining!", joinedMainSuccess: "Successfully joined the category!",
+        maxMainLimit: "Max limit reached (3 categories)",
+        horror: "Horror", action: "Action", mystery: "Mystery", thriller: "Thriller", egyptian: "Egyptian",
+        createClanTitle: "Create New Sub-Team", clanNamePh: "Team name...", createBtn: "Create", 
+        clansOf: "Sub-teams of", noClans: "No sub-teams here yet. Be the first!", 
+        members: "Members", owner: "Owner:", manage: "Manage", joinClan: "Join", leaveClan: "Leave", 
+        maxClans: "Max limit reached (3 sub-teams)", pending: "Pending", 
+        kick: "Request Kick ❌", invite: "Invite", invitePh: "Username...", 
+        ok: "OK", cancel: "Cancel", close: "Close", mustJoinMain: "You must join a main category first to create a sub-team!",
+        enterKickReason: "Enter the reason for kicking this player:", kickRequestSent: "Kick request sent to Owner for approval.",
+        inviteSuccess: "Invitation sent to player!", userNotFound: "Player not found!", cannotKickOwner: "Cannot kick the team owner!",
+        leaveMain: "Leave Category", deleteTeam: "🗑️ Delete Team Permanently", confirmDelete: "Are you sure you want to delete this team?", deleted: "Team deleted!",
+        publicBadge: "🌍 Public", privateBadge: "🔒 Private", requestBtn: "📩 Request Join", viewMembers: "👥 View Members",
+        confirmKickAdmin: "Are you sure you want to kick this player immediately?", kickSuccess: "Player kicked successfully.",
+        topClan: "👑 Top Team", clanXP: "Team Points in Category:",
+        manageTeamTitle: "Manage Team: ",
+        unauthorized: "Unauthorized! Only Owner can force add players."
     }
   };
+
+  const mainCategories = [
+    { id: 'horror', nameAr: 'الرعب', nameEn: 'Horror', icon: '🎃', class: 'horror' },
+    { id: 'action', nameAr: 'الأكشن', nameEn: 'Action', icon: '💥', class: 'action' },
+    { id: 'mystery', nameAr: 'الغموض', nameEn: 'Mystery', icon: '🕵️', class: 'mystery' },
+    { id: 'thriller', nameAr: 'التشويق', nameEn: 'Thriller', icon: '🎬', class: 'thriller' },
+    { id: 'egyptian', nameAr: 'المصري', nameEn: 'Egyptian', icon: '🇪🇬', class: 'egyptian' }
+  ];
 
   function applyLanguage() {
       const t = translations[currentLang];
       document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       
-      document.getElementById('backBtn').innerText = t.back;
-      document.getElementById('mainTitle').innerText = t.title;
-      document.getElementById('subtitle').innerText = t.subtitle;
-      document.getElementById('newTeamName').placeholder = t.teamNamePh;
-      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-
       document.querySelectorAll('[data-ar]').forEach(el => {
           if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
               el.placeholder = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
@@ -224,8 +302,22 @@
               el.innerText = currentLang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
           }
       });
+
+      document.getElementById('backBtn').innerText = t.back;
+      document.getElementById('mainTitle').innerText = t.title;
+      document.getElementById('subtitle').innerText = t.subtitle;
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
       
-      renderTeams(); 
+      if (currentCategory) {
+          const catData = mainCategories.find(c => c.id === currentCategory);
+          if (catData) {
+              const catName = currentLang === 'ar' ? catData.nameAr : catData.nameEn;
+              document.getElementById('currentClanTitle').innerText = t.clansOf + ' ' + catName;
+          }
+      }
+
+      renderMainTeams();
+      if(currentCategory) renderClans(currentCategory);
   }
 
   window.toggleLanguage = function() {
@@ -241,295 +333,406 @@
       setTimeout(() => { t.className = 'toast'; }, 3000);
   }
 
-  // 1. فحص صلاحيات الإدارة
-  window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
-      const role = snap.exists() ? snap.val() : 'Player';
-      const adminRoles = ['Owner', 'Admin', 'Partner', 'Manager', 'Tester', 'Builder'];
-      if(currentUser.toLowerCase() === 'ahmed' || adminRoles.includes(role)) {
-          isAdmin = true;
-      }
-      renderTeams();
-  });
+  window.showSiteConfirm = function(message) {
+      return new Promise((resolve) => {
+          const dialog = document.getElementById('customDialog');
+          const btnOk = document.getElementById('dialogOkBtn');
+          const btnCancel = document.getElementById('dialogCancelBtn');
+          document.getElementById('dialogMessage').innerText = message;
+          document.getElementById('dialogInput').style.display = 'none';
+          btnCancel.style.display = 'block';
+          btnOk.innerText = translations[currentLang].ok;
+          btnCancel.innerText = translations[currentLang].cancel;
+          dialog.style.display = 'flex';
+          btnOk.onclick = () => { dialog.style.display = 'none'; resolve(true); };
+          btnCancel.onclick = () => { dialog.style.display = 'none'; resolve(false); };
+      });
+  };
 
-  // 2. جلب الفرق
+  window.showSitePrompt = function(message, defaultValue = '') {
+      return new Promise((resolve) => {
+          const dialog = document.getElementById('customDialog');
+          const input = document.getElementById('dialogInput');
+          const btnOk = document.getElementById('dialogOkBtn');
+          const btnCancel = document.getElementById('dialogCancelBtn');
+          document.getElementById('dialogMessage').innerText = message;
+          input.style.display = 'block';
+          input.value = defaultValue;
+          btnCancel.style.display = 'block';
+          btnOk.innerText = translations[currentLang].ok;
+          btnCancel.innerText = translations[currentLang].cancel;
+          dialog.style.display = 'flex';
+          setTimeout(() => input.focus(), 100);
+          btnOk.onclick = () => { const val = input.value; dialog.style.display = 'none'; resolve(val); };
+          btnCancel.onclick = () => { dialog.style.display = 'none'; resolve(null); };
+      });
+  };
+
   window.onValue(window.ref(window.db, 'teams'), (snap) => {
-      allTeams = snap.val() || {};
-      renderTeams();
+      teamsScores = snap.val() || {};
+      renderMainTeams();
   });
 
-  // 3. جلب بيانات اللاعبين (عشان نعرف مين فين)
+  window.onValue(window.ref(window.db, 'scores'), (snap) => {
+      allScoresData = snap.val() || {};
+      if(currentCategory) renderClans(currentCategory);
+  });
+
   window.onValue(window.ref(window.db, 'users_data'), (snap) => {
       allUsersData = snap.val() || {};
-  });
-
-  // 4. جلب فرقي وطلباتي
-  window.onValue(window.ref(window.db, `users_data/${currentUser}/joined_teams`), (snap) => {
-      myTeams = snap.exists() ? Object.keys(snap.val()) : [];
-      renderTeams();
-  });
-
-  window.onValue(window.ref(window.db, 'team_requests'), (snap) => {
-      const data = snap.val() || {};
-      myRequests = {};
-      for(let teamId in data) {
-          if(data[teamId][currentUser]) { myRequests[teamId] = true; }
-      }
-      renderTeams();
-  });
-
-  // ------------------ دوال الأونر والإدارة ------------------
-
-  window.editTeamName = async function(teamId, currentName) {
-      const newName = prompt(currentLang === 'ar' ? 'اكتب اسم الفريق الجديد:' : 'Enter new team name:', currentName);
-      if(!newName || newName.trim() === '') return;
-      try {
-          await window.update(window.ref(window.db, 'teams/' + teamId), { name: newName.trim() });
-          showToast(currentLang === 'ar' ? 'تم تعديل اسم الفريق!' : 'Team name updated!');
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.deleteTeam = async function(teamId) {
-      if(!confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف الفريق نهائياً؟' : 'Are you sure you want to delete this team?')) return;
-      try {
-          await window.remove(window.ref(window.db, 'teams/' + teamId));
-          // مسح الطلبات المرتبطة بيه
-          await window.remove(window.ref(window.db, 'team_requests/' + teamId));
-          showToast(currentLang === 'ar' ? 'تم حذف الفريق نهائياً.' : 'Team deleted.');
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.kickMember = async function(teamId, user) {
-      if(!confirm(`هل أنت متأكد من طرد ${user} من الفريق؟`)) return;
-      try {
-          await window.remove(window.ref(window.db, `users_data/${user}/joined_teams/${teamId}`));
-          showToast(`تم طرد ${user} من الفريق.`);
-          manageTeam(teamId); // تحديث المودال
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.forceAddMember = async function() {
-      const user = document.getElementById('forceAddUser').value.trim().toLowerCase();
-      if(!user) return;
       
-      if(!allUsersData[user]) {
-          return showToast('اللاعب غير موجود!', true);
-      }
-
-      try {
-          await window.set(window.ref(window.db, `users_data/${user}/joined_teams/${currentManageTeamId}`), true);
-          await window.remove(window.ref(window.db, `team_requests/${currentManageTeamId}/${user}`));
-          showToast(`تم إضافة ${user} للفريق بالقوة.`);
-          document.getElementById('forceAddUser').value = '';
-          manageTeam(currentManageTeamId); // تحديث المودال
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  // ------------------ دوال اللاعب العادي ------------------
-
-  window.createTeam = async function() {
-      const name = document.getElementById('newTeamName').value.trim();
-      const privacy = document.querySelector('input[name="privacy"]:checked').value;
+      let myData = allUsersData[currentUser] || {};
+      myMainTeams = myData.main_teams ? Object.keys(myData.main_teams) : [];
+      myClans = myData.joined_clans ? Object.keys(myData.joined_clans) : [];
       
-      if(!name) return showToast(currentLang === 'ar' ? 'اكتب اسم الفريق!' : 'Enter a team name!', true);
-      if(!isAdmin && myTeams.length >= 3) return showToast(translations[currentLang].maxLimit, true);
+      renderMainTeams();
+      if(currentCategory) renderClans(currentCategory);
+  });
 
-      for(let id in allTeams) {
-          if(allTeams[id].name.toLowerCase() === name.toLowerCase()) {
-              return showToast(currentLang === 'ar' ? 'فيه فريق بالاسم ده!' : 'Name already exists!', true);
-          }
-      }
+  window.onValue(window.ref(window.db, 'clans'), (snap) => {
+      allClans = snap.val() || {};
+      if(currentCategory) renderClans(currentCategory);
+  });
 
-      try {
-          const teamId = 'team_' + Date.now();
-          await window.set(window.ref(window.db, 'teams/' + teamId), { name: name, owner: currentUser, isPublic: privacy === 'public', createdAt: Date.now() });
-          await window.set(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`), true);
-          document.getElementById('newTeamName').value = '';
-          showToast(currentLang === 'ar' ? 'تم إنشاء الفريق! 🎉' : 'Team created! 🎉');
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.joinTeam = async function(teamId, isPublic) {
-      if(!isAdmin && myTeams.length >= 3) return showToast(translations[currentLang].maxLimit, true);
-      if(myTeams.includes(teamId)) return;
-
-      try {
-          if(isPublic || isAdmin) { // الإدارة تدخل أي فريق عام أو خاص على طول
-              await window.set(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`), true);
-              showToast(currentLang === 'ar' ? 'تم الانضمام!' : 'Joined!');
-          } else {
-              await window.set(window.ref(window.db, `team_requests/${teamId}/${currentUser}`), 'pending');
-              showToast(currentLang === 'ar' ? 'تم إرسال الطلب.' : 'Request sent.');
-          }
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.leaveTeam = async function(teamId) {
-      if(!confirm(currentLang === 'ar' ? 'مغادرة الفريق؟' : 'Leave team?')) return;
-      try {
-          await window.remove(window.ref(window.db, `users_data/${currentUser}/joined_teams/${teamId}`));
-          showToast(currentLang === 'ar' ? 'تم المغادرة.' : 'Left.');
-      } catch(e) { showToast(e.message, true); }
-  }
-
-  window.manageTeam = async function(teamId) {
-      currentManageTeamId = teamId;
+  function renderMainTeams() {
+      const container = document.getElementById('mainTeamsContainer');
       const t = translations[currentLang];
-      
-      // 1. عرض قسم الإضافة القسرية لو إداري
-      document.getElementById('forceAddSection').style.display = isAdmin ? 'flex' : 'none';
+      container.innerHTML = '';
 
-      // 2. جلب الطلبات
-      const snap = await window.get(window.ref(window.db, 'team_requests/' + teamId));
-      const requests = snap.exists() ? Object.keys(snap.val()) : [];
-      const reqList = document.getElementById('requestsSection');
-      reqList.innerHTML = `<h4 style="color:var(--gold); margin-bottom:10px;">${currentLang === 'ar' ? 'طلبات الانضمام:' : 'Join Requests:'}</h4>`;
-      
-      if(requests.length === 0) {
-          reqList.innerHTML += `<div style="text-align:center; color:var(--subtitle); font-size:14px; margin-bottom:15px;">${t.noRequests}</div>`;
-      } else {
-          requests.forEach(user => {
-              reqList.innerHTML += `
-                  <div class="member-item">
-                      <span class="member-name">👤 ${user}</span>
-                      <div style="display:flex; gap:5px;">
-                          <button class="btn-accept" onclick="acceptRequest('${teamId}', '${user}')">${t.accept}</button>
-                          <button class="btn-reject" onclick="rejectRequest('${teamId}', '${user}')">${t.reject}</button>
-                      </div>
-                  </div>
-              `;
-          });
-      }
+      mainCategories.forEach(cat => {
+          const score = teamsScores[cat.id] || 0;
+          const isJoined = myMainTeams.includes(cat.id);
+          const catName = currentLang === 'ar' ? cat.nameAr : cat.nameEn;
 
-      // 3. جلب الأعضاء الحاليين
-      const memberList = document.getElementById('membersList');
-      memberList.innerHTML = '';
-      let members = [];
-      for(let u in allUsersData) {
-          if(allUsersData[u].joined_teams && allUsersData[u].joined_teams[teamId]) {
-              members.push(u);
+          let statusHTML = '';
+          if (isJoined) {
+              statusHTML = `<div class="main-team-status joined" onclick="leaveMainTeam('${cat.id}', event)">${t.joinedMain} ❌</div>`; 
+          } else if (myMainTeams.length >= 3 && !isOwner) {
+              statusHTML = `<div class="main-team-status">${t.maxMainLimit}</div>`;
+          } else {
+              statusHTML = `<div class="main-team-status" onclick="joinMainTeam('${cat.id}', event)">${t.joinMain} ➡</div>`;
           }
-      }
 
-      if(members.length === 0) {
-          memberList.innerHTML = `<div style="text-align:center; color:var(--subtitle); padding:10px;">لا يوجد أعضاء.</div>`;
-      } else {
-          members.forEach(user => {
-              let kickBtn = isAdmin ? `<button class="btn-kick" onclick="kickMember('${teamId}', '${user}')">${t.kickBtn}</button>` : '';
-              memberList.innerHTML += `
-                  <div class="member-item">
-                      <span class="member-name">👤 ${user} ${allTeams[teamId].owner === user ? '👑' : ''}</span>
-                      ${kickBtn}
-                  </div>
-              `;
-          });
-      }
-      
-      document.getElementById('modalTitle').innerText = t.modalTitle + ' ' + allTeams[teamId].name;
-      document.getElementById('manageModal').style.display = 'flex';
+          const div = document.createElement('div');
+          div.className = `main-team-card ${cat.class} ${isJoined ? 'active-team' : ''}`;
+          div.onclick = () => openClans(cat.id, catName);
+          div.innerHTML = `
+              <div class="main-team-icon">${cat.icon}</div>
+              <div class="main-team-name">${catName}</div>
+              <div class="main-team-score">${score} ${t.points}</div>
+              ${statusHTML}
+          `;
+          container.appendChild(div);
+      });
   }
 
-  window.acceptRequest = async function(teamId, user) {
+  window.joinMainTeam = async function(teamId, event) {
+      event.stopPropagation();
+      const t = translations[currentLang];
+      if (myMainTeams.includes(teamId)) return;
+      if (myMainTeams.length >= 3 && !isOwner) return showToast(t.maxMainLimit, true);
+
+      const confirmJoin = await showSiteConfirm(t.confirmMain);
+      if (!confirmJoin) return;
+
       try {
-          const userTeamsSnap = await window.get(window.ref(window.db, `users_data/${user}/joined_teams`));
-          const userTeams = userTeamsSnap.exists() ? Object.keys(userTeamsSnap.val()) : [];
-          if(userTeams.length >= 3) {
-              return showToast('اللاعب في 3 فرق بالفعل!', true);
-          }
-          await window.set(window.ref(window.db, `users_data/${user}/joined_teams/${teamId}`), true);
-          await window.remove(window.ref(window.db, `team_requests/${teamId}/${user}`));
-          showToast('تم القبول!');
-          manageTeam(teamId); 
+          await window.set(window.ref(window.db, `users_data/${currentUser}/main_teams/${teamId}`), true);
+          showToast(t.joinedMainSuccess);
       } catch(e) { showToast(e.message, true); }
-  }
+  };
 
-  window.rejectRequest = async function(teamId, user) {
+  window.leaveMainTeam = async function(teamId, event) {
+      event.stopPropagation();
+      const confirmLeave = await showSiteConfirm(translations[currentLang].leaveMain);
+      if (!confirmLeave) return;
+
       try {
-          await window.remove(window.ref(window.db, `team_requests/${teamId}/${user}`));
-          showToast('تم الرفض!');
-          manageTeam(teamId); 
+          await window.remove(window.ref(window.db, `users_data/${currentUser}/main_teams/${teamId}`));
+          showToast(currentLang === 'ar' ? 'تم الخروج من التصنيف.' : 'Left category.');
       } catch(e) { showToast(e.message, true); }
-  }
+  };
 
-  window.closeModal = function() { document.getElementById('manageModal').style.display = 'none'; }
-
-  // ------------------ رسم الفرق ------------------
-  function renderTeams() {
-      const grid = document.getElementById('teamsGrid');
-      if(!grid) return;
+  window.openClans = function(catId, catName) {
+      currentCategory = catId;
+      const section = document.getElementById('clansSection');
+      section.classList.add('active');
+      document.getElementById('currentClanTitle').innerText = translations[currentLang].clansOf + ' ' + catName;
       
+      document.getElementById('createClanBox').style.display = myMainTeams.length > 0 ? 'flex' : 'none';
+      document.getElementById('createClanPrivacy').style.display = myMainTeams.length > 0 ? 'flex' : 'none';
+      
+      renderClans(catId);
+      section.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.closeClans = function() {
+      currentCategory = null;
+      document.getElementById('clansSection').classList.remove('active');
+  };
+
+  function renderClans(catId) {
+      const grid = document.getElementById('clansGrid');
       const t = translations[currentLang];
       grid.innerHTML = '';
 
-      const teamArray = Object.entries(allTeams).map(([id, data]) => ({ id, ...data }));
-      teamArray.sort((a, b) => b.createdAt - a.createdAt);
+      const categoryQuizzes = {
+          horror: ['annabelle', 'conjuring', 'fnaf', 'thenun', 'traintobusan', 'scream'],
+          action: ['squidgame', 'spiderman', 'spiderman2026', 'avengers', 'avatar', 'venom', 'birdsofprey'],
+          thriller: ['fall'],
+          mystery: ['wednesday', 'knivesout'],
+          egyptian: ['elharifa']
+      };
+      const quizzes = categoryQuizzes[catId] || [];
 
-      if(teamArray.length === 0) {
-          grid.innerHTML = `<div style="text-align:center; color:var(--subtitle); grid-column: 1/-1;">${currentLang === 'ar' ? 'لا يوجد فرق بعد. كن الأول!' : 'No teams yet. Be the first!'}</div>`;
+      let clansWithScores = Object.entries(allClans)
+          .map(([id, data]) => {
+              let teamScore = 0;
+              for(let u in allUsersData) {
+                  if(allUsersData[u].joined_clans && allUsersData[u].joined_clans[id]) {
+                      let userScores = allScoresData[u] || {};
+                      for (let quiz in userScores) {
+                          if (quizzes.includes(quiz.toLowerCase())) {
+                              let attempts = Object.values(userScores[quiz]);
+                              attempts.forEach(a => {
+                                  teamScore += (a.score || 0);
+                              });
+                          }
+                      }
+                  }
+              }
+              return { id, ...data, totalScore: teamScore };
+          })
+          .filter(c => c.category === catId && c.name)
+          .sort((a, b) => b.totalScore - a.totalScore);
+
+      if (clansWithScores.length === 0) {
+          grid.innerHTML = `<div style="text-align:center; color:var(--subtitle); grid-column:1/-1; padding:20px;">${t.noClans}</div>`;
           return;
       }
 
-      teamArray.forEach(team => {
-          const isMember = myTeams.includes(team.id);
-          const isOwner = team.owner === currentUser;
-          const hasRequested = myRequests[team.id];
-          const isOwnerTeam = (team.owner.toLowerCase() === 'ahmed' && team.isPublic);
+      clansWithScores.forEach((clan, index) => {
+          const isMember = myClans.includes(clan.id);
+          const isClanOwner = clan.owner === currentUser;
+          const isOwnerTeam = (clan.owner.toLowerCase() === 'ahmed');
           
-          const div = document.createElement('div');
-          div.className = `team-card ${isOwnerTeam ? 'owner-team-card' : ''}`;
+          const isTopClan = (index === 0 && clan.totalScore > 0);
           
-          let badgeHTML = isOwnerTeam ? `<span class="badge-owner-team">${t.ownerTeamBadge}</span>` : '';
-          let privacyHTML = team.isPublic 
+          let privacyHTML = clan.isPublic 
               ? `<span class="badge-privacy badge-public">${t.publicBadge}</span>` 
               : `<span class="badge-privacy badge-private">${t.privateBadge}</span>`;
 
-          // أزرار اللاعب العادي
           let actionHTML = '';
-          if(isOwner) {
-              actionHTML = `<button class="btn-action btn-manage" onclick="manageTeam('${team.id}')">${t.manageBtn}</button>`;
-          } else if(isMember) {
-              actionHTML = `<button class="btn-action btn-leave" onclick="leaveTeam('${team.id}')">${t.leaveBtn}</button>`;
-          } else if(hasRequested) {
-              actionHTML = `<button class="btn-action btn-disabled" disabled>${t.pendingBtn}</button>`;
-          } else if(!isAdmin && myTeams.length >= 3) {
-              actionHTML = `<button class="btn-action btn-disabled" disabled>${t.maxLimit}</button>`;
+          actionHTML += `<button class="btn-action btn-view" onclick="openClanModal('${clan.id}', true)">${t.viewMembers}</button>`;
+
+          if (isClanOwner) {
+              actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
+          } else if (isMember) {
+              actionHTML += `<button class="btn-action btn-leave" onclick="leaveClan('${clan.id}')">${t.leaveClan}</button>`;
+          } else if (myClans.length >= 3 && !isOwner) {
+              actionHTML += `<button class="btn-action btn-disabled">${t.maxClans}</button>`;
           } else {
-              if(team.isPublic || isAdmin) {
-                  actionHTML = `<button class="btn-action btn-join" onclick="joinTeam('${team.id}', true)">${t.joinBtn}</button>`;
+              if(clan.isPublic || isOwner) {
+                  actionHTML += `<button class="btn-action btn-join" onclick="joinClan('${clan.id}', true)">${t.joinClan}</button>`;
               } else {
-                  actionHTML = `<button class="btn-action btn-request" onclick="joinTeam('${team.id}', false)">${t.requestBtn}</button>`;
+                  actionHTML += `<button class="btn-action btn-request" onclick="joinClan('${clan.id}', false)">${t.requestBtn}</button>`;
               }
           }
 
-          // أزرار الإدارة (تظهر فقط لو isAdmin == true)
-          let adminToolsHTML = '';
-          if(isAdmin) {
-              adminToolsHTML = `
-                  <div class="admin-actions">
-                      <button class="btn-admin" onclick="editTeamName('${team.id}', '${team.name}')">${t.adminEdit}</button>
-                      <button class="btn-admin" onclick="manageTeam('${team.id}')">${t.adminTools}</button>
-                      <button class="btn-admin btn-admin-danger" onclick="deleteTeam('${team.id}')">${t.adminDelete}</button>
-                  </div>
-              `;
+          if (isOwner && !isClanOwner) {
+               actionHTML += `<button class="btn-action btn-manage" onclick="openClanModal('${clan.id}', false)">${t.manage}</button>`;
           }
 
+          const div = document.createElement('div');
+          div.className = `clan-card ${isOwnerTeam ? 'owner-team' : ''} ${isTopClan ? 'top-clan' : ''}`;
           div.innerHTML = `
-              <div class="team-header">
+              <div class="clan-header">
                   <div>
-                      <div class="team-name">${team.name} ${badgeHTML}</div>
-                      <div class="team-owner">${t.ownerLabel} <b>${team.owner}</b></div>
+                      <div class="clan-name">
+                          ${clan.name} 
+                          ${isOwnerTeam ? '<span class="badge-owner-team">👑 Owner Team</span>' : ''}
+                          ${isTopClan ? `<span class="winner-badge">${t.topClan}</span>` : ''}
+                      </div>
+                      <div class="clan-owner">${t.owner} <b>${clan.owner}</b></div>
                   </div>
                   ${privacyHTML}
               </div>
-              <div class="team-actions">
+              
+              <div class="clan-score-box">
+                  <span style="font-size:12px; color:var(--subtitle);">${t.clanXP}</span>
+                  <span class="clan-score">${clan.totalScore} ${t.points}</span>
+              </div>
+
+              <div class="clan-actions">
                   ${actionHTML}
               </div>
-              ${adminToolsHTML}
           `;
           grid.appendChild(div);
       });
   }
 
-  // التشغيل
+  window.createClan = async function() {
+      if (myMainTeams.length === 0) return showToast(translations[currentLang].mustJoinMain, true);
+      const name = document.getElementById('newClanName').value.trim();
+      const privacy = document.querySelector('input[name="clan_privacy"]:checked').value;
+      
+      if (!name) return showToast(currentLang === 'ar' ? 'اكتب اسم الفريق!' : 'Enter name!', true);
+      if (myClans.length >= 3 && !isOwner) return showToast(translations[currentLang].maxClans, true);
+
+      try {
+          const clanId = 'clan_' + Date.now();
+          await window.set(window.ref(window.db, 'clans/' + clanId), {
+              name: name,
+              owner: currentUser,
+              category: currentCategory,
+              isPublic: privacy === 'public',
+              createdAt: Date.now()
+          });
+          await window.set(window.ref(window.db, `users_data/${currentUser}/joined_clans/${clanId}`), true);
+          document.getElementById('newClanName').value = '';
+          showToast(currentLang === 'ar' ? 'تم إنشاء الفريق الفرعي! 🎉' : 'Sub-team created! 🎉');
+      } catch(e) { showToast(e.message, true); }
+  };
+
+  window.joinClan = async function(clanId, isPublic) {
+      if (myClans.length >= 3 && !isOwner) return showToast(translations[currentLang].maxClans, true);
+      if (myClans.includes(clanId)) return;
+      try {
+          if (isPublic || isOwner) {
+              await window.set(window.ref(window.db, `users_data/${currentUser}/joined_clans/${clanId}`), true);
+              showToast(currentLang === 'ar' ? 'تم الانضمام للفريق!' : 'Joined team!');
+          } else {
+              await window.set(window.ref(window.db, `team_requests/${clanId}/${currentUser}`), 'pending');
+              showToast(currentLang === 'ar' ? 'تم إرسال طلب الانضمام لصاحب الفريق.' : 'Request sent.');
+          }
+      } catch(e) { showToast(e.message, true); }
+  };
+
+  window.leaveClan = async function(clanId) {
+      const confirmLeave = await showSiteConfirm(currentLang === 'ar' ? 'مغادرة الفريق؟' : 'Leave team?');
+      if (!confirmLeave) return;
+      try {
+          await window.remove(window.ref(window.db, `users_data/${currentUser}/joined_clans/${clanId}`));
+          showToast(currentLang === 'ar' ? 'تم المغادرة.' : 'Left.');
+      } catch(e) { showToast(e.message, true); }
+  };
+
+  window.deleteTeam = async function() {
+      if (!currentManageClanId) return;
+      const t = translations[currentLang];
+      const confirmDel = await showSiteConfirm(t.confirmDelete);
+      if (!confirmDel) return;
+
+      try {
+          await window.remove(window.ref(window.db, 'clans/' + currentManageClanId));
+          
+          for(let u in allUsersData) {
+              if(allUsersData[u].joined_clans && allUsersData[u].joined_clans[currentManageClanId]) {
+                  await window.remove(window.ref(window.db, `users_data/${u}/joined_clans/${currentManageClanId}`));
+              }
+          }
+          showToast(t.deleted);
+          closeModal();
+      } catch(e) { showToast(e.message, true); }
+  };
+
+  window.openClanModal = async function(clanId, isViewOnly = false) {
+      currentManageClanId = clanId;
+      const clan = allClans[clanId];
+      const t = translations[currentLang];
+      
+      const isClanOwner = clan.owner === currentUser;
+      
+      // ✅ تصليح جذري: شريط الإضافة يظهر ONLY لو أنت أونر (ahmed)
+      document.getElementById('forceAddSection').style.display = (isOwner && !isViewOnly) ? 'flex' : 'none';
+      
+      // زرار الحذف يظهر لصاحب الفريق والأونر
+      document.getElementById('deleteClanBtn').style.display = (!isViewOnly && (isClanOwner || isOwner)) ? 'block' : 'none';
+
+      document.getElementById('modalTitle').innerText = isViewOnly ? t.viewMembers + ' - ' + clan.name : t.manageTeamTitle + ' ' + clan.name;
+
+      const list = document.getElementById('membersList');
+      list.innerHTML = '';
+      
+      let members = [];
+      for(let u in allUsersData) {
+          if(allUsersData[u].joined_clans && allUsersData[u].joined_clans[clanId]) {
+              members.push(u);
+          }
+      }
+
+      if(members.length === 0) {
+          list.innerHTML = '<div style="padding:20px; color:#aaa; text-align:center;">لا يوجد أعضاء.</div>';
+      } else {
+          members.forEach(user => {
+              let kickBtn = '';
+              if ((isClanOwner || isOwner) && user !== clan.owner && !isViewOnly) {
+                  kickBtn = `<button class="btn-kick" onclick="requestKick('${clanId}', '${user}')">${t.kick}</button>`;
+              }
+              list.innerHTML += `
+                  <div class="member-item">
+                      <span class="member-name">👤 ${user} ${clan.owner === user ? '👑' : ''}</span>
+                      ${kickBtn}
+                  </div>
+              `;
+          });
+      }
+      document.getElementById('manageModal').style.display = 'flex';
+  };
+
+  window.manageClan = function(clanId) { openClanModal(clanId, false); };
+
+  window.requestKick = async function(clanId, user) {
+      if (isOwner || isAdmin) { // الطرد الفوري لسه شغال للأونر والأدمن
+          const confirmKick = await showSiteConfirm(translations[currentLang].confirmKickAdmin);
+          if (!confirmKick) return;
+          
+          try {
+              await window.remove(window.ref(window.db, `users_data/${user}/joined_clans/${clanId}`));
+              showToast(translations[currentLang].kickSuccess);
+              openClanModal(clanId, false); 
+          } catch(e) { showToast(e.message, true); }
+      } else {
+          const reason = await showSitePrompt(translations[currentLang].enterKickReason);
+          if (!reason || reason.trim() === '') return;
+
+          try {
+              const requestId = 'req_' + Date.now();
+              await window.set(window.ref(window.db, 'kick_requests/' + requestId), {
+                  clanId: clanId,
+                  clanName: allClans[clanId].name,
+                  clanOwner: allClans[clanId].owner,
+                  targetUser: user,
+                  requestedBy: currentUser,
+                  reason: reason,
+                  status: 'pending',
+                  time: Date.now()
+              });
+              showToast(translations[currentLang].kickRequestSent);
+          } catch(e) { showToast(e.message, true); }
+      }
+  };
+
+  // ✅ تصليح جذري: منع الكل من الإضافة القسرية ما عدا الأونر
+  window.forceAddMember = async function() {
+      if (!isOwner) {
+          return showToast(translations[currentLang].unauthorized, true);
+      }
+
+      const user = document.getElementById('forceAddUser').value.trim().toLowerCase();
+      if (!user || !allUsersData[user]) {
+          return showToast(currentLang === 'ar' ? 'اللاعب غير موجود!' : 'Player not found!', true);
+      }
+      
+      try {
+          await window.set(window.ref(window.db, `users_data/${user}/joined_clans/${currentManageClanId}`), true);
+          showToast(currentLang === 'ar' ? 'تم الإضافة!' : 'Added successfully!');
+          document.getElementById('forceAddUser').value = '';
+          openClanModal(currentManageClanId, false);
+      } catch(e) { showToast(e.message, true); }
+  };
+
+  window.closeModal = function() { document.getElementById('manageModal').style.display = 'none'; };
+
   window.onload = () => {
       applyLanguage();
   };
