@@ -8,13 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { 
-      --bg-color: #080808; --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; 
-      --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --orange: #ff9800;
-  }
-  body.light-mode { 
-      --bg-color: #f4f4f4; --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; 
-  }
+  :root { --bg-color: #080808; --text-color: #fff; --subtitle-color: #aaa; --card-bg: #111; --card-border: #333; --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --orange: #ff9800; }
+  body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --subtitle-color: #555; --card-bg: #fff; --card-border: #ccc; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
@@ -23,7 +18,6 @@
   .custom-alert-box h2 { color: var(--accent); margin-bottom: 15px; }
   .custom-alert-box p { margin-bottom: 20px; font-size: 16px; }
   .custom-alert-btn { background: var(--accent); color: #fff; border: none; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 16px; }
-  .custom-alert-btn:hover { background: #cc0000; }
 
   .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
   .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
@@ -34,7 +28,11 @@
   .avatar { width: 130px; height: 130px; background: var(--accent); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; margin-bottom: 15px; font-weight: bold; border: 4px solid #fff; background-size: cover; background-position: center; transition: 0.3s; overflow: hidden; }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   body.light-mode .avatar { border-color: #111; }
-  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; display: flex; flex-direction: column; align-items: center; gap: 10px;}
+  
+  /* ✅ علامة التوثيق */
+  .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 6px; vertical-align: middle; }
+
+  .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px;}
   .persona-badge { font-size: 16px; color: #00bcd4; background: rgba(0, 188, 212, 0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid #00bcd4; font-weight: bold;}
   .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
   body.light-mode .rank-box { background: #fff; }
@@ -53,9 +51,6 @@
   .adv-stat-box:hover { transform: translateY(-5px); border-color: var(--accent); }
   .adv-stat-title { font-size: 13px; color: var(--subtitle-color); margin-bottom: 8px; font-weight: bold; }
   .adv-stat-value { font-size: 24px; font-weight: 900; color: var(--text-color); }
-  .adv-stat-value.accuracy { color: var(--blue); }
-  .adv-stat-value.streak { color: var(--orange); }
-  .adv-stat-value.completed { color: var(--green); }
   .badges-section { width: 100%; margin-top: 15px; }
   .badges-title { font-size: 14px; color: var(--subtitle-color); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
   .badges-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -64,9 +59,7 @@
   .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px; flex-wrap: wrap; }
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
-  .upload-label:hover { background: var(--accent); }
   .upload-btn { background: #4caf50; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; display: none;}
-  .upload-btn:hover { background: #388e3c; }
   .section-title { color: var(--accent); margin-bottom: 15px; font-size: 22px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
   .friends-container { display: flex; flex-direction: column; gap: 10px; }
   .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
@@ -76,35 +69,17 @@
   .friend-name { font-weight: bold; font-size: 16px; }
   .action-btn { padding: 6px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; background: #0088cc; font-size: 13px; }
   .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; background: var(--card-bg); border-radius: 15px; }
-
-  /* ستايل الأرشيف الزمني */
   .timeline-container { width: 100%; margin-top: 30px; }
   #timelineList { position: relative; padding-right: 30px; border-right: 3px solid var(--card-border); display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
   .timeline-item-wrapper { position: relative; }
   .timeline-dot { position: absolute; right: -38px; top: 15px; width: 15px; height: 15px; background: var(--accent); border-radius: 50%; border: 3px solid var(--bg-color); box-shadow: 0 0 10px var(--accent); }
   .timeline-content { background: var(--bg-color); padding: 15px; border-radius: 10px; border: 1px solid var(--card-border); box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.3s; }
-  .timeline-content:hover { border-color: var(--accent); transform: translateX(-5px); }
   .timeline-date { font-size: 12px; color: var(--subtitle-color); margin-bottom: 5px; }
   .timeline-title { font-size: 16px; color: var(--accent); margin-bottom: 5px; }
   .timeline-desc { font-size: 14px; color: var(--text-color); }
-
-  /* تأثير الإطار الناري للبروفايل */
-  .avatar.fire-frame {
-      border-color: #ff5722;
-      box-shadow: 0 0 25px #ff5722, 0 0 50px #ff9800;
-      animation: firePulse 1.5s infinite alternate;
-  }
-  @keyframes firePulse {
-      from { box-shadow: 0 0 15px #ff5722, 0 0 30px #ff9800; }
-      to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; }
-  }
-
-  /* تظبيط الموبايل */
-  @media (max-width: 600px) { 
-      .advanced-stats { grid-template-columns: 1fr; } 
-      .stats-row { flex-direction: column; gap: 10px; }
-      .stat-badge { justify-content: center; }
-  }
+  .avatar.fire-frame { border-color: #ff5722; box-shadow: 0 0 25px #ff5722, 0 0 50px #ff9800; animation: firePulse 1.5s infinite alternate; }
+  @keyframes firePulse { from { box-shadow: 0 0 15px #ff5722, 0 0 30px #ff9800; } to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; } }
+  @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } .stats-row { flex-direction: column; gap: 10px; } .stat-badge { justify-content: center; } }
 </style>
 </head>
 <body>
@@ -161,7 +136,6 @@
         </div>
     </div>
 
-    <!-- صندوق التحذير -->
     <div id="warningBox"><span id="warningText"></span></div>
 
     <div class="badges-section" id="badgesSection" style="display: none;">
@@ -169,11 +143,8 @@
         <div class="badges-container" id="badgesContainer"></div>
     </div>
 
-    <!-- زرار صندوق الغموض -->
     <div id="lootBoxContainer" style="display: none; margin-top: 20px;">
-        <button id="openBoxBtn" onclick="window.openLootBox()" style="padding: 15px 40px; background: linear-gradient(45deg, #ff9800, #ff5722); color: #fff; border: none; border-radius: 30px; font-family: 'Cairo'; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255, 87, 34, 0.5); transition: 0.3s;">
-            🎁 افتح صندوقك اليومي
-        </button>
+        <button id="openBoxBtn" onclick="window.openLootBox()" style="padding: 15px 40px; background: linear-gradient(45deg, #ff9800, #ff5722); color: #fff; border: none; border-radius: 30px; font-family: 'Cairo'; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255, 87, 34, 0.5); transition: 0.3s;">🎁 افتح صندوقك اليومي</button>
         <p id="lootBoxTimer" style="color: #aaa; font-size: 14px; margin-top: 10px; display: none;"></p>
     </div>
 
@@ -192,7 +163,6 @@
     </div>
   </div>
 
-  <!-- الأرشيف الزمني -->
   <div class="timeline-container">
     <h2 class="section-title" id="timelineTitle" data-ar="📜 أرشيفك الزمني" data-en="📜 Your Timeline">📜 أرشيفك الزمني</h2>
     <div id="timelineList">
@@ -223,9 +193,7 @@
       document.getElementById('alertMessage').innerText = message;
       document.getElementById('customAlert').style.display = 'flex';
   };
-  window.closeCustomAlert = function() {
-      document.getElementById('customAlert').style.display = 'none';
-  };
+  window.closeCustomAlert = function() { document.getElementById('customAlert').style.display = 'none'; };
 
   document.getElementById('userNameText').innerText = profileUser;
   document.getElementById('friendsNameDisplay').innerText = profileUser;
@@ -241,7 +209,6 @@
       document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       document.getElementById('backBtn').innerText = t.back;
       document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-      
       document.getElementById('rankLabelText').innerText = t.rank;
       document.getElementById('pointsText').innerText = t.points;
       document.getElementById('levelText').innerText = t.level;
@@ -251,11 +218,9 @@
       document.getElementById('removeImgBtn').innerText = t.removeImg;
       document.getElementById('friendsSectionTitle').innerHTML = `${t.friends} <span id="friendsNameDisplay">${profileUser}</span>`;
       document.getElementById('timelineTitle').innerText = t.timeline;
-      
       document.getElementById('accLabel').innerText = t.accuracy;
       document.getElementById('streakLabel').innerText = t.bestStreak;
       document.getElementById('compLabel').innerText = t.completed;
-      
       document.getElementById('alertOkBtn').innerText = t.okBtn;
   }
   applyLanguage();
@@ -274,9 +239,15 @@
           }
       }
       const displayName = profileUser.charAt(0).toUpperCase() + profileUser.slice(1);
-      document.getElementById('userNameText').innerText = displayName;
-      document.getElementById('friendsNameDisplay').innerText = displayName;
       
+      // ✅ التحقق من التوثيق
+      window.get(window.ref(window.db, 'verified_users/' + profileUser.toLowerCase())).then(vSnap => {
+          const isVerified = vSnap.exists();
+          const badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
+          document.getElementById('userNameText').innerHTML = displayName + badge;
+          document.getElementById('friendsNameDisplay').innerText = displayName;
+      });
+
       if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
           document.getElementById('uploadSection').style.display = 'flex';
       }
@@ -299,9 +270,7 @@
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'none';
           }
 
-          if (userData.profileFrame === 'fire') {
-              avatarEl.classList.add('fire-frame');
-          }
+          if (userData.profileFrame === 'fire') { avatarEl.classList.add('fire-frame'); }
 
           let myPersona = userData.persona;
           if (myPersona) {
@@ -311,9 +280,6 @@
           }
 
           let xp = userData.xp || 0;
-          if (typeof userData === 'number') xp = userData; 
-          else if (userData.xp === undefined && !isNaN(userData)) xp = userData;
-
           document.getElementById('xpDisplay').innerText = xp;
           let level = 1, nextLevelXp = 100, currentLevelXp = 0;
           if (xp >= 4500) { level = 10; currentLevelXp = 4500; nextLevelXp = "Max"; }
@@ -387,7 +353,6 @@
               });
           } else { badgesSection.style.display = 'none'; }
 
-          // التحذير (تم إصلاحه ليتجاهل حالة الأحرف)
           const warnSnap = await window.get(window.ref(window.db, 'warnings'));
           let myWarning = null;
           if (warnSnap.exists()) {
@@ -428,7 +393,6 @@
               historyList.innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
           }
 
-          // إظهار صندوق الغموض لو ده بروفايلي
           if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
               document.getElementById('lootBoxContainer').style.display = 'block';
               checkLootBoxTimer(userData);
@@ -436,9 +400,7 @@
 
           loadFriendsData(dbUser);
 
-      } catch (error) {
-          console.error("حدث خطأ أثناء تحميل البيانات:", error);
-      }
+      } catch (error) { console.error("حدث خطأ أثناء تحميل البيانات:", error); }
   }
 
   async function loadFriendsData(dbUser) {
@@ -489,10 +451,7 @@
               `;
               friendsListEl.appendChild(card);
           }
-      } catch (error) {
-          console.error("خطأ في تحميل الأصدقاء:", error);
-          friendsListEl.innerHTML = `<div class="no-data" style="color:var(--accent);">حدث خطأ أثناء تحميل الأصدقاء.</div>`;
-      }
+      } catch (error) { friendsListEl.innerHTML = `<div class="no-data" style="color:var(--accent);">حدث خطأ أثناء تحميل الأصدقاء.</div>`; }
   }
 
   let selectedFile = null;
@@ -544,37 +503,21 @@
     }
   }
 
-  // ==========================================
-  // 🎁 نظام صناديق الغموض (Loot Boxes)
-  // ==========================================
-  
   function checkLootBoxTimer(userData) {
       const lastBox = userData.lastLootBox || 0;
       const now = Date.now();
-      const cooldown = 24 * 60 * 60 * 1000; // 24 ساعة بالميللي ثانية
+      const cooldown = 24 * 60 * 60 * 1000;
       const timeLeft = (lastBox + cooldown) - now;
       const btn = document.getElementById('openBoxBtn');
       const timerText = document.getElementById('lootBoxTimer');
 
       if (timeLeft > 0) {
-          btn.disabled = true;
-          btn.style.background = '#333';
-          btn.style.boxShadow = 'none';
-          btn.style.cursor = 'not-allowed';
-          btn.innerText = '⏳ الصندوق مقفول';
+          btn.disabled = true; btn.style.background = '#333'; btn.style.boxShadow = 'none'; btn.style.cursor = 'not-allowed'; btn.innerText = '⏳ الصندوق مقفول';
           timerText.style.display = 'block';
-          
-          // عداد تنازلي
           setInterval(() => {
               const newTimeLeft = (lastBox + cooldown) - Date.now();
               if (newTimeLeft <= 0) {
-                  btn.disabled = false;
-                  btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)';
-                  btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)';
-                  btn.style.cursor = 'pointer';
-                  btn.innerText = '🎁 افتح صندوقك اليومي';
-                  timerText.style.display = 'none';
-                  return;
+                  btn.disabled = false; btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)'; btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)'; btn.style.cursor = 'pointer'; btn.innerText = '🎁 افتح صندوقك اليومي'; timerText.style.display = 'none'; return;
               }
               const hours = Math.floor(newTimeLeft / (1000 * 60 * 60));
               const minutes = Math.floor((newTimeLeft % (1000 * 60 * 60)) / (1000 * 60));
@@ -582,46 +525,32 @@
               timerText.innerText = `متاح بعد: ${hours}س ${minutes}د ${seconds}ث`;
           }, 1000);
       } else {
-          btn.disabled = false;
-          timerText.style.display = 'none';
+          btn.disabled = false; timerText.style.display = 'none';
       }
   }
 
   window.openLootBox = async function() {
       const btn = document.getElementById('openBoxBtn');
       const user = profileUser.toLowerCase();
-      
-      btn.innerText = 'جاري الفتح... 🎁';
-      btn.disabled = true;
-
+      btn.innerText = 'جاري الفتح... 🎁'; btn.disabled = true;
       try {
-          const rewards = [
-              { type: 'coins', amount: 50, text: '🪙 50 كوينز!' },
-              { type: 'coins', amount: 100, text: '🪙 100 كوينز!' },
-              { type: 'xp', amount: 100, text: '✨ 100 XP!' },
-              { type: 'xp', amount: 200, text: '✨ 200 XP!' },
-              { type: 'frame', text: '🔥 إطار ناري أسطوري!' }
-          ];
+          const rewards = [ { type: 'coins', amount: 50, text: '🪙 50 كوينز!' }, { type: 'coins', amount: 100, text: '🪙 100 كوينز!' }, { type: 'xp', amount: 100, text: '✨ 100 XP!' }, { type: 'xp', amount: 200, text: '✨ 200 XP!' }, { type: 'frame', text: '🔥 إطار ناري أسطوري!' } ];
           let randomReward = rewards[Math.floor(Math.random() * 4)]; 
           if (Math.random() > 0.7) randomReward = rewards[4]; 
 
-          const updates = {};
-          updates[`users_data/${user}/lastLootBox`] = Date.now();
+          const updates = {}; updates[`users_data/${user}/lastLootBox`] = Date.now();
 
           if (randomReward.type === 'coins') {
               const coinSnap = await window.get(window.ref(window.db, `users_data/${user}/coins`));
-              let currentCoins = coinSnap.exists() ? coinSnap.val() : 0;
-              updates[`users_data/${user}/coins`] = currentCoins + randomReward.amount;
+              updates[`users_data/${user}/coins`] = (coinSnap.exists() ? coinSnap.val() : 0) + randomReward.amount;
           } else if (randomReward.type === 'xp') {
               const xpSnap = await window.get(window.ref(window.db, `users_data/${user}/xp`));
-              let currentXp = xpSnap.exists() ? xpSnap.val() : 0;
-              updates[`users_data/${user}/xp`] = currentXp + randomReward.amount;
+              updates[`users_data/${user}/xp`] = (xpSnap.exists() ? xpSnap.val() : 0) + randomReward.amount;
           } else if (randomReward.type === 'frame') {
               updates[`users_data/${user}/profileFrame`] = 'fire'; 
           }
 
           await window.update(window.ref(window.db), updates);
-
           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
           
           setTimeout(() => {
@@ -630,10 +559,8 @@
           }, 500);
 
       } catch(e) {
-          console.error(e);
           showAlert('خطأ', 'حدث خطأ أثناء فتح الصندوق.');
-          btn.innerText = '🎁 افتح صندوقك اليومي';
-          btn.disabled = false;
+          btn.innerText = '🎁 افتح صندوقك اليومي'; btn.disabled = false;
       }
   }
 
