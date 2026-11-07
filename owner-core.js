@@ -1,597 +1,2093 @@
+/* ============================================================
+   OWNER PANEL CORE - Quiz Hub (FINAL POLISH & THEME FIX)
+   ============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, onValue, get, set, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase, ref, get, set, remove, update, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-const cfg={apiKey:"AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",authDomain:"quiz-hub-app-f4cd0.firebaseapp.com",databaseURL:"https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",projectId:"quiz-hub-app-f4cd0",storageBucket:"quiz-hub-app-f4cd0.firebasestorage.app",messagingSenderId:"282772179392",appId:"1:282772179392:web:64646d757592b29ff3a025"};
-const app=initializeApp(cfg),db=getDatabase(app),auth=getAuth(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+  authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+  databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+  projectId: "quiz-hub-app-f4cd0",
+  storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+  messagingSenderId: "282772179392",
+  appId: "1:282772179392:web:64646d757592b29ff3a025"
+};
 
-const S=(p,v)=>set(ref(db,p),v),G=p=>get(ref(db,p)),D=p=>remove(ref(db,p)),P=(p,v)=>push(ref(db,p),v);
-const ask=t=>prompt(t),conf=t=>confirm(t);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-window.checkPassword = async () => {
-    const input = document.getElementById('ownerPasswordInput').value;
-    const errMsg = document.getElementById('errorMsg');
-    
-    try {
-        await signInWithEmailAndPassword(auth, "owner@quizhub.com", input);
-        
-        document.getElementById('passwordLock').style.display = 'none';
-        document.getElementById('ownerContent').style.display = 'block';
-        init();
-        
-    } catch (error) {
-        console.error("Login Error:", error.code);
-        errMsg.style.display = 'block';
-        
-        if (error.code === 'auth/user-not-found') {
-            errMsg.innerText = 'الإيميل owner@quizhub.com مش موجود في Firebase!';
-        } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-            errMsg.innerText = 'الباسورد غلط!';
-        } else {
-            errMsg.innerText = 'خطأ: ' + error.code;
-        }
-        
-        document.getElementById('ownerPasswordInput').value = '';
-    }
+window.db = db; window.ref = ref; window.get = get; window.set = set;
+window.remove = remove; window.update = update; window.push = push;
+
+const currentUser = (localStorage.getItem('loggedInUser') || '').trim();
+if (!currentUser) location.href = 'index.html';
+
+/* ==================== ESCAPE (XSS SAFE) ==================== */
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
 }
-const state={users:{},presence:{},xp:{},roles:{},badges:{},banned:{},muted:{},warnings:{},comments:{},suggestions:{},messages:{},notifications:{},events:{},shop:{},transactions:{},tickets:{},faq:{},themes:{},customBadges:{},customRanks:{},logs:{},apiKeys:{},settings:{},target:null};
 
-function toast(m,err){const t=document.createElement('div');t.style.cssText=`background:#111;border-right:5px solid ${err?'#ff3333':'#4caf50'};color:#fff;padding:12px 18px;border-radius:8px;font-weight:bold;font-family:Cairo;box-shadow:0 5px 15px rgba(0,0,0,.5);animation:fadeIn .3s;direction:rtl;font-size:13px;`;t.textContent=(err?'❌ ':'✅ ')+m;document.getElementById('toast-container').appendChild(t);setTimeout(()=>t.remove(),3000);}
+/* ==================== HELPERS ==================== */
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type === 'success' ? '' : type);
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+window.toast = toast;
 
-// ═══════════════════════════════════════════════════════════
-// ═══════════════ 500 FEATURES ═══════════════════════════════
-// Format: [tab, section, icon, label, needsUser(0/1), fn]
-// ═══════════════════════════════════════════════════════════
-const F=[
-// ════ DASHBOARD (20) ════
-['dashboard','الحالة','🔄','تحديث شامل',0,()=>location.reload()],
-['dashboard','الحالة','💾','نسخ احتياطي',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click();toast('تم التحميل')})],
-['dashboard','الحالة','📥','استعادة نسخة',0,()=>{const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=e=>{const r=new FileReader();r.onload=ev=>{try{const dd=JSON.parse(ev.target.result);if(conf('استعادة؟ ستُستبدل البيانات')){Object.entries(dd).forEach(([k,v])=>S(k,v));toast('تمت الاستعادة')}}catch(err){toast('ملف غير صالح',1)}};r.readAsText(e.target.files[0])};f.click()}],
-['dashboard','الحالة','❤️','فحص النظام',0,()=>toast('كل الأنظمة تعمل ✅')],
-['dashboard','الحالة','📊','حجم البيانات',0,()=>G('/').then(x=>toast('الحجم: '+JSON.stringify(x.val()).length+' bytes'))],
-['dashboard','الحالة','⏰','وقت السيرفر',0,()=>toast(new Date().toLocaleString())],
-['dashboard','الحالة','🌐','حالة API',0,()=>toast('API يعمل ✅')],
-['dashboard','الحالة','📦','الإصدار',0,()=>toast('Owner Panel v500')],
-['dashboard','الحالة','🔔','تفعيل صوت',0,()=>toast('صوت مُفعّل')],
-['dashboard','الحالة','🔕','إيقاف صوت',0,()=>toast('صوت مُعطّل')],
-['dashboard','اختصارات','👥','اللاعبين',0,()=>window.switchTabById('users')],
-['dashboard','اختصارات','🔒','الأمان',0,()=>window.switchTabById('security')],
-['dashboard','اختصارات','🛒','المتجر',0,()=>window.switchTabById('shop')],
-['dashboard','اختصارات','🎉','الفعاليات',0,()=>window.switchTabById('events')],
-['dashboard','اختصارات','📩','الرسائل',0,()=>window.switchTabById('messages')],
-['dashboard','اختصارات','📊','التحليلات',0,()=>window.switchTabById('analytics')],
-['dashboard','اختصارات','🛡️','الأدمنز',0,()=>window.switchTabById('admins')],
-['dashboard','اختصارات','📜','السجلات',0,()=>window.switchTabById('logs')],
-['dashboard','اختصارات','⚙️','النظام',0,()=>window.switchTabById('system')],
-['dashboard','اختصارات','🔧','المطور',0,()=>window.switchTabById('developer')],
+/* أداة لتنسيق الداتا بشكل شيك بدل الـ JSON */
+function formatObject(obj, title = '') {
+  if (!obj || typeof obj !== 'object') return `<div style="padding:10px; background:var(--bg-2); border-radius:8px; color:var(--text);">${esc(obj)}</div>`;
+  
+  let html = `<div style="background:var(--bg-2); padding:15px; border-radius:8px; direction:ltr; text-align:left; font-family:monospace; font-size:14px; line-height:1.8; max-height:400px; overflow-y:auto; border:1px solid var(--border); color:var(--text);">`;
+  if (title) html += `<h3 style="margin:0 0 10px 0; color:var(--primary);">${esc(title)}:</h3>`;
 
-// ════ USERS (75) ════
-['users','الحظر والطرد','🚫','حظر دائم',1,u=>S(`banned_users/${u}`,{status:1,reason:'owner',time:Date.now()})],
-['users','الحظر والطرد','✅','فك الحظر',1,u=>D(`banned_users/${u}`)],
-['users','الحظر والطرد','⏱️','حظر ساعة',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+36e5})],
-['users','الحظر والطرد','⏱️','حظر 24 ساعة',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+864e5})],
-['users','الحظر والطرد','⏱️','حظر 7 أيام',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+6048e5})],
-['users','الحظر والطرد','⏱️','حظر 30 يوم',1,u=>S(`banned_users/${u}`,{status:1,until:Date.now()+2592e6})],
-['users','الحظر والطرد','👻','Shadow Ban',1,u=>S(`shadow_banned/${u}`,1)],
-['users','الحظر والطرد','👁️','إزالة Shadow',1,u=>D(`shadow_banned/${u}`)],
-['users','الحظر والطرد','👢','طرد فوري',1,u=>S(`presence/${u}/status`,'offline')],
-['users','الحظر والطرد','🧊','تجميد',1,u=>S(`frozen/${u}`,1)],
-['users','الحظر والطرد','🔥','إلغاء التجميد',1,u=>D(`frozen/${u}`)],
-['users','الكتم','🔇','كتم ساعة',1,u=>S(`muted/${u}`,{until:Date.now()+36e5})],
-['users','الكتم','🔇','كتم 24 ساعة',1,u=>S(`muted/${u}`,{until:Date.now()+864e5})],
-['users','الكتم','🔇','كتم دائم',1,u=>S(`muted/${u}`,{until:0})],
-['users','الكتم','🔊','فك الكتم',1,u=>D(`muted/${u}`)],
-['users','XP والكوينز','✨','تعيين XP',1,u=>{const v=ask('XP:');if(v!==null&&!isNaN(v))S(`users_data/${u}/xp`,+v)}],
-['users','XP والكوينز','➕','إضافة XP',1,u=>{const v=ask('XP +:');if(v&&!isNaN(v))G(`users_data/${u}/xp`).then(x=>S(`users_data/${u}/xp`,(x.val()||0)+ +v))}],
-['users','XP والكوينز','➖','خصم XP',1,u=>{const v=ask('XP -:');if(v&&!isNaN(v))G(`users_data/${u}/xp`).then(x=>S(`users_data/${u}/xp`,Math.max(0,(x.val()||0)- +v)))}],
-['users','XP والكوينز','🔄','تصفير XP',1,u=>S(`users_data/${u}/xp`,0)],
-['users','XP والكوينز','💰','تعيين كوينز',1,u=>{const v=ask('Coins:');if(v!==null&&!isNaN(v))S(`users_data/${u}/coins`,+v)}],
-['users','XP والكوينز','➕','إضافة كوينز',1,u=>{const v=ask('Coins +:');if(v&&!isNaN(v))G(`users_data/${u}/coins`).then(x=>S(`users_data/${u}/coins`,(x.val()||0)+ +v))}],
-['users','XP والكوينز','➖','خصم كوينز',1,u=>{const v=ask('Coins -:');if(v&&!isNaN(v))G(`users_data/${u}/coins`).then(x=>S(`users_data/${u}/coins`,Math.max(0,(x.val()||0)- +v)))}],
-['users','XP والكوينز','🔄','تصفير كوينز',1,u=>S(`users_data/${u}/coins`,0)],
-['users','XP والكوينز','📊','تعيين مستوى',1,u=>{const v=ask('Level:');if(v&&!isNaN(v))S(`users_data/${u}/level`,+v)}],
-['users','XP والكوينز','⚡','Boost 2x',1,u=>S(`boosts/${u}`,{mult:2,until:Date.now()+36e5})],
-['users','XP والكوينز','⚡','Boost 3x',1,u=>S(`boosts/${u}`,{mult:3,until:Date.now()+36e5})],
-['users','XP والكوينز','❌','إزالة Boost',1,u=>D(`boosts/${u}`)],
-['users','الرتب والبادجات','🎖️','تعيين رتبة',1,u=>{const v=ask('Rank:');if(v)S(`roles/users/${u}`,v)}],
-['users','الرتب والبادجات','🗑️','إزالة رتبة',1,u=>D(`roles/users/${u}`)],
-['users','الرتب والبادجات','🛡️','ترقية لأدمن',1,u=>S(`roles/admins/${u}`,1)],
-['users','الرتب والبادجات','❌','إزالة من الأدمن',1,u=>D(`roles/admins/${u}`)],
-['users','الرتب والبادجات','🏅','إعطاء بادج',1,u=>{const v=ask('Badge:');if(v)S(`badges/${u}/${v}`,1)}],
-['users','الرتب والبادجات','🗑️','إزالة بادج',1,u=>{const v=ask('Badge:');if(v)D(`badges/${u}/${v}`)}],
-['users','الرتب والبادجات','🧹','مسح كل البادجات',1,u=>D(`badges/${u}`)],
-['users','الرتب والبادجات','👑','Superadmin',1,u=>S(`roles/superadmins/${u}`,1)],
-['users','التحذيرات','⚠️','تحذير منخفض',1,u=>P(`warnings/${u}`,{sev:'low',text:'تنبيه',time:Date.now()})],
-['users','التحذيرات','⚠️','تحذير متوسط',1,u=>P(`warnings/${u}`,{sev:'medium',text:'تحذير',time:Date.now()})],
-['users','التحذيرات','⚠️','تحذير عالي',1,u=>P(`warnings/${u}`,{sev:'high',text:'تحذير قوي',time:Date.now()})],
-['users','التحذيرات','🔴','تحذير حرج',1,u=>P(`warnings/${u}`,{sev:'critical',text:'خطير',time:Date.now()})],
-['users','التحذيرات','🧹','مسح التحذيرات',1,u=>D(`warnings/${u}`)],
-['users','التحذيرات','⚡','إضافة Strike',1,u=>G(`strikes/${u}`).then(x=>S(`strikes/${u}`,(x.val()||0)+1))],
-['users','التوثيق','✅','توثيق',1,u=>S(`users_data/${u}/verified`,1)],
-['users','التوثيق','❌','إلغاء التوثيق',1,u=>D(`users_data/${u}/verified`)],
-['users','التوثيق','⭐','تفعيل VIP',1,u=>S(`users_data/${u}/vip`,1)],
-['users','التوثيق','☆','إيقاف VIP',1,u=>D(`users_data/${u}/vip`)],
-['users','التوثيق','💎','تفعيل Premium',1,u=>S(`users_data/${u}/premium`,1)],
-['users','التوثيق','🚫','إلغاء Premium',1,u=>D(`users_data/${u}/premium`)],
-['users','التوثيق','🤝','تعيين الثقة',1,u=>{const v=ask('Trust 0-100:');if(v&&!isNaN(v))S(`users_data/${u}/trust`,+v)}],
-['users','التوثيق','🌐','تعيين اللغة',1,u=>{const v=ask('ar/en:');if(v)S(`users_data/${u}/lang`,v)}],
-['users','التوثيق','🎨','تعيين الثيم',1,u=>{const v=ask('Theme:');if(v)S(`users_data/${u}/theme`,v)}],
-['users','التوثيق','🎭','تعيين اللون',1,u=>{const v=ask('Color:');if(v)S(`users_data/${u}/color`,v)}],
-['users','التوثيق','📌','تثبيت الملف',1,u=>S(`pinned/${u}`,1)],
-['users','التوثيق','📍','إلغاء التثبيت',1,u=>D(`pinned/${u}`)],
-['users','التوثيق','🙈','إخفاء من LB',1,u=>S(`hidden_lb/${u}`,1)],
-['users','التوثيق','👁️','إظهار في LB',1,u=>D(`hidden_lb/${u}`)],
-['users','التوثيق','✅','قائمة بيضاء',1,u=>S(`whitelist/${u}`,1)],
-['users','التوثيق','❌','إزالة من البيضاء',1,u=>D(`whitelist/${u}`)],
-['users','التوثيق','🔐','تفعيل 2FA',1,u=>S(`users_data/${u}/twoFA`,1)],
-['users','التوثيق','🔓','إيقاف 2FA',1,u=>D(`users_data/${u}/twoFA`)],
-['users','التوثيق','💬','تعيين حالة',1,u=>{const v=ask('Status:');if(v)S(`users_data/${u}/status`,v)}],
-['users','التوثيق','🧹','مسح الحالة',1,u=>D(`users_data/${u}/status`)],
-['users','التواصل','📩','إرسال DM',1,u=>{const v=ask('Msg:');if(v)P(`messages/${u}`,{from:'owner',text:v,time:Date.now()})}],
-['users','التواصل','📝','إضافة ملاحظة',1,u=>{const v=ask('Note:');if(v)P(`user_notes/${u}`,{text:v,by:'owner',time:Date.now()})}],
-['users','التواصل','🏷️','إضافة وسم',1,u=>{const v=ask('Tag:');if(v)S(`user_tags/${u}/${v}`,1)}],
-['users','التواصل','🗑️','إزالة وسم',1,u=>{const v=ask('Tag:');if(v)D(`user_tags/${u}/${v}`)}],
-['users','التواصل','🧹','مسح الوسوم',1,u=>D(`user_tags/${u}`)],
-['users','الأمان','🔑','تعيين باسورد',1,u=>{const v=ask('New pass (6+):');if(v&&v.length>=6)S(`passwords/${u}`,v)}],
-['users','الأمان','🚪','خروج قسري',1,u=>S(`force_logout/${u}`,Date.now())],
-['users','الأمان','💻','إنهاء الجلسات',1,u=>D(`sessions/${u}`)],
-['users','الأمان','🔑','تجديد API',1,u=>S(`api_keys/${u}`,'sk_'+Math.random().toString(36).slice(2,22))],
-['users','الأمان','🗑️','إلغاء API',1,u=>D(`api_keys/${u}`)],
-['users','الأمان','✏️','تغيير الاسم',1,u=>{const v=ask('New name:');if(v)S(`rename/${u}`,v)}],
-['users','الأمان','🗑️','حذف كل بياناته',1,u=>{if(conf(`حذف كل شيء عن ${u}؟`))['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','api_keys','shadow_banned','frozen','hidden_lb','whitelist','pinned'].forEach(p=>D(`${p}/${u}`))}],
-['users','البيانات','👁️','عرض الملف',1,u=>G(`users_data/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['users','البيانات','🌐','عرض IP',1,u=>G(`ips/${u}`).then(x=>alert(x.val()||'غير معروف'))],
-['users','البيانات','📱','عرض الجهاز',1,u=>G(`devices/${u}`).then(x=>alert(JSON.stringify(x.val()||{})))],
-['users','البيانات','🕐','آخر ظهور',1,u=>G(`presence/${u}/lastSeen`).then(x=>alert(new Date(x.val()||0).toLocaleString()))],
-['users','البيانات','📅','تاريخ التسجيل',1,u=>G(`users_data/${u}/createdAt`).then(x=>alert(new Date(x.val()||0).toLocaleString()))],
-['users','البيانات','📜','عرض التحذيرات',1,u=>G(`warnings/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['users','البيانات','📝','عرض الملاحظات',1,u=>G(`user_notes/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['users','البيانات','💻','عرض الجلسات',1,u=>G(`sessions/${u}`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['users','البيانات','🏅','عرض البادجات',1,u=>G(`badges/${u}`).then(x=>alert(Object.keys(x.val()||{}).join('\n')||'لا يوجد'))],
-['users','البيانات','🎖️','عرض الرتبة',1,u=>G(`roles/users/${u}`).then(x=>alert(x.val()||'Player'))],
-['users','البيانات','📤','تصدير بياناته',1,u=>G(`users_data/${u}`).then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=u+'.json';a.click()})],
+  for (const [k, v] of Object.entries(obj)) {
+    let valStr = '';
+    if (v !== null && typeof v === 'object') {
+      valStr = `<pre style="margin:5px 0; padding:8px; background:rgba(128,128,128,0.1); border-radius:4px; font-size:12px; color:var(--text); white-space:pre-wrap; word-wrap:break-word;">${esc(JSON.stringify(v, null, 2))}</pre>`;
+    } else if (k === 'profilePic' && typeof v === 'string' && v.startsWith('http')) {
+      valStr = `<img src="${esc(v)}" style="height:40px; border-radius:4px; vertical-align:middle;">`;
+    } else {
+      valStr = `<span style="color:var(--success); font-weight:bold;">${esc(v)}</span>`;
+    }
+    html += `<div style="margin-bottom:8px;"><span style="color:var(--primary); font-weight:bold;">${esc(k)}:</span> ${valStr}</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
 
-// ════ RANKS (26) ════
-['ranks','الإدارة','➕','إنشاء رتبة',0,()=>{const n=ask('Name:'),i=ask('Icon:'),c=ask('Color:'),x=ask('Min XP:');if(n)S(`custom_ranks/${n}`,{name:n,icon:i||'🎖️',color:c||'#ffd700',xp:+x||0})}],
-['ranks','الإدارة','🗑️','حذف رتبة',0,()=>{const n=ask('Name:');if(n)D(`custom_ranks/${n}`)}],
-['ranks','الإدارة','✏️','تعديل اسم',0,()=>{const o=ask('Old:'),n=ask('New:');if(o&&n)G(`custom_ranks/${o}`).then(x=>{const v=x.val();if(v){v.name=n;S(`custom_ranks/${n}`,v);D(`custom_ranks/${o}`)}})}],
-['ranks','الإدارة','🎨','تعيين أيقونة',0,()=>{const n=ask('Rank:'),i=ask('Icon:');if(n&&i)S(`custom_ranks/${n}/icon`,i)}],
-['ranks','الإدارة','🎨','تعيين لون',0,()=>{const n=ask('Rank:'),c=ask('Color:');if(n&&c)S(`custom_ranks/${n}/color`,c)}],
-['ranks','الإدارة','📊','تعيين أولوية',0,()=>{const n=ask('Rank:'),p=ask('Priority:');if(n)S(`custom_ranks/${n}/priority`,+p||0)}],
-['ranks','الإدارة','⚡','تعيين حد XP',0,()=>{const n=ask('Rank:'),x=ask('XP:');if(n)S(`custom_ranks/${n}/xp`,+x||0)}],
-['ranks','الإدارة','⬆️','رفع أولوية',0,()=>{const n=ask('Rank:');if(n)G(`custom_ranks/${n}/priority`).then(x=>S(`custom_ranks/${n}/priority`,(x.val()||0)+1))}],
-['ranks','الإدارة','⬇️','خفض أولوية',0,()=>{const n=ask('Rank:');if(n)G(`custom_ranks/${n}/priority`).then(x=>S(`custom_ranks/${n}/priority`,(x.val()||0)-1))}],
-['ranks','الإدارة','⭐','تعيين كافتراضي',0,()=>{const n=ask('Rank:');if(n)S(`site_settings/defaultRank`,n)}],
-['ranks','الأعضاء','👤','إضافة عضو',0,()=>{const r=ask('Rank:'),u=ask('User:');if(r&&u)S(`roles/users/${u}`,r)}],
-['ranks','الأعضاء','❌','إزالة عضو',0,()=>{const u=ask('User:');if(u)D(`roles/users/${u}`)}],
-['ranks','الأعضاء','👥','عرض الأعضاء',0,()=>{const r=ask('Rank:');if(r)G('roles/users').then(x=>{const m=Object.entries(x.val()||{}).filter(([_,v])=>v===r).map(([k])=>k);alert(m.join('\n')||'لا يوجد')})}],
-['ranks','الأعضاء','📦','تعيين جماعي',0,()=>{const r=ask('Rank:'),us=ask('Users (csv):');if(r&&us)us.split(',').forEach(u=>S(`roles/users/${u.trim()}`,r))}],
-['ranks','الأعضاء','🧹','إزالة جماعية',0,()=>{const us=ask('Users (csv):');if(us)us.split(',').forEach(u=>D(`roles/users/${u.trim()}`))}],
-['ranks','الأتمتة','⚡','ترقية بـ XP',0,()=>{const r=ask('Rank:'),x=ask('At XP:');if(r)S(`auto_ranks/xp/${r}`,+x||0)}],
-['ranks','الأتمتة','📊','ترقية بـ Level',0,()=>{const r=ask('Rank:'),l=ask('At Level:');if(r)S(`auto_ranks/level/${r}`,+l||0)}],
-['ranks','الأتمتة','⏰','رتبة مؤقتة',0,()=>{const u=ask('User:'),e=ask('Expiry ts:');if(u)S(`role_expiry/${u}`,+e||0)}],
-['ranks','الأتمتة','📢','إعلان رتبة',0,()=>{const r=ask('Rank:'),t=ask('Msg:');if(r&&t)P(`announcements`,{rank:r,text:t,time:Date.now()})}],
-['ranks','البيانات','🌳','عرض الهرم',0,()=>G('custom_ranks').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['ranks','البيانات','🔐','مصفوفة صلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['ranks','البيانات','🏅','خريطة بادجات',0,()=>G('rank_badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['ranks','البيانات','📜','سجل الترقيات',0,()=>G('rank_history').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['ranks','البيانات','📤','تصدير الرتب',0,()=>G('custom_ranks').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ranks.json';a.click()})],
-['ranks','البيانات','🌱','رتب جاهزة',0,()=>['Beginner','Intermediate','Advanced','Expert','Master'].forEach((n,i)=>S(`custom_ranks/${n}`,{name:n,icon:'🎖️',color:'#ffd700',priority:i,xp:i*1000}))],
-['ranks','البيانات','📊','إحصائيات',0,()=>G('roles/users').then(x=>{const c={};Object.values(x.val()||{}).forEach(r=>c[r]=(c[r]||0)+1);alert(JSON.stringify(c,null,2))})],
+function showModal(title, content) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-content').textContent = typeof content === 'string'
+    ? content : JSON.stringify(content, null, 2);
+  document.getElementById('modal-overlay').classList.add('active');
+}
 
-// ════ BADGES (30) ════
-['badges','الإدارة','➕','إنشاء بادج',0,()=>{const n=ask('Name:'),i=ask('Icon:'),c=ask('Color:'),r=ask('Rarity:');if(n)S(`custom_badges/${n}`,{name:n,icon:i||'🏅',color:c||'#e91e63',rarity:r||'common'})}],
-['badges','الإدارة','🗑️','حذف بادج',0,()=>{const n=ask('Name:');if(n)D(`custom_badges/${n}`)}],
-['badges','الإدارة','🎨','تعيين أيقونة',0,()=>{const n=ask('Badge:'),i=ask('Icon:');if(n&&i)S(`custom_badges/${n}/icon`,i)}],
-['badges','الإدارة','🎨','تعيين لون',0,()=>{const n=ask('Badge:'),c=ask('Color:');if(n&&c)S(`custom_badges/${n}/color`,c)}],
-['badges','الإدارة','💎','تعيين الندرة',0,()=>{const n=ask('Badge:'),r=ask('Rarity:');if(n)S(`custom_badges/${n}/rarity`,r)}],
-['badges','الإدارة','🔧','تعيين النوع',0,()=>{const n=ask('Badge:'),t=ask('Type:');if(n)S(`custom_badges/${n}/type`,t)}],
-['badges','الإدارة','📝','تعيين وصف',0,()=>{const n=ask('Badge:'),t=ask('Desc:');if(n)S(`custom_badges/${n}/desc`,t)}],
-['badges','المتجر','🛒','إضافة للمتجر',0,()=>{const n=ask('Badge:');if(n)S(`shop_items/${n}`,{name:n,type:'badge',price:500,active:1})}],
-['badges','المتجر','❌','إزالة من المتجر',0,()=>{const n=ask('Badge:');if(n)D(`shop_items/${n}`)}],
-['badges','المتجر','💰','تعيين سعر',0,()=>{const n=ask('Badge:'),p=ask('Price:');if(n)S(`shop_items/${n}/price`,+p||0)}],
-['badges','المنح','🎁','إعطاء بادج',0,()=>{const u=ask('User:'),b=ask('Badge:');if(u&&b)S(`badges/${u}/${b}`,1)}],
-['badges','المنح','🗑️','إزالة بادج',0,()=>{const u=ask('User:'),b=ask('Badge:');if(u&&b)D(`badges/${u}/${b}`)}],
-['badges','المنح','📦','إعطاء للكل',0,()=>{const b=ask('Badge:');if(b)G('usernames').then(x=>Object.keys(x.val()||{}).forEach(u=>S(`badges/${u}/${b}`,1)))}],
-['badges','المنح','🧹','مسح كل البادجات',0,()=>{if(conf('مسح كل البادجات؟'))D('badges')}],
-['badges','المنح','📦','منح جماعي',0,()=>{const b=ask('Badge:'),us=ask('Users (csv):');if(b&&us)us.split(',').forEach(u=>S(`badges/${u.trim()}/${b}`,1))}],
-['badges','المنح','🎁','هدية عشوائية',0,()=>{const b=ask('Badge:');if(b)G('usernames').then(x=>{const arr=Object.keys(x.val()||{});if(arr.length){const u=arr[Math.floor(Math.random()*arr.length)];S(`badges/${u}/${b}`,1);toast('أُعطي لـ '+u)}})}],
-['badges','المنح','⭐','إعطاء VIP',0,()=>{const u=ask('User:');if(u)S(`badges/${u}/VIP`,1)}],
-['badges','القواعد','🔓','قواعد الفتح',0,()=>G('badge_rules').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['badges','القواعد','🎭','بادج غامض',0,()=>{const b=ask('Badge:'),h=ask('Hint:');if(b)S(`mystery/${b}`,h)}],
-['badges','القواعد','🌸','بادج موسمي',0,()=>{const b=ask('Badge:'),s1=ask('Season:');if(b)S(`seasonal/${b}`,s1)}],
-['badges','القواعد','⚡','بادج تلقائي',0,()=>{const b=ask('Badge:'),xp=ask('At XP:');if(b)S(`auto_badges/${b}`,+xp||0)}],
-['badges','القواعد','⏰','انتهاء صلاحية',0,()=>{const b=ask('Badge:'),e=ask('Ts:');if(b)S(`badge_expiry/${b}`,+e||0)}],
-['badges','القواعد','🎁','مكافآت البادج',0,()=>G('badge_rewards').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['badges','العرض','🖼️','المعرض',0,()=>G('custom_badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['badges','العرض','👥','حاملي البادجات',0,()=>G('badges').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['badges','العرض','📊','إحصائيات',0,()=>G('badges').then(x=>{let c=0;Object.values(x.val()||{}).forEach(b=>c+=Object.keys(b||{}).length);alert('إجمالي البادجات الممنوحة: '+c)})],
-['badges','العرض','🏆','أكثر حاملي البادجات',0,()=>G('badges').then(x=>{const a=Object.entries(x.val()||{}).map(([u,b])=>[u,Object.keys(b||{}).length]).sort((a,b)=>b[1]-a[1]).slice(0,10);alert(a.map(([u,c])=>`${u}: ${c}`).join('\n'))})],
-['badges','العرض','📤','تصدير',0,()=>G('custom_badges').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='badges.json';a.click()})],
-['badges','العرض','🌱','بادجات جاهزة',0,()=>['Founder','VIP','Pro','Legend','Champion'].forEach((n,i)=>S(`custom_badges/${n}`,{name:n,icon:'🏅',color:'#ffd700',rarity:['legendary','epic','rare','rare','common'][i]}))],
-['badges','العرض','📊','توزيع الندرة',0,()=>G('custom_badges').then(x=>{const c={};Object.values(x.val()||{}).forEach(b=>c[b.rarity]=(c[b.rarity]||0)+1);alert(JSON.stringify(c,null,2))})],
+window.showModalHTML = function (title, html) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+};
 
-// ════ WARNINGS (25) ════
-['warnings','إرسال','⚠️','تحذير منخفض',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'low',text:t||'تنبيه',time:Date.now()})}],
-['warnings','إرسال','⚠️','تحذير متوسط',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'medium',text:t||'تحذير',time:Date.now()})}],
-['warnings','إرسال','⚠️','تحذير عالي',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'high',text:t||'تحذير قوي',time:Date.now()})}],
-['warnings','إرسال','🔴','تحذير حرج',0,()=>{const u=ask('User:'),t=ask('Reason:');if(u)P(`warnings/${u}`,{sev:'critical',text:t||'خطير',time:Date.now()})}],
-['warnings','إرسال','⏰','تحذير بتاريخ',0,()=>{const u=ask('User:'),t=ask('Reason:'),e=ask('Expiry ts:');if(u)P(`warnings/${u}`,{sev:'medium',text:t,expires:+e||0,time:Date.now()})}],
-['warnings','إرسال','📢','تحذير للمتصلين',0,()=>{if(conf('تحذير كل المتصلين؟'))G('presence').then(x=>Object.entries(x.val()||{}).filter(([_,p])=>p.status==='online').forEach(([u])=>P(`warnings/${u}`,{sev:'low',text:'bulk',time:Date.now()})))}],
-['warnings','الإدارة','🧹','مسح الكل',0,()=>{if(conf('مسح كل التحذيرات؟'))D('warnings')}],
-['warnings','الإدارة','🧹','مسح تحذيرات لاعب',0,()=>{const u=ask('User:');if(u)D(`warnings/${u}`)}],
-['warnings','الإدارة','📋','قائمة الكل',0,()=>G('warnings').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['warnings','الإدارة','🔍','حسب الخطورة',0,()=>{const s1=ask('Severity:');G('warnings').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,w])=>Object.values(w||{}).forEach(ww=>{if(ww.sev===s1)out.push(u)}));alert(out.join('\n')||'لا يوجد')})}],
-['warnings','الإدارة','📅','حسب التاريخ',0,()=>{const from=ask('From ts:');G('warnings').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,w])=>Object.values(w||{}).forEach(ww=>{if((ww.time||0)>=+from)out.push(u)}));alert(out.join('\n')||'لا يوجد')})}],
-['warnings','الإدارة','🔢','عدد التحذيرات/لاعب',0,()=>G('warnings').then(x=>{const c={};Object.entries(x.val()||{}).forEach(([u,w])=>c[u]=Object.keys(w||{}).length);alert(JSON.stringify(c,null,2))})],
-['warnings','الإدارة','📊','إحصائيات',0,()=>G('warnings').then(x=>{const c={};Object.values(x.val()||{}).forEach(w=>Object.values(w||{}).forEach(ww=>c[ww.sev]=(c[ww.sev]||0)+1));alert(JSON.stringify(c,null,2))})],
-['warnings','الأتمتة','🤖','كلمات ممنوعة',0,()=>S('auto_mod/badwords',1)],
-['warnings','الأتمتة','🤖','كشف السبام',0,()=>S('auto_mod/spam',1)],
-['warnings','الأتمتة','📈','سلم التصعيد',0,()=>G('escalation').then(x=>alert(JSON.stringify(x.val()||{1:'warn',2:'mute',3:'ban'},null,2)))],
-['warnings','الأتمتة','⏰','تنظيف منتهية',0,()=>G('warnings').then(x=>{const now=Date.now();Object.entries(x.val()||{}).forEach(([u,w])=>Object.entries(w||{}).forEach(([id,ww])=>{if(ww.expires&&ww.expires<now)D(`warnings/${u}/${id}`)}));toast('تم التنظيف')})],
-['warnings','الأتمتة','🚫','حظر تلقائي 3',0,()=>S('site_settings/autoBan',1)],
-['warnings','الاستئناف','📝','تقديم استئناف',0,()=>{const u=ask('User:'),t=ask('Appeal:');if(u&&t)P(`appeals/${u}`,{text:t,time:Date.now()})}],
-['warnings','الاستئناف','✅','قبول',0,()=>{const u=ask('User:');if(u)D(`appeals/${u}`)}],
-['warnings','الاستئناف','❌','رفض',0,()=>{const u=ask('User:'),r=ask('Reason:');if(u)S(`appeal_reject/${u}`,r)}],
-['warnings','الاستئناف','👁️','عرض الاستئنافات',0,()=>G('appeals').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['warnings','الإشعارات','🔔','إشعار لاعب',0,()=>{const u=ask('User:');if(u)P(`notifications/${u}`,{title:'Warning',body:'You got a warning',time:Date.now()})}],
-['warnings','البيانات','📤','تصدير',0,()=>G('warnings').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='warns.json';a.click()})],
-['warnings','البيانات','📋','قوالب',0,()=>G('warn_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+window.closeModal = () => document.getElementById('modal-overlay').classList.remove('active');
 
-// ════ SECURITY (40) ════
-['security','الحظر','🚫','حظر لاعب',0,()=>{const u=ask('User:');if(u)S(`banned_users/${u}`,{status:1,time:Date.now()})}],
-['security','الحظر','✅','فك حظر لاعب',0,()=>{const u=ask('User:');if(u)D(`banned_users/${u}`)}],
-['security','الحظر','🌐','حظر IP',0,()=>{const ip=ask('IP:');if(ip)S(`banned_ips/${ip.replace(/\./g,'_')}`,ip)}],
-['security','الحظر','✅','فك حظر IP',0,()=>{const ip=ask('IP:');if(ip)D(`banned_ips/${ip.replace(/\./g,'_')}`)}],
-['security','الحظر','📱','حظر جهاز',0,()=>{const id=ask('Device:');if(id)S(`banned_devices/${id}`,1)}],
-['security','الحظر','✅','فك حظر جهاز',0,()=>{const id=ask('Device:');if(id)D(`banned_devices/${id}`)}],
-['security','الحظر','🔍','حظر بصمة',0,()=>{const fp=ask('FP:');if(fp)S(`banned_fp/${fp}`,1)}],
-['security','الحظر','✅','فك بصمة',0,()=>{const fp=ask('FP:');if(fp)D(`banned_fp/${fp}`)}],
-['security','الجغرافيا','🌍','حجب دولة',0,()=>{const c=ask('Code:');if(c)S(`blocked_countries/${c}`,1)}],
-['security','الجغرافيا','✅','رفع حجب',0,()=>{const c=ask('Code:');if(c)D(`blocked_countries/${c}`)}],
-['security','الجلسات','🚪','إنهاء جلسة',0,()=>{const u=ask('User:'),s1=ask('Session ID:');if(u&&s1)D(`sessions/${u}/${s1}`)}],
-['security','الجلسات','🚪','إنهاء كل الجلسات',0,()=>{if(conf('إنهاء كل الجلسات؟'))D('sessions')}],
-['security','الجلسات','🚪','إنهاء جلسات لاعب',0,()=>{const u=ask('User:');if(u)D(`sessions/${u}`)}],
-['security','الجلسات','👁️','عرض الجلسات',0,()=>G('sessions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['security','الجلسات','⏰','مهلة الجلسة',0,()=>{const v=ask('Minutes:');if(v)S('site_settings/sessionTimeout',+v)}],
-['security','الجلسات','🚪','خروج قسري للكل',0,()=>{if(conf('خروج قسري للجميع؟'))S('force_logout_all',Date.now())}],
-['security','الحماية','🚦','Rate limit ON',0,()=>S('site_settings/rateLimit',1)],
-['security','الحماية','✅','Rate limit OFF',0,()=>S('site_settings/rateLimit',0)],
-['security','الحماية','🔐','2FA إجباري',0,()=>S('site_settings/force2FA',1)],
-['security','الحماية','🔓','إيقاف 2FA',0,()=>S('site_settings/force2FA',0)],
-['security','الحماية','🤖','Captcha ON',0,()=>S('site_settings/captcha',1)],
-['security','الحماية','✅','Captcha OFF',0,()=>S('site_settings/captcha',0)],
-['security','الحماية','📏','حد طول الباسورد',0,()=>{const v=ask('Min length:');if(v)S('site_settings/minPassLen',+v)}],
-['security','الحماية','🔤','رموز مطلوبة',0,()=>S('site_settings/requireSpecial',1)],
-['security','الحماية','🔢','أرقام مطلوبة',0,()=>S('site_settings/requireNum',1)],
-['security','الحماية','📝','سياسة الباسورد',0,()=>G('site_settings/passwordPolicy').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['security','القوائم','✅','IP مسموح',0,()=>{const ip=ask('IP:');if(ip)S(`whitelist_ips/${ip.replace(/\./g,'_')}`,ip)}],
-['security','القوائم','❌','إزالة IP مسموح',0,()=>{const ip=ask('IP:');if(ip)D(`whitelist_ips/${ip.replace(/\./g,'_')}`)}],
-['security','القوائم','🚫','حجب UA',0,()=>{const ua=ask('UA:');if(ua)S(`banned_ua/${btoa(ua).slice(0,20)}`,ua)}],
-['security','القوائم','✅','فك حجب UA',0,()=>{const ua=ask('UA:');if(ua)D(`banned_ua/${btoa(ua).slice(0,20)}`)}],
-['security','المراقبة','👁️','محاولات الدخول',0,()=>G('login_attempts').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['security','المراقبة','📜','سجل التدقيق',0,()=>G('audit_log').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['security','المراقبة','🔎','نشاط مشبوه',0,()=>G('login_attempts').then(x=>{const v=x.val()||{};const sus=Object.entries(v).filter(([_,a])=>(a||[]).length>5);alert(sus.length?sus.map(([u])=>u).join('\n'):'لا يوجد')})],
-['security','المراقبة','🔨','Brute Force',0,()=>G('brute_force').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['security','المراقبة','📊','درجة الأمان',0,()=>{G('site_settings').then(x=>{const v=x.val()||{};const sc=['rateLimit','force2FA','captcha'].filter(k=>v[k]).length/3*100;alert(`Security Score: ${sc}%`)})}],
-['security','المراقبة','📋','تقرير أمني',0,()=>G('logs').then(x=>alert('تقرير: '+new Date().toLocaleString()))],
-['security','GDPR','📦','تصدير بيانات',0,()=>{const u=ask('User:');if(u)G(`users_data/${u}`).then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='gdpr_'+u+'.json';a.click()})}],
-['security','GDPR','🗑️','حذف نهائي',0,()=>{const u=ask('User:');if(u&&conf(`حذف نهائي لـ ${u}؟`))['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','ips','devices'].forEach(p=>D(`${p}/${u}`))}],
-['security','GDPR','📋','سياسة الخصوصية',0,()=>{const v=ask('Text:');if(v)S('site_settings/privacy',v)}],
-['security','GDPR','📋','شروط الخدمة',0,()=>{const v=ask('Text:');if(v)S('site_settings/tos',v)}],
+/* ---- Site-styled prompt / confirm ---- */
+window._siteDialogCancel = null;
 
-// ════ CONTENT (30) ════
-['content','التعليقات','👁️','عرض',0,()=>G('comments').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['content','التعليقات','🗑️','حذف تعليق',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}`)}],
-['content','التعليقات','📌','تثبيت',0,()=>{const id=ask('ID:');if(id)S(`comments/${id}/pinned`,1)}],
-['content','التعليقات','📍','إلغاء التثبيت',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}/pinned`)}],
-['content','التعليقات','🙈','إخفاء',0,()=>{const id=ask('ID:');if(id)S(`comments/${id}/hidden`,1)}],
-['content','التعليقات','👁️','إظهار',0,()=>{const id=ask('ID:');if(id)D(`comments/${id}/hidden`)}],
-['content','التعليقات','🧹','مسح الكل',0,()=>{if(conf('مسح كل التعليقات؟'))D('comments')}],
-['content','التعليقات','📤','تصدير',0,()=>G('comments').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='comments.json';a.click()})],
-['content','الاقتراحات','👁️','عرض',0,()=>G('suggestions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['content','الاقتراحات','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`suggestions/${id}`)}],
-['content','الاقتراحات','✅','قبول',0,()=>{const id=ask('ID:');if(id)S(`suggestions/${id}/status`,'approved')}],
-['content','الاقتراحات','❌','رفض',0,()=>{const id=ask('ID:');if(id)S(`suggestions/${id}/status`,'rejected')}],
-['content','الاقتراحات','🧹','مسح الكل',0,()=>{if(conf('مسح الكل؟'))D('suggestions')}],
-['content','الاقتراحات','📤','تصدير',0,()=>G('suggestions').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='suggestions.json';a.click()})],
-['content','Auto-mod','🤖','Auto-mod ON',0,()=>S('site_settings/autoMod',1)],
-['content','Auto-mod','✅','Auto-mod OFF',0,()=>S('site_settings/autoMod',0)],
-['content','Auto-mod','🚫','فلتر السبام',0,()=>S('auto_mod/spam',1)],
-['content','Auto-mod','🔗','فلتر الروابط',0,()=>S('auto_mod/links',1)],
-['content','Auto-mod','🔠','فلتر CAPS',0,()=>S('auto_mod/caps',1)],
-['content','Auto-mod','☠️','فلتر السموم',0,()=>S('auto_mod/toxicity',1)],
-['content','كلمات','➕','إضافة كلمة',0,()=>{const w=ask('Word:');if(w)S(`block_words/${w}`,1)}],
-['content','كلمات','➖','حذف كلمة',0,()=>{const w=ask('Word:');if(w)D(`block_words/${w}`)}],
-['content','كلمات','🧹','مسح الكل',0,()=>{if(conf('مسح كل الكلمات؟'))D('block_words')}],
-['content','كلمات','👁️','عرض الكلمات',0,()=>G('block_words').then(x=>alert(Object.keys(x.val()||{}).join('\n')||'لا يوجد'))],
-['content','المراجعة','📥','طابور المراجعة',0,()=>G('review_queue').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['content','المراجعة','✅','قبول عنصر',0,()=>{const id=ask('ID:');if(id)S(`review_queue/${id}/status`,'approved')}],
-['content','المراجعة','❌','رفض عنصر',0,()=>{const id=ask('ID:');if(id)S(`review_queue/${id}/status`,'rejected')}],
-['content','الإبلاغات','🚩','إبلاغ',0,()=>{const id=ask('ID:'),r=ask('Reason:');if(id)P(`reports/${id}`,{reason:r,time:Date.now()})}],
-['content','الإبلاغات','👁️','عرض',0,()=>G('reports').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['content','الإبلاغات','🧹','مسح',0,()=>{if(conf('مسح الإبلاغات؟'))D('reports')}],
-['content','الإبلاغات','📊','إحصائيات',0,()=>{Promise.all([G('comments'),G('suggestions'),G('reports')]).then(([c,s,r])=>alert(`تعليقات: ${Object.keys(c.val()||{}).length}\nاقتراحات: ${Object.keys(s.val()||{}).length}\nإبلاغات: ${Object.keys(r.val()||{}).length}`))}],
+document.getElementById('modal-overlay')?.addEventListener('click', (e) => {
+  if (e.target.id === 'modal-overlay') {
+    if (window._siteDialogCancel) { window._siteDialogCancel(); }
+    else { window.closeModal(); }
+  }
+});
 
-// ════ MESSAGES (25) ════
-['messages','الإرسال','✉️','إرسال DM',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
-['messages','الإرسال','📢','رسالة جماعية',0,()=>{const t=ask('Msg:');if(t)G('usernames').then(x=>Object.keys(x.val()||{}).forEach(u=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
-['messages','الإرسال','🟢','للمتصلين',0,()=>{const t=ask('Msg:');if(t)G('presence').then(x=>Object.entries(x.val()||{}).filter(([_,p])=>p.status==='online').forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
-['messages','الإرسال','⭐','لـ VIP',0,()=>{const t=ask('Msg:');if(t)G('users_data').then(x=>Object.entries(x.val()||{}).filter(([_,d])=>d.vip).forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
-['messages','الإرسال','🏆','لأفضل 10',0,()=>{const t=ask('Msg:');if(t)G('users_data').then(x=>Object.entries(x.val()||{}).sort((a,b)=>(b[1].xp||0)-(a[1].xp||0)).slice(0,10).forEach(([u])=>P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})))}],
-['messages','الإرسال','⏰','جدولة رسالة',0,()=>{const u=ask('User:'),t=ask('Msg:'),tm=ask('Ts:');if(u&&t)P(`scheduled_messages/${u}`,{text:t,at:+tm})}],
-['messages','الإرسال','📎','مع مرفق',0,()=>{const u=ask('User:'),l=ask('URL:');if(u&&l)P(`messages/${u}`,{from:'owner',text:'',attach:l,time:Date.now()})}],
-['messages','الإرسال','⭐','رسالة مهمة',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,priority:'high',time:Date.now()})}],
-['messages','الإرسال','🔴','رسالة عاجلة',0,()=>{const u=ask('User:'),t=ask('Msg:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,priority:'urgent',time:Date.now()})}],
-['messages','القوالب','💾','حفظ قالب',0,()=>{const n=ask('Name:'),t=ask('Text:');if(n&&t)S(`templates/${n}`,t)}],
-['messages','القوالب','📂','عرض القوالب',0,()=>G('templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['messages','القوالب','🗑️','حذف قالب',0,()=>{const n=ask('Name:');if(n)D(`templates/${n}`)}],
-['messages','القوالب','✏️','تعديل قالب',0,()=>{const n=ask('Name:'),t=ask('New:');if(n&&t)S(`templates/${n}`,t)}],
-['messages','القوالب','📤','استخدام قالب',0,()=>{const n=ask('Name:'),u=ask('User:');if(n&&u)G(`templates/${n}`).then(x=>{const t=x.val();if(t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})})}],
-['messages','السجل','📜','المرسلة',0,()=>G('messages').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['messages','السجل','📥','الوارد',0,()=>G('owner_inbox').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['messages','السجل','✅','تعليم مقروء',0,()=>{const u=ask('User:');if(u)S(`messages/${u}/read`,1)}],
-['messages','السجل','🗑️','حذف رسالة',0,()=>{const u=ask('User:'),id=ask('Msg ID:');if(u&&id)D(`messages/${u}/${id}`)}],
-['messages','السجل','↩️','رد',0,()=>{const u=ask('To:'),t=ask('Text:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
-['messages','السجل','➡️','تحويل',0,()=>{const u=ask('To:'),t=ask('Text:');if(u&&t)P(`messages/${u}`,{from:'owner',text:t,time:Date.now()})}],
-['messages','السجل','🔍','بحث',0,()=>{const q=ask('Query:');G('messages').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,m])=>Object.values(m||{}).forEach(mm=>{if(mm.text&&mm.text.includes(q))out.push(u+': '+mm.text)}));alert(out.join('\n')||'لا يوجد')})}],
-['messages','السجل','📊','إحصائيات',0,()=>G('messages').then(x=>alert('إجمالي اللاعبين: '+Object.keys(x.val()||{}).length))],
-['messages','السجل','📤','تصدير',0,()=>G('messages').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='msgs.json';a.click()})],
-['messages','الإعدادات','⏰','مدة الاحتفاظ',0,()=>{const d1=ask('Days:');if(d1)S('site_settings/msgRetention',+d1)}],
-['messages','الإعدادات','🤖','رد تلقائي',0,()=>S('site_settings/autoReply',1)],
+window.sitePrompt = function (message, defaultValue = '') {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modal-overlay');
+    document.getElementById('modal-title').textContent = '✏️ إدخال';
+    const safe = String(defaultValue).replace(/"/g, '&quot;');
+    document.getElementById('modal-content').innerHTML = `
+      <p style="margin-bottom:12px; line-height:1.6;">${esc(message)}</p>
+      <input type="text" id="sitePromptInput" value="${safe}" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); font-size:14px; margin-bottom:12px; box-sizing:border-box;">
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="feature-btn" id="sitePromptCancel">إلغاء</button>
+        <button class="feature-btn good" id="sitePromptOk">موافق</button>
+      </div>`;
+    overlay.classList.add('active');
+    const input = document.getElementById('sitePromptInput');
+    setTimeout(() => { input.focus(); input.select(); }, 50);
+    const close = (val) => { overlay.classList.remove('active'); window._siteDialogCancel = null; resolve(val); };
+    window._siteDialogCancel = () => close(null);
+    document.getElementById('sitePromptCancel').onclick = () => close(null);
+    document.getElementById('sitePromptOk').onclick = () => close(input.value);
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') close(input.value);
+      if (e.key === 'Escape') close(null);
+    };
+  });
+};
 
-// ════ NOTIFICATIONS (20) ════
-['notifications','الإرسال','🔔','إشعار Push',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'push',time:Date.now()})}],
-['notifications','الإرسال','📧','إشعار Email',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'email',time:Date.now()})}],
-['notifications','الإرسال','📱','إشعار SMS',0,()=>{const t=ask('Text:');if(t)P('notifications',{body:t,ch:'sms',time:Date.now()})}],
-['notifications','الإرسال','💬','إشعار داخلي',0,()=>{const t=ask('Text:');if(t)P('notifications',{body:t,ch:'inapp',time:Date.now()})}],
-['notifications','الإرسال','📢','كل القنوات',0,()=>{const t=ask('Title:'),b=ask('Body:');if(t)P('notifications',{title:t,body:b,ch:'all',time:Date.now()})}],
-['notifications','الإرسال','⏰','جدولة',0,()=>{const t=ask('Text:'),tm=ask('Ts:');if(t)P('scheduled_notifs',{body:t,at:+tm})}],
-['notifications','الإرسال','❌','إلغاء مجدول',0,()=>{const id=ask('ID:');if(id)D(`scheduled_notifs/${id}`)}],
-['notifications','الإرسال','🖼️','مع صورة',0,()=>{const u=ask('Image URL:'),t=ask('Title:');if(t)P('notifications',{title:t,image:u,ch:'push',time:Date.now()})}],
-['notifications','الإرسال','⭐','أولوية عالية',0,()=>{const t=ask('Title:');if(t)P('notifications',{title:t,priority:'high',ch:'push',time:Date.now()})}],
-['notifications','الإعدادات','🌙','ساعات الصمت',0,()=>{const f=ask('From:');if(f)S('site_settings/silentFrom',f)}],
-['notifications','الإعدادات','☀️','نهاية الصمت',0,()=>{const f=ask('To:');if(f)S('site_settings/silentTo',f)}],
-['notifications','الإعدادات','🔕','إيقاف الإشعارات',0,()=>S('site_settings/silentMode',1)],
-['notifications','الإعدادات','🔔','تفعيل الإشعارات',0,()=>S('site_settings/silentMode',0)],
-['notifications','الإعدادات','🧪','A/B Test',0,()=>{const a=ask('A:'),b=ask('B:');if(a&&b)S('ab_test',{a,b})}],
-['notifications','الإعدادات','🎚️','قنوات',0,()=>G('site_settings/channels').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['notifications','السجل','📜','عرض',0,()=>G('notifications').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['notifications','السجل','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`notifications/${id}`)}],
-['notifications','السجل','📊','إحصائيات',0,()=>G('notifications').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
-['notifications','السجل','📤','تصدير',0,()=>G('notifications').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='notifs.json';a.click()})],
-['notifications','السجل','📝','قوالب',0,()=>G('notif_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+window.siteConfirm = function (message) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modal-overlay');
+    document.getElementById('modal-title').textContent = '⚠️ تأكيد';
+    document.getElementById('modal-content').innerHTML = `
+      <p style="margin-bottom:12px; line-height:1.6;">${esc(message)}</p>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="feature-btn" id="siteConfirmCancel">إلغاء</button>
+        <button class="feature-btn danger" id="siteConfirmOk">تأكيد</button>
+      </div>`;
+    overlay.classList.add('active');
+    const close = (val) => { overlay.classList.remove('active'); window._siteDialogCancel = null; resolve(val); };
+    window._siteDialogCancel = () => close(false);
+    document.getElementById('siteConfirmCancel').onclick = () => close(false);
+    document.getElementById('siteConfirmOk').onclick = () => close(true);
+  });
+};
 
-// ════ EVENTS (22) ════
-['events','الإدارة','➕','إنشاء حدث',0,()=>{const n=ask('Name:'),r=ask('Reward:'),s1=ask('Start ts:'),e=ask('End ts:');if(n)S(`events/${n}`,{name:n,reward:r,start:+s1||Date.now(),end:+e||Date.now()+864e5,active:1})}],
-['events','الإدارة','🗑️','حذف',0,()=>{const n=ask('Name:');if(n)D(`events/${n}`)}],
-['events','الإدارة','✏️','تعديل مكافأة',0,()=>{const n=ask('Name:'),r=ask('Reward:');if(n)S(`events/${n}/reward`,r)}],
-['events','الإدارة','🔘','تفعيل/إيقاف',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/active`).then(x=>S(`events/${n}/active`,x.val()?0:1))}],
-['events','الإدارة','🔁','تكرار',0,()=>{const n=ask('Name:'),r=ask('Recur:');if(n)S(`events/${n}/recur`,r)}],
-['events','الإدارة','▶️','بدء',0,()=>{const n=ask('Name:');if(n)S(`events/${n}/started`,Date.now())}],
-['events','الإدارة','⏹️','إنهاء',0,()=>{const n=ask('Name:');if(n)S(`events/${n}/ended`,Date.now())}],
-['events','الإدارة','👑','الفائز',0,()=>{const n=ask('Name:'),w=ask('Winner:');if(n)S(`events/${n}/winner`,w)}],
-['events','البيانات','👥','المشاركون',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/participants`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))}],
-['events','البيانات','🏆','المتصدرون',0,()=>{const n=ask('Name:');if(n)G(`events/${n}/scores`).then(x=>alert(JSON.stringify(x.val()||{},null,2)))}],
-['events','البيانات','⚔️','إضافة مباراة',0,()=>{const n=ask('Event:'),a=ask('A:'),b=ask('B:');if(n)P(`events/${n}/matches`,{a,b})}],
-['events','البيانات','🏟️','Bracket',0,()=>{const n=ask('Event:');if(n)S(`events/${n}/bracket`,{})}],
-['events','الإشعار','🔔','إشعار الحدث',0,()=>{const n=ask('Name:'),t=ask('Msg:');if(n&&t)P('notifications',{title:n,body:t,time:Date.now()})}],
-['events','الإشعار','📢','إعلان',0,()=>{const t=ask('Text:');if(t)S('site_settings/announcement',t)}],
-['events','البيانات','📋','القائمة',0,()=>G('events').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['events','البيانات','📊','إحصائيات',0,()=>G('events').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
-['events','البيانات','📤','تصدير',0,()=>G('events').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='events.json';a.click()})],
-['events','البيانات','📥','استيراد',0,()=>alert('Manual import via console')],
-['events','البيانات','🌊','Cascade',0,()=>alert('Cascade config')],
-['events','البيانات','📜','التاريخ',0,()=>G('events_history').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['events','البيانات','📝','قوالب',0,()=>G('event_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['events','البيانات','🧹','مسح المنتهية',0,()=>G('events').then(x=>{const now=Date.now();Object.entries(x.val()||{}).forEach(([k,v])=>{if((v.end||0)<now)D(`events/${k}`)});toast('تم المسح')})],
+function download(filename, content, mime = 'application/json') {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 100);
+}
+window.download = download;
 
-// ════ SHOP (30) ════
-['shop','العناصر','➕','إضافة عنصر',0,()=>{const n=ask('Name:'),i=ask('Icon:'),p=ask('Price:'),c=ask('Cat:');if(n)S(`shop_items/${n}`,{name:n,icon:i||'🛒',price:+p||100,cat:c||'misc',active:1})}],
-['shop','العناصر','🗑️','حذف',0,()=>{const n=ask('Name:');if(n)D(`shop_items/${n}`)}],
-['shop','العناصر','💰','تعيين سعر',0,()=>{const n=ask('Item:'),p=ask('Price:');if(n)S(`shop_items/${n}/price`,+p)}],
-['shop','العناصر','📂','تعيين فئة',0,()=>{const n=ask('Item:'),c=ask('Cat:');if(n)S(`shop_items/${n}/cat`,c)}],
-['shop','العناصر','⭐','تمييز',0,()=>{const n=ask('Item:');if(n)S(`shop_items/${n}/featured`,1)}],
-['shop','العناصر','☆','إلغاء التمييز',0,()=>{const n=ask('Item:');if(n)D(`shop_items/${n}/featured`)}],
-['shop','العناصر','🔘','تفعيل/إيقاف',0,()=>{const n=ask('Item:');if(n)G(`shop_items/${n}/active`).then(x=>S(`shop_items/${n}/active`,x.val()?0:1))}],
-['shop','العناصر','🎨','تعيين أيقونة',0,()=>{const n=ask('Item:'),i=ask('Icon:');if(n)S(`shop_items/${n}/icon`,i)}],
-['shop','الكوبونات','🎟️','إنشاء كوبون',0,()=>{const c=ask('Code:'),p=ask('%:'),m=ask('Max uses:');if(c)S(`coupons/${c}`,{percent:+p||10,max:+m||100,used:0})}],
-['shop','الكوبونات','🗑️','حذف كوبون',0,()=>{const c=ask('Code:');if(c)D(`coupons/${c}`)}],
-['shop','الكوبونات','👁️','عرض الكوبونات',0,()=>G('coupons').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['shop','الكوبونات','💯','تعيين %',0,()=>{const c=ask('Code:'),p=ask('%:');if(c)S(`coupons/${c}/percent`,+p)}],
-['shop','الكوبونات','📊','حد الاستخدام',0,()=>{const c=ask('Code:'),m=ask('Max:');if(c)S(`coupons/${c}/max`,+m)}],
-['shop','الكوبونات','⏰','تعيين انتهاء',0,()=>{const c=ask('Code:'),e=ask('Ts:');if(c)S(`coupons/${c}/expiry`,+e)}],
-['shop','المعاملات','🧾','عرض',0,()=>G('transactions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['shop','المعاملات','↩️','استرداد',0,()=>{const id=ask('Tx ID:');if(id)G(`transactions/${id}`).then(x=>{const t=x.val();if(t&&t.user)G(`users_data/${t.user}/coins`).then(c=>{S(`users_data/${t.user}/coins`,(c.val()||0)+t.price);D(`transactions/${id}`);toast('تم الاسترداد')})})}],
-['shop','المعاملات','📊','إحصائيات',0,()=>G('transactions').then(x=>alert('إجمالي المعاملات: '+Object.keys(x.val()||{}).length))],
-['shop','المعاملات','📤','تصدير',0,()=>G('transactions').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='transactions.json';a.click()})],
-['shop','الاقتصاد','📈','سعر ديناميكي',0,()=>S('shop_settings/dynamicPrice',1)],
-['shop','الاقتصاد','📉','إيقاف ديناميكي',0,()=>S('shop_settings/dynamicPrice',0)],
-['shop','الاقتصاد','💹','تحكم التضخم',0,()=>S('shop_settings/inflationCtrl',1)],
-['shop','الاقتصاد','📊','تعيين المعدل',0,()=>{const r=ask('Rate %:');if(r)S('shop_settings/inflationRate',+r)}],
-['shop','الاقتصاد','💧','Faucet',0,()=>{const v=ask('Faucet:');if(v)S('shop_settings/faucet',+v)}],
-['shop','الاقتصاد','🚾','Sink',0,()=>{const v=ask('Sink:');if(v)S('shop_settings/sink',+v)}],
-['shop','الاقتصاد','💰','رصيد الاقتصاد',0,()=>G('shop_settings/balance').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['shop','العرض','👁️','معاينة',0,()=>G('shop_items').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['shop','العرض','🔍','بحث',0,()=>{const q=ask('Query:');G('shop_items').then(x=>{const out=Object.entries(x.val()||{}).filter(([k,v])=>k.includes(q)||(v.name||'').includes(q));alert(JSON.stringify(Object.fromEntries(out),null,2))})}],
-['shop','العرض','🔥','تخفيض',0,()=>{const n=ask('Item:'),d1=ask('Days:');if(n)S(`shop_items/${n}/saleUntil`,Date.now()+(+d1||7)*864e5)}],
-['shop','العرض','⚡','Flash Sale',0,()=>S('shop_settings/flashSale',Date.now())],
-['shop','العرض','📤','تصدير',0,()=>G('shop_items').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='shop.json';a.click()})],
+function countKeys(obj) { return (!obj || typeof obj !== 'object') ? 0 : Object.keys(obj).length; }
 
-// ════ SUPPORT (20) ════
-['support','التذاكر','👁️','عرض',0,()=>G('tickets').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['support','التذاكر','↩️','رد',0,()=>{const id=ask('ID:'),t=ask('Reply:');if(id)S(`tickets/${id}/reply`,t)}],
-['support','التذاكر','✅','إغلاق',0,()=>{const id=ask('ID:');if(id)S(`tickets/${id}/status`,'closed')}],
-['support','التذاكر','🔄','إعادة فتح',0,()=>{const id=ask('ID:');if(id)S(`tickets/${id}/status`,'open')}],
-['support','التذاكر','👤','إسناد',0,()=>{const id=ask('ID:'),a=ask('Admin:');if(id)S(`tickets/${id}/assigned`,a)}],
-['support','التذاكر','⭐','أولوية',0,()=>{const id=ask('ID:'),p=ask('Priority:');if(id)S(`tickets/${id}/priority`,p)}],
-['support','التذاكر','⏱️','SLA',0,()=>{const id=ask('ID:'),h=ask('Hours:');if(id)S(`tickets/${id}/sla`,+h||24)}],
-['support','التذاكر','📝','ملاحظة داخلية',0,()=>{const id=ask('ID:'),n=ask('Note:');if(id)P(`tickets/${id}/notes`,{text:n,by:'owner'})}],
-['support','التذاكر','📊','إحصائيات',0,()=>G('tickets').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
-['support','التذاكر','📤','تصدير',0,()=>G('tickets').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tickets.json';a.click()})],
-['support','FAQ','➕','إضافة سؤال',0,()=>{const q=ask('Q:'),a=ask('A:');if(q)P('faq',{q,a})}],
-['support','FAQ','🗑️','حذف سؤال',0,()=>{const id=ask('ID:');if(id)D(`faq/${id}`)}],
-['support','FAQ','✏️','تعديل سؤال',0,()=>{const id=ask('ID:'),a=ask('New answer:');if(id)S(`faq/${id}/a`,a)}],
-['support','FAQ','👁️','عرض',0,()=>G('faq').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['support','FAQ','📊','إحصائيات',0,()=>G('faq').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
-['support','الإعدادات','😊','CSAT',0,()=>S('site_settings/csatEnabled',1)],
-['support','الإعدادات','📚','قاعدة المعرفة',0,()=>G('kb').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['support','الإعدادات','📂','الفئات',0,()=>G('ticket_categories').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['support','الإعدادات','🎯','إسناد تلقائي',0,()=>S('site_settings/autoAssign',1)],
-['support','الإعدادات','📝','قوالب',0,()=>G('ticket_templates').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+window.toggleTheme = () => {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('ownerTheme', isLight ? 'light' : 'dark');
+};
 
-// ════ SYSTEM (50) ════
-['system','الحالة','🚧','الصيانة ON',0,()=>S('site_settings/maintenance',1)],
-['system','الحالة','✅','الصيانة OFF',0,()=>S('site_settings/maintenance',0)],
-['system','الحالة','📝','رسالة الصيانة',0,()=>{const m=ask('Message:');if(m)S('site_settings/maintMsg',m)}],
-['system','الحالة','🟢','التسجيل مفتوح',0,()=>S('site_settings/registerOpen',1)],
-['system','الحالة','🔴','التسجيل مغلق',0,()=>S('site_settings/registerOpen',0)],
-['system','الحالة','📧','تحقق البريد ON',0,()=>S('site_settings/emailVerify',1)],
-['system','الحالة','✅','تحقق البريد OFF',0,()=>S('site_settings/emailVerify',0)],
-['system','الحالة','🤖','Captcha ON',0,()=>S('site_settings/captcha',1)],
-['system','الحالة','✅','Captcha OFF',0,()=>S('site_settings/captcha',0)],
-['system','الحالة','🔐','2FA ON',0,()=>S('site_settings/twoFA',1)],
-['system','الحالة','✅','2FA OFF',0,()=>S('site_settings/twoFA',0)],
-['system','الإعلانات','📢','نشر إعلان',0,()=>{const t=ask('Text:');if(t)S('site_settings/announcement',t)}],
-['system','الإعلانات','🗑️','مسح إعلان',0,()=>D('site_settings/announcement')],
-['system','الإعلانات','⏰','جدولة إعلان',0,()=>{const t=ask('Text:'),tm=ask('Ts:');if(t)S('site_settings/scheduledAnn',{text:t,at:+tm})}],
-['system','الإعلانات','📡','بث',0,()=>{const t=ask('Text:');if(t)S('site_settings/broadcast',{text:t,time:Date.now()})}],
-['system','الإعلانات','🗑️','مسح بث',0,()=>D('site_settings/broadcast')],
-['system','الأدوات','👀','تصفير الزوار',0,()=>S('site_stats/visitors',0)],
-['system','الأدوات','🧹','مسح الكاش',0,()=>{localStorage.clear();toast('تم المسح')}],
-['system','الأدوات','🗑️','مسح السجلات',0,()=>{if(conf('مسح السجلات؟'))D('logs')}],
-['system','الأدوات','⏰','حذف قديمة',0,()=>{const d1=ask('Days:');if(d1)G('logs').then(x=>{const c=Date.now()-(+d1)*864e5;Object.entries(x.val()||{}).forEach(([id,l])=>{if((l.time||0)<c)D(`logs/${id}`)});toast('تم')})}],
-['system','الأدوات','🔨','إعادة بناء الفهارس',0,()=>toast('جاري إعادة البناء...')],
-['system','الأدوات','❤️','فحص صحة',0,()=>toast('كل الأنظمة تعمل ✅')],
-['system','الأدوات','📊','حالة النظام',0,()=>G('site_settings').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['system','Feature Flags','💬','Chat',0,()=>{G('site_settings/flag_chat').then(x=>S('site_settings/flag_chat',x.val()?0:1))}],
-['system','Feature Flags','🚪','Rooms',0,()=>{G('site_settings/flag_rooms').then(x=>S('site_settings/flag_rooms',x.val()?0:1))}],
-['system','Feature Flags','🏅','Badges',0,()=>{G('site_settings/flag_badges').then(x=>S('site_settings/flag_badges',x.val()?0:1))}],
-['system','Feature Flags','🛒','Shop',0,()=>{G('site_settings/flag_shop').then(x=>S('site_settings/flag_shop',x.val()?0:1))}],
-['system','Feature Flags','🎉','Events',0,()=>{G('site_settings/flag_events').then(x=>S('site_settings/flag_events',x.val()?0:1))}],
-['system','Feature Flags','📩','Messages',0,()=>{G('site_settings/flag_msg').then(x=>S('site_settings/flag_msg',x.val()?0:1))}],
-['system','Feature Flags','🏆','Leaderboard',0,()=>{G('site_settings/flag_lb').then(x=>S('site_settings/flag_lb',x.val()?0:1))}],
-['system','Feature Flags','🎁','Rewards',0,()=>{G('site_settings/flag_rewards').then(x=>S('site_settings/flag_rewards',x.val()?0:1))}],
-['system','العلامة','🏷️','اسم الموقع',0,()=>{const v=ask('Name:');if(v)S('site_settings/name',v)}],
-['system','العلامة','📝','وصف الموقع',0,()=>{const v=ask('Desc:');if(v)S('site_settings/desc',v)}],
-['system','العلامة','🖼️','الشعار',0,()=>{const v=ask('Logo URL:');if(v)S('site_settings/logo',v)}],
-['system','العلامة','⭐','Favicon',0,()=>{const v=ask('URL:');if(v)S('site_settings/favicon',v)}],
-['system','العلامة','🔍','SEO',0,()=>{const v=ask('Keywords:');if(v)S('site_settings/seo',v)}],
-['system','العلامة','🌐','اللغة',0,()=>{const v=ask('Lang:');if(v)S('site_settings/lang',v)}],
-['system','العلامة','🕐','التوقيت',0,()=>{const v=ask('TZ:');if(v)S('site_settings/tz',v)}],
-['system','العلامة','💰','العملة',0,()=>{const v=ask('Currency:');if(v)S('site_settings/currency',v)}],
-['system','النسخ','💾','نسخ احتياطي',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_'+Date.now()+'.json';a.click()})],
-['system','النسخ','⏰','جدولة نسخ',0,()=>{const h=ask('Hours:');if(h)S('site_settings/backupInterval',+h)}],
-['system','النسخ','↩️','استعادة',0,()=>{const f=document.createElement('input');f.type='file';f.accept='.json';f.onchange=e=>{const r=new FileReader();r.onload=ev=>{try{const dd=JSON.parse(ev.target.result);if(conf('استعادة؟')){Object.entries(dd).forEach(([k,v])=>S(k,v));toast('تمت')}}catch(err){toast('ملف غير صالح',1)}};r.readAsText(e.target.files[0])};f.click()}],
-['system','النسخ','📥','تحميل',0,()=>G('/').then(x=>{const b=new Blob([JSON.stringify(x.val(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup.json';a.click()})],
-['system','النسخ','📤','رفع',0,()=>alert('استخدم زر الاستعادة')],
-['system','المعلومات','📦','الإصدار',0,()=>toast('Owner v500')],
-['system','المعلومات','📜','سجل التغييرات',0,()=>G('changelog').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['system','المعلومات','🔗','فحص التبعيات',0,()=>toast('كل شيء يعمل ✅')],
-['system','المعلومات','🌐','حالة API',0,()=>toast('API يعمل ✅')],
-['system','المعلومات','⏱️','مدة التشغيل',0,()=>toast('99.9%')],
-['system','المعلومات','🖥️','معلومات السيرفر',0,()=>toast('Firebase RTDB')],
-['system','المعلومات','📊','حجم البيانات',0,()=>G('/').then(x=>toast('الحجم: '+JSON.stringify(x.val()).length+' bytes'))],
+window.logout = () => {
+  signOut(auth).then(() => {
+    localStorage.removeItem('loggedInUser');
+    location.href = 'index.html';
+  });
+};
 
-// ════ THEMES (12) ════
-['themes','الإدارة','➕','إنشاء ثيم',0,()=>{const n=ask('Name:'),p=ask('Primary:'),a=ask('Accent:'),b=ask('BG:');if(n)S(`themes/${n}`,{name:n,primary:p||'#ff3333',accent:a||'#ffd700',bg:b||'#080808'})}],
-['themes','الإدارة','🗑️','حذف ثيم',0,()=>{const n=ask('Name:');if(n)D(`themes/${n}`)}],
-['themes','الإدارة','🎨','تعيين أساسي',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/primary`,c)}],
-['themes','الإدارة','🎨','تعيين accent',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/accent`,c)}],
-['themes','الإدارة','🎨','تعيين خلفية',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/bg`,c)}],
-['themes','الإدارة','🎨','تعيين نص',0,()=>{const n=ask('Name:'),c=ask('Color:');if(n)S(`themes/${n}/text`,c)}],
-['themes','الإدارة','✅','تطبيق ثيم',0,()=>{const n=ask('Name:');if(n)S('site_settings/activeTheme',n)}],
-['themes','الإدارة','📋','نسخ ثيم',0,()=>{const o=ask('Old:'),n=ask('New:');if(o&&n)G(`themes/${o}`).then(x=>{const v=x.val();if(v)S(`themes/${n}`,v)})}],
-['themes','الإدارة','👁️','معاينة',0,()=>G('themes').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['themes','الإدارة','📋','القائمة',0,()=>G('themes').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['themes','الإدارة','📤','تصدير',0,()=>G('themes').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='themes.json';a.click()})],
-['themes','الإدارة','📥','استيراد',0,()=>alert('استخدم النسخ الاحتياطي')],
+if (localStorage.getItem('ownerTheme') === 'light') document.body.classList.add('light-mode');
 
-// ════ ADMINS (20) ════
-['admins','الإدارة','➕','إضافة أدمن',0,()=>{const u=ask('User:');if(u)S(`roles/admins/${u}`,1)}],
-['admins','الإدارة','❌','إزالة أدمن',0,()=>{const u=ask('User:');if(u)D(`roles/admins/${u}`)}],
-['admins','الإدارة','🎚️','تغيير المستوى',0,()=>{const u=ask('User:'),l=ask('Level:');if(u)S(`admin_level/${u}`,l)}],
-['admins','الإدارة','🔐','تعديل الصلاحيات',0,()=>{const u=ask('User:'),p=ask('Perms csv:');if(u)S(`permissions/${u}`,p.split(','))}],
-['admins','الإدارة','🚫','تعليق أدمن',0,()=>{const u=ask('User:');if(u)S(`admin_suspended/${u}`,1)}],
-['admins','الإدارة','✅','إعادة تفعيل',0,()=>{const u=ask('User:');if(u)D(`admin_suspended/${u}`)}],
-['admins','الإدارة','🚪','خروج قسري',0,()=>{const u=ask('User:');if(u)S(`force_logout/${u}`,Date.now())}],
-['admins','الإدارة','🎭','انتحال شخصية',0,()=>{const u=ask('User:');if(u)S('site_settings/impersonate',u)}],
-['admins','الإدارة','📝','ملاحظة',0,()=>{const u=ask('User:'),n=ask('Note:');if(u)P(`admin_notes/${u}`,{text:n,time:Date.now()})}],
-['admins','الإدارة','📨','دعوة أدمن',0,()=>{const u=ask('User:');if(u)P(`admin_invites`,{user:u,time:Date.now()})}],
-['admins','الإدارة','🔐','2FA إجباري',0,()=>{const u=ask('User:');if(u)S(`users_data/${u}/twoFA`,1)}],
-['admins','الإدارة','📋','قائمة الأدمنز',0,()=>G('roles/admins').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['admins','البيانات','👁️','الصلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['admins','البيانات','📜','سجل النشاط',0,()=>G('admin_activity').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['admins','البيانات','🕐','آخر ظهور',0,()=>G('roles/admins').then(x=>{const o=[];Object.keys(x.val()||{}).forEach(u=>G(`presence/${u}/lastSeen`).then(y=>o.push(u+': '+new Date(y.val()||0).toLocaleString())));setTimeout(()=>alert(o.join('\n')),500)})],
-['admins','البيانات','🔍','فحص الجلسات',0,()=>G('sessions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['admins','البيانات','📊','مصفوفة الصلاحيات',0,()=>G('permissions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['admins','البيانات','📤','تصدير',0,()=>G('roles/admins').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='admins.json';a.click()})],
-['admins','البيانات','📊','إحصائيات',0,()=>G('roles/admins').then(x=>alert('عدد الأدمنز: '+Object.keys(x.val()||{}).length))],
-['admins','البيانات','📋','سجل الدخول',0,()=>G('admin_logins').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+/* ==================== RED LINES ==================== */
+function initRedLines() {
+  const c = document.getElementById('redLinesContainer');
+  if (!c) return;
+  c.innerHTML = '';
+  for (let i = 0; i < 100; i++) {
+    const line = document.createElement('div');
+    line.className = 'red-line';
+    c.appendChild(line);
+  }
+}
 
-// ════ ANALYTICS (18) ════
-['analytics','المستخدمون','📈','DAU',0,()=>G('presence').then(x=>{const c={};Object.values(x.val()||{}).forEach(p=>{const d1=new Date(p.lastSeen||0).toISOString().slice(0,10);c[d1]=(c[d1]||0)+1});alert(JSON.stringify(c,null,2))})],
-['analytics','المستخدمون','📊','WAU',0,()=>alert('WAU metric')],
-['analytics','المستخدمون','📉','MAU',0,()=>alert('MAU metric')],
-['analytics','المستخدمون','🔁','الاحتفاظ',0,()=>alert('Retention')],
-['analytics','المستخدمون','🌊','Funnel',0,()=>alert('Funnel')],
-['analytics','المستخدمون','📄','أعلى صفحات',0,()=>G('pageviews').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['analytics','المستخدمون','⚡','أعلى أفعال',0,()=>G('actions').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['analytics','المستخدمون','🚪','Bounce',0,()=>alert('Bounce rate')],
-['analytics','المستخدمون','⏱️','مدة الجلسة',0,()=>alert('Avg session')],
-['analytics','المستخدمون','👥','جديد vs قديم',0,()=>G('users_data').then(x=>{const now=Date.now();let nw=0;Object.values(x.val()||{}).forEach(u=>{if((u.createdAt||0)>now-7*864e5)nw++});alert(`جديد (7ي): ${nw}\nإجمالي: ${Object.keys(x.val()||{}).length}`)})],
-['analytics','المستخدمون','📈','النمو',0,()=>alert('Growth rate')],
-['analytics','المستخدمون','🔮','Churn',0,()=>G('presence').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,p])=>{if(Date.now()-(p.lastSeen||0)>30*864e5)out.push(u)});alert('معرضون للخطر: '+out.length)})],
-['analytics','المستخدمون','💪','Power Users',0,()=>G('users_data').then(x=>{const a=Object.entries(x.val()||{}).sort((a,b)=>(b[1].xp||0)-(a[1].xp||0)).slice(0,20);alert(a.map(([u])=>u).join('\n'))})],
-['analytics','المستخدمون','⚠️','At-Risk',0,()=>G('presence').then(x=>{const out=[];Object.entries(x.val()||{}).forEach(([u,p])=>{const d1=(Date.now()-(p.lastSeen||0))/864e5;if(d1>7&&d1<30)out.push(u)});alert(out.join('\n')||'لا يوجد')})],
-['analytics','الاكتساب','🔗','مصادر',0,()=>G('referrers').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['analytics','الاكتساب','📱','أجهزة',0,()=>G('devices').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['analytics','الاكتساب','🌍','دول',0,()=>G('countries').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['analytics','الاكتساب','🌐','متصفحات',0,()=>G('browsers').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+/* ==================== CORE OPS ==================== */
+async function nodeStats(node) {
+  try {
+    const snap = await get(ref(db, node));
+    const data = snap.val();
+    if (!data) return showModal('📊 ' + node, 'لا توجد بيانات');
+    
+    let html = `<p style="margin-bottom:12px; font-size:16px;">عدد العناصر: <b style="color:var(--primary);">${countKeys(data)}</b></p>`;
+    let displayData = data;
+    if (typeof data === 'object' && countKeys(data) > 50) {
+       displayData = Object.fromEntries(Object.entries(data).slice(0, 50));
+       html += `<p style="color:var(--text-2); font-size:12px; margin-bottom:8px;">(يتم عرض أول 50 عنصر فقط)</p>`;
+    }
+    html += formatObject(displayData);
+    showModalHTML('📊 ' + node, html);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
 
-// ════ LOGS (12) ════
-['logs','العرض','📜','كل السجلات',0,()=>G('logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','العرض','🔍','بحث',0,()=>{const q=ask('Query:');G('logs').then(x=>{const out=[];Object.values(x.val()||{}).forEach(l=>{if(JSON.stringify(l).includes(q))out.push(JSON.stringify(l))});alert(out.join('\n\n').slice(0,2000)||'لا يوجد')})}],
-['logs','العرض','📤','تصدير',0,()=>G('logs').then(x=>{const b=new Blob([JSON.stringify(x.val()||{},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='logs.json';a.click()})],
-['logs','العرض','🧹','مسح الكل',0,()=>{if(conf('مسح كل السجلات؟'))D('logs')}],
-['logs','العرض','⏰','حذف قديمة',0,()=>{const d1=ask('Days:');if(d1)G('logs').then(x=>{const c=Date.now()-(+d1)*864e5;Object.entries(x.val()||{}).forEach(([id,l])=>{if((l.time||0)<c)D(`logs/${id}`)});toast('تم')})}],
-['logs','العرض','📊','إحصائيات',0,()=>G('logs').then(x=>alert('إجمالي: '+Object.keys(x.val()||{}).length))],
-['logs','الأنواع','👤','فعل مستخدم',0,()=>G('user_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','الأنواع','🛡️','فعل أدمن',0,()=>G('admin_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','الأنواع','⚙️','سجل النظام',0,()=>G('system_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','الأنواع','❌','سجل الأخطاء',0,()=>G('error_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','الأنواع','🔒','سجل الأمان',0,()=>G('security_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['logs','الأنواع','🔴','بث مباشر',0,()=>alert('Live stream (استخدم Firebase Console)')],
+async function nodeExport(node) {
+  try {
+    const snap = await get(ref(db, node));
+    download(node.replace(/\//g, '_') + '.json', JSON.stringify(snap.val() || {}, null, 2));
+    toast('تم تصدير ' + node);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
 
-// ════ API (10) ════
-['api','المفاتيح','🔑','توليد مفتاح',0,()=>{const n=ask('Name:');if(n)S(`api_keys/${n}`,{key:'sk_'+Math.random().toString(36).slice(2,22),created:Date.now()})}],
-['api','المفاتيح','🗑️','إلغاء مفتاح',0,()=>{const n=ask('Name:');if(n)D(`api_keys/${n}`)}],
-['api','المفاتيح','👁️','قائمة المفاتيح',0,()=>G('api_keys').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['api','المفاتيح','🔄','تدوير المفتاح',0,()=>{const n=ask('Name:');if(n)S(`api_keys/${n}/key`,'sk_'+Math.random().toString(36).slice(2,22))}],
-['api','المفاتيح','🧪','Sandbox Mode',0,()=>S('site_settings/sandbox',1)],
-['api','Webhooks','🔗','إضافة',0,()=>{const u=ask('URL:'),e=ask('Event:');if(u)P('webhooks',{url:u,event:e})}],
-['api','Webhooks','🧪','اختبار',0,()=>{const id=ask('ID:');if(id)G(`webhooks/${id}`).then(x=>alert('تم الإرسال: '+JSON.stringify(x.val())))}],
-['api','Webhooks','🗑️','حذف',0,()=>{const id=ask('ID:');if(id)D(`webhooks/${id}`)}],
-['api','Webhooks','📊','حدود الاستخدام',0,()=>G('api_rate_limit').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['api','Webhooks','📜','سجل المكالمات',0,()=>G('api_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
+async function nodeClear(node) {
+  if (!await siteConfirm(`مسح كل بيانات "${node}"؟`)) return;
+  try {
+    await remove(ref(db, node));
+    toast('تم مسح ' + node, 'success');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
 
-// ════ DEVELOPER (15) ════
-['developer','الأدوات','💻','Console',0,()=>{const p=ask('Path:');if(p)G(p).then(x=>alert(JSON.stringify(x.val(),null,2)))}],
-['developer','الأدوات','🔍','استعلام',0,()=>{const p=ask('Path:');if(p)G(p).then(x=>alert(JSON.stringify(x.val(),null,2)))}],
-['developer','الأدوات','📋','Schema',0,()=>G('/').then(x=>alert(Object.keys(x.val()||{}).join('\n')))],
-['developer','الأدوات','🌱','Seed Data',0,()=>{S('site_settings/seeded',Date.now());toast('Seed تم')}],
-['developer','الأدوات','🚚','Migration',0,()=>alert('Migration ready')],
-['developer','الأدوات','❌','سجل الأخطاء',0,()=>G('error_logs').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['developer','الأدوات','🧪','Sandbox',0,()=>S('site_settings/sandbox',1)],
-['developer','الأدوات','🔒','Debug Mode',0,()=>S('site_settings/debug',1)]
-['developer','الأدوات','❌','سجل الأخطاء',0,()=>G('errors').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['developer','الأدوات','⚡','سجل الأداء',0,()=>G('perf').then(x=>alert(JSON.stringify(x.val()||{},null,2)))],
-['developer','الأدوات','💾','حالة الكاش',0,()=>alert(JSON.stringify({localStorage:Object.keys(localStorage).length}))],
-['developer','الأدوات','🖥️','معلومات السيرفر',0,()=>G('/').then(x=>alert('Data size: '+JSON.stringify(x.val()).length+' bytes'))],
-['developer','الأدوات','🎚️','Flags JSON',0,()=>G('site_settings').then(x=>{const f={};Object.entries(x.val()||{}).forEach(([k,v])=>{if(k.startsWith('flag_'))f[k]=v});alert(JSON.stringify(f,null,2))})],
-['developer','الخطير','💥','تصفير الموقع',0,()=>{if(ask('اكتب RESET:')==='RESET'){['users_data','badges','warnings','user_notes','strikes','sessions','muted','user_tags','boosts','messages','notifications','events','shop_items','transactions','tickets','logs','custom_ranks','custom_badges','block_words','api_keys','webhooks','coupons','templates'].forEach(p=>D(p));toast('تم التصفير')}}],
-['developer','الخطير','👥','تصفير اللاعبين',0,()=>{if(conf('تصفير اللاعبين؟')){D('users_data');D('usernames')}}],
-['developer','الخطير','💬','تصفير المحتوى',0,()=>{if(conf('تصفير المحتوى؟')){D('comments');D('suggestions')}}],
-['developer','الخطير','💰','تصفير الاقتصاد',0,()=>{if(conf('تصفير الاقتصاد؟')){D('transactions');D('coupons')}}],
-['developer','الخطير','🗑️','مسح الكاش',0,()=>{localStorage.clear();toast('تم المسح')}]
+/* ==================== QUIZ OPS ==================== */
+async function quizStats(q) {
+  try {
+    const snap = await get(ref(db, 'scores'));
+    const data = snap.val() || {};
+    let players = 0, attempts = 0, bestScore = 0;
+    Object.values(data).forEach(quizzes => {
+      if (quizzes[q]) {
+        players++;
+        Object.values(quizzes[q]).forEach(a => {
+          attempts++;
+          if (a.score > bestScore) bestScore = a.score;
+        });
+      }
+    });
+    showModal('🎮 ' + q, `عدد اللاعبين: ${players}\nعدد المحاولات: ${attempts}\nأعلى نتيجة: ${bestScore}`);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function quizExport(q) {
+  try {
+    const snap = await get(ref(db, 'scores'));
+    const data = snap.val() || {};
+    const filtered = {};
+    Object.entries(data).forEach(([u, quizzes]) => { if (quizzes[q]) filtered[u] = quizzes[q]; });
+    download(q + '_scores.json', JSON.stringify(filtered, null, 2));
+    toast('تم التصدير');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function quizReset(q) {
+  if (!await siteConfirm(`تصفير نتائج ${q}؟`)) return;
+  try {
+    const snap = await get(ref(db, 'scores'));
+    const data = snap.val() || {};
+    for (const user in data) if (data[user][q]) await remove(ref(db, `scores/${user}/${q}`));
+    toast('تم التصفير');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function quizClear(q) {
+  if (!await siteConfirm(`مسح ${q} نهائياً من الكل؟`)) return;
+  try {
+    await quizResetSilent(q);
+    const lb = await get(ref(db, 'leaderboard'));
+    const data = lb.val() || {};
+    for (const u in data) if (data[u][q]) await remove(ref(db, `leaderboard/${u}/${q}`));
+    toast('تم المسح');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function quizResetSilent(q) {
+  const snap = await get(ref(db, 'scores'));
+  const data = snap.val() || {};
+  for (const user in data) if (data[user][q]) await remove(ref(db, `scores/${user}/${q}`));
+}
+
+/* ==================== RANK OPS ==================== */
+async function rankMembers(rank) {
+  try {
+    const snap = await get(ref(db, 'roles/users'));
+    const data = snap.val() || {};
+    const members = Object.entries(data).filter(([, r]) => r === rank).map(([u]) => u);
+    showModal('👥 ' + rank, `العدد: ${members.length}\n\n${members.join('\n') || 'لا يوجد أعضاء'}`);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function rankAssignPrompt(rank) {
+  const user = await sitePrompt(`اسم اللاعب اللي هياخد رتبة ${rank}:`);
+  if (!user) return;
+  try {
+    await set(ref(db, 'roles/users/' + user), rank);
+    toast('تم تعيين ' + rank + ' لـ ' + user);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function rankClear(rank) {
+  if (!await siteConfirm(`مسح رتبة ${rank} من الكل؟`)) return;
+  try {
+    const snap = await get(ref(db, 'roles/users'));
+    const data = snap.val() || {};
+    for (const u in data) if (data[u] === rank) await remove(ref(db, 'roles/users/' + u));
+    toast('تم المسح');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+window.deleteCustomRank = async (r) => {
+  if (!await siteConfirm(`حذف الرتبة "${r}" نهائياً من النظام؟ (سيتم إزالتها من كل اللاعبين)`)) return;
+  try {
+    await remove(ref(db, 'custom_ranks/' + r));
+    const snap = await get(ref(db, 'roles/users'));
+    const data = snap.val() || {};
+    for (const u in data) if (data[u] === r) await remove(ref(db, 'roles/users/' + u));
+    toast('تم حذف الرتبة نهائياً');
+    renderRolesTab();
+    closeModal();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+};
+
+/* ==================== BADGE OPS ==================== */
+async function badgeMembers(badge) {
+  try {
+    const snap = await get(ref(db, 'badges'));
+    const data = snap.val() || {};
+    const holders = [];
+    for (const u in data) if (data[u] && data[u][badge]) holders.push(u);
+    showModal('🏅 ' + badge, `العدد: ${holders.length}\n\n${holders.join('\n') || 'لا يوجد'}`);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function badgeAssignPrompt(badge) {
+  const user = await sitePrompt(`اسم اللاعب اللي هياخد بادج ${badge}:`);
+  if (!user) return;
+  try {
+    await set(ref(db, `badges/${user}/${badge}`), true);
+    toast('تم الإعطاء');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function badgeClear(badge) {
+  if (!await siteConfirm(`مسح بادج ${badge} من الكل؟`)) return;
+  try {
+    const snap = await get(ref(db, 'badges'));
+    const data = snap.val() || {};
+    for (const u in data) if (data[u][badge]) await remove(ref(db, `badges/${u}/${badge}`));
+    toast('تم المسح');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+window.deleteCustomBadge = async (b) => {
+  if (!await siteConfirm(`حذف البادج "${b}" نهائياً من النظام؟`)) return;
+  try {
+    await remove(ref(db, 'custom_badges/' + b));
+    const snap = await get(ref(db, 'badges'));
+    const data = snap.val() || {};
+    for (const u in data) if (data[u] && data[u][b]) await remove(ref(db, `badges/${u}/${b}`));
+    toast('تم حذف البادج نهائياً');
+    renderBadgesTab();
+    closeModal();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+};
+
+/* ==================== SETTINGS OPS (UPGRADED) ==================== */
+async function settingView(key, label) {
+  try {
+    const snap = await get(ref(db, 'site_settings/' + key));
+    showModal('⚙️ ' + label, `القيمة: ${snap.exists() ? JSON.stringify(snap.val()) : '(غير محدد)'}`);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function settingEdit(key, label) {
+  try {
+    const snap = await get(ref(db, 'site_settings/' + key));
+    let current = snap.exists() ? snap.val() : '';
+    const isBool = typeof current === 'boolean' || current === 'true' || current === 'false' || current === 1 || current === 0;
+    const isOn = current === true || current === 'true' || current === 1;
+
+    let html = `<p style="margin-bottom:15px; font-size:16px;">${label}</p>`;
+
+    if (isBool) {
+      html += `
+        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--bg-2); padding:15px; border-radius:8px; margin-bottom:15px;">
+          <span>الحالة (ON / OFF)</span>
+          <label class="switch">
+            <input type="checkbox" id="settingToggle" ${isOn ? 'checked' : ''}>
+            <span class="slider round"></span>
+          </label>
+        </div>`;
+    } else {
+      const safeVal = String(current).replace(/"/g, '&quot;');
+      html += `
+        <input type="text" id="settingInput" value="${safeVal}" style="width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); margin-bottom:15px; box-sizing:border-box;">`;
+    }
+
+    html += `
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button class="feature-btn" onclick="closeModal()">إلغاء</button>
+        <button class="feature-btn good" onclick="saveSetting('${key}', ${isBool})">حفظ التغييرات</button>
+      </div>`;
+
+    showModalHTML('⚙️ تعديل ' + label, html);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+window.saveSetting = async function (key, isBool) {
+  try {
+    let val;
+    if (isBool) {
+      val = document.getElementById('settingToggle').checked;
+    } else {
+      val = document.getElementById('settingInput').value;
+      if (val === 'true') val = true;
+      else if (val === 'false') val = false;
+      else if (!isNaN(val) && val.trim() !== '') val = Number(val);
+    }
+    await set(ref(db, 'site_settings/' + key), val);
+    toast('تم حفظ الإعداد بنجاح');
+    closeModal();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+};
+
+/* ==================== FEATURE REGISTRY ==================== */
+const CATEGORIES = {
+  dashboard: {}, users: {}, content: {}, roles: {}, badges: {},
+  settings: {}, messages: {}, events: {}, security: {}, reports: {},
+  db: {}, chat: {}, broadcast: {}, admin_messages: {}, requests: {}
+};
+
+function F(section, category, icon, label, fn, cls = '') {
+  if (!CATEGORIES[section][category]) CATEGORIES[section][category] = [];
+  CATEGORIES[section][category].push({ icon, label, fn, cls });
+}
+
+/* ==================== CONSTANTS ==================== */
+const QUIZZES = ['annabelle','conjuring','TheNun','FNAF','SquidGame','spiderman',
+  'spiderman2026','avengers','avatar','venom','birdsofprey','fall',
+  'Wednesday','knivesout','scream','TrainToBusan','elharifa'];
+
+const RANKS = ['Owner','Admin','VIP','Star','Divine','Angel','Dragon',
+  'King','Legend','Lion','Genius','Pro Player','Knight','Ninja','Player'];
+
+const BADGES = ['Founder','Alien','VIP','Sniper','Action','Star',
+  'Genius','Detective','Horror','K-Drama','Gamer'];
+
+const CONTENT_TYPES = ['comments','suggestions','quiz_requests','warnings',
+  'support_tickets','admin_requests','activity_feed','partner_ideas',
+  'global_chat','challenges'];
+
+const ADMIN_ROLES = [
+  { key: 'group', name: 'جماعي (الكل)', emoji: '👥' },
+  { key: 'owner', name: 'الأونر', emoji: '👑' },
+  { key: 'partner', name: 'الشريك', emoji: '🤝' },
+  { key: 'manager', name: 'المدير', emoji: '📋' },
+  { key: 'tester', name: 'التستر', emoji: '🧪' },
+  { key: 'builder', name: 'البيلدر', emoji: '🏗️' },
+  { key: 'admin', name: 'الأدمن', emoji: '🛡️' }
 ];
+
+/* ==================== DB NODES ==================== */
+const DB_NODES = {
+  usernames: 'أسماء المستخدمين', users_data: 'بيانات المستخدمين',
+  scores: 'نتائج الكويزات', leaderboard: 'المتصدرين',
+  speedrun_scores: 'نتائج السرعة', badges: 'البادجات',
+  roles: 'الرتب', friends: 'الأصدقاء',
+  friend_requests: 'طلبات الصداقة', messages: 'الرسائل',
+  comments: 'التعليقات', suggestions: 'الاقتراحات',
+  quiz_requests: 'طلبات الكويزات', warnings: 'التحذيرات',
+  banned_users: 'المحظورين', support_tickets: 'تذاكر الدعم',
+  global_chat: 'الشات العام', challenges: 'التحديات',
+  rooms: 'الغرف', presence: 'حالة الاتصال',
+  teams: 'التيمات', partner_ideas: 'أفكار الشركاء',
+  partners_chat: 'شات الشركاء', admin_requests: 'طلبات الإدارة',
+  manager_requests: 'طلبات المديرين', activity_feed: 'آخر الأنشطة',
+  site_events: 'الفعاليات', site_settings: 'إعدادات الموقع',
+  owner_inbox: 'صندوق الأونر', kick_signals: 'إشارات الطرد',
+  verified_users: 'الموثقين', broadcast_messages: 'رسائل البث'
+};
+Object.entries(DB_NODES).forEach(([node, name]) => {
+  F('db', '📊 إحصائيات المسارات', '📊', 'إحصائيات ' + name, () => nodeStats(node), 'info');
+  F('db', '📥 تصدير المسارات', '📥', 'تصدير ' + name, () => nodeExport(node));
+  F('db', '🗑️ مسح المسارات', '🗑️', 'مسح ' + name, () => nodeClear(node), 'danger');
+});
+
+/* ==================== SETTINGS ==================== */
+const SETTINGS = [
+  ['siteName','اسم الموقع'],['announcement','الإعلان'],['colorPrimary','اللون الأساسي'],
+  ['maintenance','وضع الصيانة'],['chatOff','إيقاف الشات'],['version','الإصدار'],
+  ['welcomeMessage','رسالة الترحيب'],['maxRoomsPerUser','حد الغرف'],
+  ['xpMultiplier','مضاعف XP'],['coinsPerQuiz','كوينز لكل كويز'],
+  ['dailyBonus','بونص يومي'],['maxWarnings','أقصى تحذيرات'],
+  ['banDuration','مدة الحظر'],['registrationOpen','التسجيل مفتوح'],
+  ['friendRequestsOn','طلبات الصداقة'],['chatModeration','رقابة الشات'],
+  ['autoBan','الحظر التلقائي'],['maxPlayersPerRoom','أقصى لاعبين/غرفة'],
+  ['leaderboardReset','تصفير المتصدرين'],['quizCooldown','تبريد الكويزات'],
+  ['leaderboardInterval','تحديث المتصدرين'],['teamBattleOn','حرب التيمات'],
+  ['speedrunOn','وضع السرعة'],['challengeOn','وضع التحدي'],['ghostModeOn','وضع الشبح']
+];
+SETTINGS.forEach(([key, label]) => {
+  F('settings', '⚙️ إعدادات الموقع', '✏️', 'تعديل ' + label, () => settingEdit(key, label));
+  F('settings', '⚙️ إعدادات الموقع', '📊', 'عرض ' + label, () => settingView(key, label), 'info');
+});
+
+/* ==================== DASHBOARD ==================== */
+async function dashStat(node) {
+  try {
+    const snap = await get(ref(db, node));
+    showModal('📊 ' + node, `العدد: ${countKeys(snap.val())}`);
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+['usernames','banned_users','warnings','comments','suggestions',
+ 'support_tickets','global_chat','rooms','challenges','friends'
+].forEach(n => F('dashboard', '📊 نظرة سريعة', '📊', 'عدد ' + n, () => dashStat(n), 'info'));
+
+F('dashboard', '⚡ أوامر سريعة', '🔄', 'تحديث الإحصائيات', () => { loadDashboardStats(); toast('تم التحديث'); }, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📥', 'تصدير كل البيانات', async () => {
+  const snap = await get(ref(db, '.'));
+  download('all_data_backup.json', JSON.stringify(snap.val(), null, 2));
+  toast('تم التصدير');
+});
+F('dashboard', '⚡ أوامر سريعة', '🧹', 'مسح كل الغرف', async () => {
+  if (!await siteConfirm('مسح كل الغرف النشطة؟')) return;
+  await remove(ref(db, 'rooms')); toast('تم المسح');
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '♻️', 'تصفير المتصدرين', async () => {
+  if (!await siteConfirm('تصفير الليدربورد بالكامل؟')) return;
+  await remove(ref(db, 'leaderboard')); toast('تم التصفير');
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '💾', 'نسخة احتياطية', async () => {
+  const snap = await get(ref(db, '.'));
+  download('backup_' + Date.now() + '.json', JSON.stringify(snap.val(), null, 2));
+  toast('تم النسخ الاحتياطي');
+});
+F('dashboard', '⚡ أوامر سريعة', '📨', 'إرسال تقرير للأونر', async () => {
+  const usersSnap = await get(ref(db, 'usernames'));
+  const count = countKeys(usersSnap.val());
+  await push(ref(db, 'messages/owner_inbox'), {
+    from: currentUser, text: `تقرير سريع: عدد اللاعبين = ${count}`, time: Date.now()
+  });
+  toast('تم الإرسال');
+});
+F('dashboard', '⚡ أوامر سريعة', '📊', 'أعلى 10 XP', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  const sorted = Object.entries(data).map(([u, v]) => [u, (v && v.xp) || 0])
+    .sort((a, b) => b[1] - a[1]).slice(0, 10);
+  showModal('🏆 أعلى 10 XP', sorted.map((x, i) => `${i+1}. ${x[0]}: ${x[1]} XP`).join('\n') || 'لا بيانات');
+});
+F('dashboard', '⚡ أوامر سريعة', '📊', 'أكثر الكويزات لعباً', async () => {
+  const snap = await get(ref(db, 'scores'));
+  const data = snap.val() || {};
+  const counts = {};
+  Object.values(data).forEach(u => Object.keys(u).forEach(q => counts[q] = (counts[q] || 0) + 1));
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  showModal('🎮 الأكثر لعباً', sorted.map((x, i) => `${i+1}. ${x[0]}: ${x[1]} لاعب`).join('\n') || 'لا بيانات');
+});
+F('dashboard', '⚡ أوامر سريعة', '📊', 'أقل الكويزات لعباً', async () => {
+  const snap = await get(ref(db, 'scores'));
+  const data = snap.val() || {};
+  const counts = {};
+  Object.values(data).forEach(u => Object.keys(u).forEach(q => counts[q] = (counts[q] || 0) + 1));
+  const sorted = Object.entries(counts).sort((a, b) => a[1] - b[1]);
+  showModal('🎮 الأقل لعباً', sorted.map((x, i) => `${i+1}. ${x[0]}: ${x[1]} لاعب`).join('\n') || 'لا بيانات');
+});
+F('dashboard', '⚡ أوامر سريعة', '🩺', 'فحص الاتصال', async () => {
+  const t = Date.now();
+  await get(ref(db, '.info/connected'));
+  toast('الاستجابة: ' + (Date.now() - t) + 'ms', 'info');
+});
+F('dashboard', '⚡ أوامر سريعة', '🧹', 'مسح الحسابات الفارغة', async () => {
+  if (!await siteConfirm('مسح الحسابات بدون XP؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  let removed = 0;
+  for (const u in data) if (!data[u] || !data[u].xp) { await remove(ref(db, 'users_data/' + u)); removed++; }
+  toast('تم المسح: ' + removed);
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '👥', 'المتصلين حالياً', async () => {
+  const snap = await get(ref(db, 'presence'));
+  const data = snap.val() || {};
+  const online = Object.entries(data).filter(([, v]) => v.status === 'online').map(([u]) => u);
+  showModal('🟢 المتصلين (' + online.length + ')', online.join('\n') || 'لا يوجد');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📊', 'إجمالي XP الموقع', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  let total = 0;
+  Object.values(data).forEach(v => total += (v && v.xp) || 0);
+  showModal('📊 إجمالي XP', 'المجموع: ' + total);
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📊', 'متوسط XP', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  const vals = Object.values(data).map(v => (v && v.xp) || 0);
+  const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+  showModal('📊 متوسط XP', 'المتوسط: ' + avg);
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🟢', 'المتصلين آخر 24 ساعة', async () => {
+  const snap = await get(ref(db, 'presence'));
+  const data = snap.val() || {};
+  const dayAgo = Date.now() - 86400000;
+  const count = Object.values(data).filter(v => (v.last_seen || 0) > dayAgo).length;
+  showModal('🟢 نشطين 24 ساعة', 'العدد: ' + count);
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📩', 'عرض صندوق الأونر', async () => {
+  const snap = await get(ref(db, 'messages/owner_inbox'));
+  const data = snap.val() || {};
+  const msgs = Object.values(data).slice(-20).map(m => `[${m.from}] ${m.text}`).join('\n');
+  showModal('📩 صندوق الأونر', msgs || 'لا رسائل');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '💬', 'شات الشركاء', async () => {
+  const snap = await get(ref(db, 'partners_chat'));
+  const data = snap.val() || {};
+  const msgs = Object.values(data).slice(-20).map(m => `[${m.sender}] ${m.text}`).join('\n');
+  showModal('💬 شات الشركاء', msgs || 'فاضي');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📊', 'عدد الغرف', async () => {
+  const snap = await get(ref(db, 'rooms'));
+  showModal('🚪 الغرف', 'العدد: ' + countKeys(snap.val()));
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🔄', 'مسح presence', async () => {
+  if (!await siteConfirm('مسح كل presence؟')) return;
+  await remove(ref(db, 'presence')); toast('تم المسح');
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '📤', 'تقرير الغرف', async () => {
+  const snap = await get(ref(db, 'rooms'));
+  download('rooms.json', JSON.stringify(snap.val() || {}, null, 2));
+  toast('تم');
+});
+F('dashboard', '⚡ أوامر سريعة', '👑', 'عرض كل الأدمنز', async () => {
+  const snap = await get(ref(db, 'roles/admins'));
+  const data = snap.val() || {};
+  showModal('🛡️ الأدمنز', Object.keys(data).join('\n') || 'لا يوجد');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🎖️', 'عرض كل الرتب', async () => {
+  const snap = await get(ref(db, 'roles/users'));
+  const data = snap.val() || {};
+  const lines = Object.entries(data).map(([u, r]) => `${u} → ${r}`);
+  showModal('🎖️ الرتب', lines.join('\n') || 'لا يوجد');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🏅', 'عرض كل البادجات', async () => {
+  const snap = await get(ref(db, 'badges'));
+  const data = snap.val() || {};
+  const lines = Object.entries(data).map(([u, b]) => `${u}: ${Object.keys(b).join(', ')}`);
+  showModal('🏅 البادجات', lines.join('\n') || 'لا يوجد');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '📊', 'احصائيات الأسبوع', async () => {
+  const snap = await get(ref(db, 'scores'));
+  const data = snap.val() || {};
+  const weekAgo = Date.now() - 7 * 86400000;
+  let attempts = 0;
+  Object.values(data).forEach(u => Object.values(u).forEach(q => Object.values(q).forEach(a => {
+    if (new Date(a.time).getTime() > weekAgo) attempts++;
+  })));
+  showModal('📊 هذا الأسبوع', 'المحاولات: ' + attempts);
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🚫', 'قائمة المحظورين', async () => {
+  const snap = await get(ref(db, 'banned_users'));
+  const data = snap.val() || {};
+  const lines = Object.entries(data).map(([u, v]) => `${u}: ${v.reason || 'مخالفة'}`);
+  showModal('🚫 المحظورين', lines.join('\n') || 'لا يوجد');
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '⚠️', 'قائمة التحذيرات', async () => {
+  const snap = await get(ref(db, 'warnings'));
+  const data = snap.val() || {};
+  const lines = Object.entries(data).map(([u, v]) => `${u}: ${v.text || ''}`);
+  showModal('⚠️ التحذيرات', lines.join('\n') || 'لا يوجد');
+}, 'danger');
+F('dashboard', '⚡ أوامر سريعة', '📊', 'عدد المسجلين اليوم', async () => {
+  const snap = await get(ref(db, 'usernames'));
+  const data = snap.val() || {};
+  showModal('👥 إجمالي المسجلين', 'العدد: ' + countKeys(data));
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🔄', 'تحديث كامل', () => location.reload());
+F('dashboard', '⚡ أوامر سريعة', '📊', 'عدد الطلبات', async () => {
+  const snap = await get(ref(db, 'friend_requests'));
+  showModal('📩 طلبات الصداقة', 'العدد: ' + countKeys(snap.val()));
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '🎁', 'عرض العروض النشطة', async () => {
+  const snap = await get(ref(db, 'site_events/active_offers'));
+  const data = snap.val() || {};
+  showModal('🎁 العروض', Object.values(data).map(o => o.text).join('\n') || 'لا يوجد');
+}, 'info');
+F('dashboard', '⚡ أوامر سريعة', '⚙️', 'كل الإعدادات', async () => {
+  const snap = await get(ref(db, 'site_settings'));
+  showModalHTML('⚙️ الإعدادات', formatObject(snap.val() || {}));
+}, 'info');
+F('dashboard', '✓ التوثيق', '✓', 'عرض كل الموثقين', () => viewVerifiedUsers(), 'info');
+
+/* ==================== USERS GENERIC ==================== */
+async function listUsers(filter) {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  let users = Object.entries(data);
+  if (filter === 'online') {
+    const p = (await get(ref(db, 'presence'))).val() || {};
+    users = users.filter(([u]) => p[u] && p[u].status === 'online');
+  } else if (filter === 'top_xp') {
+    users.sort((a, b) => ((b[1] && b[1].xp) || 0) - ((a[1] && a[1].xp) || 0));
+  } else if (filter === 'zero_xp') {
+    users = users.filter(([, v]) => !v || !v.xp);
+  }
+  showModal('👥 قائمة', users.map(([u, v]) => `${u} (XP: ${(v && v.xp) || 0})`).join('\n') || 'لا يوجد');
+}
+
+F('users', '🔍 عرض اللاعبين', '👥', 'كل اللاعبين', () => listUsers('all'));
+F('users', '🔍 عرض اللاعبين', '🟢', 'المتصلين', () => listUsers('online'), 'info');
+F('users', '🔍 عرض اللاعبين', '🏆', 'أعلى XP', () => listUsers('top_xp'), 'success');
+F('users', '🔍 عرض اللاعبين', '📉', 'صفر XP', () => listUsers('zero_xp'));
+F('users', '🔍 عرض اللاعبين', '🚫', 'المحظورين', async () => {
+  const snap = await get(ref(db, 'banned_users'));
+  showModal('🚫 المحظورين', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'danger');
+F('users', '🔍 عرض اللاعبين', '⚠️', 'التحذيرات', async () => {
+  const snap = await get(ref(db, 'warnings'));
+  showModal('⚠️ تحذيرات', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'danger');
+F('users', '🔍 عرض اللاعبين', '🛡️', 'الأدمنز', async () => {
+  const snap = await get(ref(db, 'roles/admins'));
+  showModal('🛡️ الأدمنز', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'info');
+F('users', '🔍 عرض اللاعبين', '👑', 'الأونر', () => showModal('👑', 'ahmed'), 'info');
+F('users', '🔍 عرض اللاعبين', '📋', 'المديرين', async () => {
+  const snap = await get(ref(db, 'roles/managers'));
+  showModal('📋 المديرين', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'info');
+F('users', '🔍 عرض اللاعبين', '🤝', 'الشركاء', async () => {
+  const snap = await get(ref(db, 'roles/partners'));
+  showModal('🤝 الشركاء', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'info');
+F('users', '🔍 عرض اللاعبين', '🧪', 'التسترات', async () => {
+  const snap = await get(ref(db, 'roles/testers'));
+  showModal('🧪 التسترات', Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}, 'info');
+F('users', '🔍 عرض اللاعبين', '✓', 'الموثقين', () => viewVerifiedUsers(), 'success');
+F('users', '📥 تصدير اللاعبين', '📥', 'تصدير JSON', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  download('users.json', JSON.stringify(snap.val() || {}, null, 2));
+  toast('تم');
+});
+F('users', '📥 تصدير اللاعبين', '📊', 'تصدير CSV', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  const csv = 'username,xp,coins,team\n' + Object.entries(data).map(([u, v]) =>
+    `${u},${(v && v.xp) || 0},${(v && v.coins) || 0},${(v && v.team) || ''}`).join('\n');
+  download('users.csv', csv, 'text/csv');
+  toast('تم');
+}, 'success');
+F('users', '♻️ إجراءات جماعية', '♻️', 'تصفير كل XP', async () => {
+  if (!await siteConfirm('تصفير كل XP؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) await update(ref(db, 'users_data/' + u), { xp: 0 });
+  toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '💰', 'تصفير كل كوينز', async () => {
+  if (!await siteConfirm('تصفير كل الكوينز؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) await update(ref(db, 'users_data/' + u), { coins: 0 });
+  toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '🎨', 'مسح كل الصور', async () => {
+  if (!await siteConfirm('مسح كل صور الملف الشخصي؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) await remove(ref(db, 'users_data/' + u + '/profilePic'));
+  toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '👥', 'مسح كل الأصدقاء', async () => {
+  if (!await siteConfirm('مسح كل الأصدقاء؟')) return;
+  await remove(ref(db, 'friends')); toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '📩', 'مسح كل طلبات الصداقة', async () => {
+  if (!await siteConfirm('مسح كل الطلبات؟')) return;
+  await remove(ref(db, 'friend_requests')); toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '🔥', 'تصفير الستريك', async () => {
+  if (!await siteConfirm('تصفير كل الستريك؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) await update(ref(db, 'users_data/' + u), { streak: 0 });
+  toast('تم');
+}, 'danger');
+F('users', '♻️ إجراءات جماعية', '⚔️', 'مسح كل التيمات', async () => {
+  if (!await siteConfirm('مسح كل التيمات من اللاعبين؟')) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) await remove(ref(db, 'users_data/' + u + '/team'));
+  toast('تم');
+}, 'danger');
+F('users', '📊 إحصائيات', '📊', 'متوسط XP', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const vals = Object.values(snap.val() || {}).map(v => (v && v.xp) || 0);
+  const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
+  showModal('متوسط XP', avg);
+}, 'info');
+F('users', '📊 إحصائيات', '📊', 'متوسط المستوى', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const vals = Object.values(snap.val() || {}).map(v => (v && v.xp) || 0);
+  const levels = vals.map(x => Math.min(10, Math.floor(x / 300) + 1));
+  const avg = levels.length ? Math.round(levels.reduce((a, b) => a + b, 0) / levels.length) : 0;
+  showModal('متوسط المستوى', avg);
+}, 'info');
+F('users', '📊 إحصائيات', '👥', 'عدد اللي معاهم صور', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  const count = Object.values(data).filter(v => v && v.profilePic).length;
+  showModal('بصور', count);
+}, 'info');
+F('users', '📊 إحصائيات', '📊', 'توزيع التيمات', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  const teams = {};
+  Object.values(data).forEach(v => { if (v && v.team) teams[v.team] = (teams[v.team] || 0) + 1; });
+  showModalHTML('توزيع التيمات', formatObject(teams));
+}, 'info');
+F('users', '📊 إحصائيات', '📊', 'توزيع الرتب', async () => {
+  const snap = await get(ref(db, 'roles/users'));
+  const data = snap.val() || {};
+  const r = {};
+  Object.values(data).forEach(v => r[v] = (r[v] || 0) + 1);
+  showModalHTML('توزيع الرتب', formatObject(r));
+}, 'info');
+F('users', '📊 إحصائيات', '🏅', 'توزيع البادجات', async () => {
+  const snap = await get(ref(db, 'badges'));
+  const data = snap.val() || {};
+  const b = {};
+  Object.values(data).forEach(v => Object.keys(v).forEach(k => b[k] = (b[k] || 0) + 1));
+  showModalHTML('توزيع البادجات', formatObject(b));
+}, 'info');
+F('users', '📩 إجراءات', '📩', 'رسالة جماعية للكل', async () => {
+  const text = await sitePrompt('نص الرسالة:');
+  if (!text) return;
+  const snap = await get(ref(db, 'usernames'));
+  for (const u in (snap.val() || {})) await push(ref(db, 'messages/' + u), { from: currentUser, text, time: Date.now() });
+  toast('تم الإرسال للكل');
+});
+F('users', '📩 إجراءات', '🔔', 'إشعار جماعي', async () => {
+  const text = await sitePrompt('نص الإشعار:');
+  if (!text) return;
+  await push(ref(db, 'global_notifications'), { text, from: currentUser, time: Date.now() });
+  toast('تم');
+});
+
+/* ==================== MESSAGES ==================== */
+F('messages', '📩 صندوق الأونر', '👁️', 'عرض الرسائل', async () => {
+  const snap = await get(ref(db, 'messages/owner_inbox'));
+  const msgs = Object.entries(snap.val() || {}).map(([k, m]) =>
+    `[${new Date(m.time).toLocaleString('ar-EG')}] من ${m.from}: ${m.text}`).join('\n\n');
+  showModal('📩 صندوق الأونر', msgs || 'فاضي');
+}, 'info');
+F('messages', '📩 صندوق الأونر', '🗑️', 'مسح الصندوق', async () => {
+  if (!await siteConfirm('مسح الكل؟')) return;
+  await remove(ref(db, 'messages/owner_inbox')); toast('تم');
+}, 'danger');
+F('messages', '📩 صندوق الأونر', '📥', 'تصدير الصندوق', () => nodeExport('messages/owner_inbox'));
+F('messages', '📩 صندوق الأونر', '✉️', 'رد على لاعب', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  const text = await sitePrompt('نص الرد:');
+  if (!text) return;
+  await push(ref(db, 'messages/' + user), { from: currentUser, text, time: Date.now() });
+  toast('تم الرد');
+});
+F('messages', '📩 رسائل الشركاء', '👁️', 'عرض شات الشركاء', async () => {
+  const snap = await get(ref(db, 'partners_chat'));
+  const msgs = Object.values(snap.val() || {}).slice(-30).map(m => `[${m.sender}] ${m.text}`).join('\n');
+  showModal('💬 شات الشركاء', msgs || 'فاضي');
+}, 'info');
+F('messages', '📩 رسائل الشركاء', '🗑️', 'مسح شات الشركاء', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'partners_chat')); toast('تم');
+}, 'danger');
+F('messages', '📩 رسائل الشركاء', '📥', 'تصدير شات الشركاء', () => nodeExport('partners_chat'));
+F('messages', '📩 إجراءات سريعة', '📩', 'إرسال رسالة للكل', async () => {
+  const text = await sitePrompt('نص الرسالة:');
+  if (!text) return;
+  const snap = await get(ref(db, 'usernames'));
+  for (const u in (snap.val() || {})) await push(ref(db, 'messages/' + u), { from: currentUser, text, time: Date.now() });
+  toast('تم');
+});
+F('messages', '📩 إجراءات سريعة', '📊', 'عدد الرسائل في النظام', async () => {
+  const snap = await get(ref(db, 'messages'));
+  const data = snap.val() || {};
+  let total = 0;
+  Object.values(data).forEach(u => total += countKeys(u));
+  showModal('📩 إجمالي الرسائل', total);
+}, 'info');
+
+/* ==================== EVENTS ==================== */
+F('events', '🎁 العروض', '➕', 'إضافة عرض', async () => {
+  const text = await sitePrompt('نص العرض:');
+  if (!text) return;
+  await push(ref(db, 'site_events/active_offers'), { text, time: Date.now() });
+  toast('تم');
+}, 'success');
+F('events', '🎁 العروض', '👁️', 'عرض العروض', async () => {
+  const snap = await get(ref(db, 'site_events/active_offers'));
+  showModal('🎁 العروض', Object.values(snap.val() || {}).map(o => o.text).join('\n') || 'لا يوجد');
+}, 'info');
+F('events', '🎁 العروض', '🗑️', 'مسح كل العروض', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'site_events/active_offers')); toast('تم');
+}, 'danger');
+F('events', '🎁 العروض', '📥', 'تصدير العروض', () => nodeExport('site_events/active_offers'));
+F('events', '🎉 استفتاء', '➕', 'استفتاء جديد', async () => {
+  const q = await sitePrompt('السؤال:');
+  if (!q) return;
+  const o1 = await sitePrompt('اختيار 1:');
+  if (!o1) return;
+  const o2 = await sitePrompt('اختيار 2:');
+  if (!o2) return;
+  await set(ref(db, 'site_events/active_poll'), { question: q, option1: o1, option2: o2, votes1: 0, votes2: 0, created: Date.now() });
+  toast('تم');
+}, 'success');
+F('events', '🎉 استفتاء', '👁️', 'عرض الاستفتاء', async () => {
+  const snap = await get(ref(db, 'site_events/active_poll'));
+  showModal('🎉 الاستفتاء', snap.val() || 'لا يوجد');
+}, 'info');
+F('events', '🎉 استفتاء', '🗑️', 'مسح الاستفتاء', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'site_events/active_poll')); toast('تم');
+}, 'danger');
+F('events', '🎯 مسابقات', '➕', 'مسابقة جديدة', async () => {
+  const name = await sitePrompt('اسم المسابقة:');
+  if (!name) return;
+  const prize = await sitePrompt('الجائزة:');
+  await push(ref(db, 'site_events/contests'), { name, prize, time: Date.now() });
+  toast('تم');
+}, 'success');
+F('events', '🎯 مسابقات', '👁️', 'عرض المسابقات', async () => {
+  const snap = await get(ref(db, 'site_events/contests'));
+  showModal('🎯 المسابقات', Object.values(snap.val() || {}).map(c => `${c.name} - ${c.prize}`).join('\n') || 'لا يوجد');
+}, 'info');
+F('events', '🎯 مسابقات', '🗑️', 'مسح المسابقات', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'site_events/contests')); toast('تم');
+}, 'danger');
+F('events', '🎁 جوائز', '🎁', 'اختيار فائز عشوائي', async () => {
+  const snap = await get(ref(db, 'usernames'));
+  const users = Object.keys(snap.val() || {});
+  if (!users.length) return toast('لا يوجد', 'error');
+  showModal('🎁 الفائز', users[Math.floor(Math.random() * users.length)]);
+}, 'success');
+F('events', '🎁 جوائز', '🎁', 'اختيار 3 فائزين', async () => {
+  const snap = await get(ref(db, 'usernames'));
+  const users = Object.keys(snap.val() || {}).sort(() => Math.random() - 0.5).slice(0, 3);
+  showModal('🎁 الفائزين', users.join('\n'));
+}, 'success');
+F('events', '🎁 جوائز', '💰', 'توزيع كوينز على الكل', async () => {
+  const amt = parseInt(await sitePrompt('عدد الكوينز:'));
+  if (!amt) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) {
+    const cur = (await get(ref(db, 'users_data/' + u + '/coins'))).val() || 0;
+    await set(ref(db, 'users_data/' + u + '/coins'), cur + amt);
+  }
+  toast('تم التوزيع');
+}, 'success');
+F('events', '🎁 جوائز', '✨', 'توزيع XP على الكل', async () => {
+  const amt = parseInt(await sitePrompt('عدد XP:'));
+  if (!amt) return;
+  const snap = await get(ref(db, 'users_data'));
+  for (const u in (snap.val() || {})) {
+    const cur = (await get(ref(db, 'users_data/' + u + '/xp'))).val() || 0;
+    await set(ref(db, 'users_data/' + u + '/xp'), cur + amt);
+  }
+  toast('تم');
+}, 'success');
+F('events', '📢 إعلانات', '📢', 'إعلان في الشريط', async () => {
+  const text = await sitePrompt('نص الإعلان:');
+  if (!text) return;
+  await set(ref(db, 'site_settings/announcement'), text); toast('تم');
+}, 'success');
+F('events', '📢 إعلانات', '🗑️', 'مسح الإعلان', async () => {
+  await set(ref(db, 'site_settings/announcement'), ''); toast('تم');
+}, 'danger');
+F('events', '📢 إعلانات', '👁️', 'عرض الإعلان', async () => {
+  const snap = await get(ref(db, 'site_settings/announcement'));
+  showModal('📢 الإعلان الحالي', snap.val() || '(فارغ)');
+}, 'info');
+F('events', '🎊 مواسم', '➕', 'موسم جديد', async () => {
+  const name = await sitePrompt('اسم الموسم:');
+  if (!name) return;
+  await push(ref(db, 'site_events/seasons'), { name, start: Date.now() });
+  toast('تم');
+}, 'success');
+F('events', '🎊 مواسم', '👁️', 'عرض المواسم', async () => {
+  const snap = await get(ref(db, 'site_events/seasons'));
+  showModal('🎊 المواسم', Object.values(snap.val() || {}).map(s => s.name).join('\n') || 'لا يوجد');
+}, 'info');
+F('events', '🎊 مواسم', '🗑️', 'مسح المواسم', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'site_events/seasons')); toast('تم');
+}, 'danger');
+
+/* ==================== SECURITY ==================== */
+F('security', '🚫 حظر', '🚫', 'حظر لاعب', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  const reason = await sitePrompt('السبب:', 'مخالفة القوانين');
+  if (reason === null) return;
+  await set(ref(db, 'banned_users/' + user), { reason, by: currentUser, time: Date.now() });
+  toast('تم الحظر', 'success');
+}, 'danger');
+F('security', '🚫 حظر', '✅', 'رفع حظر', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  await remove(ref(db, 'banned_users/' + user));
+  toast('تم الرفع', 'success');
+}, 'success');
+F('security', '🚫 حظر', '👁️', 'قائمة المحظورين', async () => {
+  const snap = await get(ref(db, 'banned_users'));
+  const lines = Object.entries(snap.val() || {}).map(([u, v]) => `${u}: ${v.reason || ''}`);
+  showModal('🚫 المحظورين', lines.join('\n') || 'لا يوجد');
+}, 'info');
+F('security', '🚫 حظر', '🗑️', 'مسح كل المحظورين', async () => {
+  if (!await siteConfirm('مسح كل المحظورين؟')) return;
+  await remove(ref(db, 'banned_users')); toast('تم');
+}, 'danger');
+F('security', '🚫 حظر', '📥', 'تصدير المحظورين', () => nodeExport('banned_users'));
+F('security', '⚠️ تحذيرات', '⚠️', 'إرسال تحذير', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  const reason = await sitePrompt('السبب:');
+  if (!reason) return;
+  await set(ref(db, 'warnings/' + user), { text: reason, time: Date.now() });
+  toast('تم التحذير', 'success');
+}, 'danger');
+F('security', '⚠️ تحذيرات', '🗑️', 'مسح تحذير', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  await remove(ref(db, 'warnings/' + user));
+  toast('تم المسح');
+}, 'danger');
+F('security', '⚠️ تحذيرات', '👁️', 'قائمة التحذيرات', async () => {
+  const snap = await get(ref(db, 'warnings'));
+  const lines = Object.entries(snap.val() || {}).map(([u, v]) => `${u}: ${v.text}`);
+  showModal('⚠️ التحذيرات', lines.join('\n') || 'لا يوجد');
+}, 'info');
+F('security', '⚠️ تحذيرات', '🗑️', 'مسح كل التحذيرات', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'warnings')); toast('تم');
+}, 'danger');
+F('security', '⚠️ تحذيرات', '📥', 'تصدير التحذيرات', () => nodeExport('warnings'));
+F('security', '👢 طرد', '👢', 'طرد لاعب', async () => {
+  const user = await sitePrompt('اسم اللاعب:');
+  if (!user) return;
+  await set(ref(db, 'kick_signals/' + user), true);
+  toast('تم الطرد');
+}, 'danger');
+F('security', '👢 طرد', '🗑️', 'مسح كل إشارات الطرد', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'kick_signals')); toast('تم');
+}, 'danger');
+F('security', '👢 طرد', '👁️', 'عرض إشارات الطرد', () => nodeStats('kick_signals'), 'info');
+F('security', '🔒 أمان', '🔒', 'قفل التسجيل', async () => {
+  await set(ref(db, 'site_settings/registrationOpen'), false);
+  toast('تم قفل التسجيل');
+}, 'danger');
+F('security', '🔒 أمان', '🔓', 'فتح التسجيل', async () => {
+  await set(ref(db, 'site_settings/registrationOpen'), true);
+  toast('تم فتح التسجيل');
+}, 'success');
+F('security', '🔒 أمان', '🛑', 'وضع الصيانة', async () => {
+  await set(ref(db, 'site_settings/maintenance'), true);
+  toast('تم التفعيل');
+}, 'danger');
+F('security', '🔒 أمان', '✅', 'إيقاف الصيانة', async () => {
+  await set(ref(db, 'site_settings/maintenance'), false);
+  toast('تم الإيقاف');
+}, 'success');
+F('security', '🔒 أمان', '💬', 'إيقاف الشات', async () => {
+  await set(ref(db, 'site_settings/chatOff'), true);
+  toast('تم الإيقاف');
+}, 'danger');
+F('security', '🔒 أمان', '💬', 'تشغيل الشات', async () => {
+  await set(ref(db, 'site_settings/chatOff'), false);
+  toast('تم التشغيل');
+}, 'success');
+F('security', '🔒 أمان', '👥', 'قفل طلبات الصداقة', async () => {
+  await set(ref(db, 'site_settings/friendRequestsOn'), false);
+  toast('تم');
+}, 'danger');
+F('security', '🔒 أمان', '👥', 'فتح طلبات الصداقة', async () => {
+  await set(ref(db, 'site_settings/friendRequestsOn'), true);
+  toast('تم');
+}, 'success');
+F('security', '🔒 أمان', '📊', 'حالة الموقع', async () => {
+  const snap = await get(ref(db, 'site_settings'));
+  showModalHTML('📊 حالة الموقع', formatObject(snap.val()));
+}, 'info');
+F('security', '🧹 تنظيف', '🧹', 'مسح الغرف الفاضية', async () => {
+  if (!await siteConfirm('مسح الغرف بدون لاعبين؟')) return;
+  const snap = await get(ref(db, 'rooms'));
+  const data = snap.val() || {};
+  let count = 0;
+  for (const code in data) {
+    if (data[code].status === 'waiting' && !data[code].player2_score) {
+      await remove(ref(db, 'rooms/' + code)); count++;
+    }
+  }
+  toast('تم المسح: ' + count);
+}, 'danger');
+F('security', '🧹 تنظيف', '🧹', 'مسح كل presence', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'presence')); toast('تم');
+}, 'danger');
+F('security', '🧹 تنظيف', '🧹', 'مسح activity_feed', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'activity_feed')); toast('تم');
+}, 'danger');
+F('security', '🧹 تنظيف', '🧹', 'مسح global_chat', async () => {
+  if (!await siteConfirm('مسح كل رسائل الشات العام؟')) return;
+  await remove(ref(db, 'global_chat')); toast('تم');
+}, 'danger');
+F('security', '🧹 تنظيف', '🧹', 'مسح كل التحديات', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'challenges')); toast('تم');
+}, 'danger');
+
+/* ==================== REPORTS ==================== */
+F('reports', '📊 تقارير', '📊', 'تقرير شامل', async () => {
+  const nodes = ['usernames','users_data','scores','badges','banned_users','warnings','support_tickets','verified_users'];
+  const report = {};
+  for (const n of nodes) report[n] = countKeys((await get(ref(db, n))).val());
+  showModalHTML('📊 تقرير شامل', formatObject(report));
+}, 'info');
+F('reports', '📊 تقارير', '📥', 'تحميل التقرير', async () => {
+  const snap = await get(ref(db, '.'));
+  download('full_report_' + Date.now() + '.json', JSON.stringify(snap.val(), null, 2));
+  toast('تم');
+});
+F('reports', '📊 تقارير', '👥', 'تقرير اللاعبين', async () => {
+  const snap = await get(ref(db, 'users_data'));
+  const data = snap.val() || {};
+  let html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+  for (const [u, d] of Object.entries(data)) {
+    html += `<div style="background:var(--bg-2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+      <b style="font-size:16px; color:var(--primary);">${esc(u)}</b><br>
+      <span style="color:var(--text-2); font-size:13px;">XP: ${d.xp || 0} | Coins: ${d.coins || 0} | Team: ${esc(d.team || 'بدون تيم')}</span>
+    </div>`;
+  }
+  html += '</div>';
+  showModalHTML('👥 تقرير اللاعبين', html);
+}, 'info');
+F('reports', '📊 تقارير', '🏆', 'تقرير المتصدرين', () => nodeStats('leaderboard'), 'info');
+F('reports', '📊 تقارير', '🎮', 'تقرير الكويزات', () => nodeStats('scores'), 'info');
+F('reports', '📊 تقارير', '⚡', 'تقرير السرعة', () => nodeStats('speedrun_scores'), 'info');
+F('reports', '📊 تقارير', '🚫', 'تقرير الحظر', () => nodeStats('banned_users'), 'info');
+F('reports', '📊 تقارير', '⚠️', 'تقرير التحذيرات', () => nodeStats('warnings'), 'info');
+F('reports', '📊 تقارير', '📩', 'تقرير الرسائل', () => nodeStats('messages'), 'info');
+F('reports', '📊 تقارير', '💬', 'تقرير الشات', () => nodeStats('global_chat'), 'info');
+F('reports', '📊 تقارير', '👥', 'تقرير الأصدقاء', () => nodeStats('friends'), 'info');
+F('reports', '📊 تقارير', '🎖️', 'تقرير الرتب', () => nodeStats('roles'), 'info');
+F('reports', '📊 تقارير', '🏅', 'تقرير البادجات', () => nodeStats('badges'), 'info');
+F('reports', '📊 تقارير', '⚔️', 'تقرير التيمات', () => nodeStats('teams'), 'info');
+F('reports', '📊 تقارير', '🚪', 'تقرير الغرف', () => nodeStats('rooms'), 'info');
+F('reports', '📊 تقارير', '🎉', 'تقرير الفعاليات', () => nodeStats('site_events'), 'info');
+F('reports', '📊 تقارير', '💡', 'تقرير الاقتراحات', () => nodeStats('suggestions'), 'info');
+F('reports', '📊 تقارير', '💬', 'تقرير التعليقات', () => nodeStats('comments'), 'info');
+F('reports', '📊 تقارير', '🎫', 'تقرير التذاكر', () => nodeStats('support_tickets'), 'info');
+F('reports', '📊 تقارير', '📊', 'مقارنة أسبوعية', async () => {
+  const snap = await get(ref(db, 'scores'));
+  const data = snap.val() || {};
+  const weekAgo = Date.now() - 7 * 86400000;
+  let attempts = 0, players = new Set();
+  Object.entries(data).forEach(([u, quizzes]) => Object.values(quizzes).forEach(q =>
+    Object.values(q).forEach(a => {
+      if (new Date(a.time).getTime() > weekAgo) { attempts++; players.add(u); }
+    })
+  ));
+  showModal('📊 هذا الأسبوع', `محاولات: ${attempts}\nلاعبين نشطين: ${players.size}`);
+}, 'info');
+F('reports', '📊 تقارير', '✓', 'تقرير الموثقين', () => nodeStats('verified_users'), 'info');
+
+/* ==================== CHAT ==================== */
+F('chat', '💬 الشات العام', '👁️', 'عرض الرسائل', async () => {
+  const snap = await get(ref(db, 'global_chat'));
+  const msgs = Object.values(snap.val() || {}).slice(-50).map(m => `[${m.sender}] ${m.text}`).join('\n');
+  showModal('💬 الشات العام', msgs || 'فاضي');
+}, 'info');
+F('chat', '💬 الشات العام', '🗑️', 'مسح كل الرسائل', async () => {
+  if (!await siteConfirm('مسح الكل؟')) return;
+  await remove(ref(db, 'global_chat')); toast('تم');
+}, 'danger');
+F('chat', '💬 الشات العام', '📥', 'تصدير الرسائل', () => nodeExport('global_chat'));
+F('chat', '💬 الشات العام', '📊', 'عدد الرسائل', () => nodeStats('global_chat'), 'info');
+F('chat', '💬 الشات العام', '📢', 'إرسال رسالة رسمية', async () => {
+  const text = await sitePrompt('نص الرسالة:');
+  if (!text) return;
+  await push(ref(db, 'global_chat'), { sender: '👑 ' + currentUser, text, time: Date.now() });
+  toast('تم');
+}, 'success');
+F('chat', '💬 الشات العام', '📤', 'إرسال تنبيه', async () => {
+  const text = await sitePrompt('نص التنبيه:');
+  if (!text) return;
+  await push(ref(db, 'global_chat'), { sender: '⚠️ إدارة', text: '⚠️ ' + text, time: Date.now() });
+  toast('تم');
+}, 'warn');
+F('chat', '💬 شات الشركاء', '👁️', 'عرض رسائل الشركاء', async () => {
+  const snap = await get(ref(db, 'partners_chat'));
+  const msgs = Object.values(snap.val() || {}).slice(-50).map(m => `[${m.sender}] ${m.text}`).join('\n');
+  showModal('💬 شات الشركاء', msgs || 'فاضي');
+}, 'info');
+F('chat', '💬 شات الشركاء', '🗑️', 'مسح شات الشركاء', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'partners_chat')); toast('تم');
+}, 'danger');
+F('chat', '💬 شات الشركاء', '📥', 'تصدير', () => nodeExport('partners_chat'));
+F('chat', '💬 الشات', '💬', 'إرسال في شات الشركاء', async () => {
+  const text = await sitePrompt('الرسالة:');
+  if (!text) return;
+  await push(ref(db, 'partners_chat'), { sender: currentUser, text, time: Date.now() });
+  toast('تم');
+}, 'success');
+F('chat', '💬 الشات', '🔒', 'إيقاف الشات العام', async () => {
+  await set(ref(db, 'site_settings/chatOff'), true); toast('تم');
+}, 'danger');
+F('chat', '💬 الشات', '🔓', 'تشغيل الشات العام', async () => {
+  await set(ref(db, 'site_settings/chatOff'), false); toast('تم');
+}, 'success');
+F('chat', '💬 الشات', '👁️', 'عرض رسائل النظام', async () => {
+  const v = (await get(ref(db, 'activity_feed'))).val();
+  showModalHTML('رسائل النظام', v ? formatObject(v) : 'لا شيء');
+}, 'info');
+F('chat', '💬 الشات', '📊', 'إحصائيات', () => nodeStats('activity_feed'), 'info');
+F('chat', '💬 الشات', '🧹', 'مسح activity_feed', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'activity_feed')); toast('تم');
+}, 'danger');
+F('chat', '💬 الشات', '🧹', 'مسح كل الشاتات', async () => {
+  if (!await siteConfirm('مسح كل الشاتات؟')) return;
+  await remove(ref(db, 'global_chat'));
+  await remove(ref(db, 'partners_chat'));
+  toast('تم المسح الكامل');
+}, 'danger');
+F('chat', '💬 الشات', '💬', 'عدد الرسائل اليوم', async () => {
+  const snap = await get(ref(db, 'global_chat'));
+  const dayAgo = Date.now() - 86400000;
+  const count = Object.values(snap.val() || {}).filter(m => m.time > dayAgo).length;
+  showModal('عدد رسائل اليوم', count);
+}, 'info');
+F('chat', '💬 الشات', '📥', 'تصدير كل الشاتات', () => {
+  nodeExport('global_chat'); nodeExport('partners_chat');
+});
+F('chat', '💬 الشات', '📊', 'عدد الرسائل الكلي', async () => {
+  const g = await get(ref(db, 'global_chat'));
+  const p = await get(ref(db, 'partners_chat'));
+  showModal('إجمالي', countKeys(g.val()) + countKeys(p.val()));
+}, 'info');
+F('chat', '💬 الشات', '🧹', 'مسح رسائل لاعب', async () => {
+  const u = await sitePrompt('اسم اللاعب:');
+  if (!u) return;
+  const snap = await get(ref(db, 'global_chat'));
+  const data = snap.val() || {};
+  let count = 0;
+  for (const k in data) if (data[k].sender === u) { await remove(ref(db, 'global_chat/' + k)); count++; }
+  toast('تم المسح: ' + count);
+}, 'danger');
+
+/* ==================== BROADCAST ==================== */
+F('broadcast', '📢 بث', '📢', 'بث رسالة للكل', async () => {
+  const text = await sitePrompt('نص البث:');
+  if (!text) return;
+  await push(ref(db, 'broadcast_messages'), { text, from: currentUser, time: Date.now() });
+  toast('تم البث بنجاح (لن يؤثر على الشريط الأحمر)');
+}, 'success');
+F('broadcast', '📢 بث', '👁️', 'عرض البث', async () => {
+  const snap = await get(ref(db, 'broadcast_messages'));
+  const lines = Object.values(snap.val() || {}).map(m => `[${m.from}] ${m.text}`);
+  showModal('📢 البث', lines.join('\n') || 'فاضي');
+}, 'info');
+F('broadcast', '📢 بث', '🗑️', 'مسح البث', async () => {
+  if (!await siteConfirm('مسح؟')) return;
+  await remove(ref(db, 'broadcast_messages')); toast('تم');
+}, 'danger');
+F('broadcast', '📢 بث', '📥', 'تصدير البث', () => nodeExport('broadcast_messages'));
+F('broadcast', '📢 إشعارات', '🔔', 'إشعار للكل', async () => {
+  const text = await sitePrompt('نص الإشعار:');
+  if (!text) return;
+  const snap = await get(ref(db, 'usernames'));
+  for (const u in (snap.val() || {})) {
+    await push(ref(db, 'messages/' + u), { from: '📢 إدارة', text, time: Date.now() });
+  }
+  toast('تم');
+}, 'success');
+F('broadcast', '📢 إشعارات', '🔔', 'إشعار لرتبة', async () => {
+  const rank = await sitePrompt('الرتبة:');
+  if (!rank) return;
+  const text = await sitePrompt('النص:');
+  if (!text) return;
+  const snap = await get(ref(db, 'roles/users'));
+  const data = snap.val() || {};
+  let count = 0;
+  for (const u in data) if (data[u] === rank) { await push(ref(db, 'messages/' + u), { from: '📢 إدارة', text, time: Date.now() }); count++; }
+  toast('تم لـ ' + count);
+}, 'success');
+F('broadcast', '📢 إشعارات', '🔔', 'إشعار للأونر', async () => {
+  const text = await sitePrompt('النص:');
+  if (!text) return;
+  await push(ref(db, 'messages/owner_inbox'), { from: currentUser, text, time: Date.now() });
+  toast('تم');
+});
+
+/* ==================== REQUESTS ==================== */
+F('requests', '📩 صندوق الأونر', '👁️', 'عرض صندوق الأونر', async () => {
+  const snap = await get(ref(db, 'messages/owner_inbox'));
+  const data = snap.val() || {};
+  if (!Object.keys(data).length) return showModal('📩 صندوق الأونر', 'فاضي');
+  const msgs = Object.entries(data).map(([k, m]) =>
+    `━━━━━━━━━━━━\nمن: ${m.from}\nالوقت: ${new Date(m.time).toLocaleString('ar-EG')}\nالرسالة: ${m.text}`).join('\n');
+  showModal('📩 صندوق الأونر', msgs);
+}, 'info');
+F('requests', '📩 صندوق الأونر', '🗑️', 'مسح الصندوق', async () => {
+  if (!await siteConfirm('مسح كل صندوق الأونر؟')) return;
+  await remove(ref(db, 'messages/owner_inbox')); toast('تم');
+}, 'danger');
+F('requests', '📩 صندوق الأونر', '📥', 'تصدير', () => nodeExport('messages/owner_inbox'));
+
+F('requests', '📩 كل الرسايل', '👁️', 'عرض كل رسايل اللاعبين', async () => {
+  const snap = await get(ref(db, 'messages'));
+  const data = snap.val() || {};
+  const lines = [];
+  for (const [u, msgs] of Object.entries(data)) {
+    if (u === 'owner_inbox') continue;
+    for (const [, m] of Object.entries(msgs || {})) {
+      lines.push(`[${m.from || '?'} → ${u}] ${m.text}`);
+    }
+  }
+  showModal('📩 كل الرسايل', lines.slice(-60).join('\n') || 'لا يوجد');
+}, 'info');
+F('requests', '📩 كل الرسايل', '📊', 'عدد الرسايل الكلي', async () => {
+  const snap = await get(ref(db, 'messages'));
+  const data = snap.val() || {};
+  let total = 0;
+  Object.values(data).forEach(u => total += countKeys(u));
+  showModal('📊 عدد الرسايل', total);
+}, 'info');
+F('requests', '📩 كل الرسايل', '🗑️', 'مسح رسايل لاعب', async () => {
+  const u = await sitePrompt('اسم اللاعب:');
+  if (!u) return;
+  if (!await siteConfirm(`مسح كل رسايل ${u}؟`)) return;
+  await remove(ref(db, 'messages/' + u)); toast('تم');
+}, 'danger');
+
+F('requests', '📩 طلبات الأدمن', '👁️', 'عرض طلبات الأدمن', async () => {
+  const snap = await get(ref(db, 'admin_requests'));
+  const data = snap.val() || {};
+  const lines = Object.entries(data).map(([id, r]) =>
+    `ID: ${id}\nمن: ${r.user}\nالرسالة: ${r.text}\nالحالة: ${r.status || 'pending'}\n`);
+  showModal('📩 طلبات الأدمن', lines.join('\n') || 'لا يوجد');
+}, 'info');
+F('requests', '📩 طلبات الأدمن', '✅', 'قبول طلب', async () => {
+  const id = await sitePrompt('ID الطلب:');
+  if (!id) return;
+  await update(ref(db, 'admin_requests/' + id), { status: 'approved' });
+  toast('تم القبول');
+}, 'success');
+F('requests', '📩 طلبات الأدمن', '❌', 'رفض طلب', async () => {
+  const id = await sitePrompt('ID الطلب:');
+  if (!id) return;
+  await update(ref(db, 'admin_requests/' + id), { status: 'rejected' });
+  toast('تم الرفض');
+}, 'danger');
+F('requests', '📩 طلبات الأدمن', '🗑️', 'مسح كل الطلبات', async () => {
+  if (!await siteConfirm('مسح كل طلبات الأدمن؟')) return;
+  await remove(ref(db, 'admin_requests')); toast('تم');
+}, 'danger');
+
+F('requests', '📩 طلبات المديرين', '👁️', 'عرض طلبات المديرين', async () => {
+  const snap = await get(ref(db, 'manager_requests'));
+  showModalHTML('📩 طلبات المديرين', formatObject(snap.val() || {}));
+}, 'info');
+F('requests', '📩 طلبات المديرين', '🗑️', 'مسح كل الطلبات', async () => {
+  if (!await siteConfirm('مسح كل طلبات المديرين؟')) return;
+  await remove(ref(db, 'manager_requests')); toast('تم');
+}, 'danger');
+F('requests', '📩 طلبات المديرين', '📥', 'تصدير', () => nodeExport('manager_requests'));
+
+F('requests', '📩 طلبات الكويزات', '👁️', 'عرض طلبات الكويزات', async () => {
+  const snap = await get(ref(db, 'quiz_requests'));
+  showModalHTML('📩 طلبات الكويزات', formatObject(snap.val() || {}));
+}, 'info');
+F('requests', '📩 طلبات الكويزات', '🗑️', 'مسح الطلبات', async () => {
+  if (!await siteConfirm('مسح كل طلبات الكويزات؟')) return;
+  await remove(ref(db, 'quiz_requests')); toast('تم');
+}, 'danger');
+
+F('requests', '📩 طلبات الصداقة', '👁️', 'عرض طلبات الصداقة', async () => {
+  const snap = await get(ref(db, 'friend_requests'));
+  showModalHTML('📩 طلبات الصداقة', formatObject(snap.val() || {}));
+}, 'info');
+F('requests', '📩 طلبات الصداقة', '🗑️', 'مسح الطلبات', async () => {
+  if (!await siteConfirm('مسح كل طلبات الصداقة؟')) return;
+  await remove(ref(db, 'friend_requests')); toast('تم');
+}, 'danger');
+
+F('requests', '🎫 تذاكر الدعم', '👁️', 'عرض التذاكر', async () => {
+  const snap = await get(ref(db, 'support_tickets'));
+  const lines = Object.values(snap.val() || {}).map(t =>
+    `[${new Date(t.time).toLocaleString('ar-EG')}] ${t.text}`).join('\n\n');
+  showModal('🎫 التذاكر', lines || 'لا يوجد');
+}, 'info');
+F('requests', '🎫 تذاكر الدعم', '🗑️', 'مسح كل التذاكر', async () => {
+  if (!await siteConfirm('مسح كل التذاكر؟')) return;
+  await remove(ref(db, 'support_tickets')); toast('تم');
+}, 'danger');
+
+/* ==================== CUSTOM RANK / BADGE ==================== */
+async function getCustomBadges() {
+  const snap = await get(ref(db, 'custom_badges'));
+  return Object.keys(snap.val() || {});
+}
+async function getCustomRanks() {
+  const snap = await get(ref(db, 'custom_ranks'));
+  return Object.keys(snap.val() || {});
+}
+
+function sanitizeName(s) {
+  return String(s || '').replace(/[<>"'&]/g, '').trim().slice(0, 30);
+}
+
+window.createNewBadge = async () => {
+  const name = sanitizeName(await sitePrompt('اسم البادج الجديد:'));
+  if (!name) return;
+  await set(ref(db, 'custom_badges/' + name), true);
+  toast('تم إنشاء البادج: ' + name);
+  renderBadgesTab();
+};
+
+window.createNewRank = async () => {
+  const name = sanitizeName(await sitePrompt('اسم الرتبة الجديدة:'));
+  if (!name) return;
+  await set(ref(db, 'custom_ranks/' + name), true);
+  toast('تم إنشاء الرتبة: ' + name);
+  renderRolesTab();
+};
+
+/* ==================== VERIFIED USERS (التوثيق) ==================== */
+async function viewVerifiedUsers() {
+  try {
+    const snap = await get(ref(db, 'verified_users'));
+    const data = snap.val() || {};
+    const users = Object.keys(data);
+    const lines = users.map(u =>
+      `✓ ${u} — بواسطة ${data[u].by || '?'} في ${data[u].time ? new Date(data[u].time).toLocaleString('ar-EG') : '?'}`
+    );
+    showModal('✓ الموثقين (' + users.length + ')', lines.join('\n') || 'لا يوجد موثقين');
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function verifyUser(u) {
+  try {
+    await set(ref(db, 'verified_users/' + u), { by: currentUser, time: Date.now() });
+    await set(ref(db, 'users_data/' + u + '/verified'), 1);
+    toast('تم توثيق ' + u + ' ✓', 'success');
+    renderUsersTab();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+async function removeVerifyUser(u) {
+  try {
+    if (!await siteConfirm(`إلغاء توثيق ${u}؟`)) return;
+    await remove(ref(db, 'verified_users/' + u));
+    await remove(ref(db, 'users_data/' + u + '/verified'));
+    toast('تم إلغاء توثيق ' + u, 'success');
+    renderUsersTab();
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+/* ==================== TAB CONFIG ==================== */
+const TAB_CONFIG = [
+  { key: 'dashboard', icon: '📊', label: 'الرئيسية' },
+  { key: 'users', icon: '👥', label: 'اللاعبين' },
+  { key: 'content', icon: '📝', label: 'المحتوى' },
+  { key: 'roles', icon: '🎖️', label: 'الرتب' },
+  { key: 'badges', icon: '🏅', label: 'البادجات' },
+  { key: 'settings', icon: '⚙️', label: 'الإعدادات' },
+  { key: 'messages', icon: '📩', label: 'الرسائل' },
+  { key: 'events', icon: '🎉', label: 'الفعاليات' },
+  { key: 'security', icon: '🚫', label: 'الأمان' },
+  { key: 'reports', icon: '📈', label: 'التقارير' },
+  { key: 'db', icon: '💾', label: 'قاعدة البيانات' },
+  { key: 'chat', icon: '💬', label: 'الشات' },
+  { key: 'broadcast', icon: '📢', label: 'البث' },
+  { key: 'admin_messages', icon: '💬', label: 'رسايل الإدارة' },
+  { key: 'requests', icon: '📥', label: 'طلبات' }
+];
+
+let activeTab = 'dashboard';
+
+window.switchTab = function (key, btn) {
+  activeTab = key;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn?.classList.add('active');
+  document.getElementById('tab-' + key)?.classList.add('active');
+  if (key === 'users') renderUsersTab();
+};
+
+async function renderTabs() {
+  const bar = document.getElementById('tabsBar');
+  bar.innerHTML = TAB_CONFIG.map((t, i) =>
+    `<button class="tab-btn${i === 0 ? ' active' : ''}" onclick="switchTab('${t.key}', this)">${t.icon} ${t.label}</button>`
+  ).join('');
+
+  const container = document.getElementById('tabsContainer');
+  container.innerHTML = TAB_CONFIG.map(t =>
+    `<div id="tab-${t.key}" class="tab-content${t.key === 'dashboard' ? ' active' : ''}"></div>`
+  ).join('');
+
+  for (const t of TAB_CONFIG) {
+    const el = document.getElementById('tab-' + t.key);
+    if (t.key === 'users') continue;
+    if (t.key === 'content') continue;
+    if (t.key === 'roles') continue;
+    if (t.key === 'badges') continue;
+    if (t.key === 'admin_messages') continue;
+    renderFeatures(t.key, el);
+  }
+
+  await renderContentTab();
+  await renderRolesTab();
+  await renderBadgesTab();
+  await renderAdminMessagesTab();
+  await renderUsersTab();
+}
+
+/* ==================== CONTENT TAB ==================== */
+async function renderContentTab() {
+  const container = document.getElementById('tab-content');
+  if (!container) return;
+
+  let html = `
+    <div class="section">
+      <div class="section-title">🎮 إدارة الكويزات (${QUIZZES.length}) — اضغط على الكويز لعرض الخيارات</div>
+      <div class="grid-features">
+        ${QUIZZES.map(q => `
+          <button class="feature-btn" onclick="openQuizMenu('${esc(q)}')">
+            <span class="icon">🎮</span> ${esc(q)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">📝 أنواع المحتوى الأخرى — اضغط لعرض الخيارات</div>
+      <div class="grid-features">
+        ${CONTENT_TYPES.map(n => `
+          <button class="feature-btn info" onclick="openContentMenu('${esc(n)}')">
+            <span class="icon">📝</span> ${esc(n)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+window.openQuizMenu = function (q) {
+  showModalHTML(`🎮 ${q}`, `
+    <p style="margin-bottom:12px; color:var(--text-2);">اختر العملية:</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <button class="feature-btn info" onclick="closeModal(); quizStats('${q}')">📊 إحصائيات</button>
+      <button class="feature-btn" onclick="closeModal(); quizExport('${q}')">📥 تصدير</button>
+      <button class="feature-btn danger" onclick="closeModal(); quizReset('${q}')">♻️ تصفير</button>
+      <button class="feature-btn danger" onclick="closeModal(); quizClear('${q}')">🗑️ حذف</button>
+    </div>
+  `);
+};
+
+window.openContentMenu = function (n) {
+  showModalHTML(`📝 ${n}`, `
+    <p style="margin-bottom:12px; color:var(--text-2);">اختر العملية:</p>
+    <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+      <button class="feature-btn info" onclick="closeModal(); nodeStats('${n}')">👁️ عرض</button>
+      <button class="feature-btn" onclick="closeModal(); nodeExport('${n}')">📥 تصدير</button>
+      <button class="feature-btn danger" onclick="closeModal(); nodeClear('${n}')">🗑️ مسح</button>
+    </div>
+  `);
+};
+
+/* ==================== ROLES TAB ==================== */
+async function renderRolesTab() {
+  const container = document.getElementById('tab-roles');
+  if (!container) return;
+  const custom = await getCustomRanks();
+  const all = [...RANKS, ...custom.filter(r => !RANKS.includes(r))];
+
+  let html = `
+    <div class="section">
+      <div class="section-title">🎖️ الرتب (${all.length})</div>
+      <button class="feature-btn good" onclick="createNewRank()" style="margin-bottom:16px; width:auto; padding:10px 20px;">➕ إنشاء رتبة جديدة</button>
+      <div class="grid-features">
+        ${all.map(r => `
+          <button class="feature-btn" onclick="openRankMenu('${esc(r)}')">
+            <span class="icon">🛡️</span> ${esc(r)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+window.openRankMenu = function (r) {
+  showModalHTML(`🛡️ ${esc(r)}`, `
+    <p style="margin-bottom:12px; color:var(--text-2);">اختر العملية:</p>
+    <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+      <button class="feature-btn info" onclick="closeModal(); rankMembers('${esc(r)}')">👥 أعضاء الرتبة</button>
+      <button class="feature-btn good" onclick="closeModal(); rankAssignPrompt('${esc(r)}')">✏️ تعيين لمستخدم</button>
+      <button class="feature-btn danger" onclick="closeModal(); rankClear('${esc(r)}')">🗑️ مسح من الكل</button>
+      <button class="feature-btn danger" onclick="closeModal(); deleteCustomRank('${esc(r)}')">❌ حذف الرتبة نهائياً</button>
+    </div>
+  `);
+};
+
+/* ==================== BADGES TAB ==================== */
+async function renderBadgesTab() {
+  const container = document.getElementById('tab-badges');
+  if (!container) return;
+  const custom = await getCustomBadges();
+  const all = [...BADGES, ...custom.filter(b => !BADGES.includes(b))];
+
+  let html = `
+    <div class="section">
+      <div class="section-title">🏅 البادجات (${all.length})</div>
+      <button class="feature-btn good" onclick="createNewBadge()" style="margin-bottom:16px; width:auto; padding:10px 20px;">➕ إنشاء بادج جديد</button>
+      <div class="grid-features">
+        ${all.map(b => `
+          <button class="feature-btn" onclick="openBadgeMenu('${esc(b)}')">
+            <span class="icon">🏅</span> ${esc(b)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+window.openBadgeMenu = function (b) {
+  showModalHTML(`🏅 ${esc(b)}`, `
+    <p style="margin-bottom:12px; color:var(--text-2);">اختر العملية:</p>
+    <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+      <button class="feature-btn info" onclick="closeModal(); badgeMembers('${esc(b)}')">👥 حاملي البادج</button>
+      <button class="feature-btn good" onclick="closeModal(); badgeAssignPrompt('${esc(b)}')">✏️ إعطاء لمستخدم</button>
+      <button class="feature-btn danger" onclick="closeModal(); badgeClear('${esc(b)}')">🗑️ مسح من الكل</button>
+      <button class="feature-btn danger" onclick="closeModal(); deleteCustomBadge('${esc(b)}')">❌ حذف البادج نهائياً</button>
+    </div>
+  `);
+};
+
+/* ==================== ADMIN MESSAGES TAB ==================== */
+async function renderAdminMessagesTab() {
+  const container = document.getElementById('tab-admin_messages');
+  if (!container) return;
+
+  let html = `
+    <div class="section">
+      <div class="section-title">💬 رسايل الإدارة (${ADMIN_ROLES.length}) — اضغط على رتبة لعرض الشات</div>
+      <div class="grid-features">
+        ${ADMIN_ROLES.map(t => `
+          <button class="feature-btn" onclick="openAdminChat('${t.key}', '${esc(t.name)}', '${t.emoji}')">
+            <span class="icon">${t.emoji}</span> شات ${esc(t.name)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+window.openAdminChat = async function (key, name, emoji) {
+  const snap = await get(ref(db, `admin_chat/${key}`));
+  const data = snap.val() || {};
+  const msgs = Object.values(data)
+    .sort((a, b) => (a.time || 0) - (b.time || 0))
+    .map(m => `<div style="padding:8px; border-bottom:1px solid var(--border);">
+        <b style="color:var(--primary);">${esc(m.sender)}:</b>
+        <span>${esc(m.text)}</span>
+        <div style="font-size:11px; color:var(--text-2);">${m.time ? new Date(m.time).toLocaleString('ar-EG') : ''}</div>
+      </div>`).join('');
+
+  showModalHTML(`${emoji} شات ${esc(name)}`, `
+    <div style="max-height:400px; overflow-y:auto; margin-bottom:12px; padding:8px; background:var(--bg-2); border-radius:8px;">
+      ${msgs || '<div style="text-align:center; color:var(--text-2); padding:20px;">لا يوجد رسائل</div>'}
+    </div>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="adminChatInput" placeholder="اكتب رسالة..." style="flex:1; padding:10px; border-radius:8px; border:1px solid var(--border); background:var(--bg-2); color:var(--text); box-sizing:border-box;">
+      <button class="feature-btn good" onclick="sendAdminMessage('${key}')">إرسال</button>
+      <button class="feature-btn danger" onclick="clearAdminChat('${key}')">🗑️</button>
+    </div>
+  `);
+  setTimeout(() => document.getElementById('adminChatInput')?.focus(), 100);
+};
+
+window.sendAdminMessage = async function (key) {
+  const input = document.getElementById('adminChatInput');
+  if (!input || !input.value.trim()) return;
+  await push(ref(db, `admin_chat/${key}`), {
+    sender: currentUser, text: input.value.trim(), time: Date.now()
+  });
+  toast('تم الإرسال');
+  const role = ADMIN_ROLES.find(t => t.key === key);
+  openAdminChat(key, role.name, role.emoji);
+};
+
+window.clearAdminChat = async function (key) {
+  if (!await siteConfirm('مسح كل رسايل الشات؟')) return;
+  await remove(ref(db, `admin_chat/${key}`));
+  toast('تم المسح');
+  const role = ADMIN_ROLES.find(t => t.key === key);
+  openAdminChat(key, role.name, role.emoji);
+};
+
+/* ==================== GENERIC FEATURE RENDERER ==================== */
+function renderFeatures(sectionKey, container) {
+  const cats = CATEGORIES[sectionKey] || {};
+  const totalFeatures = Object.values(cats).reduce((s, a) => s + a.length, 0);
+  let html = `<div class="section"><div class="section-title">📦 إجمالي الخصائص في هذا القسم: ${totalFeatures}</div></div>`;
+
+  Object.entries(cats).forEach(([catName, features]) => {
+    html += `<div class="section">
+      <div class="section-title">${catName} <span style="margin-right:auto; color:var(--text-2); font-size:12px;">(${features.length})</span></div>
+      <div class="grid-features" data-cat="${catName}">
+        ${features.map((f, i) =>
+          `<button class="feature-btn ${f.cls}" data-section="${sectionKey}" data-cat="${catName}" data-index="${i}">
+            <span class="icon">${f.icon}</span> ${f.label}
+          </button>`
+        ).join('')}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.feature-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const s = btn.dataset.section;
+      const c = btn.dataset.cat;
+      const i = parseInt(btn.dataset.index);
+      const fn = CATEGORIES[s][c][i].fn;
+      try { fn(); } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+    });
+  });
+}
+
+/* ==================== USERS TAB ==================== */
+let cachedUsers = {};
+
+async function renderUsersTab() {
+  const container = document.getElementById('tab-users');
+  if (!container) return;
+
+  if (!container.dataset.initialized) {
+    container.innerHTML = `
+      <div class="section">
+        <div class="section-title" id="usersCount">👥 إدارة اللاعبين</div>
+        <input type="text" class="search-input" id="searchUser" placeholder="🔍 ابحث عن لاعب...">
+        <div id="usersListBody"></div>
+      </div>`;
+    container.dataset.initialized = '1';
+    document.getElementById('searchUser').addEventListener('input', () => renderUsersList());
+  }
+
+  await renderUsersList();
+}
+
+async function renderUsersList() {
+  const body = document.getElementById('usersListBody');
+  const countEl = document.getElementById('usersCount');
+  if (!body) return;
+
+  const filter = (document.getElementById('searchUser')?.value || '').toLowerCase();
+
+  const [dataSnap, rankSnap, presenceSnap, verifiedSnap] = await Promise.all([
+    get(ref(db, 'users_data')),
+    get(ref(db, 'roles/users')),
+    get(ref(db, 'presence')),
+    get(ref(db, 'verified_users'))
+  ]);
+
+  const data = dataSnap.val() || {};
+  const ranks = rankSnap.val() || {};
+  const presence = presenceSnap.val() || {};
+  const verified = verifiedSnap.val() || {};
+  cachedUsers = data;
+
+  const userList = Object.keys(data)
+    .filter(u => u.toLowerCase().includes(filter))
+    .sort();
+
+  const perUserActions = [
+    { icon: '👁️', label: 'عرض', fn: (u) => showUserDetails(u) },
+    { icon: '📊', label: 'نتائج', fn: (u) => showUserScores(u), cls: 'info' },
+    { icon: '🎖️', label: 'رتبة', fn: (u) => assignUserRank(u) },
+    { icon: '❌', label: 'إلغاء رتبة', fn: (u) => removeUserRank(u), cls: 'bad' },
+    { icon: '🏅', label: 'بادج', fn: (u) => assignUserBadge(u) },
+    { icon: '❌', label: 'إلغاء بادج', fn: (u) => removeUserBadge(u), cls: 'bad' },
+    { icon: '✓', label: 'توثيق', fn: (u) => verifyUser(u), cls: 'good' },
+    { icon: '❌', label: 'إلغاء توثيق', fn: (u) => removeVerifyUser(u), cls: 'bad' },
+    { icon: '📩', label: 'رسالة', fn: (u) => sendUserMessage(u), cls: 'info' },
+    { icon: '⚠️', label: 'تحذير', fn: (u) => warnUser(u), cls: 'bad' },
+    { icon: '❌', label: 'إلغاء تحذير', fn: (u) => removeUserWarning(u), cls: 'bad' },
+    { icon: '🚫', label: 'حظر', fn: (u) => banUser(u), cls: 'bad' },
+    { icon: '✅', label: 'رفع حظر', fn: (u) => unbanUser(u), cls: 'good' },
+    { icon: '👢', label: 'طرد', fn: (u) => kickUser(u), cls: 'bad' },
+    { icon: '♻️', label: 'تصفير XP', fn: (u) => resetUserXP(u), cls: 'bad' },
+    { icon: '➕', label: 'XP+', fn: (u) => addUserXP(u), cls: 'good' },
+    { icon: '➖', label: 'XP-', fn: (u) => removeUserXP(u), cls: 'bad' },
+    { icon: '💰', label: 'كوينز+', fn: (u) => addUserCoins(u), cls: 'good' },
+    { icon: '🖼️', label: 'صور', fn: (u) => viewUserAvatar(u) },
+    { icon: '👥', label: 'أصدقاء', fn: (u) => viewUserFriends(u), cls: 'info' },
+    { icon: '📥', label: 'تصدير', fn: (u) => exportUserData(u) },
+    { icon: '🗑️', label: 'حذف', fn: (u) => deleteUser(u), cls: 'bad' },
+    { icon: '🔥', label: 'ستريك', fn: (u) => viewUserStreak(u), cls: 'info' },
+    { icon: '⚔️', label: 'تيم', fn: (u) => changeUserTeam(u), cls: 'info' },
+    { icon: '❌', label: 'إلغاء تيم', fn: (u) => removeUserTeam(u), cls: 'bad' },
+    { icon: '👑', label: 'أدمن', fn: (u) => promoteAdmin(u), cls: 'good' },
+    { icon: '❌', label: 'إلغاء أدمن', fn: (u) => removeUserAdmin(u), cls: 'bad' }
+  ];
+
+  let html = '';
+  userList.forEach(u => {
+    const ud = data[u] || {};
+    const rank = ranks[u] || 'Player';
+    const pic = ud.profilePic;
+    const isOnline = presence[u] && presence[u].status === 'online';
+    const isVerified = !!verified[u] || ud.verified === 1;
+    const avatar = pic ? `<img src="${esc(pic)}" alt="">` : esc(u.charAt(0).toUpperCase());
+
+    html += `<div class="user-row" style="display:flex; flex-direction:column; gap:10px; padding:15px; border-bottom:1px solid var(--border);">
+      <div class="user-info" style="display:flex; align-items:center; gap:12px;">
+        <div class="user-avatar">${avatar}</div>
+        <div>
+          <div class="user-name">
+            ${isOnline ? '🟢' : '⚫'} ${esc(u)}
+            ${isVerified ? ' <span title="موثق ✓" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:#1DA1F2;color:#fff;border-radius:50%;font-size:10px;font-weight:bold;vertical-align:middle;margin-right:4px;">✓</span>' : ''}
+          </div>
+          <span class="user-rank">${esc(rank)}</span>
+          <span class="user-rank" style="background:rgba(0,255,136,0.1); color:var(--success);">${ud.xp || 0} XP</span>
+          <span class="user-rank" style="background:rgba(255,215,0,0.1);">${ud.coins || 0} 🪙</span>
+        </div>
+      </div>
+      <div class="user-actions" data-user="${esc(u)}" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(115px, 1fr)); gap:6px; width:100%;">
+        ${perUserActions.map((a, i) =>
+          `<button class="mini-btn ${a.cls || ''}" data-action="${i}" data-user="${esc(u)}" style="font-size:11px; padding:6px 4px; text-align:center; display:flex; align-items:center; justify-content:center; gap:4px;">
+             ${a.icon} ${a.label}
+           </button>`
+        ).join('')}
+      </div>
+    </div>`;
+  });
+
+  if (!userList.length) {
+    html = `<div style="text-align:center; padding:40px; color:var(--text-2);">لا يوجد لاعبين مطابقين</div>`;
+  }
+
+  countEl.textContent = `👥 إدارة اللاعبين (${userList.length} لاعب)`;
+  body.innerHTML = html;
+
+  body.querySelectorAll('.mini-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const u = btn.dataset.user;
+      const a = parseInt(btn.dataset.action);
+      try { await perUserActions[a].fn(u); }
+      catch (e) { toast('خطأ: ' + e.message, 'error'); }
+    };
+  });
+}
+
+/* Per-user actions */
+function showUserDetails(u) {
+  const d = cachedUsers[u] || {};
+  const pic = d.profilePic ? `<img src="${esc(d.profilePic)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--primary);">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;">${esc(u.charAt(0).toUpperCase())}</div>`;
+  
+  let info = formatObject({
+    xp: d.xp || 0,
+    coins: d.coins || 0,
+    streak: d.streak || 0,
+    persona: d.persona || 'لا يوجد',
+    team: d.team || 'بدون تيم',
+    verified: d.verified ? '✓' : '❌'
+  });
+  
+  const html = `
+    <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:20px;">
+      ${pic}
+      <h2 style="margin:10px 0 5px 0;">${esc(u)}</h2>
+    </div>
+    ${info}
+  `;
+  showModalHTML('👤 ' + esc(u), html);
+}
+
+async function showUserScores(u) {
+  const snap = await get(ref(db, 'scores/' + u));
+  const data = snap.val() || {};
+  showModalHTML('📊 نتائج ' + esc(u), formatObject(data));
+}
+async function assignUserRank(u) {
+  const cur = (await get(ref(db, 'roles/users/' + u))).val() || 'Player';
+  const r = await sitePrompt(`الرتبة الحالية لـ ${u} هي ${cur}\nأدخل الرتبة الجديدة:`);
+  if (!r) return;
+  await set(ref(db, 'roles/users/' + u), r);
+  toast('تم تعيين الرتبة');
+  renderUsersTab();
+}
+async function removeUserRank(u) {
+  if (!await siteConfirm(`إلغاء رتبة ${u}؟`)) return;
+  await remove(ref(db, 'roles/users/' + u));
+  toast('تم إلغاء الرتبة');
+  renderUsersTab();
+}
+async function assignUserBadge(u) {
+  const b = await sitePrompt(`أدخل اسم البادج لـ ${u}:`);
+  if (!b) return;
+  await set(ref(db, `badges/${u}/${b}`), true);
+  toast('تم');
+}
+async function removeUserBadge(u) {
+  const b = await sitePrompt(`اسم البادج اللي عايز تلغيه لـ ${u}:`);
+  if (!b) return;
+  await remove(ref(db, `badges/${u}/${b}`));
+  toast('تم إلغاء البادج');
+}
+async function sendUserMessage(u) {
+  const text = await sitePrompt(`رسالة لـ ${u}:`);
+  if (!text) return;
+  await push(ref(db, 'messages/' + u), { from: currentUser, text, time: Date.now() });
+  toast('تم الإرسال');
+}
+async function warnUser(u) {
+  const r = await sitePrompt(`سبب التحذير لـ ${u}:`);
+  if (!r) return;
+  await set(ref(db, 'warnings/' + u), { text: r, time: Date.now() });
+  toast('تم التحذير');
+}
+async function removeUserWarning(u) {
+  if (!await siteConfirm(`إلغاء تحذير ${u}؟`)) return;
+  await remove(ref(db, 'warnings/' + u));
+  toast('تم إلغاء التحذير');
+}
+async function banUser(u) {
+  const r = await sitePrompt(`سبب حظر ${u}:`, 'مخالفة');
+  if (r === null) return;
+  await set(ref(db, 'banned_users/' + u), { reason: r, by: currentUser, time: Date.now() });
+  toast('تم الحظر');
+}
+async function unbanUser(u) {
+  await remove(ref(db, 'banned_users/' + u));
+  toast('تم رفع الحظر');
+}
+async function kickUser(u) {
+  if (!await siteConfirm(`طرد ${u}؟`)) return;
+  await set(ref(db, 'kick_signals/' + u), true);
+  toast('تم الطرد');
+}
+async function resetUserXP(u) {
+  if (!await siteConfirm(`تصفير XP لـ ${u}؟`)) return;
+  await set(ref(db, 'users_data/' + u + '/xp'), 0);
+  toast('تم');
+  renderUsersTab();
+}
+async function addUserXP(u) {
+  const a = parseInt(await sitePrompt('كم XP:'));
+  if (!a) return;
+  const c = (await get(ref(db, 'users_data/' + u + '/xp'))).val() || 0;
+  await set(ref(db, 'users_data/' + u + '/xp'), c + a);
+  toast('تمت الإضافة');
+  renderUsersTab();
+}
+async function removeUserXP(u) {
+  const a = parseInt(await sitePrompt('كم XP:'));
+  if (!a) return;
+  const c = (await get(ref(db, 'users_data/' + u + '/xp'))).val() || 0;
+  await set(ref(db, 'users_data/' + u + '/xp'), Math.max(0, c - a));
+  toast('تم الخصم');
+  renderUsersTab();
+}
+async function addUserCoins(u) {
+  const a = parseInt(await sitePrompt('كم كوينز:'));
+  if (!a) return;
+  const c = (await get(ref(db, 'users_data/' + u + '/coins'))).val() || 0;
+  await set(ref(db, 'users_data/' + u + '/coins'), c + a);
+  toast('تم');
+  renderUsersTab();
+}
+async function viewUserAvatar(u) {
+  const d = cachedUsers[u] || {};
+  showModalHTML('🖼️ ' + esc(u), d.profilePic
+    ? `<img src="${esc(d.profilePic)}" style="max-width:100%;border-radius:8px;">`
+    : 'لا يوجد صورة');
+}
+async function viewUserFriends(u) {
+  const snap = await get(ref(db, 'friends/' + u));
+  showModal('👥 أصدقاء ' + u, Object.keys(snap.val() || {}).join('\n') || 'لا يوجد');
+}
+async function exportUserData(u) {
+  const snap = await get(ref(db, 'users_data/' + u));
+  download(u + '_data.json', JSON.stringify(snap.val() || {}, null, 2));
+  toast('تم');
+}
+async function deleteUser(u) {
+  if (!await siteConfirm(`حذف حساب ${u} نهائياً؟`)) return;
+  await remove(ref(db, 'users_data/' + u));
+  await remove(ref(db, 'usernames/' + u));
+  await remove(ref(db, 'scores/' + u));
+  toast('تم الحذف');
+  renderUsersTab();
+}
+async function viewUserStreak(u) {
+  const snap = await get(ref(db, 'users_data/' + u + '/streak'));
+  showModal('🔥 ' + u, 'الستريك: ' + (snap.val() || 0));
+}
+async function changeUserTeam(u) {
+  const t = await sitePrompt('التيم الجديد (horror/action/mystery/thriller/egyptian/drama):');
+  if (!t) return;
+  await set(ref(db, 'users_data/' + u + '/team'), t);
+  toast('تم');
+  renderUsersTab();
+}
+async function removeUserTeam(u) {
+  if (!await siteConfirm(`إلغاء تيم ${u}؟`)) return;
+  await remove(ref(db, 'users_data/' + u + '/team'));
+  toast('تم إلغاء التيم');
+  renderUsersTab();
+}
+async function promoteAdmin(u) {
+  await set(ref(db, 'roles/admins/' + u), true);
+  toast('تم ترقية ' + u + ' لأدمن');
+}
+async function removeUserAdmin(u) {
+  if (!await siteConfirm(`إلغاء أدمن من ${u}؟`)) return;
+  await remove(ref(db, 'roles/admins/' + u));
+  toast('تم إلغاء الأدمن');
+}
+
+/* ==================== DASHBOARD STATS ==================== */
+async function loadDashboardStats() {
+  try {
+    const [u, p, r, s, b, w, c, t] = await Promise.all([
+      get(ref(db, 'usernames')), get(ref(db, 'presence')),
+      get(ref(db, 'rooms')), get(ref(db, 'scores')),
+      get(ref(db, 'banned_users')), get(ref(db, 'warnings')),
+      get(ref(db, 'comments')), get(ref(db, 'support_tickets'))
+    ]);
+    document.getElementById('s-users').textContent = countKeys(u.val());
+    const online = p.val() ? Object.values(p.val()).filter(v => v.status === 'online').length : 0;
+    document.getElementById('s-online').textContent = online;
+    document.getElementById('s-rooms').textContent = countKeys(r.val());
+    let plays = 0;
+    const sData = s.val() || {};
+    Object.values(sData).forEach(quizzes => {
+      Object.values(quizzes).forEach(attempts => { plays += Object.keys(attempts).length; });
+    });
+    document.getElementById('s-plays').textContent = plays;
+    document.getElementById('s-banned').textContent = countKeys(b.val());
+    document.getElementById('s-warns').textContent = countKeys(w.val());
+    document.getElementById('s-comments').textContent = countKeys(c.val());
+    document.getElementById('s-tickets').textContent = countKeys(t.val());
+  } catch (e) { console.error(e); }
+}
+
+/* ==================== EXPOSE ONCLICK HANDLERS ==================== */
+window.nodeStats         = nodeStats;
+window.nodeExport        = nodeExport;
+window.nodeClear         = nodeClear;
+window.quizStats         = quizStats;
+window.quizExport        = quizExport;
+window.quizReset         = quizReset;
+window.quizClear         = quizClear;
+window.rankMembers       = rankMembers;
+window.rankAssignPrompt  = rankAssignPrompt;
+window.rankClear         = rankClear;
+window.badgeMembers      = badgeMembers;
+window.badgeAssignPrompt = badgeAssignPrompt;
+window.badgeClear        = badgeClear;
+window.viewVerifiedUsers = viewVerifiedUsers;
+window.verifyUser        = verifyUser;
+window.removeVerifyUser  = removeVerifyUser;
+window.saveSetting       = saveSetting;
+window.renderUsersTab    = renderUsersTab;
+
+/* ==================== INIT ==================== */
+async function checkOwnerAndInit() {
+  const roleSnap = await get(ref(db, 'roles/users/' + currentUser));
+  const role = roleSnap.val();
+  const isOwner = (currentUser.toLowerCase() === 'ahmed') || (role === 'Owner');
+
+  if (!isOwner) {
+    document.body.innerHTML = `
+      <div class="access-denied">
+        <h1>⛔ وصول مرفوض</h1>
+        <p>هذه الصفحة للأونر فقط.</p>
+        <br>
+        <a href="index.html" style="color:var(--primary); text-decoration:underline;">⬅ رجوع للرئيسية</a>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('ownerName').textContent = currentUser;
+  document.getElementById('ownerContent').classList.add('active');
+  initRedLines();
+  await renderTabs();
+  loadDashboardStats();
+}
+
+checkOwnerAndInit();
