@@ -10,39 +10,73 @@
 </head>
 <body>
 
-<div id="toast-container"></div>
+<div class="gold-particles" id="goldParticles"></div>
 
-<div id="modal-overlay" class="modal-overlay">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">✖</button>
-    <div class="modal-title" id="modal-title">معلومات</div>
-    <div class="modal-content" id="modal-content"></div>
-  </div>
+<div class="access-denied" id="accessDenied">
+  <h1>⛔</h1>
+  <h2>وصول مرفوض</h2>
+  <p>هذه الصفحة للأونر فقط.</p>
+  <a href="index.html">⬅ العودة للرئيسية</a>
 </div>
 
 <div id="ownerContent">
-  <div class="owner-header">
-    <div class="owner-title">👑 لوحة الأونر العليا</div>
-    <div class="owner-sub">
-      مرحباً <b id="ownerName" style="color:var(--primary);">...</b> — تحكم كامل في الموقع
-    </div>
 
-    <div class="working-box">
-      <div class="working-text">✅ شغالة</div>
-      <div id="redLinesContainer"></div>
+  <nav class="exec-navbar">
+    <div class="nav-brand">
+      <div class="brand-crown">👑</div>
+      <div>
+        <div class="brand-main">OWNER PANEL</div>
+        <div class="brand-tag">SUPREME CONTROL</div>
+      </div>
     </div>
+    <div class="nav-actions">
+      <button class="nav-btn cmd-trigger" onclick="window.openCommandPalette()">
+        <span>🔍</span>
+        <span class="cmd-hint">بحث سريع (Ctrl+K)</span>
+      </button>
+      <button class="nav-btn icon-only" onclick="window.toggleTheme()" id="themeBtn" title="الثيم">🌙</button>
+      <button class="nav-btn icon-only" onclick="window.refreshAll()" title="تحديث">🔄</button>
+      <a href="index.html" class="nav-btn" title="الرئيسية">🏠</a>
+      <button class="nav-btn danger" onclick="window.logout()" title="خروج">🚪</button>
+    </div>
+  </nav>
 
-    <div class="header-actions">
-      <button class="icon-btn" onclick="window.toggleTheme()">🌓 تبديل الثيم</button>
-      <button class="icon-btn" onclick="window.refreshAll()">🔄 تحديث شامل</button>
-      <button class="icon-btn" onclick="location.href='index.html'">⬅ رجوع للرئيسية</button>
-      <button class="icon-btn" onclick="window.logout()">🚪 تسجيل خروج</button>
-    </div>
+  <div class="status-strip">
+    <div class="status-item"><span class="status-label">الأونر:</span><span class="status-value gold" id="ownerName">...</span></div>
+    <div class="status-item"><span class="status-label">الوقت:</span><span class="status-value" id="liveClock">--:--</span></div>
+    <div class="status-item"><span class="status-label">الميزات:</span><span class="status-value gold" id="featureCount">0</span></div>
+    <div class="status-item"><span class="status-label">الاتصال:</span><span class="status-value green" id="connStatus">🟢 متصل</span></div>
   </div>
 
-  <div class="tabs-bar" id="tabsBar"></div>
-  <div id="tabsContainer"></div>
+  <div class="tabs-wrapper">
+    <div class="tabs-bar" id="tabsBar"></div>
+  </div>
+
+  <div class="tabs-container" id="tabsContainer"></div>
+
 </div>
+
+<div class="cmd-palette-overlay" id="cmdPaletteOverlay" onclick="if(event.target.id==='cmdPaletteOverlay') window.closeCommandPalette()">
+  <div class="cmd-palette">
+    <div class="cmd-palette-input-wrapper">
+      <span class="cmd-icon">⌘</span>
+      <input type="text" id="cmdInput" placeholder="ابحث عن أي ميزة... (حظر، بادج، مسح، تصدير...)" oninput="window.filterCommandPalette()" onkeydown="window.handleCmdKeydown(event)">
+      <span class="cmd-esc" onclick="window.closeCommandPalette()">ESC</span>
+    </div>
+    <div class="cmd-palette-results" id="cmdResults"></div>
+    <div class="cmd-palette-footer">↑↓ للتنقل • Enter للتنفيذ • ESC للإغلاق</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target.id==='modalOverlay') window.closeModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="window.closeModal()">✖</button>
+    <div class="modal-title" id="modalTitle">معلومات</div>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
 
 <script type="module" src="owner-core.js"></script>
 </body>
