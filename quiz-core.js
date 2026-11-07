@@ -38,6 +38,34 @@ function speakText(text, lang) {
     }
 }
 
+function injectHelperStyles() {
+    if (document.getElementById('quizHelperStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'quizHelperStyles';
+    style.innerText = `
+        #quizHelperBtn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background: linear-gradient(135deg, #8b0000, #ff3333); color: #fff; border: 2px solid #fff; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 5px 20px rgba(255,51,51,0.6); font-weight: bold; transition: 0.3s; font-family: Cairo, sans-serif; }
+        #quizHelperBtn:hover { transform: scale(1.1); box-shadow: 0 8px 30px rgba(255,51,51,0.9); }
+        #quizHelperBtn.loading { opacity: 0.6; cursor: wait; }
+        #quizHelperBtn .count-bubble { position: absolute; top: -5px; right: -5px; background: #ffd700; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #fff; }
+        #quizHelperPanel { position: fixed; bottom: 90px; right: 20px; z-index: 1001; background: #111; border: 2px solid #ff3333; border-radius: 15px; padding: 15px; width: 280px; max-height: 70vh; overflow-y: auto; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.8); direction: rtl; font-family: Cairo, sans-serif; }
+        #quizHelperPanel h3 { color: #ff3333; margin: 0 0 10px 0; font-size: 18px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        #quizHelperPanel .helper-empty { color: #aaa; text-align: center; padding: 20px; font-size: 14px; }
+        #quizHelperPanel .helper-empty a { color: #ffd700; text-decoration: underline; }
+        #quizHelperPanel .helper-loading { color: #00bcd4; text-align: center; padding: 20px; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .helper-spinner { width: 30px; height: 30px; border: 3px solid #333; border-top-color: #00bcd4; border-radius: 50%; animation: helperSpin 0.8s linear infinite; }
+        @keyframes helperSpin { to { transform: rotate(360deg); } }
+        .helper-item { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 10px; margin-bottom: 6px; background: #222; color: #fff; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-family: Cairo, sans-serif; font-size: 14px; transition: 0.2s; text-align: right; }
+        .helper-item:hover { background: #333; border-color: #ff3333; }
+        .helper-item:disabled { opacity: 0.4; cursor: not-allowed; }
+        .helper-item .h-left { display: flex; align-items: center; gap: 8px; }
+        .helper-item .h-right { background: #ff0000; border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: bold; }
+        .helper-item.active-boost { border-color: #4caf50; background: rgba(76,175,80,0.15); }
+        .helper-close { width: 100%; padding: 8px; margin-top: 5px; background: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: Cairo, sans-serif; font-weight: bold; }
+        .boost-indicator { position: fixed; top: 15px; left: 15px; z-index: 1000; background: rgba(0,0,0,0.85); border: 2px solid #ffd700; color: #ffd700; padding: 8px 15px; border-radius: 20px; font-family: Cairo, sans-serif; font-weight: bold; font-size: 13px; display: none; }
+    `;
+    document.head.appendChild(style);
+}
+
 window.initQuiz = function(config) {
     const { title, quizKey, quizData, hasParts, partsList } = config;
     let currentLang = localStorage.getItem('lang') || 'ar';
@@ -46,6 +74,33 @@ window.initQuiz = function(config) {
     let currentQuestions = []; let current = 0, score = 0, answered = false, timerInterval = null, timeLeft = 20;
     let isChallengeMode = false; let isSpeedrun = false; let myRoomCode = null; let myRole = null;
     let ghostTimes = []; let playerAnswers = [];
+    
+    // ✅ Shop helper state
+    let userInventory = {};
+    let inventoryLoaded = false;
+    let inventoryLoadPromise = null;
+    let secondChanceActive = false;
+    let isFrozen = false;
+    let currentFreezeTick = null;
+    const activeBoosts = { double_xp: false, double_coins: false, double_lb: false, ghost_mode: false };
+    const itemMeta = {
+        freeze10: { icon: '⏱️', name: 'تجميد 10ث' },
+        freeze20: { icon: '⏱️', name: 'تجميد 20ث' },
+        add10: { icon: '➕', name: 'إضافة 10ث' },
+        add30: { icon: '➕', name: 'إضافة 30ث' },
+        stop_timer: { icon: '🛑', name: 'إيقاف العداد' },
+        fifty: { icon: '✂️', name: '50/50' },
+        skip: { icon: '⏭️', name: 'تخطي' },
+        hint_half: { icon: '💡', name: 'تلميح' },
+        reveal: { icon: '👁️', name: 'إظهار' },
+        second_chance: { icon: '🎲', name: 'فرصة تانية' },
+        double_xp: { icon: '✨', name: 'مضاعف XP' },
+        double_coins: { icon: '💰', name: 'مضاعف كوينز' },
+        double_lb: { icon: '🏆', name: 'مضاعف ليدربورد' },
+        ghost_mode: { icon: '👻', name: 'وضع الشبح' }
+    };
+    const timeQuestionItems = ['freeze10','freeze20','add10','add30','stop_timer','fifty','skip','hint_half','reveal'];
+    const boostItems = ['double_xp','double_coins','double_lb','ghost_mode'];
     
     const urlParams = new URLSearchParams(window.location.search);
     const roomCodeFromUrl = urlParams.get('room');
@@ -70,6 +125,47 @@ window.initQuiz = function(config) {
     if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
     setupStars();
     applyLangOnLoad();
+    injectHelperStyles();
+
+    // ============================================
+    // ✅ تحميل المخزون — دالة موحدة مع Promise
+    // ============================================
+    function loadInventory(force = false) {
+        // لو محمّل بالفعل ومش بنجبر إعادة تحميل
+        if (!force && inventoryLoadPromise) return inventoryLoadPromise;
+        if (currentUser === 'Unknown' || !window.db) {
+            inventoryLoaded = true;
+            return Promise.resolve({});
+        }
+        
+        // تحديث زرار المساعدات لحالة التحميل (لو موجود)
+        const btn = document.getElementById('quizHelperBtn');
+        const bubble = document.getElementById('helperCountBubble');
+        if (btn) btn.classList.add('loading');
+        if (bubble) bubble.innerText = '...';
+        renderHelperItems(); // لو البانل مفتوح، اعرض ⏳
+        
+        inventoryLoadPromise = window.get(window.ref(window.db, 'users_data/' + currentUser + '/inventory'))
+            .then(snap => {
+                userInventory = snap.exists() ? (snap.val() || {}) : {};
+                inventoryLoaded = true;
+                if (btn) btn.classList.remove('loading');
+                renderHelperItems();
+                return userInventory;
+            })
+            .catch(e => {
+                console.warn('inventory load failed', e);
+                inventoryLoaded = true;
+                if (btn) btn.classList.remove('loading');
+                return {};
+            });
+        return inventoryLoadPromise;
+    }
+
+    // ✅ أطلق التحميل فوراً (قبل ما اللعبة تبدأ)
+    if (window.db && currentUser !== 'Unknown') {
+        loadInventory();
+    }
 
     function applyLangOnLoad() {
         document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
@@ -100,6 +196,268 @@ window.initQuiz = function(config) {
         localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
     }
 
+    // ============================
+    // ✅ Helper UI Setup
+    // ============================
+    function setupHelperUI() {
+        if (document.getElementById('quizHelperBtn')) return;
+        const playScreen = document.getElementById('playScreen') || document.body;
+        
+        const btn = document.createElement('button');
+        btn.id = 'quizHelperBtn';
+        // ✅ الحالة الابتدائية حسب ما إذا كان المخزون محمّل
+        const initialBubble = inventoryLoaded ? Object.keys(userInventory).filter(k => userInventory[k] > 0).length : '...';
+        btn.innerHTML = `🎒<span class="count-bubble" id="helperCountBubble">${initialBubble}</span>`;
+        if (!inventoryLoaded) btn.classList.add('loading');
+        btn.title = currentLang === 'en' ? 'Assistants' : 'المساعدات';
+        btn.onclick = toggleHelperPanel;
+        playScreen.appendChild(btn);
+        
+        const panel = document.createElement('div');
+        panel.id = 'quizHelperPanel';
+        panel.innerHTML = `<h3>🎒 ${currentLang === 'en' ? 'Your Assistants' : 'مساعداتك'}</h3><div id="helperItemsList"></div><button class="helper-close" onclick="toggleHelperPanel()">${currentLang === 'en' ? 'Close' : 'إغلاق'}</button>`;
+        playScreen.appendChild(panel);
+        
+        const indicator = document.createElement('div');
+        indicator.id = 'boostIndicator';
+        indicator.className = 'boost-indicator';
+        document.body.appendChild(indicator);
+    }
+    
+    window.toggleHelperPanel = function() {
+        const panel = document.getElementById('quizHelperPanel');
+        if (!panel) return;
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        if (panel.style.display === 'block') {
+            // ✅ لو لسه محملش، حاول تاني لما تفتح البانل
+            if (!inventoryLoaded) {
+                loadInventory(true);
+            }
+            renderHelperItems();
+        }
+    };
+    
+    function renderHelperItems() {
+        const list = document.getElementById('helperItemsList');
+        const bubble = document.getElementById('helperCountBubble');
+        if (!list) return;
+        
+        // ✅ حالة التحميل — بدل ما تقول "مفيش أدوات"
+        if (!inventoryLoaded) {
+            if (bubble) bubble.innerText = '...';
+            list.innerHTML = `<div class="helper-loading"><div class="helper-spinner"></div><div>${currentLang === 'en' ? 'Loading inventory...' : 'جاري تحميل المخزون...'}</div></div>`;
+            return;
+        }
+        
+        const usable = Object.keys(itemMeta).filter(id => (userInventory[id] || 0) > 0);
+        if (bubble) bubble.innerText = usable.length;
+        
+        if (usable.length === 0) {
+            list.innerHTML = `<div class="helper-empty">${currentLang === 'en' ? 'No assistants available.<br>Buy some from the <a href="shop.html">Shop</a>!' : 'مفيش مساعدات متاحة.<br>اشتري من <a href="shop.html">المتجر</a>!'}</div>`;
+            return;
+        }
+        
+        list.innerHTML = '';
+        usable.forEach(itemId => {
+            const meta = itemMeta[itemId];
+            const count = userInventory[itemId];
+            const isBoost = boostItems.includes(itemId);
+            const isActive = isBoost && activeBoosts[itemId];
+            const isBlockedAfterAnswer = answered && timeQuestionItems.includes(itemId);
+            
+            const btn = document.createElement('button');
+            btn.className = 'helper-item' + (isActive ? ' active-boost' : '');
+            btn.disabled = isBlockedAfterAnswer;
+            btn.innerHTML = `<span class="h-left">${meta.icon} ${meta.name}${isActive ? ' ✅' : ''}</span><span class="h-right">x${count}</span>`;
+            btn.onclick = () => useItem(itemId);
+            list.appendChild(btn);
+        });
+    }
+    
+    async function consumeItem(itemId) {
+        if ((userInventory[itemId] || 0) <= 0) return false;
+        userInventory[itemId]--;
+        const updates = {};
+        updates[`users_data/${currentUser}/inventory/${itemId}`] = userInventory[itemId] > 0 ? userInventory[itemId] : null;
+        try {
+            await window.update(window.ref(window.db), updates);
+        } catch(e) { console.warn('inventory update failed', e); }
+        renderHelperItems();
+        return true;
+    }
+    
+    // ============================
+    // ✅ Item Effects (زي ما هي)
+    // ============================
+    function freezeTimer(seconds) {
+        if (isFrozen) { showToastMessage('⏱️ العداد متجمد بالفعل!'); return; }
+        isFrozen = true;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        const timerEl = document.getElementById('timer');
+        let remaining = seconds;
+        timerEl.innerText = `❄️ ${remaining}s`;
+        timerEl.style.color = '#00bcd4';
+        playSound(sndTick);
+        currentFreezeTick = setInterval(() => {
+            remaining--;
+            if (remaining > 0) {
+                timerEl.innerText = `❄️ ${remaining}s`;
+            } else {
+                clearInterval(currentFreezeTick);
+                currentFreezeTick = null;
+                isFrozen = false;
+                timerEl.innerText = `⏱️ ${timeLeft}`;
+                timerEl.style.color = '';
+                if (!answered && timeLeft > 0) timerInterval = setInterval(updateTimer, 1000);
+            }
+        }, 1000);
+    }
+    
+    function addTime(seconds) {
+        timeLeft += seconds;
+        document.getElementById('timer').innerText = `⏱️ ${timeLeft}`;
+        showToastMessage(`➕ +${seconds} ثانية!`);
+    }
+    
+    function stopTimer() {
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        isFrozen = false;
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = '🛑 متوقف';
+        showToastMessage('🛑 العداد اتوقف للسؤال ده!');
+    }
+    
+    function useFifty() {
+        const q = currentQuestions[current];
+        let activeLang = localStorage.getItem('lang') || 'ar';
+        let opts = activeLang === 'ar' ? q.options_ar : q.options_en;
+        if (!opts) opts = q.options_en || q.options_ar;
+        const correctText = opts[q.answer];
+        const allOpts = Array.from(document.querySelectorAll('.option'));
+        const wrongOpts = allOpts.filter(o => o.innerText !== correctText && !o.classList.contains('disabled'));
+        wrongOpts.sort(() => Math.random() - 0.5);
+        wrongOpts.slice(0, 2).forEach(o => { o.classList.add('disabled'); o.style.opacity = '0.25'; });
+        showToastMessage('✂️ اتحذفت إجابتين غلط!');
+    }
+    
+    function skipQuestion() {
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        isFrozen = false;
+        clearInterval(timerInterval);
+        answered = true;
+        showToastMessage('⏭️ تم تخطي السؤال');
+        setTimeout(() => { current++; if (current < currentQuestions.length) loadQuestion(); else showFinal(); }, 800);
+    }
+    
+    function useHintHalf() {
+        const q = currentQuestions[current];
+        let activeLang = localStorage.getItem('lang') || 'ar';
+        let opts = activeLang === 'ar' ? q.options_ar : q.options_en;
+        if (!opts) opts = q.options_en || q.options_ar;
+        const correctText = opts[q.answer];
+        const half = correctText.substring(0, Math.ceil(correctText.length / 2));
+        showToastMessage(`💡 الإجابة بتبدأ بـ "${half}..."`);
+    }
+    
+    function useReveal() {
+        const q = currentQuestions[current];
+        let activeLang = localStorage.getItem('lang') || 'ar';
+        let opts = activeLang === 'ar' ? q.options_ar : q.options_en;
+        if (!opts) opts = q.options_en || q.options_ar;
+        const correctText = opts[q.answer];
+        document.querySelectorAll('.option').forEach(o => {
+            if (o.innerText === correctText) {
+                o.style.border = '3px solid #4caf50';
+                o.style.boxShadow = '0 0 15px #4caf50';
+            }
+        });
+        showToastMessage('👁️ الإجابة الصحيحة اتوضحت!');
+    }
+    
+    function activateSecondChance() {
+        if ((userInventory['second_chance'] || 0) <= 0) {
+            showToastMessage('مفيش عندك فرص تانية!');
+            return;
+        }
+        if (secondChanceActive) { showToastMessage('مفعلة بالفعل!'); return; }
+        secondChanceActive = true;
+        showToastMessage('🎲 لو غلطت في السؤال ده، عندك فرصة تانية!');
+    }
+    
+    function activateDoubleXP() { activeBoosts.double_xp = true; showToastMessage('✨ XP هيتضاعف في الكويز ده!'); updateBoostIndicator(); }
+    function activateDoubleCoins() { activeBoosts.double_coins = true; showToastMessage('💰 الكوينز هتتضاعف!'); updateBoostIndicator(); }
+    function activateDoubleLB() { activeBoosts.double_lb = true; showToastMessage('🏆 نقاط الليدربورد هتتضاعف!'); updateBoostIndicator(); }
+    function activateGhostMode() { activeBoosts.ghost_mode = true; showToastMessage('👻 وضع الشبح: اسمك مش هيظهر في الليدربورد!'); updateBoostIndicator(); }
+    
+    function updateBoostIndicator() {
+        const indicator = document.getElementById('boostIndicator');
+        if (!indicator) return;
+        const actives = [];
+        if (activeBoosts.double_xp) actives.push('✨x2');
+        if (activeBoosts.double_coins) actives.push('💰x2');
+        if (activeBoosts.double_lb) actives.push('🏆x2');
+        if (activeBoosts.ghost_mode) actives.push('👻');
+        if (actives.length > 0) { indicator.innerText = actives.join(' | '); indicator.style.display = 'block'; }
+        else indicator.style.display = 'none';
+    }
+    
+    // ✅ useItem — بيستنى التحميل بدل ما يقول "مش معاك"
+    window.useItem = async function(itemId) {
+        // ✅ لو المخزون لسه بيتحمل، استنى لحد ما يخلص (بدل "مش معاك")
+        if (!inventoryLoaded) {
+            showToastMessage(currentLang === 'en' ? '⏳ Loading inventory...' : '⏳ جاري تحميل المخزون...');
+            await loadInventory();
+        }
+        
+        // Guards
+        if (answered && timeQuestionItems.includes(itemId)) {
+            showToastMessage('⚠️ مينفعش تستخدم الأداة دي بعد ما جاوبت!');
+            return;
+        }
+        if (isChallengeMode && ['double_xp','double_coins','double_lb'].includes(itemId)) {
+            showToastMessage('⚠️ مضاعفات المكافآت مش بتشتغل في التحدي!');
+            return;
+        }
+        if ((userInventory[itemId] || 0) <= 0) {
+            showToastMessage('مفيش عندك من الأداة دي!');
+            return;
+        }
+        
+        // Second chance arms (no consume yet)
+        if (itemId === 'second_chance') {
+            activateSecondChance();
+            window.toggleHelperPanel();
+            return;
+        }
+        
+        // Consume
+        const consumed = await consumeItem(itemId);
+        if (!consumed) return;
+        
+        switch(itemId) {
+            case 'freeze10': freezeTimer(10); break;
+            case 'freeze20': freezeTimer(20); break;
+            case 'add10': addTime(10); break;
+            case 'add30': addTime(30); break;
+            case 'stop_timer': stopTimer(); break;
+            case 'fifty': useFifty(); break;
+            case 'skip': skipQuestion(); break;
+            case 'hint_half': useHintHalf(); break;
+            case 'reveal': useReveal(); break;
+            case 'double_xp': activateDoubleXP(); break;
+            case 'double_coins': activateDoubleCoins(); break;
+            case 'double_lb': activateDoubleLB(); break;
+            case 'ghost_mode': activateGhostMode(); break;
+        }
+        
+        const panel = document.getElementById('quizHelperPanel');
+        if (panel) panel.style.display = 'none';
+    };
+    
+    // ============================
+    // ✅ Challenge mode logic
+    // ============================
     if (isChallengeMode && myRoomCode) {
         let challengeStarted = false;
         const roomListener = window.onValue(window.ref(window.db, 'rooms/' + myRoomCode), (snapshot) => {
@@ -203,6 +561,16 @@ window.initQuiz = function(config) {
 
     window.startGame = function(part) { 
         isSpeedrun = false; ghostTimes = []; playerAnswers = [];
+        // ✅ Reset shop state
+        activeBoosts.double_xp = false; activeBoosts.double_coins = false; activeBoosts.double_lb = false; activeBoosts.ghost_mode = false;
+        secondChanceActive = false; isFrozen = false;
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        updateBoostIndicator();
+        setupHelperUI();
+        // ✅ لو المخزون لسه محملش، فعّله تاني (idempotent)
+        if (!inventoryLoaded) loadInventory();
+        renderHelperItems();
+        
         if (part === 'challenge') { 
             let challengeQuestions = null;
             if (quizData.comprehensive && quizData.comprehensive.length > 0) { challengeQuestions = [...quizData.comprehensive]; } 
@@ -232,6 +600,9 @@ window.initQuiz = function(config) {
     function loadQuestion() { 
         if (!currentQuestions || currentQuestions.length === 0) return;
         answered = false; timeLeft = isSpeedrun ? 5 : 20; 
+        isFrozen = false;
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        
         let activeLang = localStorage.getItem('lang') || 'ar';
         const q = currentQuestions[current]; 
         let qText = activeLang === 'ar' ? q.q_ar : q.q_en; if (!qText) qText = q.q_en || q.q_ar; 
@@ -255,16 +626,26 @@ window.initQuiz = function(config) {
             });
         }
         }); 
-        document.getElementById('score').innerText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; 
+        
+        let scoreText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
+        if (activeBoosts.double_xp) scoreText += ' ✨x2';
+        if (activeBoosts.double_coins) scoreText += ' 💰x2';
+        if (activeBoosts.double_lb) scoreText += ' 🏆x2';
+        document.getElementById('score').innerText = scoreText; 
+        
         document.getElementById('next').style.display = 'none'; document.getElementById('progress').style.width = ((current) / currentQuestions.length * 100) + '%'; 
         
         document.getElementById('question').classList.add('cinematic-entrance');
         document.getElementById('options').classList.add('cinematic-entrance');
 
         clearInterval(timerInterval); timerInterval = setInterval(updateTimer, 1000); updateTimer(); 
+        
+        const panel = document.getElementById('quizHelperPanel');
+        if (panel && panel.style.display === 'block') renderHelperItems();
     }
 
     function updateTimer() { 
+        if (isFrozen) return;
         const timerEl = document.getElementById('timer'); timerEl.innerText = `⏱️ ${timeLeft}`; 
         
         let vignette = document.getElementById('redVignette');
@@ -287,12 +668,42 @@ window.initQuiz = function(config) {
     }
 
     function checkAnswer(isCorrect, el) { 
-        if (answered) return; answered = true; clearInterval(timerInterval); 
+        if (answered) return;
+        
+        let activeLang = localStorage.getItem('lang') || 'ar'; 
+        const q = currentQuestions[current]; 
+        let opts = activeLang === 'ar' ? q.options_ar : q.options_en; 
+        if (!opts) opts = q.options_en || q.options_ar;
+        
+        if (!isCorrect && secondChanceActive) {
+            if ((userInventory['second_chance'] || 0) > 0) {
+                secondChanceActive = false;
+                userInventory['second_chance']--;
+                const updates = {};
+                updates[`users_data/${currentUser}/inventory/second_chance`] = userInventory['second_chance'] > 0 ? userInventory['second_chance'] : null;
+                window.update(window.ref(window.db), updates).catch(e => console.warn(e));
+                renderHelperItems();
+                
+                document.querySelectorAll('.option').forEach(o => o.classList.remove('disabled'));
+                el.classList.add('wrong');
+                setTimeout(() => el.classList.remove('wrong'), 800);
+                el.classList.add('disabled');
+                showToastMessage('🎲 فرصة تانية! جرب تاني!');
+                playSound(sndWrong);
+                return;
+            } else {
+                secondChanceActive = false;
+            }
+        }
+        
+        answered = true; 
+        clearInterval(timerInterval); 
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        isFrozen = false;
         
         let vignette = document.getElementById('redVignette');
         if (vignette) vignette.remove();
 
-        let activeLang = localStorage.getItem('lang') || 'ar'; const q = currentQuestions[current]; let opts = activeLang === 'ar' ? q.options_ar : q.options_en; if (!opts) opts = q.options_en || q.options_ar; 
         const allOpts = document.querySelectorAll('.option'); allOpts.forEach(o => o.classList.add('disabled')); allOpts.forEach(o => { if(o.innerText === opts[q.answer]) o.classList.add('correct'); }); 
         
         let timeTaken = 20 - timeLeft;
@@ -312,10 +723,18 @@ window.initQuiz = function(config) {
                 document.getElementById('playScreen').classList.remove('cinematic-glitch');
             }, 500);
         } 
-        document.getElementById('score').innerText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`; 
+        
+        let scoreText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
+        if (activeBoosts.double_xp) scoreText += ' ✨x2';
+        if (activeBoosts.double_coins) scoreText += ' 💰x2';
+        if (activeBoosts.double_lb) scoreText += ' 🏆x2';
+        document.getElementById('score').innerText = scoreText;
+        
         document.getElementById('next').style.display = 'inline-block'; 
         if (!isChallengeMode && !isSpeedrun) { ghostTimes.push(20 - timeLeft); }
         if('speechSynthesis' in window) window.speechSynthesis.resume();
+        
+        renderHelperItems();
     }
 
     window.nextQuestion = function() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
@@ -338,6 +757,15 @@ window.initQuiz = function(config) {
 
     async function showFinal() {
         clearInterval(timerInterval); 
+        if (currentFreezeTick) { clearInterval(currentFreezeTick); currentFreezeTick = null; }
+        isFrozen = false;
+        const helperBtn = document.getElementById('quizHelperBtn');
+        const helperPanel = document.getElementById('quizHelperPanel');
+        const boostInd = document.getElementById('boostIndicator');
+        if (helperBtn) helperBtn.style.display = 'none';
+        if (helperPanel) helperPanel.style.display = 'none';
+        if (boostInd) boostInd.style.display = 'none';
+        
         document.getElementById('progress').style.width = '100%'; 
         if (score > (currentQuestions.length / 2)) { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }
         
@@ -378,6 +806,23 @@ window.initQuiz = function(config) {
             }
 
             const { persona, personaDesc } = getPlayerPersona(score, currentQuestions.length, avgTime);
+            
+            let xpGain = score;
+            let coinGain = 5;
+            let lbScore = score;
+            if (activeBoosts.double_xp) xpGain *= 2;
+            if (activeBoosts.double_coins) coinGain *= 2;
+            if (activeBoosts.double_lb) lbScore *= 2;
+            
+            let boostSummaryHtml = '';
+            if (activeBoosts.double_xp || activeBoosts.double_coins || activeBoosts.double_lb || activeBoosts.ghost_mode) {
+                let parts = [];
+                if (activeBoosts.double_xp) parts.push(`✨ XP: +${xpGain} (x2)`);
+                if (activeBoosts.double_coins) parts.push(`💰 ${activeLang === 'en' ? 'Coins' : 'كوينز'}: +${coinGain} (x2)`);
+                if (activeBoosts.double_lb) parts.push(`🏆 ${activeLang === 'en' ? 'Leaderboard' : 'ليدربورد'}: +${lbScore} (x2)`);
+                if (activeBoosts.ghost_mode) parts.push(`👻 ${activeLang === 'en' ? 'Name hidden' : 'الاسم مخفي'}`);
+                boostSummaryHtml = `<div style="margin-top: 15px; padding: 12px; background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 10px;"><h4 style="color:#ffd700; margin-bottom:8px; font-size:16px;">⚡ ${activeLang === 'en' ? 'Boosts Applied' : 'التعزيزات المطبقة'}</h4>${parts.map(p=>`<p style="font-size:14px; color:#ddd; margin:4px 0;">${p}</p>`).join('')}</div>`;
+            }
 
             document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
                 <h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2>
@@ -389,6 +834,8 @@ window.initQuiz = function(config) {
                     <p style="font-size: 16px; color: #ddd;">${personaDesc}</p>
                     <p style="font-size: 14px; color: #aaa; margin-top: 10px;">(متوسط سرعة إجابتك: ${avgTime} ثانية)</p>
                 </div>
+                
+                ${boostSummaryHtml}
 
                 <div style="margin-top: 20px; border-top: 1px dashed #333; padding-top: 20px;">
                     <button onclick="window.startGhostQuiz()" style="padding:15px 30px; background:#0088cc; color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:18px; font-weight:bold; width:100%; max-width:300px; margin: 0 auto; display:block; margin-bottom: 10px;">👻 ${activeLang === 'en' ? 'Play Against Your Ghost' : 'العب ضد شبحك'}</button>
@@ -412,14 +859,17 @@ window.initQuiz = function(config) {
 
             if (window.db && currentUser !== 'Unknown') { 
                 window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
-                window.set(window.ref(window.db, 'leaderboard/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
+                
+                if (!activeBoosts.ghost_mode) {
+                    window.set(window.ref(window.db, 'leaderboard/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: lbScore, total: currentQuestions.length, time: new Date().toISOString() }); 
+                }
                 
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/xp')).then(snap => { 
-                    let xp = snap.exists() ? snap.val() : 0; window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + score); 
+                    let xp = snap.exists() ? snap.val() : 0; window.set(window.ref(window.db, 'users_data/' + currentUser + '/xp'), xp + xpGain); 
                 }); 
                 
                 window.get(window.ref(window.db, 'users_data/' + currentUser + '/coins')).then(coinSnap => {
-                    let currentCoins = coinSnap.exists() ? coinSnap.val() : 0; window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), currentCoins + 5);
+                    let currentCoins = coinSnap.exists() ? coinSnap.val() : 0; window.set(window.ref(window.db, 'users_data/' + currentUser + '/coins'), currentCoins + coinGain);
                 });
 
                 window.push(window.ref(window.db, 'activity_feed'), { user: currentUser, action: "أنهى", detail: "كويز " + (quizKey.toUpperCase()) + " بنتيجة " + score, time: Date.now() });
@@ -486,6 +936,11 @@ window.initQuiz = function(config) {
 
     window.startGhostQuiz = function() { 
         current = 0; let ghostScore = 0; let activeLang = localStorage.getItem('lang') || 'ar';
+        const helperBtn = document.getElementById('quizHelperBtn');
+        const helperPanel = document.getElementById('quizHelperPanel');
+        if (helperBtn) helperBtn.style.display = 'none';
+        if (helperPanel) helperPanel.style.display = 'none';
+        
         document.getElementById('question').innerHTML = `<h2 style="color:var(--blue); text-align:center;">👻 ${activeLang === 'en' ? 'Ghost Mode' : 'وضع الشبح'}</h2><p style="text-align:center; color:#aaa;">${activeLang === 'en' ? 'Answer before your ghost!' : 'جاوب قبل الشبح بتاعك!'}</p>`;
         document.getElementById('options').innerHTML = ''; document.getElementById('next').style.display = 'none'; document.getElementById('score').innerText = ''; document.getElementById('backBtn').style.display = 'none'; document.getElementById('timer').style.display = 'none';
         let ghostInterval;
