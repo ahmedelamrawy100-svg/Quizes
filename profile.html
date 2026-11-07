@@ -16,7 +16,7 @@
   .custom-alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 99999; display: none; justify-content: center; align-items: center; }
   .custom-alert-box { background: var(--card-bg); border: 2px solid var(--accent); border-radius: 15px; padding: 30px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 0 30px rgba(255,0,0,0.3); font-family: 'Cairo'; }
   .custom-alert-box h2 { color: var(--accent); margin-bottom: 15px; }
-  .custom-alert-box p { margin-bottom: 20px; font-size: 16px; }
+  .custom-alert-box p { margin-bottom: 20px; font-size: 16px; white-space: pre-line; }
   .custom-alert-btn { background: var(--accent); color: #fff; border: none; padding: 10px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 16px; }
 
   .top-controls { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
@@ -29,7 +29,6 @@
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   body.light-mode .avatar { border-color: #111; }
   
-  /* ✅ علامة التوثيق */
   .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 12px; font-weight: bold; margin-right: 6px; vertical-align: middle; }
 
   .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px;}
@@ -43,6 +42,8 @@
   .score-badge { color: var(--gold); background: rgba(255, 215, 0, 0.1); border-color: var(--gold); }
   .xp-badge { color: var(--green); background: rgba(76, 175, 80, 0.1); border-color: var(--green); }
   .level-badge { color: var(--purple); background: rgba(156, 39, 176, 0.1); border-color: var(--purple); }
+  .coin-badge { color: var(--orange); background: rgba(255, 152, 0, 0.1); border-color: var(--orange); }
+
   .progress-container { width: 100%; max-width: 400px; margin: 10px auto; }
   .progress-bar-bg { width: 100%; height: 15px; background: #333; border-radius: 10px; overflow: hidden; }
   .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), #00ff00); width: 0%; transition: width 0.5s; }
@@ -79,6 +80,27 @@
   .timeline-desc { font-size: 14px; color: var(--text-color); }
   .avatar.fire-frame { border-color: #ff5722; box-shadow: 0 0 25px #ff5722, 0 0 50px #ff9800; animation: firePulse 1.5s infinite alternate; }
   @keyframes firePulse { from { box-shadow: 0 0 15px #ff5722, 0 0 30px #ff9800; } to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; } }
+  
+  #inventorySection { width: 100%; background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 20px; margin-top: 20px; }
+  #inventoryTitle { color: var(--accent); font-size: 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
+  #inventoryGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .inv-item { background: var(--bg-color); border: 2px solid var(--card-border); border-radius: 12px; padding: 15px 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; transition: 0.3s; }
+  .inv-item:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .inv-item .inv-icon { font-size: 36px; }
+  .inv-item .inv-name { font-size: 13px; font-weight: bold; line-height: 1.2; min-height: 32px; }
+  .inv-item .inv-count { position: absolute; top: 8px; right: 8px; background: var(--gold); color: #000; border-radius: 10px; padding: 2px 8px; font-size: 12px; font-weight: 900; min-width: 24px; text-align: center; }
+  .inv-item .inv-btn { width: 100%; padding: 8px 4px; border: none; border-radius: 6px; font-family: Cairo, sans-serif; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s; margin-top: 5px; }
+  .inv-item .inv-btn.profile-use { background: var(--green); color: #fff; }
+  .inv-item .inv-btn.profile-use:hover { background: #66bb6a; transform: scale(1.03); }
+  .inv-item .inv-btn.unpack { background: var(--gold); color: #000; }
+  .inv-item .inv-btn.unpack:hover { background: #ffe066; transform: scale(1.03); }
+  .inv-item .inv-btn.quiz-note { background: rgba(0, 136, 204, 0.15); color: var(--blue); border: 1px solid var(--blue); cursor: default; font-size: 11px; padding: 5px; }
+  .inv-empty { text-align: center; color: var(--subtitle-color); padding: 25px 15px; font-size: 15px; }
+  .inv-empty a { color: var(--gold); text-decoration: underline; font-weight: bold; }
+  .inv-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+  .inv-tab { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: Cairo, sans-serif; font-weight: bold; font-size: 13px; transition: 0.2s; }
+  .inv-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+  
   @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } .stats-row { flex-direction: column; gap: 10px; } .stat-badge { justify-content: center; } }
 </style>
 </head>
@@ -114,11 +136,12 @@
       <div class="stat-badge score-badge">🏆 <span id="totalScoreDisplay">0</span> <span id="pointsText">نقطة</span></div>
       <div class="stat-badge xp-badge">✨ <span id="xpDisplay">0</span> XP</div>
       <div class="stat-badge level-badge"><span id="levelText">⭐ المستوى:</span> <span id="levelDisplay">1</span></div>
+      <div class="stat-badge coin-badge">🪙 <span id="coinsDisplay">0</span> <span id="coinsText">كوينز</span></div>
     </div>
 
     <div class="progress-container">
         <div class="progress-bar-bg"><div class="progress-bar-fill" id="xpProgressBar"></div></div>
-        <div style="font-size: 12px; color: var(--subtitle-color); margin-top: 5px; direction: ltr;" id="xpProgressText">0 / 100 XP</div>
+        <div style="font-size: 12px; color: var(--subtitle-color); margin-top: 5px; direction: ltr;" id="xpProgressText">1 / 1000</div>
     </div>
 
     <div class="advanced-stats" id="advancedStatsSection">
@@ -127,7 +150,7 @@
             <div class="adv-stat-value accuracy" id="accuracyDisplay">0%</div>
         </div>
         <div class="adv-stat-box">
-            <div class="adv-stat-title" id="streakLabel">🔥 أفضل نتيجة</div>
+            <div class="adv-stat-title" id="streakLabel">🔥 أفضل ستريك</div>
             <div class="adv-stat-value streak" id="bestStreakDisplay">0</div>
         </div>
         <div class="adv-stat-box">
@@ -154,6 +177,12 @@
       <button id="saveImgBtn" class="upload-btn" onclick="window.uploadProfilePic()">حفظ الصورة</button>
       <button class="upload-btn" style="background: #ff3333; display: none;" id="removeImgBtn" onclick="window.removeProfilePic()">🗑️ مسح</button>
     </div>
+  </div>
+
+  <div id="inventorySection" style="display: none;">
+    <h3 id="inventoryTitle">🎒 مخزونك <span id="invTotalCount" style="font-size: 14px; color: var(--subtitle-color); font-weight: normal;"></span></h3>
+    <div class="inv-tabs" id="invTabs"></div>
+    <div id="inventoryGrid"></div>
   </div>
 
   <div>
@@ -200,9 +229,64 @@
 
   let currentLang = localStorage.getItem('lang') || 'ar';
   const translations = {
-    ar: { back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", badges: "الإنجازات (Badges)", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل نتيجة", completed: "🎮 كويزات مكتملة", errTitle: "خطأ", okBtn: "حسناً", timeline: "📜 أرشيفك الزمني", noEvents: "لا يوجد أحداث بعد. ابدأ اللعب!" },
-    en: { back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", badges: "Achievements (Badges)", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Score", completed: "🎮 Quizzes Completed", errTitle: "Error", okBtn: "OK", timeline: "📜 Your Timeline", noEvents: "No events yet. Start playing!" }
+    ar: { 
+      back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", coins: "كوينز", badges: "الإنجازات (Badges)", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل ستريك", completed: "🎮 كويزات مكتملة", errTitle: "خطأ", successTitle: "تم بنجاح", okBtn: "حسناً", timeline: "📜 أرشيفك الزمني", noEvents: "لا يوجد أحداث بعد. ابدأ اللعب!", inventoryTitle: "🎒 مخزونك", invEmpty: "مفيش أدوات في المخزون. اشتري من <a href='shop.html'>المتجر</a>!", use: "استخدم", unpack: "فتح الحزمة", open: "فتح", quizUse: "استخدم في الكويز", invTotal: "إجمالي الأدوات:", noTeam: "انت مش في تيم! انضم لتيم الأول.", teamBoosted: "التيم بتاعك خد 1000 XP! ⚔️", streakHealthy: "ستريكك مش مكسور، مش محتاج إصلاح!", streakFixed: "ستريكك اترجع! 🔥", shieldUsed: "الدرع اتفعل! ستريكك محمي النهارده. 🛡️", shieldAlready: "انت لعبت النهارده، الستريك محمي تلقائياً.", announceTitle: "اكتب رسالتك الرسمية:", announceSent: "الرسالة اتبعتت في الفيد! 📢", boxOpened: "فتحت الصندوق وحصلت على:", bundleUnpacked: "الحزمة اتفكت!", errorOccurred: "حدث خطأ، حاول تاني.",
+      lootBoxBtn: "🎁 افتح صندوقك اليومي", lootBoxLocked: "⏳ الصندوق مقفول", lootBoxTimerPrefix: "متاح بعد: ", lootBoxOpening: "جاري الفتح... 🎁", lootBoxCongrats: "🎉 مبروك!", lootBoxResult: "لقد فتحت الصندوق وحصلت على:\n", rewardCoins50: "🪙 50 كوينز!", rewardCoins100: "🪙 100 كوينز!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 إطار ناري أسطوري!", lootBoxError: "حدث خطأ أثناء فتح الصندوق.", h: "س", m: "د", s: "ث"
+    },
+    en: { 
+      back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", coins: "Coins", badges: "Achievements (Badges)", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Streak", completed: "🎮 Quizzes Completed", errTitle: "Error", successTitle: "Success", okBtn: "OK", timeline: "📜 Your Timeline", noEvents: "No events yet. Start playing!", inventoryTitle: "🎒 Your Inventory", invEmpty: "No items in inventory. Buy from the <a href='shop.html'>Shop</a>!", use: "Use", unpack: "Unpack Bundle", open: "Open", quizUse: "Use in Quiz", invTotal: "Total items:", noTeam: "You're not in a team! Join one first.", teamBoosted: "Your team got 1000 XP! ⚔️", streakHealthy: "Your streak isn't broken, no need to fix!", streakFixed: "Your streak was restored! 🔥", shieldUsed: "Shield activated! Your streak is protected today. 🛡️", shieldAlready: "You already played today, streak is auto-protected.", announceTitle: "Write your announcement:", announceSent: "Message sent to feed! 📢", boxOpened: "You opened the box and got:", bundleUnpacked: "Bundle unpacked!", errorOccurred: "Something went wrong, try again.",
+      lootBoxBtn: "🎁 Open Daily Box", lootBoxLocked: "⏳ Box Locked", lootBoxTimerPrefix: "Available after: ", lootBoxOpening: "Opening... 🎁", lootBoxCongrats: "🎉 Congratulations!", lootBoxResult: "You opened the box and got:\n", rewardCoins50: "🪙 50 Coins!", rewardCoins100: "🪙 100 Coins!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 Legendary Fire Frame!", lootBoxError: "An error occurred while opening the box.", h: "h", m: "m", s: "s"
+    }
   };
+
+  const inventoryItemsMeta = {
+    freeze10: { icon: '⏱️', name: 'تجميد 10ث', nameEn: 'Freeze 10s', cat: 'quiz' },
+    freeze20: { icon: '⏱️', name: 'تجميد 20ث', nameEn: 'Freeze 20s', cat: 'quiz' },
+    add10: { icon: '➕', name: 'إضافة 10ث', nameEn: '+10s', cat: 'quiz' },
+    add30: { icon: '➕', name: 'إضافة 30ث', nameEn: '+30s', cat: 'quiz' },
+    stop_timer: { icon: '🛑', name: 'إيقاف العداد', nameEn: 'Stop Timer', cat: 'quiz' },
+    fifty: { icon: '✂️', name: '50/50', nameEn: '50/50', cat: 'quiz' },
+    skip: { icon: '⏭️', name: 'تخطي', nameEn: 'Skip', cat: 'quiz' },
+    hint_half: { icon: '💡', name: 'تلميح', nameEn: 'Hint', cat: 'quiz' },
+    reveal: { icon: '👁️', name: 'إظهار الإجابة', nameEn: 'Reveal', cat: 'quiz' },
+    second_chance: { icon: '🎲', name: 'فرصة تانية', nameEn: 'Second Chance', cat: 'quiz' },
+    double_xp: { icon: '✨', name: 'مضاعف XP', nameEn: 'Double XP', cat: 'quiz' },
+    double_coins: { icon: '💰', name: 'مضاعف كوينز', nameEn: 'Double Coins', cat: 'quiz' },
+    double_lb: { icon: '🏆', name: 'مضاعف ليدربورد', nameEn: 'Double LB', cat: 'quiz' },
+    ghost_mode: { icon: '👻', name: 'وضع الشبح', nameEn: 'Ghost Mode', cat: 'quiz' },
+    box_bronze: { icon: '📦', name: 'صندوق برونزي', nameEn: 'Bronze Box', cat: 'box', action: 'open' },
+    box_silver: { icon: '🎁', name: 'صندوق فضي', nameEn: 'Silver Box', cat: 'box', action: 'open' },
+    box_gold: { icon: '🏆', name: 'صندوق ذهبي', nameEn: 'Gold Box', cat: 'box', action: 'open' },
+    box_diamond: { icon: '💎', name: 'صندوق ألماسي', nameEn: 'Diamond Box', cat: 'box', action: 'open' },
+    box_legendary: { icon: '👑', name: 'صندوق أسطوري', nameEn: 'Legendary Box', cat: 'box', action: 'open' },
+    fix_streak: { icon: '🔥', name: 'إصلاح الستريك', nameEn: 'Fix Streak', cat: 'action', action: 'use' },
+    team_boost: { icon: '⚔️', name: 'دعم التيم', nameEn: 'Team Boost', cat: 'action', action: 'use' },
+    shield: { icon: '🛡️', name: 'درع الحماية', nameEn: 'Streak Shield', cat: 'action', action: 'use' },
+    starter_bundle: { icon: '🎁', name: 'حزمة المبتدئين', nameEn: 'Starter Bundle', cat: 'bundle', action: 'unpack' },
+    survival_kit: { icon: '🎒', name: 'حقيبة النجاة', nameEn: 'Survival Kit', cat: 'bundle', action: 'unpack' },
+    speed_demon: { icon: '💨', name: 'شيطان السرعة', nameEn: 'Speed Demon', cat: 'bundle', action: 'unpack' },
+    ultimate_pack: { icon: '👑', name: 'الحزمة المطلقة', nameEn: 'Ultimate Pack', cat: 'bundle', action: 'unpack' }
+  };
+
+  const bundleContents = {
+    starter_bundle: { fifty: 1, freeze10: 1, hint_half: 1 },
+    survival_kit: { shield: 1, fifty: 1, second_chance: 1 },
+    speed_demon: { add30: 1, stop_timer: 1 },
+    ultimate_pack: { double_xp: 1, double_coins: 1, shield: 1 }
+  };
+
+  const invTabsData = [
+    { id: 'all', name: 'الكل', nameEn: 'All' },
+    { id: 'action', name: '⚡ استخدام فوري', nameEn: '⚡ Action' },
+    { id: 'box', name: '🎁 صناديق', nameEn: '🎁 Boxes' },
+    { id: 'bundle', name: '📦 حزم', nameEn: '📦 Bundles' },
+    { id: 'quiz', name: '❓ كويز', nameEn: '❓ Quiz' }
+  ];
+
+  let currentInvTab = 'all';
+  let currentInventory = {};
+  let currentUserData = {};
+  let currentTimelineEvents = null;
 
   function applyLanguage() {
       const t = translations[currentLang];
@@ -212,6 +296,7 @@
       document.getElementById('rankLabelText').innerText = t.rank;
       document.getElementById('pointsText').innerText = t.points;
       document.getElementById('levelText').innerText = t.level;
+      document.getElementById('coinsText').innerText = t.coins;
       document.getElementById('badgesTitleText').innerText = t.badges;
       document.getElementById('uploadLabelText').innerText = t.uploadLabel;
       document.getElementById('saveImgBtn').innerText = t.saveImg;
@@ -222,6 +307,21 @@
       document.getElementById('streakLabel').innerText = t.bestStreak;
       document.getElementById('compLabel').innerText = t.completed;
       document.getElementById('alertOkBtn').innerText = t.okBtn;
+      const invTitleEl = document.getElementById('inventoryTitle');
+      if (invTitleEl) invTitleEl.childNodes[0].textContent = t.inventoryTitle + ' ';
+      
+      if (profileUser.toLowerCase() === loggedInUser.toLowerCase() && document.getElementById('lootBoxContainer').style.display !== 'none') {
+          checkLootBoxTimer(currentUserData);
+      }
+
+      if (document.getElementById('inventorySection').style.display !== 'none') {
+          renderInventoryTabs();
+          renderInventory(currentInventory);
+      }
+      
+      if (currentTimelineEvents) {
+          renderTimeline(currentTimelineEvents);
+      }
   }
   applyLanguage();
 
@@ -231,36 +331,50 @@
       applyLanguage();
   }
 
-  window.get(window.ref(window.db, 'usernames')).then(snap => {
-      if(snap.exists()) {
-          const allUsers = snap.val();
-          for(let user in allUsers) {
-              if(user.toLowerCase() === profileUser.toLowerCase()) { profileUser = user; break; }
-          }
-      }
+  function bootstrapProfile() {
       const displayName = profileUser.charAt(0).toUpperCase() + profileUser.slice(1);
       
-      // ✅ التحقق من التوثيق
       window.get(window.ref(window.db, 'verified_users/' + profileUser.toLowerCase())).then(vSnap => {
-          const isVerified = vSnap.exists();
-          const badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
+          const badge = vSnap.exists() ? ' <span class="verified-badge">✓</span>' : '';
           document.getElementById('userNameText').innerHTML = displayName + badge;
+          document.getElementById('friendsNameDisplay').innerText = displayName;
+      }).catch(() => {
+          document.getElementById('userNameText').innerText = displayName;
           document.getElementById('friendsNameDisplay').innerText = displayName;
       });
 
       if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
           document.getElementById('uploadSection').style.display = 'flex';
       }
-      loadProfileData(); 
-  });
+      
+      loadProfileData();
+  }
+  
+  bootstrapProfile();
 
   async function loadProfileData() {
+      const dbUser = profileUser.toLowerCase();
+      
+      const friendsPromise = loadFriendsData(dbUser).catch(e => console.warn('friends load:', e));
+      
       try {
-          const dbUser = profileUser.toLowerCase();
+          const results = await Promise.allSettled([
+              window.get(window.ref(window.db, 'users_data/' + dbUser)),
+              window.get(window.ref(window.db, 'scores/' + dbUser)),
+              window.get(window.ref(window.db, 'roles/admins')),
+              window.get(window.ref(window.db, 'roles/users')),
+              window.get(window.ref(window.db, 'badges/' + dbUser)),
+              window.get(window.ref(window.db, 'warnings/' + dbUser)),
+              window.get(window.ref(window.db, 'users_data/' + dbUser + '/history'))
+          ]);
           
-          const userSnap = await window.get(window.ref(window.db, 'users_data/' + dbUser));
-          const userData = userSnap.val() || {};
-
+          const getUser = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
+          
+          // ============ 1. البيانات الأساسية ============
+          const userSnap = getUser(0);
+          const userData = (userSnap && userSnap.val()) || {};
+          currentUserData = userData;
+          
           const avatarEl = document.getElementById('userAvatar');
           if (userData.profilePic && userData.profilePic.startsWith('http')) {
               avatarEl.innerHTML = `<img src="${userData.profilePic}">`;
@@ -269,37 +383,40 @@
               avatarEl.innerHTML = profileUser.charAt(0).toUpperCase();
               if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) document.getElementById('removeImgBtn').style.display = 'none';
           }
-
+          
           if (userData.profileFrame === 'fire') { avatarEl.classList.add('fire-frame'); }
-
-          let myPersona = userData.persona;
-          if (myPersona) {
+          
+          if (userData.persona) {
               const badge = document.getElementById('personaBadge');
-              badge.innerText = myPersona;
+              badge.innerText = userData.persona;
               badge.style.display = 'inline-block';
           }
-
+          
           let xp = userData.xp || 0;
           document.getElementById('xpDisplay').innerText = xp;
-          let level = 1, nextLevelXp = 100, currentLevelXp = 0;
-          if (xp >= 4500) { level = 10; currentLevelXp = 4500; nextLevelXp = "Max"; }
-          else if (xp >= 3600) { level = 9; currentLevelXp = 3600; nextLevelXp = 4500; }
-          else if (xp >= 2800) { level = 8; currentLevelXp = 2800; nextLevelXp = 3600; }
-          else if (xp >= 2100) { level = 7; currentLevelXp = 2100; nextLevelXp = 2800; }
-          else if (xp >= 1500) { level = 6; currentLevelXp = 1500; nextLevelXp = 2100; }
-          else if (xp >= 1000) { level = 5; currentLevelXp = 1000; nextLevelXp = 1500; }
-          else if (xp >= 600) { level = 4; currentLevelXp = 600; nextLevelXp = 1000; }
-          else if (xp >= 300) { level = 3; currentLevelXp = 300; nextLevelXp = 600; }
-          else if (xp >= 100) { level = 2; currentLevelXp = 100; nextLevelXp = 300; }
+          
+          let coins = userData.coins || 0;
+          document.getElementById('coinsDisplay').innerText = coins;
+          
+          // ✅ نظام XP الجديد (1000 لفل، كل لفل 500 XP، الإجمالي 500,000 XP)
+          let xpPerLevel = 500;
+          let maxLevel = 1000;
+          
+          let level = Math.floor(xp / xpPerLevel) + 1;
+          if (level > maxLevel) level = maxLevel;
+          
           document.getElementById('levelDisplay').innerText = level;
-          document.getElementById('xpProgressText').innerText = `${xp - currentLevelXp} / ${nextLevelXp === "Max" ? "Max" : nextLevelXp - currentLevelXp} XP`;
-          document.getElementById('xpProgressBar').style.width = `${nextLevelXp === "Max" ? 100 : ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100}%`;
-
+          
+          // ✅ هنا التعديل: بيظهر المستوى الحالي من 1000 زي ما طلبت
+          document.getElementById('xpProgressText').innerText = `${level} / ${maxLevel}`;
+          document.getElementById('xpProgressBar').style.width = `${(level / maxLevel) * 100}%`;
+          
           let streak = userData.streak || 0;
           document.getElementById('bestStreakDisplay').innerText = streak;
-
-          const scoresSnap = await window.get(window.ref(window.db, 'scores/' + dbUser));
-          const scoresData = scoresSnap.val();
+          
+          // ============ 2. النقاط ============
+          const scoresSnap = getUser(1);
+          const scoresData = scoresSnap ? scoresSnap.val() : null;
           
           let totalPoints = 0, totalCorrect = 0, totalQuestions = 0, completedCount = 0;
           if (scoresData) {
@@ -324,11 +441,12 @@
               let accuracy = Math.round((totalCorrect / totalQuestions) * 100);
               document.getElementById('accuracyDisplay').innerText = accuracy + '%';
           } else { document.getElementById('accuracyDisplay').innerText = '0%'; }
-
-          const adminsSnap = await window.get(window.ref(window.db, 'roles/admins'));
-          const ranksSnap = await window.get(window.ref(window.db, 'roles/users'));
-          const admins = adminsSnap.val() || {};
-          const ranks = ranksSnap.val() || {};
+          
+          // ============ 3. الرتب ============
+          const adminsSnap = getUser(2);
+          const ranksSnap = getUser(3);
+          const admins = (adminsSnap && adminsSnap.val()) || {};
+          const ranks = (ranksSnap && ranksSnap.val()) || {};
           const isOwner = dbUser === 'ahmed';
           let isAdmin = false;
           for (let adminName in admins) { if (adminName.toLowerCase() === dbUser) { isAdmin = true; break; } }
@@ -337,12 +455,13 @@
           for (let user in ranks) { if (user.toLowerCase() === dbUser) { rankText = ranks[user]; break; } }
           if (isOwner) rankText = translations[currentLang].rankOwner;
           else if (isAdmin && (rankText.includes('لاعب') || rankText.includes('Player'))) rankText = translations[currentLang].rankAdmin;
-
+          
           document.getElementById('rankBox').style.display = 'inline-flex';
           document.getElementById('userRankValue').innerText = rankText;
-
-          const badgesSnap = await window.get(window.ref(window.db, 'badges/' + dbUser));
-          const badgesData = badgesSnap.val();
+          
+          // ============ 4. الشارات ============
+          const badgesSnap = getUser(4);
+          const badgesData = badgesSnap ? badgesSnap.val() : null;
           const badgesContainer = document.getElementById('badgesContainer');
           const badgesSection = document.getElementById('badgesSection');
           badgesContainer.innerHTML = '';
@@ -352,106 +471,424 @@
                   const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; badgesContainer.appendChild(span);
               });
           } else { badgesSection.style.display = 'none'; }
-
-          const warnSnap = await window.get(window.ref(window.db, 'warnings'));
-          let myWarning = null;
-          if (warnSnap.exists()) {
-              const warningsData = warnSnap.val();
-              for (let u in warningsData) {
-                  if (u.toLowerCase() === dbUser) { myWarning = warningsData[u]; break; }
+          
+          // ============ 5. التحذير ============
+          const warningSnap = getUser(5);
+          if (warningSnap && warningSnap.exists()) {
+              const w = warningSnap.val();
+              if (w && w.text) {
+                  document.getElementById('warningBox').style.display = 'block';
+                  document.getElementById('warningText').innerText = translations[currentLang].warnPrefix + w.text;
               }
-          }
-
-          if (myWarning && myWarning.text) { 
-              document.getElementById('warningBox').style.display = 'block'; 
-              document.getElementById('warningText').innerText = translations[currentLang].warnPrefix + myWarning.text; 
           } else { 
               document.getElementById('warningBox').style.display = 'none'; 
           }
-
-          const historySnap = await window.get(window.ref(window.db, 'users_data/' + dbUser + '/history'));
-          const historyList = document.getElementById('timelineList');
-          historyList.innerHTML = '';
-          if (historySnap.exists()) {
-              const events = historySnap.val();
-              const sortedEvents = Object.values(events).sort((a, b) => b.time - a.time);
-              sortedEvents.forEach(event => {
-                  const date = new Date(event.time).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-                  const wrapper = document.createElement('div');
-                  wrapper.className = 'timeline-item-wrapper';
-                  wrapper.innerHTML = `
-                      <div class="timeline-dot"></div>
-                      <div class="timeline-content">
-                          <div class="timeline-date">${date}</div>
-                          <div class="timeline-title">${event.title}</div>
-                          <div class="timeline-desc">${event.description}</div>
-                      </div>
-                  `;
-                  historyList.appendChild(wrapper);
-              });
+          
+          // ============ 6. الأرشيف ============
+          const historySnap = getUser(6);
+          if (historySnap && historySnap.exists()) {
+              currentTimelineEvents = historySnap.val();
+              renderTimeline(currentTimelineEvents);
           } else {
-              historyList.innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
+              currentTimelineEvents = null;
+              document.getElementById('timelineList').innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
           }
-
+          
+          // ============ 7. صندوق اليوم + المخزون ============
           if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
               document.getElementById('lootBoxContainer').style.display = 'block';
               checkLootBoxTimer(userData);
+              currentInventory = userData.inventory || {};
+              document.getElementById('inventorySection').style.display = 'block';
+              renderInventoryTabs();
+              renderInventory(currentInventory);
+          }
+          
+          await friendsPromise;
+          
+      } catch (error) { 
+          console.error("حدث خطأ أثناء تحميل البيانات:", error);
+      }
+  }
+
+  function renderTimeline(events) {
+      const historyList = document.getElementById('timelineList');
+      historyList.innerHTML = '';
+      
+      if (!events || Object.keys(events).length === 0) {
+          historyList.innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
+          return;
+      }
+
+      const sortedEvents = Object.values(events).sort((a, b) => b.time - a.time);
+      sortedEvents.forEach(event => {
+          const date = new Date(event.time).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+          
+          let tTitle = event.title || '';
+          let tDesc = event.description || '';
+          
+          if (currentLang === 'en') {
+              if (tTitle.includes('أنهى كويز: ')) tTitle = tTitle.replace('أنهى كويز: ', 'Finished Quiz: ');
+              if (tDesc.includes('بنتيجة ')) tDesc = tDesc.replace('بنتيجة ', 'Score: ').replace(' من ', ' / ');
+          } else {
+              if (tTitle.includes('Finished Quiz: ')) tTitle = tTitle.replace('Finished Quiz: ', 'أنهى كويز: ');
+              if (tDesc.includes('Score: ')) tDesc = tDesc.replace('Score: ', 'بنتيجة ').replace(' / ', ' من ');
           }
 
-          loadFriendsData(dbUser);
-
-      } catch (error) { console.error("حدث خطأ أثناء تحميل البيانات:", error); }
+          const wrapper = document.createElement('div');
+          wrapper.className = 'timeline-item-wrapper';
+          wrapper.innerHTML = `
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                  <div class="timeline-date">${date}</div>
+                  <div class="timeline-title">${tTitle}</div>
+                  <div class="timeline-desc">${tDesc}</div>
+              </div>
+          `;
+          historyList.appendChild(wrapper);
+      });
   }
 
   async function loadFriendsData(dbUser) {
       const friendsListEl = document.getElementById('friendsList');
       try {
-          const friendsSnap = await window.get(window.ref(window.db, 'friends'));
-          if (!friendsSnap.exists()) {
-              friendsListEl.innerHTML = `<div class="no-data">لا يوجد أصدقاء مسجلين في الموقع حالياً.</div>`;
-              return;
+          let friendsSnap = await window.get(window.ref(window.db, 'friends/' + dbUser));
+          let myFriends = friendsSnap.exists() ? friendsSnap.val() : null;
+          
+          if (!myFriends) {
+              const allSnap = await window.get(window.ref(window.db, 'friends'));
+              if (allSnap.exists()) {
+                  const allFriendsData = allSnap.val();
+                  for (let key in allFriendsData) {
+                      if (key.toLowerCase() === dbUser) { myFriends = allFriendsData[key]; break; }
+                  }
+              }
           }
-
-          const allFriendsData = friendsSnap.val();
-          let myFriends = null;
-
-          for (let key in allFriendsData) {
-              if (key.toLowerCase() === dbUser) { myFriends = allFriendsData[key]; break; }
-          }
-
+          
           if (!myFriends || Object.keys(myFriends).length === 0) {
               friendsListEl.innerHTML = `<div class="no-data">${translations[currentLang].noFriends}</div>`;
               return;
           }
-
-          const usersSnap = await window.get(window.ref(window.db, 'users_data'));
-          const allUsersData = usersSnap.exists() ? usersSnap.val() : {};
+          
+          friendsListEl.innerHTML = `<div class="no-data">${translations[currentLang].loading}</div>`;
+          
+          const friendNames = Object.keys(myFriends);
+          const friendData = await Promise.all(
+              friendNames.map(async (name) => {
+                  try {
+                      const picSnap = await window.get(window.ref(window.db, `users_data/${name.toLowerCase()}/profilePic`));
+                      return { name, pic: picSnap.exists() ? picSnap.val() : null };
+                  } catch { return { name, pic: null }; }
+              })
+          );
+          
           friendsListEl.innerHTML = '';
-
-          for (let friendName in myFriends) {
-              let picUrl = null;
-              for (let u in allUsersData) {
-                  if (u.toLowerCase() === friendName.toLowerCase() && allUsersData[u].profilePic) {
-                      picUrl = allUsersData[u].profilePic; break;
-                  }
-              }
-              let avatarHTML = friendName.charAt(0).toUpperCase();
-              if (picUrl) avatarHTML = `<img src="${picUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-
+          friendData.forEach(({ name, pic }) => {
+              let avatarHTML = name.charAt(0).toUpperCase();
+              if (pic && pic.startsWith('http')) avatarHTML = `<img src="${pic}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+              
               const card = document.createElement('div');
               card.className = 'friend-card';
               card.innerHTML = `
                   <div class="friend-info">
                       <div class="friend-avatar">${avatarHTML}</div>
-                      <div class="friend-name">${friendName}</div>
+                      <div class="friend-name">${name}</div>
                   </div>
                   <div>
-                      <a href="profile.html?user=${friendName}" class="action-btn">${translations[currentLang].visitProfile}</a>
+                      <a href="profile.html?user=${name}" class="action-btn">${translations[currentLang].visitProfile}</a>
                   </div>
               `;
               friendsListEl.appendChild(card);
+          });
+      } catch (error) { 
+          friendsListEl.innerHTML = `<div class="no-data" style="color:var(--accent);">${translations[currentLang].errorOccurred}</div>`; 
+      }
+  }
+
+  function renderInventoryTabs() {
+      const tabsEl = document.getElementById('invTabs');
+      if (!tabsEl) return;
+      tabsEl.innerHTML = invTabsData.map(t => 
+          `<button class="inv-tab ${currentInvTab === t.id ? 'active' : ''}" onclick="changeInvTab('${t.id}')">${currentLang === 'en' ? t.nameEn : t.name}</button>`
+      ).join('');
+  }
+
+  window.changeInvTab = function(tabId) {
+      currentInvTab = tabId;
+      renderInventoryTabs();
+      renderInventory(currentInventory);
+  };
+
+  function renderInventory(inventory) {
+      const grid = document.getElementById('inventoryGrid');
+      const totalEl = document.getElementById('invTotalCount');
+      if (!grid) return;
+      
+      let total = 0;
+      for (const k in inventory) { total += inventory[k] || 0; }
+      if (totalEl) totalEl.innerText = `(${total} ${translations[currentLang].invTotal.replace(':', '')})`;
+      
+      const itemKeys = Object.keys(inventory).filter(k => (inventory[k] || 0) > 0 && inventoryItemsMeta[k]);
+      
+      if (itemKeys.length === 0) {
+          grid.innerHTML = `<div class="inv-empty" style="grid-column: 1 / -1;">${translations[currentLang].invEmpty}</div>`;
+          return;
+      }
+      
+      const filtered = currentInvTab === 'all' ? itemKeys : itemKeys.filter(k => inventoryItemsMeta[k].cat === currentInvTab);
+      
+      if (filtered.length === 0) {
+          grid.innerHTML = `<div class="inv-empty" style="grid-column: 1 / -1;">${currentLang === 'en' ? 'No items in this category.' : 'مفيش أدوات في التصنيف ده.'}</div>`;
+          return;
+      }
+      
+      grid.innerHTML = '';
+      filtered.forEach(itemId => {
+          const meta = inventoryItemsMeta[itemId];
+          const count = inventory[itemId];
+          const displayName = currentLang === 'en' ? meta.nameEn : meta.name;
+          
+          let btnHtml = '';
+          if (meta.action === 'open') {
+              btnHtml = `<button class="inv-btn unpack" onclick="useInventoryItem('${itemId}')">🎁 ${translations[currentLang].open}</button>`;
+          } else if (meta.action === 'unpack') {
+              btnHtml = `<button class="inv-btn unpack" onclick="useInventoryItem('${itemId}')">📦 ${translations[currentLang].unpack}</button>`;
+          } else if (meta.action === 'use') {
+              btnHtml = `<button class="inv-btn profile-use" onclick="useInventoryItem('${itemId}')">${translations[currentLang].use} ✓</button>`;
+          } else if (meta.cat === 'quiz') {
+              btnHtml = `<button class="inv-btn quiz-note" disabled>🎮 ${translations[currentLang].quizUse}</button>`;
           }
-      } catch (error) { friendsListEl.innerHTML = `<div class="no-data" style="color:var(--accent);">حدث خطأ أثناء تحميل الأصدقاء.</div>`; }
+          
+          const card = document.createElement('div');
+          card.className = 'inv-item';
+          card.innerHTML = `
+              <div class="inv-count">${count}</div>
+              <div class="inv-icon">${meta.icon}</div>
+              <div class="inv-name">${displayName}</div>
+              ${btnHtml}
+          `;
+          grid.appendChild(card);
+      });
+  }
+
+  async function refreshInventory() {
+      const invSnap = await window.get(window.ref(window.db, 'users_data/' + profileUser.toLowerCase() + '/inventory'));
+      currentInventory = invSnap.exists() ? invSnap.val() : {};
+      renderInventory(currentInventory);
+  }
+
+  window.useInventoryItem = async function(itemId) {
+      const meta = inventoryItemsMeta[itemId];
+      if (!meta) return;
+      if ((currentInventory[itemId] || 0) <= 0) {
+          showAlert('⚠️', currentLang === 'en' ? 'You don\'t have this item!' : 'مفيش عندك من الأداة دي!');
+          return;
+      }
+      
+      try {
+          switch (itemId) {
+              case 'box_bronze':
+              case 'box_silver':
+              case 'box_gold':
+              case 'box_diamond':
+              case 'box_legendary':
+                  await openShopBox(itemId);
+                  break;
+              case 'starter_bundle':
+              case 'survival_kit':
+              case 'speed_demon':
+              case 'ultimate_pack':
+                  await unpackBundle(itemId);
+                  break;
+              case 'fix_streak':
+                  await useFixStreak();
+                  break;
+              case 'team_boost':
+                  await useTeamBoost();
+                  break;
+              case 'shield':
+                  await useShield();
+                  break;
+              default:
+                  showAlert('⚠️', currentLang === 'en' ? 'This item is used inside quizzes.' : 'الأداة دي بتتستخدم جوه الكويزات.');
+          }
+      } catch (e) {
+          console.error(e);
+          showAlert('❌', translations[currentLang].errorOccurred);
+      }
+  };
+
+  async function consumeItem(itemId) {
+      const user = profileUser.toLowerCase();
+      const currentCount = currentInventory[itemId] || 0;
+      if (currentCount <= 0) return false;
+      const newCount = currentCount - 1;
+      const updates = {};
+      updates[`users_data/${user}/inventory/${itemId}`] = newCount > 0 ? newCount : null;
+      await window.update(window.ref(window.db), updates);
+      currentInventory[itemId] = newCount > 0 ? newCount : 0;
+      if (newCount <= 0) delete currentInventory[itemId];
+      renderInventory(currentInventory);
+      return true;
+  }
+
+  async function openShopBox(boxId) {
+      const user = profileUser.toLowerCase();
+      const boxConfig = {
+          box_bronze:    { coins: [30, 100],    xp: [50, 150],    weights: { coins: 60, xp: 40 } },
+          box_silver:    { coins: [100, 300],   xp: [150, 400],   weights: { coins: 40, xp: 40, item: 20 } },
+          box_gold:      { coins: [300, 800],   xp: [400, 800],   weights: { coins: 35, xp: 35, item: 15, frame: 15 } },
+          box_diamond:   { coins: [800, 2000],  xp: [1000, 2000], weights: { coins: 30, xp: 30, item: 20, frame: 20 } },
+          box_legendary: { coins: [2000, 5000], xp: [3000, 5000], weights: { coins: 25, xp: 25, item: 25, frame: 25 } }
+      };
+      const cfg = boxConfig[boxId];
+      if (!cfg) return;
+      
+      const consumed = await consumeItem(boxId);
+      if (!consumed) return;
+      
+      const rand = Math.random() * 100;
+      let cumulative = 0;
+      let type = 'coins';
+      for (const [k, w] of Object.entries(cfg.weights)) {
+          cumulative += w;
+          if (rand < cumulative) { type = k; break; }
+      }
+      
+      const updates = {};
+      let rewardText = '';
+      
+      if (type === 'coins') {
+          const amount = Math.floor(Math.random() * (cfg.coins[1] - cfg.coins[0] + 1)) + cfg.coins[0];
+          const cSnap = await window.get(window.ref(window.db, `users_data/${user}/coins`));
+          const current = cSnap.exists() ? cSnap.val() : 0;
+          updates[`users_data/${user}/coins`] = current + amount;
+          rewardText = `🪙 ${amount} ${currentLang === 'en' ? 'Coins' : 'كوينز'}`;
+      } else if (type === 'xp') {
+          const amount = Math.floor(Math.random() * (cfg.xp[1] - cfg.xp[0] + 1)) + cfg.xp[0];
+          const xpSnap = await window.get(window.ref(window.db, `users_data/${user}/xp`));
+          const current = xpSnap.exists() ? xpSnap.val() : 0;
+          updates[`users_data/${user}/xp`] = current + amount;
+          rewardText = `✨ ${amount} XP`;
+      } else if (type === 'item') {
+          const quizItems = ['fifty','skip','hint_half','reveal','second_chance','freeze10','freeze20','add10','add30','stop_timer','double_xp','double_coins','double_lb'];
+          const randomItem = quizItems[Math.floor(Math.random() * quizItems.length)];
+          const meta = inventoryItemsMeta[randomItem];
+          const cSnap = await window.get(window.ref(window.db, `users_data/${user}/inventory/${randomItem}`));
+          const current = cSnap.exists() ? cSnap.val() : 0;
+          updates[`users_data/${user}/inventory/${randomItem}`] = current + 1;
+          rewardText = `${meta.icon} ${currentLang === 'en' ? meta.nameEn : meta.name} x1`;
+      } else if (type === 'frame') {
+          const frameSnap = await window.get(window.ref(window.db, `users_data/${user}/profileFrame`));
+          const currentFrame = frameSnap.exists() ? frameSnap.val() : null;
+          if (currentFrame === 'fire') {
+              const amount = Math.floor(Math.random() * (cfg.coins[1] - cfg.coins[0] + 1)) + cfg.coins[0];
+              const cSnap = await window.get(window.ref(window.db, `users_data/${user}/coins`));
+              const current = cSnap.exists() ? cSnap.val() : 0;
+              updates[`users_data/${user}/coins`] = current + amount;
+              rewardText = `🪙 ${amount} ${currentLang === 'en' ? 'Coins (frame already owned)' : 'كوينز (الإطار موجود عندك)'}`;
+          } else {
+              updates[`users_data/${user}/profileFrame`] = 'fire';
+              rewardText = `🔥 ${currentLang === 'en' ? 'Legendary Fire Frame!' : 'إطار ناري أسطوري!'}`;
+          }
+      }
+      
+      await window.update(window.ref(window.db), updates);
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+      
+      showAlert(
+          currentLang === 'en' ? '🎉 Box Opened!' : '🎉 مبروك!',
+          `${translations[currentLang].boxOpened}\n\n${rewardText}`
+      );
+      
+      await refreshInventory();
+  }
+
+  async function unpackBundle(bundleId) {
+      const user = profileUser.toLowerCase();
+      const contents = bundleContents[bundleId];
+      if (!contents) return;
+      
+      const consumed = await consumeItem(bundleId);
+      if (!consumed) return;
+      
+      const updates = {};
+      let parts = [];
+      for (const [itemId, qty] of Object.entries(contents)) {
+          const cSnap = await window.get(window.ref(window.db, `users_data/${user}/inventory/${itemId}`));
+          const current = cSnap.exists() ? cSnap.val() : 0;
+          updates[`users_data/${user}/inventory/${itemId}`] = current + qty;
+          const meta = inventoryItemsMeta[itemId];
+          parts.push(`${meta.icon} ${currentLang === 'en' ? meta.nameEn : meta.name} x${qty}`);
+      }
+      
+      await window.update(window.ref(window.db), updates);
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      
+      showAlert(translations[currentLang].bundleUnpacked, parts.join('\n'));
+      
+      await refreshInventory();
+  }
+
+  async function useFixStreak() {
+      const user = profileUser.toLowerCase();
+      const streakSnap = await window.get(window.ref(window.db, `users_data/${user}/streak`));
+      const currentStreak = streakSnap.exists() ? streakSnap.val() : 0;
+      
+      if (currentStreak > 0) {
+          showAlert('⚠️', translations[currentLang].streakHealthy);
+          return;
+      }
+      
+      const consumed = await consumeItem('fix_streak');
+      if (!consumed) return;
+      
+      const restored = Math.max(1, Math.floor(Math.random() * 3) + 1);
+      await window.set(window.ref(window.db, `users_data/${user}/streak`), restored);
+      document.getElementById('bestStreakDisplay').innerText = restored;
+      
+      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
+      showAlert('🔥', `${translations[currentLang].streakFixed} (${restored} ${currentLang === 'en' ? 'days' : 'أيام'})`);
+  }
+
+  async function useTeamBoost() {
+      const user = profileUser.toLowerCase();
+      const teamSnap = await window.get(window.ref(window.db, `users_data/${user}/team`));
+      if (!teamSnap.exists()) {
+          showAlert('⚠️', translations[currentLang].noTeam);
+          return;
+      }
+      
+      const consumed = await consumeItem('team_boost');
+      if (!consumed) return;
+      
+      const teamId = teamSnap.val();
+      const teamScoreSnap = await window.get(window.ref(window.db, `teams/${teamId}`));
+      const currentScore = teamScoreSnap.exists() ? teamScoreSnap.val() : 0;
+      await window.set(window.ref(window.db, `teams/${teamId}`), currentScore + 1000);
+      
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      showAlert('⚔️', translations[currentLang].teamBoosted);
+  }
+
+  async function useShield() {
+      const user = profileUser.toLowerCase();
+      const today = new Date().toDateString();
+      const lastPlaySnap = await window.get(window.ref(window.db, `users_data/${user}/lastPlay`));
+      const lastPlay = lastPlaySnap.exists() ? lastPlaySnap.val() : null;
+      
+      if (lastPlay === today) {
+          showAlert('🛡️', translations[currentLang].shieldAlready);
+          return;
+      }
+      
+      const consumed = await consumeItem('shield');
+      if (!consumed) return;
+      
+      await window.set(window.ref(window.db, `users_data/${user}/lastPlay`), today);
+      
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      showAlert('🛡️', translations[currentLang].shieldUsed);
   }
 
   let selectedFile = null;
@@ -504,6 +941,7 @@
   }
 
   function checkLootBoxTimer(userData) {
+      const t = translations[currentLang];
       const lastBox = userData.lastLootBox || 0;
       const now = Date.now();
       const cooldown = 24 * 60 * 60 * 1000;
@@ -512,33 +950,65 @@
       const timerText = document.getElementById('lootBoxTimer');
 
       if (timeLeft > 0) {
-          btn.disabled = true; btn.style.background = '#333'; btn.style.boxShadow = 'none'; btn.style.cursor = 'not-allowed'; btn.innerText = '⏳ الصندوق مقفول';
+          btn.disabled = true; 
+          btn.style.background = '#333'; 
+          btn.style.boxShadow = 'none'; 
+          btn.style.cursor = 'not-allowed'; 
+          btn.innerText = t.lootBoxLocked;
+          
           timerText.style.display = 'block';
-          setInterval(() => {
+          
+          if (window.lootBoxInterval) clearInterval(window.lootBoxInterval);
+          
+          window.lootBoxInterval = setInterval(() => {
               const newTimeLeft = (lastBox + cooldown) - Date.now();
               if (newTimeLeft <= 0) {
-                  btn.disabled = false; btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)'; btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)'; btn.style.cursor = 'pointer'; btn.innerText = '🎁 افتح صندوقك اليومي'; timerText.style.display = 'none'; return;
+                  btn.disabled = false; 
+                  btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)'; 
+                  btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)'; 
+                  btn.style.cursor = 'pointer'; 
+                  btn.innerText = translations[currentLang].lootBoxBtn; 
+                  timerText.style.display = 'none'; 
+                  clearInterval(window.lootBoxInterval);
+                  return;
               }
               const hours = Math.floor(newTimeLeft / (1000 * 60 * 60));
               const minutes = Math.floor((newTimeLeft % (1000 * 60 * 60)) / (1000 * 60));
               const seconds = Math.floor((newTimeLeft % (1000 * 60)) / 1000);
-              timerText.innerText = `متاح بعد: ${hours}س ${minutes}د ${seconds}ث`;
+              timerText.innerText = `${translations[currentLang].lootBoxTimerPrefix}${hours}${translations[currentLang].h} ${minutes}${translations[currentLang].m} ${seconds}${translations[currentLang].s}`;
           }, 1000);
       } else {
-          btn.disabled = false; timerText.style.display = 'none';
+          btn.disabled = false; 
+          btn.innerText = t.lootBoxBtn;
+          btn.style.background = 'linear-gradient(45deg, #ff9800, #ff5722)'; 
+          btn.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.5)'; 
+          btn.style.cursor = 'pointer';
+          timerText.style.display = 'none';
       }
   }
 
   window.openLootBox = async function() {
+      const t = translations[currentLang];
       const btn = document.getElementById('openBoxBtn');
       const user = profileUser.toLowerCase();
-      btn.innerText = 'جاري الفتح... 🎁'; btn.disabled = true;
+      
+      btn.innerText = t.lootBoxOpening; 
+      btn.disabled = true;
+      
       try {
-          const rewards = [ { type: 'coins', amount: 50, text: '🪙 50 كوينز!' }, { type: 'coins', amount: 100, text: '🪙 100 كوينز!' }, { type: 'xp', amount: 100, text: '✨ 100 XP!' }, { type: 'xp', amount: 200, text: '✨ 200 XP!' }, { type: 'frame', text: '🔥 إطار ناري أسطوري!' } ];
+          const rewards = [ 
+              { type: 'coins', amount: 50, text: t.rewardCoins50 }, 
+              { type: 'coins', amount: 100, text: t.rewardCoins100 }, 
+              { type: 'xp', amount: 100, text: t.rewardXp100 }, 
+              { type: 'xp', amount: 200, text: t.rewardXp200 }, 
+              { type: 'frame', text: t.rewardFrame } 
+          ];
+          
           let randomReward = rewards[Math.floor(Math.random() * 4)]; 
           if (Math.random() > 0.7) randomReward = rewards[4]; 
 
-          const updates = {}; updates[`users_data/${user}/lastLootBox`] = Date.now();
+          const updates = {}; 
+          updates[`users_data/${user}/lastLootBox`] = Date.now();
 
           if (randomReward.type === 'coins') {
               const coinSnap = await window.get(window.ref(window.db, `users_data/${user}/coins`));
@@ -553,14 +1023,18 @@
           await window.update(window.ref(window.db), updates);
           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
           
-          setTimeout(() => {
-              showAlert('🎉 مبروك!', `لقد فتحت الصندوق وحصلت على:\n${randomReward.text}`);
-              setTimeout(() => location.reload(), 2000);
-          }, 500);
+          showAlert(t.lootBoxCongrats, `${t.lootBoxResult}${randomReward.text}`);
+          
+          const userSnap = await window.get(window.ref(window.db, 'users_data/' + user));
+          const newData = userSnap.val() || {};
+          checkLootBoxTimer(newData);
+          document.getElementById('coinsDisplay').innerText = newData.coins || 0;
+          document.getElementById('xpDisplay').innerText = newData.xp || 0;
 
       } catch(e) {
-          showAlert('خطأ', 'حدث خطأ أثناء فتح الصندوق.');
-          btn.innerText = '🎁 افتح صندوقك اليومي'; btn.disabled = false;
+          showAlert(t.errTitle, t.lootBoxError);
+          btn.innerText = t.lootBoxBtn; 
+          btn.disabled = false;
       }
   }
 
