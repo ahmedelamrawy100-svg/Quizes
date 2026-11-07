@@ -141,33 +141,61 @@
 <script src="questions.js"></script>
 <script src="quiz-core.js" type="module"></script>
 <script>
-    const quizKey = 'spiderman'; 
-    const quizData = allQuizzesData.spiderman;
-    const quizData2026 = allQuizzesData.spiderman2026;
+    // ✅ تأمين التشغيل عشان ميرميش إيرور لو الداتا ناقصة
+    window.addEventListener('load', () => {
+        
+        // لو ملف questions.js فيه مشكلة أو allQuizzesData مش موجود
+        if (typeof allQuizzesData === 'undefined') {
+            console.error("خطأ: allQuizzesData غير معرف. تأكد من ملف questions.js");
+            return;
+        }
 
-    // دمج أجزاء سبايدرمان 2026 داخل قائمة الأجزاء
-    const partsList = { 
-        part1: quizData.part1, 
-        part2: quizData.part2, 
-        part3: quizData.part3,
-        part4: quizData.part4,
-        part5: quizData.part5,
-        part6: quizData.part6,
-        part7: quizData.part7,
-        part8: quizData.part8,
-        part2026: quizData2026.comprehensive // ربط كارت 2026 ببياناته
-    };
+        const quizKey = 'spiderman'; 
+        // استخدام || {} كحماية لو البيانات ناقصة
+        const quizData = allQuizzesData.spiderman || {};
+        const quizData2026 = allQuizzesData.spiderman2026 || {};
 
-    window.onload = () => { 
-        initQuiz({ 
-            title: "🕷️ كويز سبايدرمان 🕷️", 
-            quizKey: quizKey, 
-            quizData: quizData, 
-            hasParts: true, 
-            partsList: partsList, 
-            bgMusic: 'sounds/heartbeat.wav' 
-        }); 
-    }
+        // حماية كل جزء عشان لو مش موجود ميكسرش اللعبة
+        const partsList = { 
+            part1: quizData.part1 || [], 
+            part2: quizData.part2 || [], 
+            part3: quizData.part3 || [],
+            part4: quizData.part4 || [],
+            part5: quizData.part5 || [],
+            part6: quizData.part6 || [],
+            part7: quizData.part7 || [],
+            part8: quizData.part8 || [],
+            part2026: quizData2026.comprehensive || [] 
+        };
+
+        // التأكد إن الـ initQuiz اتحمل من quiz-core.js
+        if (typeof initQuiz === 'function') {
+            initQuiz({ 
+                title: "🕷️ كويز سبايدرمان 🕷️", 
+                quizKey: quizKey, 
+                quizData: quizData, 
+                hasParts: true, 
+                partsList: partsList, 
+                bgMusic: 'sounds/heartbeat.wav' 
+            }); 
+        } else {
+            // لو الموديول لسه بيحمل بانتظار لحظة كمان
+            setTimeout(() => {
+                if (typeof initQuiz === 'function') {
+                    initQuiz({ 
+                        title: "🕷️ كويز سبايدرمان 🕷️", 
+                        quizKey: quizKey, 
+                        quizData: quizData, 
+                        hasParts: true, 
+                        partsList: partsList, 
+                        bgMusic: 'sounds/heartbeat.wav' 
+                    }); 
+                } else {
+                    console.error("خطأ: دالة initQuiz غير موجودة. تأكد من ملف quiz-core.js");
+                }
+            }, 500);
+        }
+    });
 </script>
 <script src="room-cleaner.js"></script>
 </body>
