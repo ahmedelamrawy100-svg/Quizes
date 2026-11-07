@@ -3,38 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🛒 المتجر - Quiz Hub</title>
+<title>🛒 متجر المساعدات - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #000; --text: #fff; --subtitle: #aaa; --card-bg: #111; --border: #333; --accent: #ff0000; --gold: #ffd700; --green: #4caf50; }
-  body.light-mode { --bg: #f4f4f4; --text: #111; --subtitle: #555; --card-bg: #fff; --border: #ccc; --gold: #b8860b; }
+  :root { --bg: #080808; --text: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --subtitle: #aaa; --input-bg: #000; }
+  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; --gold: #b8860b; --subtitle: #555; --input-bg: #fff;}
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
   
-  .top-bar { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+  .top-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
+  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
   .coin-badge { background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
   
   .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,0,0,0.3); }
-  .header-subtitle { text-align: center; color: var(--subtitle); margin-bottom: 40px; }
+  .header-subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; text-align: center; }
   
-  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 900px; }
-  .shop-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 25px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+  .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+  .tab-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
+  .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+  
+  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; }
+  .shop-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; }
   .shop-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
   
-  .item-icon { font-size: 50px; margin-bottom: 15px; }
-  .item-title { font-size: 20px; font-weight: bold; color: var(--text); margin-bottom: 10px; }
-  .item-desc { font-size: 14px; color: var(--subtitle); margin-bottom: 20px; min-height: 42px; }
+  .item-icon { font-size: 40px; margin-bottom: 10px; }
+  .item-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+  .item-desc { font-size: 12px; color: #aaa; margin-bottom: 15px; flex-grow: 1; min-height: 36px; }
+  .item-owned { position: absolute; top: 10px; left: 10px; background: var(--green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
   
-  .btn-buy { width: 100%; padding: 12px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; background: var(--gold); color: #000; display: flex; justify-content: center; align-items: center; gap: 8px; }
+  .btn-buy { width: 100%; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; background: var(--gold); color: #000; }
   .btn-buy:hover { background: #ffcc00; transform: scale(1.02); }
   .btn-buy:disabled { background: #333; color: #888; cursor: not-allowed; transform: none; }
-  
-  /* ✅ علامة التوثيق */
-  .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 10px; font-weight: bold; vertical-align: middle; }
 
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 9999; opacity: 0; transition: 0.3s; }
+  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 9999; opacity: 0; transition: 0.3s; font-family: 'Cairo'; text-align: center; }
   .toast.show { opacity: 1; top: 30px; }
   .toast.error { background: var(--accent); }
 </style>
@@ -42,18 +45,20 @@
 <body>
 
 <div class="top-bar">
-  <a href="index.html" class="back-btn">⬅ رجوع للرئيسية</a>
-  <div class="coin-badge">🪙 <span id="userCoins">0</span> كوينز</div>
+  <div style="display: flex; gap: 10px;">
+    <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع للرئيسية</a>
+    <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+  </div>
+  <div class="coin-badge">🪙 <span id="userCoins">0</span> <span id="coinsText">كوينز</span></div>
 </div>
 
-<h1 class="header-title">🛒 متجر المساعدات</h1>
-<p class="header-subtitle">اشتري مساعدات عشان تسهل عليك الكويزات وتجيب أعلى النتايج!</p>
+<h1 class="header-title" id="shopTitle">🛒 متجر المساعدات</h1>
+<p class="header-subtitle" id="shopSubtitle">أدوات بتساعدك في الكويزات (تقدر تستخدمها من البروفايل أو جوه الكويز)</p>
 
-<div class="shop-grid" id="shopGrid">
-  <!-- كروت المتجر هتظهر هنا -->
-</div>
+<div class="tabs" id="tabsContainer"></div>
+<div class="shop-grid" id="shopGrid"></div>
 
-<div class="toast" id="toast">تمت العملية بنجاح</div>
+<div class="toast" id="toast">تمت العملية</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -67,65 +72,170 @@
   if (!currentUser) { window.location.href = 'index.html'; }
 
   let userCoins = 0;
+  let userInventory = {};
+  let currentTab = 'all';
+  let currentLang = localStorage.getItem('lang') || 'ar';
 
+  // ✅ التراجم الثابتة
+  const translations = {
+    ar: { 
+      back: "⬅ رجوع للرئيسية", coins: "كوينز", title: "🛒 متجر المساعدات", 
+      subtitle: "أدوات بتساعدك في الكويزات (تقدر تستخدمها من البروفايل أو جوه الكويز)",
+      success: "تمت العملية", buySuccess: "تم الشراء بنجاح! اذهب للبروفايل لاستخدامه.",
+      notEnough: "معندكش كوينز كافية!", error: "حدث خطأ: ", owned: "تملك: ",
+      buy: "شراء بـ ", noCoins: "كوينز غير كافية" 
+    },
+    en: { 
+      back: "⬅ Back to Home", coins: "Coins", title: "🛒 Assistants Shop", 
+      subtitle: "Tools to help you in quizzes (Use them from your profile or inside the quiz)",
+      success: "Success", buySuccess: "Purchased successfully! Go to your profile to use it.",
+      notEnough: "Not enough coins!", error: "Error: ", owned: "Owned: ",
+      buy: "Buy for ", noCoins: "Not enough coins" 
+    }
+  };
+
+  // ✅ الأدوات مع الترجمة
   const shopItems = [
-    { id: 'skip', icon: '🎯', title: 'تخطي سؤال', desc: 'بيشيل إجابتين غلط من السؤال عشان تختار صح.', price: 50 },
-    { id: 'freeze', icon: '⏱️', title: 'تجميد الوقت', desc: 'بيوقف عداد الوقت لمدة 15 ثانية عشان تفكر براحتك.', price: 30 },
-    { id: 'double_xp', icon: '🔥', title: 'مضاعف النقاط', desc: 'بيضاعف الـ XP اللي هتاخده في الكويز الجاي.', price: 100 },
-    { id: 'shield', icon: '🛡️', title: 'درع الحماية', desc: 'بيحميك من الخسارة في السؤال الجاي لو غلطت.', price: 75 },
-    { id: 'hint', icon: '💡', title: 'تلميح ذكي', desc: 'بيوريك أول حرف من الإجابة الصحيحة.', price: 40 },
-    { id: 'mega_box', icon: '🎁', title: 'صندوق المفاجآت', desc: 'بياخدك لجوايز عشوائية (XP أو كوينز).', price: 200 }
+    // ⏳ الوقت (5)
+    { id: 'freeze10', icon: '⏱️', title: 'تجميد الوقت 10ث', titleEn: 'Freeze 10s', desc: 'يوقف العداد 10 ثواني.', descEn: 'Stops the timer for 10 seconds.', price: 50, cat: 'time' },
+    { id: 'freeze20', icon: '⏱️', title: 'تجميد الوقت 20ث', titleEn: 'Freeze 20s', desc: 'يوقف العداد 20 ثانية.', descEn: 'Stops the timer for 20 seconds.', price: 100, cat: 'time' },
+    { id: 'add10', icon: '➕', title: 'إضافة 10 ثواني', titleEn: '+10 Seconds', desc: 'يزود وقت السؤال 10ث.', descEn: 'Adds 10 seconds to the question timer.', price: 30, cat: 'time' },
+    { id: 'add30', icon: '➕', title: 'إضافة 30 ثانية', titleEn: '+30 Seconds', desc: 'يزود وقت السؤال 30ث.', descEn: 'Adds 30 seconds to the question timer.', price: 80, cat: 'time' },
+    { id: 'stop_timer', icon: '🛑', title: 'إيقاف العداد لسؤال', titleEn: 'Stop Timer', desc: 'يوقف العداد تماماً في السؤال ده.', descEn: 'Stops the timer completely for this question.', price: 120, cat: 'time' },
+
+    // ❓ الأسئلة (5)
+    { id: 'fifty', icon: '✂️', title: 'حذف إجابتين (50/50)', titleEn: '50/50', desc: 'يشيل إجابتين غلط.', descEn: 'Removes two wrong answers.', price: 60, cat: 'question' },
+    { id: 'skip', icon: '⏭️', title: 'تخطي سؤال', titleEn: 'Skip Question', desc: 'يعدي السؤال من غير خسارة.', descEn: 'Skip the question without losing.', price: 80, cat: 'question' },
+    { id: 'hint_half', icon: '💡', title: 'تلميح (نصف الإجابة)', titleEn: 'Hint (Half Answer)', desc: 'يظهر نص الإجابة الصحيحة.', descEn: 'Reveals the first half of the correct answer.', price: 100, cat: 'question' },
+    { id: 'reveal', icon: '👁️', title: 'إظهار الإجابة', titleEn: 'Reveal Answer', desc: 'يظهر الإجابة الصحيحة فوراً.', descEn: 'Shows the correct answer immediately.', price: 200, cat: 'question' },
+    { id: 'second_chance', icon: '🎲', title: 'فرصة ثانية', titleEn: 'Second Chance', desc: 'يخليك تجاوب تاني لو غلطت.', descEn: 'Lets you answer again if you get it wrong.', price: 90, cat: 'question' },
+
+    // ⚡ تعزيزات (5)
+    { id: 'double_xp', icon: '✨', title: 'مضاعف XP', titleEn: 'Double XP', desc: 'يضاعف XP في الكويز الحالي.', descEn: 'Doubles XP for the current quiz.', price: 200, cat: 'boost' },
+    { id: 'double_coins', icon: '💰', title: 'مضاعف كوينز', titleEn: 'Double Coins', desc: 'يضاعف كوينز في الكويز الحالي.', descEn: 'Doubles coins for the current quiz.', price: 200, cat: 'boost' },
+    { id: 'shield', icon: '🛡️', title: 'درع الحماية', titleEn: 'Streak Shield', desc: 'بيمنع الستريك ينكسر لو غبت.', descEn: 'Prevents your streak from breaking if you miss a day.', price: 300, cat: 'boost' },
+    { id: 'double_lb', icon: '🏆', title: 'مضاعف نقاط المتصدرين', titleEn: 'Double LB Points', desc: 'يضاعف نقاطك في الليدربورد.', descEn: 'Doubles your leaderboard points.', price: 250, cat: 'boost' },
+    { id: 'fix_streak', icon: '🔥', title: 'إصلاح الستريك', titleEn: 'Fix Streak', desc: 'يرجع الستريك بتاعك لو اتكسر.', descEn: 'Restores your broken streak.', price: 250, cat: 'boost' },
+
+    // 🎁 صناديق (5)
+    { id: 'box_bronze', icon: '📦', title: 'صندوق برونزي', titleEn: 'Bronze Box', desc: 'جايزة عشوائية (كوينز/XP).', descEn: 'Random reward (Coins/XP).', price: 150, cat: 'loot' },
+    { id: 'box_silver', icon: '🎁', title: 'صندوق فضي', titleEn: 'Silver Box', desc: 'جايزة عشوائية أكبر.', descEn: 'Bigger random reward.', price: 300, cat: 'loot' },
+    { id: 'box_gold', icon: '🏆', title: 'صندوق ذهبي', titleEn: 'Gold Box', desc: 'جايزة نادرة جداً.', descEn: 'Very rare reward.', price: 600, cat: 'loot' },
+    { id: 'box_diamond', icon: '💎', title: 'صندوق ألماسي', titleEn: 'Diamond Box', desc: 'أفضل جايزة في اللعبة.', descEn: 'Best reward in the game.', price: 1000, cat: 'loot' },
+    { id: 'box_legendary', icon: '👑', title: 'صندوق أسطوري', titleEn: 'Legendary Box', desc: 'جايزة أسطورية.', descEn: 'Legendary reward.', price: 2000, cat: 'loot' },
+
+    // 💬 اجتماعي (2) - تم حذف chat_announce زي ما طلبت
+    { id: 'team_boost', icon: '⚔️', title: 'دعم التيم', titleEn: 'Team Boost', desc: 'بتضيف 1000 XP للتيم بتاعك.', descEn: 'Adds 1000 XP to your team.', price: 300, cat: 'social' },
+    { id: 'ghost_mode', icon: '👻', title: 'وضع الشبح', titleEn: 'Ghost Mode', desc: 'تلعب كويز واحد بدون اسمك في الليدربورد.', descEn: 'Play one quiz without your name on the leaderboard.', price: 200, cat: 'social' },
+
+    // 📦 حزم (4)
+    { id: 'starter_bundle', icon: '🎁', title: 'حزمة المبتدئين', titleEn: 'Starter Bundle', desc: '50/50 + تجميد 10ث + تلميح.', descEn: '50/50 + Freeze 10s + Hint.', price: 150, cat: 'bundle' },
+    { id: 'survival_kit', icon: '🎒', title: 'حقيبة النجاة', titleEn: 'Survival Kit', desc: 'درع + 50/50 + فرصة ثانية.', descEn: 'Shield + 50/50 + Second Chance.', price: 450, cat: 'bundle' },
+    { id: 'speed_demon', icon: '💨', title: 'شيطان السرعة', titleEn: 'Speed Demon', desc: 'إضافة 30ث + إيقاف العداد.', descEn: '+30s + Stop Timer.', price: 160, cat: 'bundle' },
+    { id: 'ultimate_pack', icon: '👑', title: 'الحزمة المطلقة', titleEn: 'Ultimate Pack', desc: 'مضاعف XP + كوينز + درع.', descEn: 'Double XP + Coins + Shield.', price: 500, cat: 'bundle' }
   ];
 
-  // جلب كوينز اللاعب
-  window.onValue(window.ref(window.db, 'users_data/' + currentUser + '/coins'), (snap) => {
-      userCoins = snap.exists() ? snap.val() : 0;
+  // ✅ التصنيفات مع الترجمة
+  const categories = [
+    { id: 'all', name: 'الكل', nameEn: 'All' },
+    { id: 'time', name: '⏳ الوقت', nameEn: '⏳ Time' },
+    { id: 'question', name: '❓ الأسئلة', nameEn: '❓ Questions' },
+    { id: 'boost', name: '⚡ تعزيزات', nameEn: '⚡ Boosts' },
+    { id: 'loot', name: '🎁 صناديق', nameEn: '🎁 Boxes' },
+    { id: 'social', name: '💬 اجتماعي', nameEn: '💬 Social' },
+    { id: 'bundle', name: '📦 حزم', nameEn: '📦 Bundles' }
+  ];
+
+  // جلب الكوينز والمخزون
+  window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snap) => {
+      const data = snap.val() || {};
+      userCoins = data.coins || 0;
+      userInventory = data.inventory || {};
       document.getElementById('userCoins').innerText = userCoins;
       renderShop();
   });
 
-  function renderShop() {
-      const grid = document.getElementById('shopGrid');
-      grid.innerHTML = '';
+  // ✅ تطبيق اللغة
+  function applyLanguage() {
+      const t = translations[currentLang];
+      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
       
-      shopItems.forEach(item => {
+      document.getElementById('backBtn').innerText = t.back;
+      document.getElementById('coinsText').innerText = t.coins;
+      document.getElementById('shopTitle').innerText = t.title;
+      document.getElementById('shopSubtitle').innerText = t.subtitle;
+      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+
+      renderTabs();
+      renderShop();
+  }
+
+  window.toggleLanguage = function() {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      applyLanguage();
+  }
+
+  function renderTabs() {
+      const tabsContainer = document.getElementById('tabsContainer');
+      tabsContainer.innerHTML = categories.map(c => 
+          `<button class="tab-btn ${currentTab === c.id ? 'active' : ''}" onclick="changeTab('${c.id}')">${currentLang === 'en' ? c.nameEn : c.name}</button>`
+      ).join('');
+  }
+
+  window.changeTab = function(tabId) {
+      currentTab = tabId;
+      renderTabs();
+      renderShop();
+  }
+
+  function renderShop() {
+      const t = translations[currentLang];
+      const grid = document.getElementById('shopGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const filteredItems = currentTab === 'all' ? shopItems : shopItems.filter(i => i.cat === currentTab);
+
+      filteredItems.forEach(item => {
           const canAfford = userCoins >= item.price;
+          const ownedCount = userInventory[item.id] || 0;
+          const displayTitle = currentLang === 'en' ? item.titleEn : item.title;
+          const displayDesc = currentLang === 'en' ? item.descEn : item.desc;
+          
           const div = document.createElement('div');
           div.className = 'shop-card';
           div.innerHTML = `
+              ${ownedCount > 0 ? `<div class="item-owned">${t.owned} ${ownedCount}</div>` : ''}
               <div>
                   <div class="item-icon">${item.icon}</div>
-                  <div class="item-title">${item.title}</div>
-                  <div class="item-desc">${item.desc}</div>
+                  <div class="item-title">${displayTitle}</div>
+                  <div class="item-desc">${displayDesc}</div>
               </div>
-              <button class="btn-buy" ${!canAfford ? 'disabled' : ''} onclick="buyItem('${item.id}', ${item.price}, '${item.title}')">
-                  ${canAfford ? `شراء بـ ${item.price} 🪙` : 'كوينز غير كافية'}
+              <button class="btn-buy" ${!canAfford ? 'disabled' : ''} onclick="buyItem('${item.id}', ${item.price})">
+                  ${canAfford ? `${t.buy} ${item.price} 🪙` : t.noCoins}
               </button>
           `;
           grid.appendChild(div);
       });
   }
 
-  window.buyItem = async function(itemId, price, title) {
-      if (userCoins < price) {
-          showToast('معندكش كوينز كفاية!', true);
-          return;
-      }
+  window.buyItem = async function(itemId, price) {
+      const t = translations[currentLang];
+      if (userCoins < price) return showToast(t.notEnough, true);
 
       try {
-          // خصم الكوينز
           const newCoins = userCoins - price;
-          await window.update(window.ref(window.db, 'users_data/' + currentUser), { coins: newCoins });
+          const currentOwned = userInventory[itemId] || 0;
           
-          // إضافة العنصر للمخزون
-          const itemRef = window.ref(window.db, `users_data/${currentUser}/inventory/${itemId}`);
-          const itemSnap = await window.get(itemRef);
-          const currentCount = itemSnap.exists() ? itemSnap.val() : 0;
-          await window.update(window.ref(window.db, `users_data/${currentUser}/inventory`), { [itemId]: currentCount + 1 });
-
-          showToast(`تم شراء ${title} بنجاح!`);
+          const updates = {};
+          updates[`users_data/${currentUser}/coins`] = newCoins;
+          updates[`users_data/${currentUser}/inventory/${itemId}`] = currentOwned + 1;
+          
+          await window.update(window.ref(window.db), updates);
+          showToast(t.buySuccess);
       } catch(e) {
-          showToast('حدث خطأ أثناء الشراء', true);
+          showToast(t.error + e.message, true);
       }
   }
 
@@ -136,6 +246,8 @@
       setTimeout(() => { t.className = 'toast'; }, 3000);
   }
 
+  // ✅ التشغيل الأولي
+  applyLanguage();
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 </script>
 </body>
