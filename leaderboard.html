@@ -41,118 +41,47 @@
   .cat-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
   .cat-btn:hover:not(.active) { border-color: var(--gold); }
 
-  /* ==========================================
-     ✨ غرفة الانتصارات 3D (Hall of Fame)
-     ========================================== */
-  .hall-of-fame-container {
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 20px;
-      margin: 40px 0;
-      min-height: 280px;
-      perspective: 1000px; /* عشان تأثير الـ 3D */
-  }
+  .hall-of-fame-container { display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin: 40px 0; min-height: 280px; perspective: 1000px; }
+  .fame-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 2px solid var(--gold); border-radius: 20px; width: 160px; height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; transform-style: preserve-3d; transition: transform 0.1s ease, box-shadow 0.3s; box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
+  .fame-card:hover { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); border-color: #fff; }
 
-  .fame-card {
-      background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
-      border: 2px solid var(--gold);
-      border-radius: 20px;
-      width: 160px;
-      height: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease, box-shadow 0.3s;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-  }
-
-  .fame-card:hover {
-      box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
-      border-color: #fff;
-  }
-
-  /* المركز الأول (ذهبي) */
   .fame-rank-1 { width: 190px; height: 260px; border-color: #ffd700; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); transform: translateZ(50px); }
   .fame-rank-1 .fame-avatar { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; width: 90px; height: 90px; font-size: 40px;}
-  
-  /* المركز التاني (فضي) */
   .fame-rank-2 { border-color: #c0c0c0; transform: translateZ(20px); }
   .fame-rank-2 .fame-avatar { border-color: #c0c0c0; }
-  
-  /* المركز التالت (برونزي) */
   .fame-rank-3 { border-color: #cd7f32; transform: translateZ(0px); }
   .fame-rank-3 .fame-avatar { border-color: #cd7f32; }
 
-  /* التاج */
-  .crown-icon {
-      position: absolute;
-      top: -35px;
-      font-size: 45px;
-      animation: floatCrown 2s infinite ease-in-out;
-      filter: drop-shadow(0 0 10px #ffd700);
-      z-index: 10;
-  }
-  @keyframes floatCrown {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-  }
+  .crown-icon { position: absolute; top: -35px; font-size: 45px; animation: floatCrown 2s infinite ease-in-out; filter: drop-shadow(0 0 10px #ffd700); z-index: 10; }
+  @keyframes floatCrown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-  .fame-avatar {
-      width: 70px; height: 70px;
-      background: #222;
-      border-radius: 50%;
-      border: 3px solid #555;
-      display: flex; justify-content: center; align-items: center;
-      font-size: 30px; font-weight: bold; color: #fff;
-      margin-bottom: 15px;
-      background-size: cover; background-position: center;
-      overflow: hidden;
-  }
-
-  .fame-name { color: #fff; font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 5px; width: 100%; padding: 0 5px; word-break: break-all;}
+  .fame-avatar { width: 70px; height: 70px; background: #222; border-radius: 50%; border: 3px solid #555; display: flex; justify-content: center; align-items: center; font-size: 30px; font-weight: bold; color: #fff; margin-bottom: 15px; background-size: cover; background-position: center; overflow: hidden; }
+  .fame-name { color: #fff; font-size: 18px; font-weight: 900; text-align: center; margin-bottom: 5px; width: 100%; padding: 0 5px; word-break: break-all; display: flex; align-items: center; justify-content: center; gap: 5px;}
   .fame-score { color: var(--gold); font-size: 16px; font-weight: bold; background: rgba(255,215,0,0.1); padding: 3px 12px; border-radius: 15px; }
-  
-  /* تظبيط الموبايل */
+
+  /* ✅ علامة التوثيق */
+  .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 9px; font-weight: bold; vertical-align: middle; }
+
   @media (max-width: 768px) {
       .top-controls { top: 10px; left: 10px; gap: 5px; }
       .ctrl-btn { padding: 6px 10px; font-size: 12px; }
       .leaderboard-container { margin-top: 70px; padding: 0 10px; }
       .header-title { font-size: 26px; }
       .header-subtitle { font-size: 14px; margin-bottom: 20px; }
-      
       .main-tabs { flex-direction: row; }
       .main-tab-btn { font-size: 14px; padding: 10px 5px; }
-      
       .time-filters { flex-wrap: wrap; justify-content: center; }
       .time-btn { font-size: 12px; padding: 6px 12px; }
-      
       .category-filters { gap: 6px; }
       .cat-btn { font-size: 11px; padding: 5px 10px; }
-      
-      /* تصغير كروت الـ 3D عشان تبان */
-      .hall-of-fame-container { 
-          flex-direction: row; 
-          flex-wrap: wrap; 
-          gap: 8px; 
-          justify-content: center;
-          perspective: none; /* شيل تأثير الـ 3D في الموبايل */
-      }
-      .fame-card { 
-          width: 105px; 
-          height: 160px; 
-          transform: none !important; 
-      }
+      .hall-of-fame-container { flex-direction: row; flex-wrap: wrap; gap: 8px; justify-content: center; perspective: none; }
+      .fame-card { width: 105px; height: 160px; transform: none !important; }
       .fame-rank-1 { width: 120px; height: 180px; transform: none !important; }
       .fame-avatar { width: 45px; height: 45px; font-size: 18px; }
       .fame-rank-1 .fame-avatar { width: 55px; height: 55px; }
       .fame-name { font-size: 12px; }
       .fame-score { font-size: 11px; padding: 2px 6px; }
       .crown-icon { font-size: 24px; top: -20px; }
-      
       .lb-item { padding: 10px; font-size: 14px; }
       .lb-name { font-size: 13px; }
       .lb-score, .lb-time { font-size: 12px; padding: 3px 8px; }
@@ -166,16 +95,8 @@
   .lb-name { flex: 1; text-align: right; font-weight: bold; display: flex; align-items: center; gap: 10px; }
   .lb-avatar { width: 40px; height: 40px; background: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; color: #000; font-weight: bold; background-size: cover; background-position: center; overflow: hidden; }
   .lb-score { color: #ff0000; font-weight: 900; font-size: 20px; background: rgba(255,0,0,0.1); padding: 5px 15px; border-radius: 20px; }
-  
   .lb-time { color: var(--blue); font-weight: 900; font-size: 20px; background: rgba(0,255,255,0.1); padding: 5px 15px; border-radius: 20px; direction: ltr;}
   .no-data { text-align: center; color: var(--subtitle-color); padding: 40px; font-size: 18px; }
-  
-  @media (max-width: 600px) {
-    .header-title { font-size: 30px; }
-    .main-tab-btn { padding: 10px 20px; font-size: 16px; }
-    .lb-item { padding: 12px 15px; font-size: 16px; }
-    .lb-score, .lb-time { font-size: 16px; padding: 4px 10px; }
-  }
 </style>
 </head>
 <body>
@@ -201,7 +122,6 @@
             <button class="time-btn active" onclick="switchTimeFilter('all', this)" data-ar="👑 كل الأوقات" data-en="👑 All Time">👑 كل الأوقات</button>
             <button class="time-btn" onclick="switchTimeFilter('week', this)" data-ar="🔥 أبطال الأسبوع" data-en="🔥 Week Heroes">🔥 أبطال الأسبوع</button>
           </div>
-
           <div class="category-filters" id="categoryFilters">
             <button class="cat-btn active" onclick="filterLeaderboard('all', this)" data-ar="الكل" data-en="All">الكل</button>
             <button class="cat-btn" onclick="filterLeaderboard('horror', this)" data-ar="رعب 🎃" data-en="Horror 🎃">رعب 🎃</button>
@@ -211,7 +131,6 @@
             <button class="cat-btn" onclick="filterLeaderboard('egyptian', this)" data-ar="مصري 🇪🇬" data-en="Egyptian 🇪🇬">مصري 🇪🇬</button>
         </div>
       </div>
-
       <div class="hall-of-fame-container" id="podiumContainer"></div>
       <div class="leaderboard-list" id="leaderboardList">
         <div class="no-data" id="loadingText" data-ar="جاري تحميل البيانات..." data-en="Loading data...">جاري تحميل البيانات...</div>
@@ -223,7 +142,6 @@
           <div class="no-data">جاري تحميل البيانات...</div>
       </div>
   </div>
-
 </div>
 
 <script type="module">
@@ -240,15 +158,13 @@
   let allScoresData = null;
   let allLeaderboardData = null;
   let allUsersData = {}; 
+  let verifiedUsers = {}; // ✅ متغير للتوثيق
   let speedrunData = null;
 
   if (localStorage.getItem('theme') === 'light') { 
       document.body.classList.add('light-mode'); 
       const btn = document.getElementById('themeBtn');
       if(btn) btn.innerText = '🌙';
-  } else {
-      const btn = document.getElementById('themeBtn');
-      if(btn) btn.innerText = '☀️';
   }
 
   window.toggleTheme = function() {
@@ -280,15 +196,17 @@
       }
   }
 
-  // تأثير 3D لما تحرك الماوس
   document.addEventListener('mousemove', (e) => {
       const cards = document.querySelectorAll('.fame-card');
       const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
       const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-      
-      cards.forEach(card => {
-          card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-      });
+      cards.forEach(card => { card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`; });
+  });
+
+  window.onValue(window.ref(window.db, 'verified_users'), (snapshot) => {
+      verifiedUsers = snapshot.val() || {};
+      if (allScoresData) renderLeaderboard();
+      if (speedrunData) renderSpeedrun();
   });
 
   window.onValue(window.ref(window.db, 'users_data'), (snapshot) => {
@@ -315,7 +233,6 @@
   window.switchMainTab = function(tab, btn) {
       document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
       if (tab === 'normal') {
           document.getElementById('normalSection').style.display = 'block';
           document.getElementById('speedSection').style.display = 'none';
@@ -340,6 +257,13 @@
     btn.classList.add('active');
     currentCategory = category;
     renderLeaderboard();
+  }
+
+  function checkVerified(username) {
+      for(let v in verifiedUsers) {
+          if(v.toLowerCase() === username.toLowerCase()) return true;
+      }
+      return false;
   }
 
   function renderLeaderboard() {
@@ -400,19 +324,20 @@
     const top3 = top10.slice(0, 3);
     const rest = top10.slice(3);
 
-    // ✨ رسم كروت الـ 3D الجديدة (Hall of Fame)
     const podiumContainer = document.getElementById('podiumContainer');
     podiumContainer.innerHTML = '';
     podiumContainer.className = 'hall-of-fame-container';
 
-    // ترتيب الكروت عشان المركز الأول يبقى في النص
-    const displayOrder = [top3[1], top3[0], top3[2]]; // [فضي, ذهبي, برونزي]
+    const displayOrder = [top3[1], top3[0], top3[2]]; 
     const rankClasses = ['fame-rank-2', 'fame-rank-1', 'fame-rank-3'];
     const rankIcons = ['🥈', '👑', '🥉'];
 
     displayOrder.forEach((player, index) => {
         if (!player) return;
         
+        const isVerified = checkVerified(player.username);
+        const badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
+
         const div = document.createElement('div');
         div.className = `fame-card ${rankClasses[index]}`;
         
@@ -430,7 +355,7 @@
         div.innerHTML = `
             ${crownHTML}
             <div class="fame-avatar">${avatarHTML}</div>
-            <div class="fame-name">${player.username}</div>
+            <div class="fame-name">${player.username}${badge}</div>
             <div class="fame-score">${player.total} ${ptsText}</div>
             <div style="font-size: 24px; margin-top: 10px;">${rankIcons[index]}</div>
         `;
@@ -455,11 +380,13 @@
                 }
             }
 
+            const isVerified = checkVerified(player.username);
+            const badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
             const ptsText = currentLang === 'en' ? 'pts' : 'نقطة';
 
             div.innerHTML = `
                 <span class="lb-rank">#${actualRank}</span>
-                <span class="lb-name"><div class="lb-avatar">${avatarHTML}</div> ${player.username}</span>
+                <span class="lb-name"><div class="lb-avatar">${avatarHTML}</div> ${player.username}${badge}</span>
                 <span class="lb-score">${player.total} ${ptsText}</span>
             `;
             leaderboardList.appendChild(div);
@@ -478,7 +405,6 @@
     }
 
     let scores = Object.values(speedrunData);
-    
     let bestSpeedRuns = {};
     scores.forEach(entry => {
         let lowerUser = entry.user.toLowerCase();
@@ -508,11 +434,14 @@
             }
         }
 
+        const isVerified = checkVerified(entry.user);
+        const badge = isVerified ? ' <span class="verified-badge">✓</span>' : '';
+
         div.innerHTML = `
             <div class="lb-rank">${rankHTML}</div>
             <div class="lb-name">
                 <div class="lb-avatar">${avatarHTML}</div> 
-                ${entry.user}
+                ${entry.user}${badge}
                 <span style="font-size:12px; color:#aaa; font-weight:normal;">(${entry.quiz.toUpperCase()})</span>
             </div>
             <div class="lb-time">⏱️ ${entry.time}s</div>
@@ -521,9 +450,7 @@
     });
   }
 
-  window.onload = () => {
-      applyLanguage();
-  };
+  window.onload = () => { applyLanguage(); };
 </script>
 </body>
 </html>
