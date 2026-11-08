@@ -320,7 +320,6 @@
       } else if (tab === 'teams') {
           document.getElementById('teamsSection').style.display = 'block';
           document.getElementById('subtitle').innerText = currentLang === 'ar' ? 'صراع التيمات في جمع النقاط' : 'Teams battle for points';
-          // افتراضياً نفتح التيمات الأساسية
           switchTeamType('main', document.getElementById('btnMainTeams'));
       }
   }
@@ -354,7 +353,6 @@
         { id: 'egyptian', nameAr: 'المصري', nameEn: 'Egyptian', icon: '🇪🇬', color: '#4caf50' }
     ];
 
-    // ترتيبهم حسب النقاط
     mainCats.sort((a, b) => (mainTeamsScores[b.id] || 0) - (mainTeamsScores[a.id] || 0));
 
     grid.innerHTML = mainCats.map((cat, index) => {
