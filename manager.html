@@ -3,448 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📋 لوحة المدير - Quiz Hub</title>
+<title>🧑‍💼 لوحة المدير - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f7fa;
-    --surface: #ffffff;
-    --surface-2: #f0f2f5;
-    --text: #1a1a1a;
-    --text-secondary: #6b7280;
-    --border: #e5e7eb;
-    --primary: #f97316;
-    --primary-hover: #ea580c;
-    --primary-light: #fff7ed;
-    --success: #10b981;
-    --danger: #ef4444;
-    --info: #3b82f6;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
-    --radius: 12px;
-    --radius-sm: 8px;
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f0f2f5;
+    --text: #1a1a1a; --text-secondary: #6b7280; --border: #e5e7eb;
+    --primary: #f97316; --primary-hover: #ea580c; --primary-light: #fff7ed;
+    --success: #10b981; --danger: #ef4444; --info: #3b82f6; --gold: #eab308; --warning: #f59e0b;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 12px; --radius-sm: 8px;
   }
-
   body.dark-mode {
-    --bg: #0f1419;
-    --surface: #1a1f26;
-    --surface-2: #232a33;
-    --text: #f9fafb;
-    --text-secondary: #9ca3af;
-    --border: #2d3748;
-    --primary-light: #2d1f0f;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+    --bg: #0f1419; --surface: #1a1f26; --surface-2: #232a33;
+    --text: #f9fafb; --text-secondary: #9ca3af; --border: #2d3748;
+    --primary-light: #431407;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  #panelContent { display: none; width: 100%; max-width: 1280px; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    min-height: 100vh;
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: background 0.3s, color 0.3s;
-    -webkit-font-smoothing: antialiased;
-  }
+  .top-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 16px 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), #fb923c); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+  .brand-text h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .icon-btn { width: 40px; height: 40px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-sm); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
+  .btn-back { padding: 10px 18px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-  #panelContent {
-    display: none;
-    width: 100%;
-    max-width: 1280px;
-    animation: fadeUp 0.4s ease;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ===== Header ===== */
-  .top-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--surface);
-    padding: 16px 24px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .brand-icon {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--primary), #fb923c);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-  }
-
-  .brand-text h1 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.2;
-  }
-
-  .brand-text p {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-  }
-
-  .header-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .icon-btn {
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    font-family: 'Cairo';
-  }
-
-  .icon-btn:hover {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-    transform: translateY(-1px);
-  }
-
-  .btn-back {
-    padding: 10px 18px;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .btn-back:hover {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-  }
-
-  /* ===== Tabs ===== */
-  .tabs-bar {
-    display: flex;
-    gap: 4px;
-    background: var(--surface);
-    padding: 6px;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 24px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
+  .tabs-bar { display: flex; gap: 4px; background: var(--surface); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
   .tabs-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { background: transparent; border: none; color: var(--text-secondary); font-family: 'Cairo'; font-size: 13px; font-weight: 600; padding: 10px 14px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35); }
+  .tab-content { display: none; animation: fadeUp 0.3s ease; }
+  .tab-content.active { display: block; }
 
-  .tab-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-family: 'Cairo';
-    font-size: 14px;
-    font-weight: 600;
-    padding: 10px 16px;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: all 0.2s;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; text-align: center; transition: 0.25s; }
+  .stat-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .stat-icon { font-size: 26px; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-top: 4px; }
 
-  .tab-btn:hover {
-    background: var(--surface-2);
-    color: var(--text);
-  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; transition: 0.25s; }
+  .card:hover { box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .card-icon { width: 36px; height: 36px; background: var(--primary-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .card h3 { font-size: 15px; font-weight: 700; line-height: 1.3; }
 
-  .tab-btn.active {
-    background: var(--primary);
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
-  }
+  .form-control { width: 100%; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'Cairo'; font-size: 13px; outline: none; margin-bottom: 8px; transition: 0.2s; }
+  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); background: var(--surface); }
 
-  /* ===== Tab Content ===== */
-  .tab-content {
-    display: none;
-    animation: fadeUp 0.3s ease;
-  }
+  .btn-action { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Cairo'; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  .btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-sm { padding: 6px 10px; font-size: 12px; width: auto; }
+  .btn-danger { background: var(--danger); } .btn-danger:hover { background: #dc2626; }
+  .btn-success { background: var(--success); } .btn-success:hover { background: #059669; }
+  .btn-info { background: var(--info); } .btn-info:hover { background: #2563eb; }
+  .btn-warn { background: var(--warning); color: #000; } .btn-warn:hover { background: #d97706; }
 
-  .tab-content.active {
-    display: block;
-  }
+  .list-box { max-height: 340px; overflow-y: auto; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; margin-top: 10px; }
+  .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+  .list-item:last-child { border-bottom: none; }
+  .list-item-title { font-weight: 600; font-size: 13px; word-break: break-word; flex: 1; }
+  .list-item-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .list-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
-  /* ===== Grid ===== */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-  }
+  .no-data { text-align: center; color: var(--text-secondary); padding: 30px 15px; font-size: 14px; background: var(--surface-2); border-radius: var(--radius-sm); }
+  .empty-state { text-align: center; color: var(--text-secondary); padding: 30px; font-size: 14px; }
 
-  /* ===== Card ===== */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
+  /* ===== Chat (Admin Messages) ===== */
+  .chat-layout { display: grid; grid-template-columns: 240px 1fr; gap: 16px; height: calc(100vh - 280px); min-height: 500px; }
+  .chat-sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+  .chat-sidebar-title { font-size: 12px; font-weight: 900; color: var(--primary); padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px; }
+  .chat-room-item { display: flex; align-items: center; gap: 10px; padding: 11px; border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary); border: 1px solid transparent; cursor: pointer; font-family: 'Cairo'; font-weight: 700; font-size: 13px; transition: 0.2s; text-align: right; }
+  .chat-room-item:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+  .chat-room-item.active { background: linear-gradient(90deg, rgba(249,115,22,0.2), rgba(249,115,22,0.05)); color: var(--primary); border-color: var(--primary); }
+  .chat-room-emoji { font-size: 20px; flex-shrink: 0; }
+  .chat-room-name { flex: 1; }
 
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--primary);
-    opacity: 0;
-    transition: opacity 0.25s;
-  }
+  .chat-main { display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .chat-main-header { padding: 14px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(249,115,22,0.1), rgba(249,115,22,0.02)); font-weight: 900; font-size: 15px; color: var(--primary); }
+  .chat-main-messages { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .chat-empty { text-align: center; color: var(--text-secondary); margin-top: 40px; font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .chat-empty-icon { font-size: 50px; opacity: 0.4; }
+  .chat-msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.6; word-wrap: break-word; animation: msgIn 0.3s ease; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-msg.mine { align-self: flex-start; background: linear-gradient(135deg, var(--primary), #ea580c); color: #fff; border-bottom-right-radius: 4px; }
+  .chat-msg.theirs { align-self: flex-end; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .chat-msg-sender { font-size: 11px; font-weight: 900; opacity: 0.9; margin-bottom: 4px; }
+  .chat-msg-time { font-size: 10px; opacity: 0.6; margin-top: 4px; }
+  .chat-main-input { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--surface-2); }
+  .chat-main-input input { flex: 1; padding: 12px 16px; border-radius: 25px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none; }
+  .chat-main-input input:focus { border-color: var(--primary); }
+  .chat-main-input button { padding: 0 22px; border-radius: 25px; border: none; background: linear-gradient(135deg, var(--primary), #ea580c); color: #fff; font-family: 'Cairo'; font-weight: 900; font-size: 14px; cursor: pointer; }
+  .chat-main-input button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary);
-  }
+  /* Modal */
+  #customModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 99999; justify-content: center; align-items: center; padding: 20px; }
+  #customModal.active { display: flex; }
+  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+  .modal-close { position: absolute; top: 10px; left: 10px; background: var(--danger); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 14px; font-weight: 900; }
+  .modal-title { color: var(--primary); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-size: 18px; font-weight: 900; }
 
-  .card:hover::before {
-    opacity: 1;
-  }
+  /* Toast */
+  #toastContainer { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast { background: var(--success); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3); animation: toastIn 0.3s ease; pointer-events: auto; max-width: 400px; word-wrap: break-word; text-align: center; }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--info); }
+  @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
+  .access-denied { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 999999; justify-content: center; align-items: center; text-align: center; flex-direction: column; gap: 20px; padding: 20px; }
+  .access-denied.show { display: flex; }
+  .access-denied h1 { color: var(--danger); font-size: 60px; }
+  .access-denied a { color: var(--primary); text-decoration: underline; font-weight: bold; }
 
-  .card-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--primary-light);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-
-  .card h3 {
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  .card p {
-    color: var(--text-secondary);
-    font-size: 13px;
-    line-height: 1.5;
-    margin-bottom: 14px;
-    flex-grow: 1;
-  }
-
-  .form-control {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    font-family: 'Cairo';
-    font-size: 13px;
-    outline: none;
-    margin-bottom: 8px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-
-  .form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
-    background: var(--surface);
-  }
-
-  .form-control::placeholder {
-    color: var(--text-secondary);
-    opacity: 0.7;
-  }
-
-  textarea.form-control {
-    resize: vertical;
-    min-height: 70px;
-  }
-
-  .btn-action {
-    width: 100%;
-    padding: 11px;
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: 'Cairo';
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .btn-action:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-  }
-
-  .btn-action:active {
-    transform: translateY(0);
-  }
-
-  .list-box {
-    max-height: 140px;
-    overflow-y: auto;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 12px;
-  }
-
-  .list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    gap: 8px;
-  }
-
-  .list-item:last-child {
-    border-bottom: none;
-  }
-
-  /* ===== Section Title ===== */
-  .section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text);
-    margin: 28px 0 14px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--border);
-  }
-
-  .section-title:first-child {
-    margin-top: 0;
-  }
-
-  /* ===== Status ===== */
-  .status-box {
-    margin-top: 8px;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    text-align: center;
-    display: none;
-  }
-
-  .status-box.success {
-    background: #d1fae5;
-    color: #065f46;
-    display: block;
-  }
-
-  .status-box.error {
-    background: #fee2e2;
-    color: #991b1b;
-    display: block;
-  }
-
-  body.dark-mode .status-box.success {
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
-  }
-
-  body.dark-mode .status-box.error {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-  }
-
-  /* ===== Responsive ===== */
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     body { padding: 12px; }
     .top-header { padding: 12px 16px; }
-    .brand-text h1 { font-size: 16px; }
     .grid { grid-template-columns: 1fr; }
-    .tab-btn { font-size: 13px; padding: 9px 12px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .chat-layout { grid-template-columns: 1fr; height: auto; }
+    .chat-sidebar { flex-direction: row; overflow-x: auto; padding: 10px; }
+    .chat-room-item { white-space: nowrap; }
+    .chat-main { height: 500px; }
   }
 </style>
 </head>
 <body>
 
+<div id="toastContainer"></div>
+
+<div class="access-denied" id="accessDenied">
+  <h1>⛔</h1>
+  <h2 style="color:var(--danger);">وصول مرفوض</h2>
+  <p>هذه الصفحة مخصصة للمديرين فقط.</p>
+  <a href="index.html">⬅ العودة للرئيسية</a>
+</div>
+
 <div id="panelContent">
-  <!-- Header -->
   <div class="top-header">
     <div class="brand">
       <div class="brand-icon">📋</div>
       <div class="brand-text">
         <h1>لوحة المدير</h1>
-        <p>مركز إدارة المجتمع</p>
+        <p>إدارة الفعاليات والمجتمع</p>
       </div>
     </div>
     <div class="header-actions">
@@ -453,562 +165,756 @@
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('events', this)">🎉 الفعاليات</button>
-    <button class="tab-btn" onclick="switchTab('support', this)">📩 الدعم</button>
-    <button class="tab-btn" onclick="switchTab('team', this)">📋 الفريق</button>
-    <button class="tab-btn" onclick="switchTab('reports', this)">📊 التقارير</button>
-    <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+    <button class="tab-btn active" onclick="switchTab('overview', this)">📊 نظرة عامة</button>
+    <button class="tab-btn" onclick="switchTab('events', this)">🎉 الفعاليات</button>
+    <button class="tab-btn" onclick="switchTab('community', this)">💬 المجتمع</button>
+    <button class="tab-btn" onclick="switchTab('players', this)">👥 اللاعبين</button>
+    <button class="tab-btn" onclick="switchTab('reports', this)">📈 التقارير</button>
+    <button class="tab-btn" onclick="switchTab('admin-messages', this)">💬 رسائل الإدارة</button>
+    <button class="tab-btn" onclick="switchTab('owner-messages', this)">📩 رسائل الأونر</button>
   </div>
 
-  <!-- ============ Tab: الفعاليات ============ -->
-  <div id="tab-events" class="tab-content active">
+  <!-- Overview -->
+  <div id="tab-overview" class="tab-content active">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-icon">👥</div><div class="stat-value" id="statUsers">0</div><div class="stat-label">إجمالي اللاعبين</div></div>
+      <div class="stat-box"><div class="stat-icon">🎮</div><div class="stat-value" id="statPlays">0</div><div class="stat-label">مرات اللعب</div></div>
+      <div class="stat-box"><div class="stat-icon">💡</div><div class="stat-value" id="statSuggestions">0</div><div class="stat-label">اقتراحات</div></div>
+      <div class="stat-box"><div class="stat-icon">🎫</div><div class="stat-value" id="statTickets">0</div><div class="stat-label">تذاكر دعم</div></div>
+      <div class="stat-box"><div class="stat-icon">💬</div><div class="stat-value" id="statComments">0</div><div class="stat-label">تعليقات</div></div>
+      <div class="stat-box"><div class="stat-icon">🟢</div><div class="stat-value" id="statOnline">0</div><div class="stat-label">متصل الآن</div></div>
+    </div>
     <div class="grid">
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🎰</div>
-          <h3>سحب الجوائز</h3>
-        </div>
-        <p>اختيار فائز عشوائي من قائمة اللاعبين.</p>
-        <button class="btn-action" onclick="pickWinner()">اختيار فائز</button>
-        <div class="status-box" id="winnerRes"></div>
+        <div class="card-header"><div class="card-icon">🔄</div><h3>تحديث الإحصائيات</h3></div>
+        <button class="btn-action" onclick="loadOverview()">🔄 تحديث الآن</button>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🏆</div>
-          <h3>جدول البطولات</h3>
-        </div>
-        <p>إرسال جدول البطولة للأونر لمراجعته.</p>
-        <input type="text" id="tourneyInput" class="form-control" placeholder="تيم A ضد تيم B...">
-        <button class="btn-action" onclick="sendReq('tournaments', 'tourneyInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">🟢</div><h3>المتصلين حالياً</h3></div>
+        <button class="btn-action" onclick="loadOnlineUsers()">👁️ عرض</button>
+        <div class="list-box" id="onlineResult"><div class="no-data">اضغط عرض</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">⭐</div>
-          <h3>لاعب الأسبوع</h3>
-        </div>
-        <p>ترشيح لاعب للتكريم.</p>
-        <input type="text" id="potwInput" class="form-control" placeholder="اسم اللاعب...">
-        <button class="btn-action" onclick="sendReq('player_week', 'potwInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">🎉</div><h3>الفعاليات النشطة</h3></div>
+        <button class="btn-action" onclick="loadActiveEvents()">👁️ عرض</button>
+        <div class="list-box" id="activeEventsResult"><div class="no-data">اضغط عرض</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📊</div>
-          <h3>عمل استفتاء</h3>
-        </div>
-        <p>نشر تصويت للاعبين فوراً.</p>
-        <input type="text" id="pollQ" class="form-control" placeholder="السؤال...">
-        <input type="text" id="pollO1" class="form-control" placeholder="الاختيار 1">
-        <input type="text" id="pollO2" class="form-control" placeholder="الاختيار 2">
-        <button class="btn-action" onclick="createPoll()">نشر الاستفتاء</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">⚔️</div>
-          <h3>تنسيق التيمات</h3>
-        </div>
-        <p>إرسال جدول المباريات للأونر.</p>
-        <input type="text" id="matchInput" class="form-control" placeholder="المباراة...">
-        <button class="btn-action" onclick="sendReq('matches', 'matchInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">💡</div>
-          <h3>صندوق الأفكار</h3>
-        </div>
-        <p>حفظ أفكار الكويزات في أرشيف الأفكار.</p>
-        <input type="text" id="ideaInput" class="form-control" placeholder="فكرة كويز...">
-        <button class="btn-action" onclick="sendReq('ideas', 'ideaInput', this)">حفظ الفكرة</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">💬</div>
-          <h3>استفسارات اللاعبين</h3>
-        </div>
-        <p>قراءة تعليقات المجتمع والرد عليها.</p>
-        <a href="comments.html" class="btn-action" style="text-decoration:none;">فتح المجتمع</a>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">👑</div>
-          <h3>متابعة الـ VIP</h3>
-        </div>
-        <p>إرسال تقرير عن اللاعبين المميزين.</p>
-        <input type="text" id="vipInput" class="form-control" placeholder="ملاحظة...">
-        <button class="btn-action" onclick="sendReq('vip_notes', 'vipInput', this)">إرسال للأونر</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🎁</div>
-          <h3>إرسال عرض/خصم</h3>
-        </div>
-        <p>إرسال عرض جديد للأونر لنشره.</p>
-        <input type="text" id="offerInput" class="form-control" placeholder="اسم العرض...">
-        <button class="btn-action" onclick="sendReq('offers', 'offerInput', this)">إرسال للأونر</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🏁</div>
-          <h3>إرسال تحدي/مسابقة</h3>
-        </div>
-        <p>إرسال مسابقة جديدة للأونر لنشرها.</p>
-        <input type="text" id="contestInput" class="form-control" placeholder="اسم المسابقة...">
-        <button class="btn-action" onclick="sendReq('contests', 'contestInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">⚡</div><h3>تحديث كل شيء</h3></div>
+        <button class="btn-action btn-success" onclick="refreshAll()">⚡ تحديث شامل</button>
       </div>
     </div>
   </div>
 
-  <!-- ============ Tab: الدعم ============ -->
-  <div id="tab-support" class="tab-content">
+  <!-- Events -->
+  <div id="tab-events" class="tab-content">
     <div class="grid">
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🎫</div>
-          <h3>فرز التذاكر</h3>
-        </div>
-        <p>إرسال تذكرة دعم فني للأدمن.</p>
-        <input type="text" id="ticketInput" class="form-control" placeholder="وصف المشكلة...">
-        <button class="btn-action" onclick="sendTicket(this)">فتح تذكرة</button>
+        <div class="card-header"><div class="card-icon">🎁</div><h3>العروض النشطة</h3></div>
+        <input type="text" id="offerInput" class="form-control" placeholder="نص العرض...">
+        <button class="btn-action" onclick="addOffer()">➕ إضافة عرض</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearOffers()">🗑️ مسح الكل</button>
+        <div class="list-box" id="offersList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">❓</div>
-          <h3>مسودة FAQ</h3>
-        </div>
-        <p>إرسال مسودة الأسئلة الشائعة للأونر.</p>
-        <textarea id="faqInput" class="form-control" rows="3" placeholder="اكتب الأسئلة الشائعة..."></textarea>
-        <button class="btn-action" onclick="sendDraft('faq', 'faqInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">🗳️</div><h3>استفتاء</h3></div>
+        <input type="text" id="pollQuestion" class="form-control" placeholder="السؤال...">
+        <input type="text" id="pollOpt1" class="form-control" placeholder="الخيار الأول...">
+        <input type="text" id="pollOpt2" class="form-control" placeholder="الخيار الثاني...">
+        <button class="btn-action" onclick="createPoll()">🗳️ إنشاء</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearPoll()">🗑️ مسح</button>
+        <div class="list-box" id="pollResult"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📢</div>
-          <h3>مسودة إعلان</h3>
-        </div>
-        <p>إرسال إعلان للأونر لمراجعته ونشره.</p>
-        <textarea id="annInput" class="form-control" rows="3" placeholder="اكتب الإعلان..."></textarea>
-        <button class="btn-action" onclick="sendDraft('announcement', 'annInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">🏆</div><h3>مسابقة</h3></div>
+        <input type="text" id="contestName" class="form-control" placeholder="اسم المسابقة...">
+        <input type="text" id="contestPrize" class="form-control" placeholder="الجائزة...">
+        <button class="btn-action" onclick="createContest()">🏆 إنشاء</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearContests()">🗑️ مسح الكل</button>
+        <div class="list-box" id="contestsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📜</div>
-          <h3>مسودة قوانين</h3>
-        </div>
-        <p>إرسال قوانين جديدة للأونر.</p>
-        <textarea id="rulesInput" class="form-control" rows="3" placeholder="اكتب القوانين..."></textarea>
-        <button class="btn-action" onclick="sendDraft('rules', 'rulesInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">📅</div><h3>موسم</h3></div>
+        <input type="text" id="seasonName" class="form-control" placeholder="اسم الموسم...">
+        <button class="btn-action" onclick="createSeason()">📅 إنشاء</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearSeasons()">🗑️ مسح الكل</button>
+        <div class="list-box" id="seasonsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">👋</div>
-          <h3>رسالة الترحيب</h3>
-        </div>
-        <p>إرسال نص ترحيبي للأونر.</p>
-        <textarea id="welcomeInput" class="form-control" rows="3" placeholder="اكتب نص الترحيب..."></textarea>
-        <button class="btn-action" onclick="sendDraft('welcome', 'welcomeInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🤝</div>
-          <h3>رسائل الشركاء</h3>
-        </div>
-        <p>إرسال ردود مبدئية للرعاة للأونر.</p>
-        <input type="text" id="sponsorInput" class="form-control" placeholder="رد على شريك...">
-        <button class="btn-action" onclick="sendReq('sponsor_replies', 'sponsorInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">📢</div><h3>إعلان الشريط العلوي</h3></div>
+        <input type="text" id="announceInput" class="form-control" placeholder="نص الإعلان...">
+        <button class="btn-action" onclick="setAnnouncement()">📢 نشر</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearAnnouncement()">🗑️ مسح</button>
+        <div class="list-box" id="announcementResult"><div class="no-data">جاري التحميل...</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ============ Tab: الفريق ============ -->
-  <div id="tab-team" class="tab-content">
+  <!-- Community -->
+  <div id="tab-community" class="tab-content">
     <div class="grid">
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">⏰</div>
-          <h3>جدول الشفتات</h3>
-        </div>
-        <p>إرسال جدول المناوبات للأونر.</p>
-        <input type="text" id="shiftInput" class="form-control" placeholder="الأدمن (فلان) - الساعة 8">
-        <button class="btn-action" onclick="sendReq('shifts', 'shiftInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">💡</div><h3>الاقتراحات</h3></div>
+        <button class="btn-action btn-info" onclick="loadSuggestions()">🔄 تحديث</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearSuggestions()">🗑️ مسح الكل</button>
+        <div class="list-box" id="suggestionsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📋</div>
-          <h3>مهام الفريق</h3>
-        </div>
-        <p>إرسال مهام للفريق للأونر.</p>
-        <input type="text" id="teamTaskInput" class="form-control" placeholder="مهمة...">
-        <button class="btn-action" onclick="sendReq('team_tasks', 'teamTaskInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">💬</div><h3>التعليقات</h3></div>
+        <button class="btn-action btn-info" onclick="loadComments()">🔄 تحديث</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearComments()">🗑️ مسح الكل</button>
+        <div class="list-box" id="commentsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">👥</div>
-          <h3>مراقبة الفريق</h3>
-        </div>
-        <p>مراجعة اللاعبين النشطين.</p>
-        <a href="users.html" class="btn-action" style="text-decoration:none;">عرض اللاعبين</a>
+        <div class="card-header"><div class="card-icon">🎫</div><h3>تذاكر الدعم</h3></div>
+        <button class="btn-action btn-info" onclick="loadTickets()">🔄 تحديث</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearTickets()">🗑️ مسح الكل</button>
+        <div class="list-box" id="ticketsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🛠️</div>
-          <h3>طلب ميزة للمطور</h3>
-        </div>
-        <p>إرسال طلب تحديث تقني للأونر.</p>
-        <input type="text" id="featureInput" class="form-control" placeholder="ميزة مطلوبة...">
-        <button class="btn-action" onclick="sendReq('dev_requests', 'featureInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📅</div>
-          <h3>جدول الفعاليات</h3>
-        </div>
-        <p>إرسال خطة الفعاليات السنوية.</p>
-        <input type="text" id="calInput" class="form-control" placeholder="هالوين - كويزات رعب">
-        <button class="btn-action" onclick="sendReq('calendar', 'calInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🧪</div>
-          <h3>توزيع التسترات</h3>
-        </div>
-        <p>إرسال مهام للمختبرين.</p>
-        <input type="text" id="testerInput" class="form-control" placeholder="تستر A - كويز فينوم">
-        <button class="btn-action" onclick="sendReq('tester_tasks', 'testerInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">🎬</div><h3>طلبات الكويزات</h3></div>
+        <button class="btn-action btn-info" onclick="loadQuizRequests()">🔄 تحديث</button>
+        <button class="btn-action btn-danger btn-sm" style="margin-top:6px;" onclick="clearQuizRequests()">🗑️ مسح الكل</button>
+        <div class="list-box" id="quizRequestsList"><div class="no-data">جاري التحميل...</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ============ Tab: التقارير ============ -->
+  <!-- Players -->
+  <div id="tab-players" class="tab-content">
+    <div class="card">
+      <div class="card-header"><div class="card-icon">👥</div><h3>إدارة اللاعبين</h3></div>
+      <input type="text" id="playerSearch" class="form-control" placeholder="🔍 ابحث باسم اللاعب..." oninput="loadPlayers()">
+      <button class="btn-action btn-info" onclick="loadPlayers()">🔄 تحديث القائمة</button>
+      <div class="list-box" id="playersList" style="max-height: 600px;"><div class="no-data">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+  <!-- Reports -->
   <div id="tab-reports" class="tab-content">
     <div class="grid">
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📈</div>
-          <h3>تقرير نبض المجتمع</h3>
-        </div>
-        <p>إحصائيات سريعة (لاعبين وكويزات).</p>
-        <button class="btn-action" onclick="getPulse()">تحديث الأرقام</button>
-        <div class="status-box" id="pulseRes"></div>
+        <div class="card-header"><div class="card-icon">📊</div><h3>تقرير شامل</h3></div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">كل البيانات كملف JSON.</p>
+        <button class="btn-action" onclick="exportComprehensive()">📤 تصدير شامل</button>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">👤</div>
-          <h3>تقرير الحسابات الوهمية</h3>
-        </div>
-        <p>رصد الحسابات التي لم تلعب أي كويز.</p>
-        <button class="btn-action" onclick="findFakeAccs()">فحص الحسابات</button>
-        <div class="list-box" id="fakeAccsRes"></div>
+        <div class="card-header"><div class="card-icon">👥</div><h3>تقرير اللاعبين</h3></div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">قائمة اللاعبين وبياناتهم.</p>
+        <button class="btn-action" onclick="exportPlayers()">📤 تصدير</button>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🐛</div>
-          <h3>تقرير مشاكل النظام</h3>
-        </div>
-        <p>إرسال الأعطال للأونر.</p>
-        <input type="text" id="bugInput" class="form-control" placeholder="عطل...">
-        <button class="btn-action" onclick="sendReq('bugs', 'bugInput', this)">إرسال للأونر</button>
+        <div class="card-header"><div class="card-icon">🎮</div><h3>تقرير النتائج</h3></div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">كل نتائج الكويزات.</p>
+        <button class="btn-action" onclick="exportScores()">📤 تصدير</button>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">💡</div>
-          <h3>تحليل الاقتراحات</h3>
-        </div>
-        <p>عدّاد سريع لاقتراحات اللاعبين.</p>
-        <button class="btn-action" onclick="countSuggestions()">عد الاقتراحات</button>
-        <div class="status-box" id="suggestRes"></div>
+        <div class="card-header"><div class="card-icon">📅</div><h3>التقرير الأسبوعي</h3></div>
+        <button class="btn-action" onclick="showWeeklyReport()">📊 عرض</button>
+        <div class="list-box" id="weeklyReportResult"><div class="no-data">اضغط عرض</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📣</div>
-          <h3>متابعة التسويق</h3>
-        </div>
-        <p>إرسال تقرير الحملات للأونر.</p>
-        <input type="text" id="marketInput" class="form-control" placeholder="حملة فيسبوك...">
-        <button class="btn-action" onclick="sendReq('marketing', 'marketInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">📈</div><h3>نشاط 7 أيام</h3></div>
+        <button class="btn-action" onclick="load7DayActivity()">📊 عرض</button>
+        <div class="list-box" id="activity7DaysResult"><div class="no-data">اضغط عرض</div></div>
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📝</div>
-          <h3>سجل الاجتماعات</h3>
-        </div>
-        <p>إرسال ملاحظات الاجتماع للأونر.</p>
-        <input type="text" id="meetingInput" class="form-control" placeholder="ملاحظة...">
-        <button class="btn-action" onclick="sendReq('meetings', 'meetingInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">🛣️</div>
-          <h3>رحلة المستخدم</h3>
-        </div>
-        <p>إرسال ملاحظات تجربة اللاعب.</p>
-        <textarea id="journeyInput" class="form-control" rows="3" placeholder="اكتب ملاحظاتك..."></textarea>
-        <button class="btn-action" onclick="sendDraft('journey', 'journeyInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">📋</div>
-          <h3>شروط المسابقات</h3>
-        </div>
-        <p>إرسال شروط السحب للأونر.</p>
-        <textarea id="termsInput" class="form-control" rows="3" placeholder="اكتب الشروط..."></textarea>
-        <button class="btn-action" onclick="sendDraft('terms', 'termsInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">💸</div>
-          <h3>خطط العروض</h3>
-        </div>
-        <p>إرسال خطط خصومات الكوينز للأونر.</p>
-        <input type="text" id="discountInput" class="form-control" placeholder="خصم 20%...">
-        <button class="btn-action" onclick="sendReq('discounts', 'discountInput', this)">إرسال</button>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-icon">⭐</div>
-          <h3>تقييم الفريق</h3>
-        </div>
-        <p>إرسال تقييمك لأداء الفريق للأونر.</p>
-        <textarea id="perfInput" class="form-control" rows="3" placeholder="اكتب تقييمك..."></textarea>
-        <button class="btn-action" onclick="sendDraft('performance', 'perfInput', this)">إرسال</button>
+        <div class="card-header"><div class="card-icon">🏆</div><h3>أعلى 10 لاعبين</h3></div>
+        <button class="btn-action" onclick="loadTop10Players()">📊 عرض</button>
+        <div class="list-box" id="top10PlayersResult"><div class="no-data">اضغط عرض</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ============ Tab: رسائل الأونر ============ -->
-  <div id="tab-owner_msg" class="tab-content">
-    <div class="card" style="max-width: 640px; margin: 0 auto;">
-      <div class="card-header">
-        <div class="card-icon">📩</div>
-        <h3>إرسال رسالة للأونر</h3>
+  <!-- Admin Messages (Chat) -->
+  <div id="tab-admin-messages" class="tab-content">
+    <div class="chat-layout">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-title">💬 غرف الإدارة</div>
+        <div id="chatRoomsList"></div>
       </div>
-      <textarea id="managerMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
-      <button class="btn-action" onclick="window.sendToOwner()">إرسال 📨</button>
+      <div class="chat-main">
+        <div class="chat-main-header" id="chatMainHeader">💬 اختر غرفة للبدء</div>
+        <div class="chat-main-messages" id="chatMainMessages">
+          <div class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <div>اختر غرفة من القائمة</div>
+          </div>
+        </div>
+        <div class="chat-main-input">
+          <input type="text" id="chatInput" placeholder="اكتب رسالتك..." disabled
+            onkeypress="if(event.key==='Enter') window.sendChatMessage()">
+          <button onclick="window.sendChatMessage()" id="chatSendBtn" disabled>📤</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <div class="section-title" style="margin-top: 24px;">📋 الردود من الأونر</div>
-      <div class="list-box" id="ownerRepliesList">
-        <div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>
+  <!-- Owner Messages -->
+  <div id="tab-owner-messages" class="tab-content">
+    <div class="grid">
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><div class="card-icon">📩</div><h3>إرسال رسالة للأونر</h3></div>
+        <textarea id="ownerMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..." style="resize:vertical; min-height:80px;"></textarea>
+        <button class="btn-action" onclick="sendToOwner()">📨 إرسال</button>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><div class="card-icon">📋</div><h3>الردود من الأونر</h3></div>
+        <div class="list-box" id="ownerRepliesList" style="max-height: 400px;">
+          <div class="no-data">لا توجد ردود بعد</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============ Scripts ============ -->
+<div id="customModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✖</button>
+    <h3 class="modal-title" id="modalTitle">معلومات</h3>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.get = get; window.set = set; window.push = push; window.onValue = onValue;
+  window.db = db; window.ref = ref; window.get = get; window.set = set;
+  window.push = push; window.onValue = onValue; window.remove = remove; window.update = update;
 
   const currentUser = localStorage.getItem('loggedInUser');
-  if (!currentUser) window.location.href = 'index.html';
+  if (!currentUser) { window.location.href = 'index.html'; }
 
-  // التحقق من الصلاحية (زي ما هو — من غير تغيير)
-  if (currentUser.toLowerCase() === 'ahmed' || currentUser.toLowerCase() === 'banned') {
-      document.getElementById('panelContent').style.display = 'block';
-      listenToReplies();
-  } else {
-      window.get(window.ref(window.db, 'roles/managers/' + currentUser)).then(snap => {
-          if (snap.exists()) {
-              document.getElementById('panelContent').style.display = 'block';
-              listenToReplies();
-          } else {
-              document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. أنت لست منجر.</h1>';
-          }
-      });
-  }
-
-  function listenToReplies() {
-      window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-          const list = document.getElementById('ownerRepliesList');
-          if (!msgSnap.exists()) {
-              list.innerHTML = '<div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>';
-              return;
-          }
-          list.innerHTML = '';
-          Object.values(msgSnap.val()).reverse().forEach(msg => {
-              const div = document.createElement('div');
-              div.className = 'list-item';
-              div.innerHTML = `<span>${msg.text}</span>`;
-              list.appendChild(div);
-          });
-      });
-  }
-
-  // ===== تبديل التاب =====
-  window.switchTab = function(tabId, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
+  /* ===== Helpers ===== */
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  window.toast = function(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type === 'success' ? '' : type);
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
   };
+  window.showModal = function(title, html) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('customModal').classList.add('active');
+  };
+  window.closeModal = function() { document.getElementById('customModal').classList.remove('active'); };
+  document.getElementById('customModal').addEventListener('click', (e) => { if (e.target.id === 'customModal') window.closeModal(); });
 
-  // ===== تبديل الثيم =====
+  function fmtDate(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleString('ar-EG'); } catch { return '—'; } }
+  function exportJSON(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${filename}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  /* ===== Theme ===== */
   window.toggleTheme = function() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
-      localStorage.setItem('managerTheme', isDark ? 'dark' : 'light');
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+    localStorage.setItem('managerTheme', isDark ? 'dark' : 'light');
   };
-
-  // تحميل الثيم المحفوظ
   if (localStorage.getItem('managerTheme') === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.addEventListener('DOMContentLoaded', () => {
-          const btn = document.getElementById('themeBtn');
-          if (btn) btn.innerText = '☀️';
-      });
+    document.body.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', () => { const btn = document.getElementById('themeBtn'); if (btn) btn.innerText = '☀️'; });
   }
 
-  // ===== دوال الإرسال =====
-  window.sendReq = async function(node, inputId, btn) {
-      const val = document.getElementById(inputId).value.trim();
-      if (!val) return alert('اكتب حاجة!');
-      const original = btn.innerHTML;
-      btn.innerHTML = '⏳ جاري الإرسال...';
-      btn.disabled = true;
-      try {
-          await window.push(window.ref(window.db, 'manager_requests/' + node), { text: val, time: Date.now() });
-          alert('تم الإرسال للأونر!');
-          document.getElementById(inputId).value = '';
-      } catch(e) {
-          alert('خطأ: ' + e.message);
+  /* ===== Tab Switch ===== */
+  window.switchTab = function(tabId, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+    if (tabId === 'overview') loadOverview();
+    if (tabId === 'events') loadEvents();
+    if (tabId === 'community') loadCommunity();
+    if (tabId === 'players') loadPlayers();
+    if (tabId === 'admin-messages') renderChatRooms();
+  };
+
+  /* ===== Access ===== */
+  async function checkAccess() {
+    try {
+      const isOwner = currentUser.toLowerCase() === 'ahmed';
+      const [managerSnap, roleSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'roles/managers/' + currentUser)),
+        window.get(window.ref(window.db, 'roles/users/' + currentUser))
+      ]);
+      const role = roleSnap.exists() ? roleSnap.val() : 'Player';
+      if (!(isOwner || managerSnap.exists() || role === 'Manager')) {
+        document.getElementById('accessDenied').classList.add('show');
+        return;
       }
-      btn.innerHTML = original;
-      btn.disabled = false;
+      document.getElementById('panelContent').style.display = 'block';
+      loadOverview();
+      listenOwnerReplies();
+    } catch (e) {
+      console.error(e);
+      document.getElementById('accessDenied').classList.add('show');
+    }
+  }
+
+  /* ===== Overview ===== */
+  window.loadOverview = async function() {
+    try {
+      const [uSnap, sSnap, sugSnap, tSnap, cSnap, pSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'usernames')),
+        window.get(window.ref(window.db, 'scores')),
+        window.get(window.ref(window.db, 'suggestions')),
+        window.get(window.ref(window.db, 'support_tickets')),
+        window.get(window.ref(window.db, 'comments')),
+        window.get(window.ref(window.db, 'presence'))
+      ]);
+      const users = uSnap.exists() ? uSnap.val() : {};
+      const scores = sSnap.exists() ? sSnap.val() : {};
+      const suggestions = sugSnap.exists() ? sugSnap.val() : {};
+      const tickets = tSnap.exists() ? tSnap.val() : {};
+      const comments = cSnap.exists() ? cSnap.val() : {};
+      const presence = pSnap.exists() ? pSnap.val() : {};
+      let playsCount = 0;
+      for (const u in scores) for (const q in scores[u]) playsCount += Object.keys(scores[u][q]).length;
+      document.getElementById('statUsers').innerText = Object.keys(users).length;
+      document.getElementById('statPlays').innerText = playsCount;
+      document.getElementById('statSuggestions').innerText = Object.keys(suggestions).length;
+      document.getElementById('statTickets').innerText = Object.values(tickets).filter(t => t.status === 'open').length;
+      document.getElementById('statComments').innerText = Object.keys(comments).length;
+      document.getElementById('statOnline').innerText = Object.values(presence).filter(p => p.status === 'online').length;
+    } catch (e) { window.toast('فشل التحميل: ' + e.message, 'error'); }
   };
 
-  window.sendDraft = async function(node, inputId, btn) {
-      const val = document.getElementById(inputId).value.trim();
-      if (!val) return alert('اكتب حاجة!');
-      const original = btn.innerHTML;
-      btn.innerHTML = '⏳ جاري الحفظ...';
-      btn.disabled = true;
-      try {
-          await window.set(window.ref(window.db, 'manager_requests/drafts/' + node), val);
-          alert('تم حفظ المسودة وإرسالها!');
-          document.getElementById(inputId).value = '';
-      } catch(e) {
-          alert('خطأ: ' + e.message);
+  window.loadOnlineUsers = async function() {
+    const box = document.getElementById('onlineResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'presence'));
+      const data = snap.exists() ? snap.val() : {};
+      const online = Object.entries(data).filter(([, v]) => v.status === 'online');
+      box.innerHTML = online.length
+        ? online.map(([u]) => `<div class="list-item"><span class="list-item-title">🟢 ${escapeHtml(u)}</span></div>`).join('')
+        : '<div class="no-data">لا يوجد أحد متصل</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.loadActiveEvents = async function() {
+    const box = document.getElementById('activeEventsResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const [oSnap, pSnap, cSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'site_events/active_offers')),
+        window.get(window.ref(window.db, 'site_events/active_poll')),
+        window.get(window.ref(window.db, 'site_events/contests'))
+      ]);
+      let html = '';
+      if (oSnap.exists()) {
+        const o = oSnap.val();
+        html += `<div style="font-weight:bold;color:var(--primary);margin:6px 0;">🎁 عروض (${Object.keys(o).length})</div>`;
+        Object.values(o).slice(0, 3).forEach(off => html += `<div class="list-item"><span class="list-item-title">${escapeHtml(off.text || '')}</span></div>`);
       }
-      btn.innerHTML = original;
-      btn.disabled = false;
+      if (pSnap.exists()) { html += `<div style="font-weight:bold;color:var(--primary);margin:6px 0;">🗳️ استفتاء</div>`; html += `<div class="list-item"><span class="list-item-title">${escapeHtml(pSnap.val().question || '')}</span></div>`; }
+      if (cSnap.exists()) { const c = cSnap.val(); html += `<div style="font-weight:bold;color:var(--primary);margin:6px 0;">🏆 مسابقات (${Object.keys(c).length})</div>`; Object.values(c).slice(0, 2).forEach(x => html += `<div class="list-item"><span class="list-item-title">${escapeHtml(x.name || '')}</span></div>`); }
+      box.innerHTML = html || '<div class="no-data">لا يوجد فعاليات نشطة</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
   };
 
-  window.sendToOwner = async function() {
-      const text = document.getElementById('managerMsgInput').value;
-      if (!text) return;
-      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Manager: ' + currentUser, text: text, time: Date.now() });
-      alert('تم الإرسال!');
-      document.getElementById('managerMsgInput').value = '';
-  };
+  window.refreshAll = function() { loadOverview(); window.toast('✅ تم التحديث الشامل'); };
 
+  /* ===== Events ===== */
+  window.loadEvents = function() { loadOffers(); loadPoll(); loadContests(); loadSeasons(); loadAnnouncement(); };
+
+  async function loadOffers() {
+    const box = document.getElementById('offersList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_events/active_offers'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data);
+      box.innerHTML = entries.length
+        ? entries.map(([id, o]) => `<div class="list-item"><span class="list-item-title">${escapeHtml(o.text || '')}</span><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteOffer('${id}')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد عروض</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  }
+  window.addOffer = async function() {
+    const text = document.getElementById('offerInput').value.trim();
+    if (!text) return window.toast('اكتب نص العرض', 'error');
+    try { await window.push(window.ref(window.db, 'site_events/active_offers'), { text, time: Date.now(), by: currentUser }); document.getElementById('offerInput').value = ''; window.toast('✅ تم إضافة العرض'); loadOffers(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+  window.deleteOffer = async function(id) { if (!confirm('حذف هذا العرض؟')) return; await window.remove(window.ref(window.db, 'site_events/active_offers/' + id)); window.toast('✅'); loadOffers(); };
+  window.clearOffers = async function() { if (!confirm('مسح كل العروض؟')) return; await window.remove(window.ref(window.db, 'site_events/active_offers')); window.toast('✅'); loadOffers(); };
+
+  async function loadPoll() {
+    const box = document.getElementById('pollResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_events/active_poll'));
+      if (!snap.exists()) { box.innerHTML = '<div class="no-data">لا يوجد استفتاء نشط</div>'; return; }
+      const p = snap.val();
+      const v1 = p.votes1 || 0, v2 = p.votes2 || 0, total = v1 + v2;
+      box.innerHTML = `
+        <div class="list-item"><span class="list-item-title">❓ ${escapeHtml(p.question || '')}</span></div>
+        <div class="list-item"><span class="list-item-title">${escapeHtml(p.option1 || '')}</span><b>${v1} (${total ? Math.round(v1/total*100) : 0}%)</b></div>
+        <div class="list-item"><span class="list-item-title">${escapeHtml(p.option2 || '')}</span><b>${v2} (${total ? Math.round(v2/total*100) : 0}%)</b></div>
+      `;
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  }
   window.createPoll = async function() {
-      const q = document.getElementById('pollQ').value.trim();
-      const o1 = document.getElementById('pollO1').value.trim();
-      const o2 = document.getElementById('pollO2').value.trim();
-      if (!q || !o1 || !o2) return alert('اكتب السؤال والاختيارات!');
-      await window.set(window.ref(window.db, 'site_events/active_poll'), { question: q, option1: o1, option2: o2, created: Date.now() });
-      alert('تم النشر!');
-      document.getElementById('pollQ').value = '';
-      document.getElementById('pollO1').value = '';
-      document.getElementById('pollO2').value = '';
+    const q = document.getElementById('pollQuestion').value.trim();
+    const o1 = document.getElementById('pollOpt1').value.trim();
+    const o2 = document.getElementById('pollOpt2').value.trim();
+    if (!q || !o1 || !o2) return window.toast('املأ كل الحقول', 'error');
+    try {
+      await window.set(window.ref(window.db, 'site_events/active_poll'), { question: q, option1: o1, option2: o2, votes1: 0, votes2: 0, created: Date.now(), by: currentUser });
+      document.getElementById('pollQuestion').value = ''; document.getElementById('pollOpt1').value = ''; document.getElementById('pollOpt2').value = '';
+      window.toast('✅ تم إنشاء الاستفتاء'); loadPoll();
+    } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
+  window.clearPoll = async function() { if (!confirm('مسح الاستفتاء؟')) return; await window.remove(window.ref(window.db, 'site_events/active_poll')); window.toast('✅'); loadPoll(); };
 
-  window.pickWinner = async function() {
-      const snap = await window.get(window.ref(window.db, 'usernames'));
-      const res = document.getElementById('winnerRes');
-      if (snap.exists()) {
-          const users = Object.keys(snap.val());
-          const winner = users[Math.floor(Math.random() * users.length)];
-          res.className = 'status-box success';
-          res.innerText = '🎉 الفائز: ' + winner;
-      }
+  async function loadContests() {
+    const box = document.getElementById('contestsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_events/contests'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data);
+      box.innerHTML = entries.length
+        ? entries.map(([id, c]) => `<div class="list-item"><div><div class="list-item-title">🏆 ${escapeHtml(c.name || '')}</div><div class="list-item-sub">${escapeHtml(c.prize || '')}</div></div><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteContest('${id}')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد مسابقات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  }
+  window.createContest = async function() {
+    const name = document.getElementById('contestName').value.trim();
+    const prize = document.getElementById('contestPrize').value.trim();
+    if (!name || !prize) return window.toast('املأ كل الحقول', 'error');
+    try { await window.push(window.ref(window.db, 'site_events/contests'), { name, prize, time: Date.now(), by: currentUser }); document.getElementById('contestName').value = ''; document.getElementById('contestPrize').value = ''; window.toast('✅'); loadContests(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
+  window.deleteContest = async function(id) { if (!confirm('حذف؟')) return; await window.remove(window.ref(window.db, 'site_events/contests/' + id)); window.toast('✅'); loadContests(); };
+  window.clearContests = async function() { if (!confirm('مسح كل المسابقات؟')) return; await window.remove(window.ref(window.db, 'site_events/contests')); window.toast('✅'); loadContests(); };
 
-  window.sendTicket = async function(btn) {
-      const val = document.getElementById('ticketInput').value.trim();
-      if (!val) return;
-      const original = btn.innerHTML;
-      btn.innerHTML = '⏳ جاري الفتح...';
-      btn.disabled = true;
-      try {
-          await window.push(window.ref(window.db, 'support_tickets'), { text: val, by: 'Manager', time: Date.now(), status: 'open' });
-          alert('تم فتح تذكرة!');
-          document.getElementById('ticketInput').value = '';
-      } catch(e) {
-          alert('خطأ: ' + e.message);
-      }
-      btn.innerHTML = original;
-      btn.disabled = false;
+  async function loadSeasons() {
+    const box = document.getElementById('seasonsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_events/seasons'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data);
+      box.innerHTML = entries.length
+        ? entries.map(([id, s]) => `<div class="list-item"><span class="list-item-title">📅 ${escapeHtml(s.name || '')}</span><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteSeason('${id}')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد مواسم</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  }
+  window.createSeason = async function() {
+    const name = document.getElementById('seasonName').value.trim();
+    if (!name) return window.toast('اكتب اسم الموسم', 'error');
+    try { await window.push(window.ref(window.db, 'site_events/seasons'), { name, time: Date.now(), by: currentUser }); document.getElementById('seasonName').value = ''; window.toast('✅'); loadSeasons(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
+  window.deleteSeason = async function(id) { if (!confirm('حذف؟')) return; await window.remove(window.ref(window.db, 'site_events/seasons/' + id)); window.toast('✅'); loadSeasons(); };
+  window.clearSeasons = async function() { if (!confirm('مسح كل المواسم؟')) return; await window.remove(window.ref(window.db, 'site_events/seasons')); window.toast('✅'); loadSeasons(); };
 
-  window.getPulse = async () => {
-      const uSnap = await window.get(window.ref(window.db, 'usernames'));
-      const sSnap = await window.get(window.ref(window.db, 'scores'));
-      let plays = 0;
-      if (sSnap.exists()) {
-          const d = sSnap.val();
-          for (let u in d) { for (let q in d[u]) { plays += Object.keys(d[u][q]).length; } }
-      }
-      const res = document.getElementById('pulseRes');
-      res.className = 'status-box success';
-      res.innerText = `👥 اللاعبين: ${uSnap.exists() ? Object.keys(uSnap.val()).length : 0} | 🎮 الكويزات: ${plays}`;
+  async function loadAnnouncement() {
+    const box = document.getElementById('announcementResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_settings/announcement'));
+      if (!snap.exists() || !snap.val()) { box.innerHTML = '<div class="no-data">لا يوجد إعلان</div>'; return; }
+      box.innerHTML = `<div class="list-item"><span class="list-item-title">📢 ${escapeHtml(snap.val())}</span></div>`;
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  }
+  window.setAnnouncement = async function() {
+    const text = document.getElementById('announceInput').value.trim();
+    if (!text) return window.toast('اكتب نص الإعلان', 'error');
+    try { await window.set(window.ref(window.db, 'site_settings/announcement'), text); document.getElementById('announceInput').value = ''; window.toast('✅ تم نشر الإعلان'); loadAnnouncement(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
+  window.clearAnnouncement = async function() { if (!confirm('مسح الإعلان؟')) return; await window.set(window.ref(window.db, 'site_settings/announcement'), ''); window.toast('✅'); loadAnnouncement(); };
 
-  window.findFakeAccs = async () => {
-      const uSnap = await window.get(window.ref(window.db, 'usernames'));
-      const xpSnap = await window.get(window.ref(window.db, 'users_data'));
-      const box = document.getElementById('fakeAccsRes');
-      box.innerHTML = '';
-      if (uSnap.exists() && xpSnap.exists()) {
-          const users = uSnap.val(), data = xpSnap.val();
-          let found = 0;
-          for (let u in users) {
-              if (!data[u] || !data[u].xp) {
-                  box.innerHTML += `<div class="list-item"><span>👤 ${u}</span></div>`;
-                  found++;
-              }
-          }
-          if (!found) box.innerHTML = '<div class="list-item" style="justify-content:center; color: var(--text-secondary);">لا يوجد حسابات وهمية.</div>';
-      }
-  };
+  /* ===== Community ===== */
+  window.loadCommunity = function() { loadSuggestions(); loadComments(); loadTickets(); loadQuizRequests(); };
 
-  window.countSuggestions = async () => {
+  window.loadSuggestions = async function() {
+    const box = document.getElementById('suggestionsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
       const snap = await window.get(window.ref(window.db, 'suggestions'));
-      const res = document.getElementById('suggestRes');
-      res.className = 'status-box success';
-      res.innerText = '💡 الاقتراحات: ' + (snap.exists() ? Object.keys(snap.val()).length : 0);
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data).sort((a, b) => (b[1].time || 0) - (a[1].time || 0)).slice(0, 30);
+      box.innerHTML = entries.length
+        ? entries.map(([id, s]) => `<div class="list-item"><div style="flex:1;"><div class="list-item-title">💡 ${escapeHtml((s.text || '').slice(0, 100))}</div><div class="list-item-sub">من: ${escapeHtml(s.user || 'زائر')} • ${fmtDate(s.time)}</div></div><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteItem('suggestions','${id}','suggestions')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد اقتراحات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
   };
+
+  window.loadComments = async function() {
+    const box = document.getElementById('commentsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'comments'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data).sort((a, b) => (b[1].time || 0) - (a[1].time || 0)).slice(0, 30);
+      box.innerHTML = entries.length
+        ? entries.map(([id, c]) => `<div class="list-item"><div style="flex:1;"><div class="list-item-title">💬 ${escapeHtml((c.text || '').slice(0, 100))}</div><div class="list-item-sub">من: ${escapeHtml(c.user || 'زائر')} • ${fmtDate(c.time)}</div></div><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteItem('comments','${id}','comments')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد تعليقات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.loadTickets = async function() {
+    const box = document.getElementById('ticketsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'support_tickets'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data).sort((a, b) => (b[1].time || 0) - (a[1].time || 0)).slice(0, 30);
+      box.innerHTML = entries.length
+        ? entries.map(([id, t]) => `<div class="list-item"><div style="flex:1;"><div class="list-item-title">${t.status === 'open' ? '🔴' : '✅'} ${escapeHtml((t.text || '').slice(0, 100))}</div><div class="list-item-sub">من: ${escapeHtml(t.by || '?')} • ${fmtDate(t.time)}</div></div><div class="list-item-actions">${t.status === 'open' ? `<button class="btn-action btn-success btn-sm" onclick="closeTicket('${id}')">✅</button>` : ''}<button class="btn-action btn-danger btn-sm" onclick="deleteItem('support_tickets','${id}','tickets')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد تذاكر</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.closeTicket = async function(id) {
+    try { await window.update(window.ref(window.db, 'support_tickets/' + id), { status: 'closed', resolvedBy: currentUser, resolvedAt: Date.now() }); window.toast('✅ تم إغلاق التذكرة'); loadTickets(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  window.loadQuizRequests = async function() {
+    const box = document.getElementById('quizRequestsList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'quiz_requests'));
+      const data = snap.exists() ? snap.val() : {};
+      const entries = Object.entries(data).sort((a, b) => (b[1].time || 0) - (a[1].time || 0)).slice(0, 30);
+      box.innerHTML = entries.length
+        ? entries.map(([id, r]) => `<div class="list-item"><div style="flex:1;"><div class="list-item-title">🎬 ${escapeHtml((r.text || '').slice(0, 100))}</div><div class="list-item-sub">من: ${escapeHtml(r.user || '?')} • ${fmtDate(r.time)}</div></div><div class="list-item-actions"><button class="btn-action btn-danger btn-sm" onclick="deleteItem('quiz_requests','${id}','quizRequests')">🗑️</button></div></div>`).join('')
+        : '<div class="no-data">لا يوجد طلبات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.deleteItem = async function(node, id, reloadFn) {
+    if (!confirm('حذف هذا العنصر؟')) return;
+    try {
+      await window.remove(window.ref(window.db, node + '/' + id));
+      window.toast('✅ تم الحذف');
+      if (reloadFn === 'suggestions') loadSuggestions();
+      else if (reloadFn === 'comments') loadComments();
+      else if (reloadFn === 'tickets') loadTickets();
+      else if (reloadFn === 'quizRequests') loadQuizRequests();
+    } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  window.clearSuggestions = async function() { if (!confirm('⚠️ مسح كل الاقتراحات؟')) return; await window.remove(window.ref(window.db, 'suggestions')); window.toast('✅'); loadSuggestions(); };
+  window.clearComments = async function() { if (!confirm('⚠️ مسح كل التعليقات؟')) return; await window.remove(window.ref(window.db, 'comments')); window.toast('✅'); loadComments(); };
+  window.clearTickets = async function() { if (!confirm('⚠️ مسح كل التذاكر؟')) return; await window.remove(window.ref(window.db, 'support_tickets')); window.toast('✅'); loadTickets(); };
+  window.clearQuizRequests = async function() { if (!confirm('⚠️ مسح كل الطلبات؟')) return; await window.remove(window.ref(window.db, 'quiz_requests')); window.toast('✅'); loadQuizRequests(); };
+
+  /* ===== Players ===== */
+  window.loadPlayers = async function() {
+    const box = document.getElementById('playersList');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const search = (document.getElementById('playerSearch')?.value || '').toLowerCase().trim();
+      const [uSnap, wSnap, rSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'users_data')),
+        window.get(window.ref(window.db, 'warnings')),
+        window.get(window.ref(window.db, 'roles/users'))
+      ]);
+      const users = uSnap.exists() ? uSnap.val() : {};
+      const warnings = wSnap.exists() ? wSnap.val() : {};
+      const roles = rSnap.exists() ? rSnap.val() : {};
+      let list = Object.keys(users).sort();
+      if (search) list = list.filter(u => u.toLowerCase().includes(search));
+      if (!list.length) { box.innerHTML = '<div class="no-data">لا يوجد لاعبين</div>'; return; }
+      box.innerHTML = list.map(u => {
+        const d = users[u] || {};
+        const hasWarn = !!warnings[u];
+        const role = roles[u] || 'Player';
+        return `
+          <div class="list-item">
+            <div style="flex:1;">
+              <div class="list-item-title">👤 ${escapeHtml(u)} <span style="font-size:11px; background:var(--surface-2); padding:2px 6px; border-radius:6px;">${escapeHtml(role)}</span> ${hasWarn ? '⚠️' : ''}</div>
+              <div class="list-item-sub">✨ ${d.xp || 0} XP • 🪙 ${d.coins || 0} كوينز</div>
+            </div>
+            <div class="list-item-actions">
+              <button class="btn-action btn-info btn-sm" onclick="viewProfile('${u}')">👤</button>
+              <button class="btn-action btn-sm" onclick="sendMessageTo('${u}')">📩</button>
+              ${hasWarn ? `<button class="btn-action btn-success btn-sm" onclick="clearWarn('${u}')">✅</button>` : `<button class="btn-action btn-warn btn-sm" onclick="warnUser('${u}')">⚠️</button>`}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ: ' + e.message + '</div>'; }
+  };
+
+  window.viewProfile = function(u) { window.open('profile.html?user=' + encodeURIComponent(u), '_blank'); };
+  window.sendMessageTo = async function(u) {
+    const text = prompt(`رسالة إلى ${u}:`);
+    if (!text) return;
+    try { await window.push(window.ref(window.db, 'messages/' + u), { from: '📋 Manager: ' + currentUser, text, time: Date.now() }); window.toast('✅ تم الإرسال'); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+  window.warnUser = async function(u) {
+    const reason = prompt(`سبب التحذير لـ ${u}:`);
+    if (!reason) return;
+    try { await window.set(window.ref(window.db, 'warnings/' + u), { text: reason, by: currentUser, time: Date.now() }); window.toast('⚠️ تم التحذير'); loadPlayers(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+  window.clearWarn = async function(u) {
+    if (!confirm(`إلغاء تحذير ${u}؟`)) return;
+    try { await window.remove(window.ref(window.db, 'warnings/' + u)); window.toast('✅'); loadPlayers(); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  /* ===== Reports ===== */
+  window.exportComprehensive = async function() {
+    try {
+      window.toast('⏳ جاري التجميع...', 'info');
+      const nodes = ['usernames', 'users_data', 'scores', 'leaderboard', 'suggestions', 'comments', 'support_tickets', 'site_events'];
+      const data = {};
+      await Promise.all(nodes.map(async n => { const s = await window.get(window.ref(window.db, n)); data[n] = s.exists() ? s.val() : {}; }));
+      exportJSON(data, 'manager-comprehensive'); window.toast('✅');
+    } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+  window.exportPlayers = async function() { try { const s = await window.get(window.ref(window.db, 'users_data')); exportJSON(s.exists() ? s.val() : {}, 'players'); window.toast('✅'); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); } };
+  window.exportScores = async function() { try { const s = await window.get(window.ref(window.db, 'scores')); exportJSON(s.exists() ? s.val() : {}, 'scores'); window.toast('✅'); } catch (e) { window.toast('خطأ: ' + e.message, 'error'); } };
+
+  window.showWeeklyReport = async function() {
+    const box = document.getElementById('weeklyReportResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const weekAgo = Date.now() - 7 * 86400000;
+      let plays = 0; const activeUsers = new Set();
+      for (const u in data) for (const q in data[u]) for (const a in data[u][q]) {
+        const t = new Date(data[u][q][a].time || 0).getTime();
+        if (t > weekAgo) { plays++; activeUsers.add(u); }
+      }
+      box.innerHTML = `
+        <div class="list-item"><span class="list-item-title">📅 محاولات (7 أيام)</span><b>${plays}</b></div>
+        <div class="list-item"><span class="list-item-title">👥 لاعبين نشطين</span><b>${activeUsers.size}</b></div>
+        <div class="list-item"><span class="list-item-title">📊 متوسط/يوم</span><b>${Math.round(plays / 7)}</b></div>
+      `;
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.load7DayActivity = async function() {
+    const box = document.getElementById('activity7DaysResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const byDay = {};
+      for (const u in data) for (const q in data[u]) for (const a in data[u][q]) {
+        const day = new Date(data[u][q][a].time || 0).toLocaleDateString('ar-EG');
+        byDay[day] = (byDay[day] || 0) + 1;
+      }
+      const entries = Object.entries(byDay).slice(-7);
+      box.innerHTML = entries.length ? entries.map(([d, c]) => `<div class="list-item"><span class="list-item-title">${d}</span><b>${c}</b></div>`).join('') : '<div class="no-data">لا يوجد بيانات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  window.loadTop10Players = async function() {
+    const box = document.getElementById('top10PlayersResult');
+    box.innerHTML = '<div class="no-data">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'users_data'));
+      const data = snap.exists() ? snap.val() : {};
+      const top = Object.entries(data).map(([u, d]) => [u, d.xp || 0]).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      box.innerHTML = top.length ? top.map(([u, xp], i) => `<div class="list-item"><span class="list-item-title">#${i + 1} ${escapeHtml(u)}</span><b style="color:var(--gold);">${xp} XP</b></div>`).join('') : '<div class="no-data">لا يوجد بيانات</div>';
+    } catch (e) { box.innerHTML = '<div class="no-data" style="color:var(--danger);">خطأ</div>'; }
+  };
+
+  /* ===== Admin Messages (Chat) ===== */
+  const ADMIN_ROOMS = [
+    { key: 'group', emoji: '👥', name: 'الجميع (جماعي)' },
+    { key: 'owner', emoji: '👑', name: 'الأونر' },
+    { key: 'partner', emoji: '🤝', name: 'الشركاء' },
+    { key: 'manager', emoji: '📋', name: 'المديرين' },
+    { key: 'tester', emoji: '🧪', name: 'التسترات' },
+    { key: 'builder', emoji: '🏗️', name: 'البيلدرز' },
+    { key: 'admin', emoji: '🛡️', name: 'الأدمنز' }
+  ];
+  let activeChatRoom = null;
+  let chatUnsubscribe = null;
+
+  window.renderChatRooms = function() {
+    const box = document.getElementById('chatRoomsList');
+    if (!box) return;
+    box.innerHTML = ADMIN_ROOMS.map(r => `
+      <button class="chat-room-item ${activeChatRoom === r.key ? 'active' : ''}" onclick="window.openAdminRoom('${r.key}', '${r.name}', '${r.emoji}')">
+        <span class="chat-room-emoji">${r.emoji}</span>
+        <span class="chat-room-name">${r.name}</span>
+      </button>
+    `).join('');
+  };
+
+  window.openAdminRoom = function(key, name, emoji) {
+    activeChatRoom = key;
+    window.renderChatRooms();
+    document.getElementById('chatMainHeader').innerHTML = `${emoji} شات ${name}`;
+    document.getElementById('chatInput').disabled = false;
+    document.getElementById('chatSendBtn').disabled = false;
+    document.getElementById('chatMainMessages').innerHTML = '<div class="chat-empty">جاري التحميل...</div>';
+    if (chatUnsubscribe) chatUnsubscribe();
+    chatUnsubscribe = window.onValue(window.ref(window.db, 'admin_chat/' + key), (snap) => {
+      const data = snap.val() || {};
+      const msgs = Object.entries(data).sort((a, b) => (a[1].time || 0) - (b[1].time || 0));
+      const box = document.getElementById('chatMainMessages');
+      if (!msgs.length) {
+        box.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><div>لا توجد رسائل. كن الأول!</div></div>`;
+        return;
+      }
+      box.innerHTML = msgs.map(([id, m]) => {
+        const isMine = (m.sender || '').toLowerCase() === currentUser.toLowerCase();
+        const time = m.time ? new Date(m.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
+        return `
+          <div class="chat-msg ${isMine ? 'mine' : 'theirs'}">
+            ${!isMine ? `<div class="chat-msg-sender">👤 ${escapeHtml(m.sender || '?')}</div>` : ''}
+            <div>${escapeHtml(m.text || '')}</div>
+            <div class="chat-msg-time">${time}</div>
+          </div>
+        `;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    });
+  };
+
+  window.sendChatMessage = async function() {
+    if (!activeChatRoom) return window.toast('اختر غرفة', 'error');
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+      await window.push(window.ref(window.db, 'admin_chat/' + activeChatRoom), { sender: currentUser, text, time: Date.now() });
+      input.value = '';
+    } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  /* ===== Owner Messages ===== */
+  window.sendToOwner = async function() {
+    const text = document.getElementById('ownerMsgInput').value.trim();
+    if (!text) return window.toast('اكتب رسالتك', 'error');
+    try {
+      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: '📋 Manager: ' + currentUser, text, time: Date.now() });
+      document.getElementById('ownerMsgInput').value = '';
+      window.toast('✅ تم الإرسال للأونر');
+    } catch (e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  function listenOwnerReplies() {
+    window.onValue(window.ref(window.db, 'messages/' + currentUser), (snap) => {
+      const list = document.getElementById('ownerRepliesList');
+      if (!list) return;
+      if (!snap.exists()) { list.innerHTML = '<div class="no-data">لا توجد ردود بعد</div>'; return; }
+      const msgs = Object.values(snap.val()).sort((a, b) => (b.time || 0) - (a.time || 0));
+      list.innerHTML = msgs.map(m => `<div class="list-item"><div style="flex:1;"><div class="list-item-title">${escapeHtml(m.text || '')}</div><div class="list-item-sub">من: ${escapeHtml(m.from || '؟')} • ${fmtDate(m.time)}</div></div></div>`).join('');
+    });
+  }
+
+  /* ===== Init ===== */
+  checkAccess();
 </script>
 </body>
 </html>
