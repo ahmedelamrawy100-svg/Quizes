@@ -3,681 +3,1367 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦾 لوحة الشريك - Quiz Hub</title>
+<title>🤝 لوحة الشريك - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #111;
-    --surface-2: #1a1a1a;
-    --text: #fff;
-    --text-muted: #888;
-    --border: #333;
-    --primary: #facc15;
-    --primary-glow: rgba(250, 204, 21, 0.4);
-    --danger: #ff3333;
-    --success: #00ff88;
-    --radius: 8px;
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f0f2f5;
+    --text: #1a1a1a; --text-secondary: #6b7280; --border: #e5e7eb;
+    --primary: #ec4899; --primary-hover: #db2777; --primary-light: #fdf2f8;
+    --success: #10b981; --danger: #ef4444; --info: #3b82f6; --gold: #eab308;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body.dark-mode {
+    --bg: #0f1419; --surface: #1a1f26; --surface-2: #232a33;
+    --text: #f9fafb; --text-secondary: #9ca3af; --border: #2d3748;
+    --primary-light: #2d0f1f;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; overflow: hidden; background-image: linear-gradient(45deg, #111 25%, transparent 25%), linear-gradient(-45deg, #111 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #111 75%), linear-gradient(-45deg, transparent 75%, #111 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+  body {
+    background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif;
+    min-height: 100vh; padding: 24px 16px; display: flex; flex-direction: column;
+    align-items: center; transition: background 0.3s, color 0.3s; -webkit-font-smoothing: antialiased;
+  }
+  #panelContent { display: none; width: 100%; max-width: 1280px; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-  #partnerContent { display: none; width: 100%; height: 100vh; flex-direction: column; }
-  
-  .top-bar { background: var(--surface); height: 70px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 2px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow); clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 2% 100%, 0 80%); }
-  .brand { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--primary-glow); }
-  .btn-icon { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.3s; text-decoration: none; font-size: 14px; }
-  .btn-icon:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); }
+  .top-header {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface); padding: 16px 24px; border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--primary), #f472b6);
+    border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  }
+  .brand-text h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+  .brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .icon-btn {
+    width: 40px; height: 40px; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text); border-radius: var(--radius-sm); cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Cairo';
+  }
+  .icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
+  .btn-back {
+    padding: 10px 18px; background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none;
+    font-weight: 600; font-size: 14px; transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-  .layout { display: flex; flex: 1; overflow: hidden; }
+  .tabs-bar {
+    display: flex; gap: 4px; background: var(--surface); padding: 6px;
+    border-radius: var(--radius); box-shadow: var(--shadow-sm); margin-bottom: 24px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: transparent; border: none; color: var(--text-secondary);
+    font-family: 'Cairo'; font-size: 14px; font-weight: 600; padding: 10px 16px;
+    cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s;
+    white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  }
+  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
+  .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(236, 72, 153, 0.35); }
+  .tab-content { display: none; animation: fadeUp 0.3s ease; }
+  .tab-content.active { display: block; }
 
-  .sidebar { width: 260px; background: var(--surface); border-left: 1px solid var(--border); padding: 20px 10px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
-  .sidebar::-webkit-scrollbar { width: 6px; }
-  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-  .nav-btn { background: transparent; color: var(--text-muted); border: none; padding: 15px; text-align: right; font-family: 'Cairo'; font-weight: bold; font-size: 15px; border-radius: var(--radius); cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px; }
-  .nav-btn:hover { background: var(--surface-2); color: var(--text); }
-  .nav-btn.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary-glow); }
+  /* ===== Chat ===== */
+  .chat-layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; height: calc(100vh - 260px); min-height: 550px; }
+  .chat-sidebar {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto;
+  }
+  .chat-sidebar-title {
+    font-size: 13px; font-weight: 900; color: var(--primary);
+    padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .chat-room-item {
+    display: flex; align-items: center; gap: 10px; padding: 12px;
+    border-radius: var(--radius-sm); background: transparent; color: var(--text-secondary);
+    border: 1px solid transparent; cursor: pointer; font-family: 'Cairo';
+    font-weight: 700; font-size: 13px; transition: 0.2s; text-align: right;
+  }
+  .chat-room-item:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
+  .chat-room-item.active {
+    background: linear-gradient(90deg, rgba(236,72,153,0.2), rgba(236,72,153,0.05));
+    color: var(--primary); border-color: var(--primary);
+  }
+  .chat-room-emoji { font-size: 20px; }
+  .chat-room-name { flex: 1; }
+  .chat-room-badge {
+    background: var(--danger); color: #fff; font-size: 10px; font-weight: 900;
+    padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+  }
+  .chat-main {
+    display: flex; flex-direction: column; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  }
+  .chat-main-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, rgba(236,72,153,0.1), rgba(236,72,153,0.02));
+    font-weight: 900; font-size: 15px; color: var(--primary);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .chat-header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .chat-search {
+    padding: 7px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: 'Cairo';
+    font-size: 12px; outline: none; width: 180px; transition: 0.2s;
+  }
+  .chat-search:focus { border-color: var(--primary); width: 220px; }
+  .chat-stats-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 6px 12px; cursor: pointer; font-family: 'Cairo'; font-size: 12px;
+    color: var(--text); transition: 0.2s;
+  }
+  .chat-stats-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .chat-main-messages {
+    flex: 1; padding: 18px; overflow-y: auto; display: flex;
+    flex-direction: column; gap: 12px;
+  }
+  .chat-empty {
+    text-align: center; color: var(--text-secondary); margin-top: 40px;
+    font-size: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .chat-empty-icon { font-size: 50px; opacity: 0.4; }
+  .chat-msg {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px;
+    font-size: 14px; line-height: 1.6; word-wrap: break-word; animation: msgIn 0.3s ease;
+    position: relative;
+  }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-msg.mine {
+    align-self: flex-start;
+    background: linear-gradient(135deg, var(--primary), #db2777);
+    color: #fff; border-bottom-right-radius: 4px;
+  }
+  .chat-msg.theirs {
+    align-self: flex-end; background: var(--surface-2); color: var(--text);
+    border: 1px solid var(--border); border-bottom-left-radius: 4px;
+  }
+  .chat-msg-sender { font-size: 11px; font-weight: 900; opacity: 0.9; margin-bottom: 4px; }
+  .chat-msg-time { font-size: 10px; opacity: 0.6; margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+  .msg-delete {
+    background: rgba(255,255,255,0.2); border: none; cursor: pointer;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #fff;
+    opacity: 0; transition: 0.2s; font-family: 'Cairo';
+  }
+  .chat-msg:hover .msg-delete { opacity: 0.8; }
+  .msg-delete:hover { opacity: 1 !important; background: rgba(0,0,0,0.3); }
+  .chat-main-input {
+    padding: 12px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; background: var(--surface-2);
+  }
+  .chat-main-input input {
+    flex: 1; padding: 12px 16px; border-radius: 25px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none;
+  }
+  .chat-main-input input:focus { border-color: var(--primary); }
+  .chat-main-input button {
+    padding: 0 22px; border-radius: 25px; border: none;
+    background: linear-gradient(135deg, var(--primary), #db2777);
+    color: #fff; font-family: 'Cairo'; font-weight: 900; font-size: 14px; cursor: pointer;
+  }
+  .chat-main-input button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .main-content { flex: 1; padding: 30px; overflow-y: auto; }
-  .main-content::-webkit-scrollbar { width: 8px; }
-  .main-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-  
-  .tab-pane { display: none; animation: glitchIn 0.3s ease-out; }
-  .tab-pane.active { display: block; }
-  @keyframes glitchIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+  /* ===== Cards ===== */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; display: flex; flex-direction: column; transition: all 0.25s;
+    position: relative; overflow: hidden;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .card-icon {
+    width: 36px; height: 36px; background: var(--primary-light);
+    border-radius: var(--radius-sm); display: flex; align-items: center;
+    justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .card h3 { color: var(--text); font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .card p { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 14px; flex-grow: 1; }
 
-  .pane-title { font-size: 30px; font-weight: 900; color: var(--primary); margin-bottom: 25px; border-bottom: 2px dashed var(--border); padding-bottom: 15px; text-transform: uppercase; }
+  .form-control {
+    width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+    font-family: 'Cairo'; font-size: 13px; outline: none; margin-bottom: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15); }
+  textarea.form-control { resize: vertical; min-height: 80px; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 15px; transition: 0.3s; }
-  .card:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(250, 204, 21, 0.1); }
-  .card h3 { font-size: 18px; color: var(--text); font-weight: bold; display: flex; align-items: center; gap: 10px; }
-  .card p { font-size: 13px; color: var(--text-muted); }
-  .card .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+  .btn-action {
+    width: 100%; padding: 11px; background: var(--primary); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-family: 'Cairo';
+    font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3); }
+  .btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-green { background: var(--success); }
+  .btn-green:hover { background: #059669; }
+  .btn-blue { background: var(--info); }
+  .btn-blue:hover { background: #2563eb; }
 
-  .input-control { width: 100%; padding: 12px; background: #000; border: 1px solid var(--border); border-radius: 6px; color: var(--primary); font-family: 'Cairo'; font-size: 15px; outline: none; transition: 0.3s; }
-  .input-control:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
-  
-  .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-family: 'Cairo'; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-  .btn-submit:hover { background: #fff; box-shadow: 0 0 20px var(--primary-glow); }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn-danger:hover { background: #cc0000; }
-  .btn-success { background: var(--success); color: #000; }
-  .btn-success:hover { background: #00cc66; }
+  .list-box {
+    max-height: 220px; overflow-y: auto; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px; margin-top: 10px; font-size: 13px;
+  }
+  .list-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 6px; border-bottom: 1px solid var(--border); color: var(--text); gap: 8px;
+  }
+  .list-item:last-child { border-bottom: none; }
 
-  .list-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
-  .list-item { background: var(--surface-2); border: 1px solid var(--border); padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .list-item .content { flex: 1; }
-  .list-item .header { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 3px; }
-  .list-item .action-btn { background: var(--danger); color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; font-size: 12px; }
+  .section-title {
+    font-size: 15px; font-weight: 700; color: var(--text); margin: 24px 0 12px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
 
-  .chat-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; height: 400px; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-  .msg { max-width: 80%; padding: 10px 15px; border-radius: 10px; font-size: 14px; }
-  .msg.me { background: var(--primary); color: #000; align-self: flex-end; }
-  .msg.them { background: #222; color: var(--text); align-self: flex-start; border: 1px solid #444; }
-  .chat-input { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 10px; }
-  .chat-input input { flex: 1; padding: 10px; background: #111; border: 1px solid #333; border-radius: 6px; color: #fff; font-family: 'Cairo'; outline: none; }
-  .chat-input button { padding: 0 20px; background: var(--primary); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .stat-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; text-align: center; transition: all 0.25s;
+  }
+  .stat-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+  .stat-icon { font-size: 24px; margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-top: 4px; }
 
-  .idea-item { background: var(--surface-2); border: 1px solid var(--border); padding: 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .vote-btn { background: #000; color: var(--primary); border: 1px solid var(--primary); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-  .vote-btn.active { background: var(--primary); color: #000; }
+  /* ===== Modal ===== */
+  #customModal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 99999; justify-content: center; align-items: center; padding: 20px;
+  }
+  #customModal.active { display: flex; }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; max-width: 600px; width: 100%; max-height: 80vh;
+    overflow-y: auto; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 10px; left: 10px; background: var(--danger); color: #fff;
+    border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    font-size: 14px; font-weight: 900; font-family: 'Cairo';
+  }
+  .modal-title {
+    color: var(--primary); margin-bottom: 15px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border); font-size: 18px; font-weight: 900;
+  }
 
-  #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 15px 30px; border-radius: 6px; font-weight: bold; z-index: 9999; transition: 0.3s; box-shadow: 0 0 30px var(--primary-glow); }
-  #toast.show { bottom: 30px; }
-  #toast.error { background: var(--danger); color: #fff; }
+  /* ===== Toast ===== */
+  #toastContainer {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    z-index: 100000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+  }
+  .toast {
+    background: var(--success); color: #fff; padding: 12px 24px; border-radius: 8px;
+    font-weight: bold; font-family: 'Cairo'; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: toastIn 0.3s ease; pointer-events: auto;
+  }
+  .toast.error { background: var(--danger); }
+  .toast.info { background: var(--info); }
+  @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  @media (max-width: 900px) {
-    .layout { flex-direction: column; }
-    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-left: none; border-bottom: 1px solid var(--border); padding: 10px; }
-    .main-content { padding: 15px; }
+  @media (max-width: 768px) {
+    body { padding: 12px; }
+    .top-header { padding: 12px 16px; }
+    .chat-layout { grid-template-columns: 1fr; height: auto; }
+    .chat-sidebar { flex-direction: row; overflow-x: auto; padding: 10px; }
+    .chat-room-item { white-space: nowrap; padding: 10px 14px; }
+    .chat-room-name { font-size: 12px; }
+    .chat-main { height: 500px; }
+    .chat-search { width: 130px; }
+    .chat-search:focus { width: 150px; }
     .grid { grid-template-columns: 1fr; }
+    .tab-btn { font-size: 13px; padding: 9px 12px; }
   }
 </style>
 </head>
 <body>
 
-<div id="toast">تم التنفيذ بنجاح!</div>
+<div id="toastContainer"></div>
 
-<div id="partnerContent">
-  <div class="top-bar">
-    <div class="brand">🦾 Cyber Partner</div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn-icon" onclick="window.logout()">🚪 خروج</button>
-      <a href="index.html" class="btn-icon">⬅ الرئيسية</a>
+<div id="panelContent">
+  <!-- Header -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">🤝</div>
+      <div class="brand-text">
+        <h1>لوحة الشريك</h1>
+        <p>مركز التواصل مع الإدارة</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="تبديل الثيم">🌙</button>
+      <a href="index.html" class="btn-back">⬅ رجوع</a>
     </div>
   </div>
 
-  <div class="layout">
-    <div class="sidebar">
-      <button class="nav-btn active" onclick="window.switchTab('dashboard', this)">📊 لوحة التحكم</button>
-      <button class="nav-btn" onclick="window.switchTab('quicktools', this)">⚡ أدوات سريعة</button>
-      <button class="nav-btn" onclick="window.switchTab('analytics', this)">📈 تحليلات</button>
-      <button class="nav-btn" onclick="window.switchTab('ideas', this)">💡 إدارة الأفكار</button>
-      <button class="nav-btn" onclick="window.switchTab('vigilance', this)">🚨 الرقابة</button>
-      <button class="nav-btn" onclick="window.switchTab('developer', this)">💻 المطور</button>
-      <button class="nav-btn" onclick="window.switchTab('chat', this)">💬 النقاش</button>
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('chat', this)">💬 شات الإدارة</button>
+    <button class="tab-btn" onclick="switchTab('analytics', this)">📊 التحليلات</button>
+    <button class="tab-btn" onclick="switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+    <button class="tab-btn" onclick="switchTab('ideas', this)">💡 أفكار ومقترحات</button>
+    <button class="tab-btn" onclick="switchTab('history', this)">📋 سجل وطلباتي</button>
+  </div>
+
+  <!-- ============ TAB: شات الإدارة ============ -->
+  <div id="tab-chat" class="tab-content active">
+    <div class="chat-layout">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-title">💬 غرف الإدارة</div>
+        <div id="chatRoomsList"></div>
+      </div>
+      <div class="chat-main">
+        <div class="chat-main-header">
+          <span id="chatMainHeader">💬 اختر غرفة للبدء</span>
+          <div class="chat-header-actions" id="chatHeaderActions" style="display:none;">
+            <input type="text" id="chatSearch" class="chat-search" placeholder="🔍 بحث..."
+              oninput="window.filterChatMessages()">
+            <button class="chat-stats-btn" onclick="window.showMyChatStats()" title="إحصائياتي">📊</button>
+          </div>
+        </div>
+        <div class="chat-main-messages" id="chatMainMessages">
+          <div class="chat-empty">
+            <div class="chat-empty-icon">💬</div>
+            <div>اختر غرفة من القائمة عشان تبدأ الشات مع الإدارة</div>
+          </div>
+        </div>
+        <div class="chat-main-input">
+          <input type="text" id="chatInput" placeholder="اكتب رسالتك..." disabled
+            onkeypress="if(event.key==='Enter') window.sendChatMessage()">
+          <button onclick="window.sendChatMessage()" id="chatSendBtn" disabled>📤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB: التحليلات ============ -->
+  <div id="tab-analytics" class="tab-content">
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="statUsers">0</div>
+        <div class="stat-label">إجمالي اللاعبين</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value" id="statPlays">0</div>
+        <div class="stat-label">مرات اللعب</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" id="statQuizzes">0</div>
+        <div class="stat-label">عدد الكويزات</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon">🪙</div>
+        <div class="stat-value" id="statCoins">0</div>
+        <div class="stat-label">إجمالي الكوينز</div>
+      </div>
     </div>
 
-    <div class="main-content">
-      
-      <!-- 1. Dashboard -->
-      <div id="tab-dashboard" class="tab-pane active">
-        <h2 class="pane-title">📊 لوحة التحكم</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>📈 إحصائيات حية</h3>
-            <p>عدد المتصلين: <b id="liveOnline" style="color:var(--success); font-size:20px;">0</b></p>
-            <p>عدد الغرف النشطة: <b id="liveRooms" style="color:var(--primary); font-size:20px;">0</b></p>
-          </div>
-          <div class="card">
-            <h3>💬 شات الشركاء</h3>
-            <p>تواصل مع باقي الشركاء في غرفة النقاش.</p>
-            <button class="btn-submit" onclick="window.switchTab('chat', document.querySelectorAll('.nav-btn')[6])">دخول الغرفة</button>
-          </div>
-        </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📊</div><h3>تقرير النمو</h3></div>
+        <p>إحصائيات آخر 7 أيام.</p>
+        <button class="btn-action" onclick="generateGrowthReport()">عرض</button>
+        <div class="list-box" id="growthResult"></div>
       </div>
-
-      <!-- 2. Quick Tools (6 Features) -->
-      <div id="tab-quicktools" class="tab-pane">
-        <h2 class="pane-title">⚡ أدوات سريعة</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>📢 نشر إعلان سريع</h3>
-            <p class="desc">أضف إعلاناً يظهر في شريط الموقع.</p>
-            <input type="text" id="quickAd" class="input-control" placeholder="نص الإعلان...">
-            <button class="btn-submit" onclick="window.quickAd()">نشر</button>
-          </div>
-          <div class="card">
-            <h3>📝 إرسال رسالة للأونر</h3>
-            <p class="desc">رسالة مباشرة للإدارة.</p>
-            <input type="text" id="quickMsg" class="input-control" placeholder="رسالتك...">
-            <button class="btn-submit" onclick="window.quickMsg()">إرسال</button>
-          </div>
-          <div class="card">
-            <h3>🎫 فتح تذكرة دعم</h3>
-            <p class="desc">هل تواجه مشكلة تقنية؟</p>
-            <input type="text" id="quickTicket" class="input-control" placeholder="عنوان المشكلة...">
-            <button class="btn-submit" onclick="window.quickTicket()">فتح</button>
-          </div>
-          <div class="card">
-            <h3>🚨 بلاغ عاجل</h3>
-            <p class="desc">بلاغ عن لاعب مخالف (يظهر للإدارة فوراً).</p>
-            <input type="text" id="quickReportUser" class="input-control" placeholder="اسم اللاعب...">
-            <input type="text" id="quickReportReason" class="input-control" placeholder="السبب...">
-            <button class="btn-submit btn-danger" onclick="window.quickReport()">إرسال البلاغ</button>
-          </div>
-          <div class="card">
-            <h3>📊 عرض إحصائيات اللاعبين</h3>
-            <p class="desc">عرض عدد اللاعبين والمتصلين.</p>
-            <button class="btn-submit" onclick="window.quickStats()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🚪 عرض الغرف النشطة</h3>
-            <p class="desc">شاهد الغرف النشطة حالياً.</p>
-            <button class="btn-submit" onclick="window.quickRooms()">عرض</button>
-          </div>
-        </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🔥</div><h3>أكثر الكويزات لعباً</h3></div>
+        <p>عرض الكويزات الأكثر تفاعلاً.</p>
+        <button class="btn-action" onclick="loadPopularQuizzes()">عرض</button>
+        <div class="list-box" id="popularResult"></div>
       </div>
-
-      <!-- 3. Analytics (6 Features) -->
-      <div id="tab-analytics" class="tab-pane">
-        <h2 class="pane-title">📈 التحليلات المتقدمة</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>📊 إحصائيات الموقع</h3>
-            <p class="desc">عرض أرقام حية من قاعدة البيانات.</p>
-            <button class="btn-submit" onclick="window.showSiteStats()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>👥 اللاعبين الأكثر تفاعلاً</h3>
-            <p class="desc">أكثر اللاعبين نشاطاً على الموقع.</p>
-            <button class="btn-submit" onclick="window.showTopUsers()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🎮 إحصائيات الكويزات</h3>
-            <p class="desc">عدد الكويزات التي تم لعبها.</p>
-            <button class="btn-submit" onclick="window.showQuizStats()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>💡 عدد الاقتراحات</h3>
-            <p class="desc">إجمالي الاقتراحات المقدمة.</p>
-            <button class="btn-submit" onclick="window.showSuggestionsCount()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🎫 عدد التذاكر المفتوحة</h3>
-            <p class="desc">تذاكر الدعم المفتوحة حالياً.</p>
-            <button class="btn-submit" onclick="window.showTicketsCount()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>📤 تصدير تقرير</h3>
-            <p class="desc">تحميل تقرير سريع بصيغة TXT.</p>
-            <button class="btn-submit" onclick="window.exportReport()">تحميل</button>
-          </div>
-        </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⭐</div><h3>أعلى 10 لاعبين</h3></div>
+        <p>المتصدرين في الموقع.</p>
+        <button class="btn-action" onclick="loadTopPlayers()">عرض</button>
+        <div class="list-box" id="topPlayersResult"></div>
       </div>
-
-      <!-- 4. Ideas Management (6 Features) -->
-      <div id="tab-ideas" class="tab-pane">
-        <h2 class="pane-title">💡 إدارة الأفكار</h2>
-        <div class="grid">
-          <div class="card" style="grid-column: 1 / -1;">
-            <h3>➕ اقترح فكرة جديدة</h3>
-            <p class="desc">اكتب فكرتك وسيراها الجميع ويصوتون عليها.</p>
-            <input type="text" id="ideaInput" class="input-control" placeholder="اكتب فكرتك هنا...">
-            <button class="btn-submit" onclick="window.addIdea()">نشر الفكرة</button>
-          </div>
-          <div class="card" style="grid-column: 1 / -1;">
-            <h3>🔥 الأفكار المطروحة</h3>
-            <div class="list-container" id="ideasList">
-              <div style="text-align:center; color:var(--text-muted);">جاري التحميل...</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>🗑️ حذف كل الأفكار</h3>
-            <p class="desc">مسح جميع الأفكار المطروحة (للأونر فقط).</p>
-            <button class="btn-submit btn-danger" onclick="window.clearAllIdeas()">مسح الكل</button>
-          </div>
-          <div class="card">
-            <h3>📤 تصدير الأفكار</h3>
-            <p class="desc">تحميل قائمة الأفكار بصيغة TXT.</p>
-            <button class="btn-submit" onclick="window.exportIdeas()">تحميل</button>
-          </div>
-          <div class="card">
-            <h3>🏆 أفضل فكرة</h3>
-            <p class="desc">عرض الفكرة الأكثر تصويتاً.</p>
-            <button class="btn-submit" onclick="window.showTopIdea()">عرض</button>
-          </div>
-        </div>
+      <!-- ✅ 4: المتصلين حالياً -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🟢</div><h3>المتصلين حالياً</h3></div>
+        <p>اللاعبين الموجودين دلوقتي على الموقع.</p>
+        <button class="btn-action" onclick="loadOnlineUsers()">عرض</button>
+        <div class="list-box" id="onlineResult"></div>
       </div>
-
-      <!-- 5. Vigilance (6 Features) -->
-      <div id="tab-vigilance" class="tab-pane">
-        <h2 class="pane-title">🚨 الرقابة</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>🚨 إرسال بلاغ</h3>
-            <p class="desc">بلاغ فوري عن لاعب مخالف (يظهر في لوحة الأونر).</p>
-            <input type="text" id="vigilanceUser" class="input-control" placeholder="اسم اللاعب...">
-            <input type="text" id="vigilanceReason" class="input-control" placeholder="السبب...">
-            <button class="btn-submit btn-danger" onclick="window.sendVigilanceReport()">إرسال 🚨</button>
-          </div>
-          <div class="card">
-            <h3>📋 بلاغاتك السابقة</h3>
-            <p class="desc">آخر البلاغات التي قمت بإرسالها.</p>
-            <div class="list-container" id="vigilanceList">
-              <div style="text-align:center; color:var(--text-muted);">جاري التحميل...</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>👀 مراقبة لاعبين</h3>
-            <p class="desc">عرض آخر 5 لاعبين سجلوا دخول.</p>
-            <button class="btn-submit" onclick="window.showRecentUsers()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🔍 فحص شات عام</h3>
-            <p class="desc">مراجعة آخر 5 رسائل في الشات العام.</p>
-            <button class="btn-submit" onclick="window.showRecentChat()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🚫 عدد المحظورين</h3>
-            <p class="desc">عرض عدد اللاعبين المحظورين حالياً.</p>
-            <button class="btn-submit" onclick="window.showBannedCount()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>📊 تقرير الرقابة</h3>
-            <p class="desc">تحميل تقرير سريع بحالة الموقع.</p>
-            <button class="btn-submit" onclick="window.exportVigilanceReport()">تحميل</button>
-          </div>
-        </div>
+      <!-- ✅ 5: أفضل 5 أسبوعياً -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🏆</div><h3>أفضل 5 لاعبين الأسبوع ده</h3></div>
+        <p>ترتيب أسبوعي بالنقاط.</p>
+        <button class="btn-action" onclick="loadTopWeekly()">عرض</button>
+        <div class="list-box" id="topWeeklyResult"></div>
       </div>
-
-      <!-- 6. Developer (6 Features) -->
-      <div id="tab-developer" class="tab-pane">
-        <h2 class="pane-title">💻 أدوات المطور</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>📡 فحص الاتصال (Ping)</h3>
-            <p class="desc">قياس سرعة استجابة السيرفر.</p>
-            <button class="btn-submit" onclick="window.testPing()">بدء الفحص</button>
-            <div id="pingResult" style="text-align:center; color:var(--success); font-weight:bold; margin-top:10px;"></div>
-          </div>
-          <div class="card">
-            <h3>🔍 عرض بيانات Firebase</h3>
-            <p class="desc">عرض مسار بيانات اللاعبين (Console).</p>
-            <button class="btn-submit" onclick="window.showFirebaseData()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>🧹 مسح LocalStorage</h3>
-            <p class="desc">مسح الكاش المحلي بالكامل.</p>
-            <button class="btn-submit btn-danger" onclick="window.clearLocalStorage()">مسح</button>
-          </div>
-          <div class="card">
-            <h3>📤 تصدير بياناتك</h3>
-            <p class="desc">تحميل بياناتك (JSON).</p>
-            <button class="btn-submit" onclick="window.exportMyData()">تحميل</button>
-          </div>
-          <div class="card">
-            <h3>📊 عرض إصدار الموقع</h3>
-            <p class="desc">نسخة الموقع الحالية.</p>
-            <button class="btn-submit" onclick="window.showVersion()">عرض</button>
-          </div>
-          <div class="card">
-            <h3>⚠️ محاكاة خطأ</h3>
-            <p class="desc">اختبار نظام معالجة الأخطاء.</p>
-            <button class="btn-submit btn-danger" onclick="window.testError()">تشغيل</button>
-          </div>
-        </div>
+      <!-- ✅ 6: لاعبين جدد -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🆕</div><h3>لاعبين جدد الأسبوع ده</h3></div>
+        <p>مين بدأ يلعب في آخر 7 أيام.</p>
+        <button class="btn-action" onclick="loadNewPlayers()">عرض</button>
+        <div class="list-box" id="newPlayersResult"></div>
       </div>
-
-      <!-- 7. Chat -->
-      <div id="tab-chat" class="tab-pane">
-        <h2 class="pane-title">💬 غرفة النقاش</h2>
-        <div class="chat-box">
-          <div class="chat-messages" id="chatMessages"></div>
-          <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') window.sendMsg()">
-            <button onclick="window.sendMsg()">إرسال</button>
-          </div>
-        </div>
+      <!-- ✅ 7: آخر 10 مسجلين -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📅</div><h3>آخر 10 مسجلين</h3></div>
+        <p>أحدث اللاعبين على الموقع.</p>
+        <button class="btn-action" onclick="loadRecentPlayers()">عرض</button>
+        <div class="list-box" id="recentPlayersResult"></div>
       </div>
-
+      <!-- ✅ 8: مقارنة أسبوعية -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📈</div><h3>مقارنة الأسبوع ده واللي فات</h3></div>
+        <p>فرق الأداء بين الأسبوعين.</p>
+        <button class="btn-action" onclick="compareWeekly()">عرض</button>
+        <div class="list-box" id="weeklyCompareResult"></div>
+      </div>
+      <!-- ✅ 9: عرض لاعب عشوائي -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🎯</div><h3>عرض ملف لاعب عشوائي</h3></div>
+        <p>افتح بروفايل لاعب عشوائي في تاب جديد.</p>
+        <button class="btn-action" onclick="showRandomPlayer()">افتح</button>
+      </div>
+      <!-- ✅ 10: الإعلان الحالي -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📢</div><h3>الإعلان الحالي</h3></div>
+        <p>الإعلان النشط في الشريط العلوي.</p>
+        <button class="btn-action" onclick="showAnnouncement()">عرض</button>
+        <div class="list-box" id="announcementResult"></div>
+      </div>
+      <!-- ✅ 11: الفعاليات النشطة -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🎉</div><h3>الفعاليات النشطة</h3></div>
+        <p>العروض، الاستفتاءات، والمسابقات.</p>
+        <button class="btn-action" onclick="showActiveEvents()">عرض</button>
+        <div class="list-box" id="activeEventsResult"></div>
+      </div>
     </div>
+  </div>
+
+  <!-- ============ TAB: رسائل الأونر ============ -->
+  <div id="tab-owner_msg" class="tab-content">
+    <div class="grid">
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><div class="card-icon">📩</div><h3>رسالة كاملة للأونر</h3></div>
+        <p>للرسائل الطويلة والمهمة.</p>
+        <textarea id="partnerMsgInput" class="form-control" rows="3" placeholder="اكتب رسالتك هنا..."></textarea>
+        <button class="btn-action" onclick="window.sendToOwner()">إرسال 📨</button>
+      </div>
+      <!-- ✅ 12: ملاحظة سريعة -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">✏️</div><h3>ملاحظة سريعة</h3></div>
+        <p>ملاحظة قصيرة جداً (max 100 حرف).</p>
+        <input type="text" id="quickNoteInput" class="form-control" placeholder="ملاحظة قصيرة..." maxlength="100">
+        <button class="btn-action" onclick="sendQuickNote(this)">إرسال</button>
+      </div>
+      <!-- ✅ 13: طلب اجتماع -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📅</div><h3>طلب اجتماع</h3></div>
+        <p>طلب اجتماع مع الأونر في تاريخ محدد.</p>
+        <input type="datetime-local" id="meetingDate" class="form-control">
+        <input type="text" id="meetingReason" class="form-control" placeholder="سبب الاجتماع...">
+        <button class="btn-action" onclick="requestMeeting(this)">إرسال الطلب</button>
+      </div>
+      <!-- ✅ 14: تقرير أسبوعي -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📝</div><h3>تقرير أسبوعي</h3></div>
+        <p>ابعت ملخص أسبوعك للأونر.</p>
+        <textarea id="weeklyReportInput" class="form-control" rows="3" placeholder="ملخص الأسبوع..."></textarea>
+        <button class="btn-action" onclick="sendWeeklyReport(this)">إرسال التقرير</button>
+      </div>
+      <!-- ✅ 15: الإشعارات -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🔔</div><h3>الإشعارات</h3></div>
+        <p>آخر الرسائل والإعلانات الجديدة.</p>
+        <button class="btn-action" onclick="showNotifications()">عرض</button>
+        <div class="list-box" id="notificationsResult"></div>
+      </div>
+      <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header"><div class="card-icon">📋</div><h3>الردود من الأونر</h3></div>
+        <div class="list-box" id="ownerRepliesList" style="max-height: 280px;">
+          <div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB: أفكار ومقترحات ============ -->
+  <div id="tab-ideas" class="tab-content">
+    <div class="grid">
+      <div class="card">
+        <div class="card-header"><div class="card-icon">💡</div><h3>فكرة جديدة</h3></div>
+        <p>اقترح فكرة لكويز، ميزة، أو تحسين.</p>
+        <input type="text" id="ideaInput" class="form-control" placeholder="عنوان الفكرة...">
+        <textarea id="ideaDesc" class="form-control" rows="3" placeholder="وصف الفكرة..."></textarea>
+        <button class="btn-action" onclick="sendIdea(this)">إرسال للأونر</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">⚠️</div><h3>بلاغ عن مشكلة</h3></div>
+        <p>إبلاغ الإدارة عن مشكلة تقنية أو محتوى مخالف.</p>
+        <textarea id="bugReport" class="form-control" rows="3" placeholder="وصف المشكلة..."></textarea>
+        <button class="btn-action" onclick="sendBugReport(this)">إرسال البلاغ</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🎁</div><h3>اقتراح عرض / فعالية</h3></div>
+        <p>اقترح عرض ترويجي أو فعالية بسيطة.</p>
+        <input type="text" id="eventInput" class="form-control" placeholder="العرض أو الفعالية...">
+        <button class="btn-action" onclick="sendEventIdea(this)">إرسال</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🤝</div><h3>اقتراح شريك / راعي</h3></div>
+        <p>لو عرفت حد ممكن يفيد الموقع، ابعتلنا بياناته.</p>
+        <input type="text" id="sponsorName" class="form-control" placeholder="اسم الشخص/الشركة...">
+        <input type="text" id="sponsorContact" class="form-control" placeholder="طريقة التواصل...">
+        <button class="btn-action" onclick="sendSponsorIdea(this)">إرسال للأونر</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB: سجل وطلباتي ============ -->
+  <div id="tab-history" class="tab-content">
+    <div class="grid">
+      <!-- ✅ 16: سجل طلباتي -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📋</div><h3>سجل طلباتي السابقة</h3></div>
+        <p>كل الطلبات اللي بعتها للأونر مع الحالة.</p>
+        <button class="btn-action" onclick="loadMyRequests()">عرض السجل</button>
+        <div class="list-box" id="myRequestsResult"></div>
+      </div>
+      <!-- ✅ 17: إحصائياتي كشريك -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📊</div><h3>إحصائياتي كشريك</h3></div>
+        <p>عدد الرسائل والطلبات اللي بعتها.</p>
+        <button class="btn-action" onclick="loadMyPartnerStats()">عرض</button>
+        <div class="list-box" id="myPartnerStatsResult"></div>
+      </div>
+      <!-- ✅ 18: تصدير تقريري -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📤</div><h3>تصدير تقريري</h3></div>
+        <p>تنزيل كل إحصائياتك كملف JSON.</p>
+        <button class="btn-action btn-blue" onclick="exportMyReport()">تحميل JSON</button>
+      </div>
+      <!-- ✅ 19: نسخ إحصائياتي -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📋</div><h3>نسخ إحصائياتي</h3></div>
+        <p>نسخ ملخص إحصائياتك للحافظة.</p>
+        <button class="btn-action btn-green" onclick="copyMyStats()">نسخ</button>
+      </div>
+      <!-- ✅ 20: تحديث الكل -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🔄</div><h3>تحديث كل الإحصائيات</h3></div>
+        <p>إعادة تحميل كل الأرقام من جديد.</p>
+        <button class="btn-action" onclick="refreshAllStats()">تحديث</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Modal ============ -->
+<div id="customModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="window.closeModal()">✖</button>
+    <h3 class="modal-title" id="modalTitle">معلومات</h3>
+    <div id="modalContent"></div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, get, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+  import { getDatabase, ref, get, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); 
+  const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  
-  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.push = push; window.set = set; window.remove = remove;
+  window.db = db; window.ref = ref; window.get = get; window.set = set;
+  window.push = push; window.onValue = onValue; window.remove = remove;
 
   const currentUser = localStorage.getItem('loggedInUser');
   if (!currentUser) window.location.href = 'index.html';
 
-  window.showToast = function(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.innerText = msg;
-      t.className = isError ? 'show error' : 'show';
-      setTimeout(() => t.className = t.className.replace('show', ''), 3000);
-  };
-  window.logout = function() { localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; };
+  /* ============ Utility ============ */
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
 
-  window.switchTab = function(tabId, btn) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
+  window.toast = function(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast ' + (type === 'success' ? '' : type);
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
   };
 
-  window.get(window.ref(window.db, 'roles/partners/' + currentUser)).then(snap => {
-      if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
-          document.getElementById('partnerContent').style.display = 'flex';
-          initLiveStats();
-          initChat();
-          initIdeas();
-          initVigilance();
-      } else {
-          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض.</h1>';
-      }
+  window.showModal = function(title, html) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalContent').innerHTML = html;
+    document.getElementById('customModal').classList.add('active');
+  };
+  window.closeModal = function() {
+    document.getElementById('customModal').classList.remove('active');
+  };
+  document.getElementById('customModal').addEventListener('click', (e) => {
+    if (e.target.id === 'customModal') window.closeModal();
   });
 
-  // ------------------ الأساسيات ------------------
-  function initLiveStats() {
-      window.onValue(window.ref(window.db, 'presence'), snap => {
-          let on = 0; if(snap.exists()) Object.values(snap.val()).forEach(u=>{if(u.status==='online') on++});
-          document.getElementById('liveOnline').innerText = on;
-      });
-      window.onValue(window.ref(window.db, 'rooms'), snap => {
-          document.getElementById('liveRooms').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
-      });
+  /* ============ Access Check ============ */
+  async function checkAccess() {
+    if (['ahmed', 'banned'].includes(currentUser.toLowerCase())) {
+      document.getElementById('panelContent').style.display = 'block';
+      initPanel();
+      return;
+    }
+    try {
+      const [partnerSnap, roleSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'roles/partners/' + currentUser)),
+        window.get(window.ref(window.db, 'roles/users/' + currentUser))
+      ]);
+      const role = roleSnap.exists() ? roleSnap.val() : 'Player';
+      if (partnerSnap.exists() || ['Partner', 'partner'].includes(role)) {
+        document.getElementById('panelContent').style.display = 'block';
+        initPanel();
+      } else {
+        document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. أنت لست شريك.</h1>';
+      }
+    } catch(e) {
+      document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ خطأ في التحقق.</h1>';
+    }
   }
 
-  function initChat() {
-      window.onValue(window.ref(window.db, 'partners_chat'), snap => {
-          const container = document.getElementById('chatMessages');
-          container.innerHTML = '';
-          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد رسائل بعد.</div>'; return; }
-          Object.values(snap.val()).reverse().forEach(msg => {
-              const div = document.createElement('div');
-              div.className = `msg ${msg.sender === currentUser ? 'me' : 'them'}`;
-              div.innerHTML = `<div style="font-size:10px; opacity:0.7; margin-bottom:3px;">${msg.sender}</div><div>${msg.text}</div>`;
-              container.appendChild(div);
-          });
-          container.scrollTop = container.scrollHeight;
-      });
+  function initPanel() {
+    renderChatRooms();
+    loadAnalytics();
+    listenToReplies();
   }
 
-  window.sendMsg = function() {
-      const input = document.getElementById('chatInput');
-      if (!input.value.trim()) return;
-      window.push(window.ref(window.db, 'partners_chat'), { sender: currentUser, text: input.value.trim(), time: Date.now() });
+  /* ============ Tab Switch ============ */
+  window.switchTab = function(tabId, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tabId).classList.add('active');
+    if (tabId === 'analytics') loadAnalytics();
+  };
+
+  /* ============ Theme ============ */
+  window.toggleTheme = function() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
+    localStorage.setItem('partnerTheme', isDark ? 'dark' : 'light');
+  };
+  if (localStorage.getItem('partnerTheme') === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.innerText = '☀️';
+    });
+  }
+
+  /* ============================================================
+     الشات مع الإدارة
+     ============================================================ */
+  const ADMIN_ROOMS = [
+    { key: 'group', emoji: '👥', name: 'الجميع (جماعي)' },
+    { key: 'owner', emoji: '👑', name: 'الأونر' },
+    { key: 'partner', emoji: '🤝', name: 'الشركاء' },
+    { key: 'manager', emoji: '📋', name: 'المديرين' },
+    { key: 'tester', emoji: '🧪', name: 'التسترات' },
+    { key: 'builder', emoji: '🏗️', name: 'البيلدرز' },
+    { key: 'admin', emoji: '🛡️', name: 'الأدمنز' }
+  ];
+
+  let activeChatRoom = null;
+  let chatUnsubscribe = null;
+  const roomListeners = {};
+
+  function renderChatRooms() {
+    const box = document.getElementById('chatRoomsList');
+    if (!box) return;
+    box.innerHTML = ADMIN_ROOMS.map(r => `
+      <button class="chat-room-item ${activeChatRoom === r.key ? 'active' : ''}" onclick="window.openChatRoom('${r.key}', '${r.name}', '${r.emoji}')">
+        <span class="chat-room-emoji">${r.emoji}</span>
+        <span class="chat-room-name">${r.name}</span>
+        <span class="chat-room-badge" id="badge-${r.key}" style="display:none;">0</span>
+      </button>
+    `).join('');
+
+    ADMIN_ROOMS.forEach(r => {
+      if (!roomListeners[r.key]) {
+        roomListeners[r.key] = window.onValue(window.ref(window.db, 'admin_chat/' + r.key), (snap) => {
+          const data = snap.val() || {};
+          const count = Object.keys(data).length;
+          const badge = document.getElementById('badge-' + r.key);
+          if (badge) {
+            if (count > 0 && activeChatRoom !== r.key) {
+              badge.style.display = 'inline-block';
+              badge.innerText = count;
+            } else {
+              badge.style.display = 'none';
+            }
+          }
+        });
+      }
+    });
+  }
+
+  window.openChatRoom = function(key, name, emoji) {
+    activeChatRoom = key;
+    renderChatRooms();
+    document.getElementById('chatMainHeader').innerHTML = `${emoji} شات ${name}`;
+    document.getElementById('chatHeaderActions').style.display = 'flex';
+    document.getElementById('chatSearch').value = '';
+    document.getElementById('chatInput').disabled = false;
+    document.getElementById('chatSendBtn').disabled = false;
+    document.getElementById('chatMainMessages').innerHTML = '<div class="chat-empty">جاري التحميل...</div>';
+
+    if (chatUnsubscribe) chatUnsubscribe();
+    chatUnsubscribe = window.onValue(window.ref(window.db, 'admin_chat/' + key), (snap) => {
+      const data = snap.val() || {};
+      const msgs = Object.entries(data).sort((a, b) => (a[1].time || 0) - (b[1].time || 0));
+      const box = document.getElementById('chatMainMessages');
+      if (msgs.length === 0) {
+        box.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">💬</div><div>لا توجد رسائل. كن الأول!</div></div>`;
+        return;
+      }
+      box.innerHTML = msgs.map(([id, m]) => {
+        const isMine = (m.sender || '').toLowerCase() === currentUser.toLowerCase();
+        const time = m.time ? new Date(m.time).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '';
+        const deleteBtn = isMine ? `<button class="msg-delete" onclick="event.stopPropagation(); window.deleteMyMessage('${key}', '${id}')">🗑️</button>` : '';
+        return `
+          <div class="chat-msg ${isMine ? 'mine' : 'theirs'}" data-id="${id}">
+            ${!isMine ? `<div class="chat-msg-sender">👤 ${escapeHtml(m.sender || '?')}</div>` : ''}
+            <div>${escapeHtml(m.text || '')}</div>
+            <div class="chat-msg-time"><span>${time}</span>${deleteBtn}</div>
+          </div>
+        `;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+      const badge = document.getElementById('badge-' + key);
+      if (badge) badge.style.display = 'none';
+    });
+  };
+
+  window.sendChatMessage = async function() {
+    if (!activeChatRoom) return window.toast('اختر غرفة أولاً', 'error');
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    try {
+      await window.push(window.ref(window.db, 'admin_chat/' + activeChatRoom), {
+        sender: currentUser, text, time: Date.now()
+      });
       input.value = '';
+    } catch(e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
 
-  // ------------------ الأفكار ------------------
-  function initIdeas() {
-      window.onValue(window.ref(window.db, 'partner_ideas'), snap => {
-          const container = document.getElementById('ideasList');
-          container.innerHTML = '';
-          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد أفكار بعد.</div>'; return; }
-          
-          const entries = Object.entries(snap.val()).sort((a,b) => {
-              const av = a[1].votes ? Object.keys(a[1].votes).length : 0;
-              const bv = b[1].votes ? Object.keys(b[1].votes).length : 0;
-              return bv - av;
-          });
+  // ✅ 1: بحث في الشات
+  window.filterChatMessages = function() {
+    const q = document.getElementById('chatSearch').value.toLowerCase().trim();
+    const messages = document.querySelectorAll('#chatMainMessages .chat-msg');
+    let visible = 0;
+    messages.forEach(m => {
+      const text = m.textContent.toLowerCase();
+      const show = !q || text.includes(q);
+      m.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    if (q && visible === 0 && messages.length > 0) {
+      window.toast('مفيش رسائل فيها "' + q + '"', 'info');
+    }
+  };
 
-          entries.forEach(([key, idea]) => {
-              const div = document.createElement('div');
-              div.className = 'idea-item';
-              const votes = idea.votes ? Object.keys(idea.votes).length : 0;
-              const hasVoted = idea.votes && idea.votes[currentUser.toLowerCase()];
-              div.innerHTML = `
-                  <div>
-                      <div style="font-weight:bold; margin-bottom:5px;">${idea.text}</div>
-                      <div style="font-size:11px; color:#888;">بواسطة: ${idea.user}</div>
-                  </div>
-                  <button class="vote-btn ${hasVoted ? 'active' : ''}" onclick="window.vote('${key}')">👍 ${votes}</button>
-              `;
-              container.appendChild(div);
-          });
+  // ✅ 2: حذف رسالتي
+  window.deleteMyMessage = async function(roomKey, msgId) {
+    if (!confirm('تحذف الرسالة دي؟')) return;
+    try {
+      await window.remove(window.ref(window.db, `admin_chat/${roomKey}/${msgId}`));
+      window.toast('✅ تم حذف الرسالة');
+    } catch(e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  // ✅ 3: إحصائياتي في الشات
+  window.showMyChatStats = async function() {
+    window.showModal('📊 رسائلك في الشات', '<div style="text-align:center; padding:20px;">جاري التحميل...</div>');
+    try {
+      const roomsData = {};
+      let total = 0;
+      for (const r of ADMIN_ROOMS) {
+        const snap = await window.get(window.ref(window.db, 'admin_chat/' + r.key));
+        const data = snap.exists() ? snap.val() : {};
+        let count = 0;
+        for (const id in data) {
+          if ((data[id].sender || '').toLowerCase() === currentUser.toLowerCase()) count++;
+        }
+        if (count > 0) { roomsData[r.name] = count; total += count; }
+      }
+      let html = `<div style="background:var(--primary-light); padding:15px; border-radius:8px; text-align:center; margin-bottom:15px;"><div style="font-size:32px; font-weight:900; color:var(--primary);">${total}</div><div style="font-size:12px; color:var(--text-secondary);">إجمالي رسائلك</div></div>`;
+      if (Object.keys(roomsData).length === 0) {
+        html += '<div style="text-align:center; padding:15px; color:var(--text-secondary);">لم ترسل أي رسائل بعد</div>';
+      } else {
+        html += Object.entries(roomsData).map(([r, c]) => `<div class="list-item"><span>💬 ${r}</span><b>${c} رسالة</b></div>`).join('');
+      }
+      document.getElementById('modalContent').innerHTML = html;
+    } catch(e) {
+      document.getElementById('modalContent').innerHTML = '<div style="color:red; text-align:center;">خطأ في التحميل</div>';
+    }
+  };
+
+  /* ============ الرسائل للأونر ============ */
+  window.sendToOwner = async function() {
+    const text = document.getElementById('partnerMsgInput').value.trim();
+    if (!text) return window.toast('اكتب حاجة!', 'error');
+    try {
+      await window.push(window.ref(window.db, 'messages/owner_inbox'), {
+        from: 'Partner: ' + currentUser, text, time: Date.now()
       });
+      window.toast('✅ تم إرسال الرسالة للأونر!');
+      document.getElementById('partnerMsgInput').value = '';
+    } catch(e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  function listenToReplies() {
+    window.onValue(window.ref(window.db, 'messages/' + currentUser), (msgSnap) => {
+      const list = document.getElementById('ownerRepliesList');
+      if (!list) return;
+      if (!msgSnap.exists()) {
+        list.innerHTML = '<div class="list-item" style="color: var(--text-secondary); justify-content: center;">لا توجد ردود بعد</div>';
+        return;
+      }
+      list.innerHTML = '';
+      Object.values(msgSnap.val()).reverse().forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span style="flex:1;">${escapeHtml(msg.text || '')}</span><span style="font-size:10px; color: var(--text-secondary);">${escapeHtml(msg.from || '')}</span>`;
+        list.appendChild(div);
+      });
+    });
   }
 
-  window.addIdea = async function() {
-      const text = document.getElementById('ideaInput').value.trim();
-      if (!text) return window.showToast('اكتب فكرتك!', true);
-      await window.push(window.ref(window.db, 'partner_ideas'), { text: text, user: currentUser, time: Date.now() });
-      document.getElementById('ideaInput').value = '';
-      window.showToast('✅ تم النشر!');
+  /* ============ التحليلات ============ */
+  async function loadAnalytics() {
+    try {
+      const [usersSnap, scoresSnap, usersDataSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'usernames')),
+        window.get(window.ref(window.db, 'scores')),
+        window.get(window.ref(window.db, 'users_data'))
+      ]);
+      const users = usersSnap.exists() ? usersSnap.val() : {};
+      const scores = scoresSnap.exists() ? scoresSnap.val() : {};
+      const usersData = usersDataSnap.exists() ? usersDataSnap.val() : {};
+      let playsCount = 0;
+      const quizSet = new Set();
+      for (const u in scores) {
+        for (const q in scores[u]) {
+          quizSet.add(q);
+          playsCount += Object.keys(scores[u][q]).length;
+        }
+      }
+      let totalCoins = 0;
+      for (const u in usersData) totalCoins += (usersData[u].coins || 0);
+      document.getElementById('statUsers').innerText = Object.keys(users).length;
+      document.getElementById('statPlays').innerText = playsCount;
+      document.getElementById('statQuizzes').innerText = quizSet.size;
+      document.getElementById('statCoins').innerText = totalCoins.toLocaleString();
+    } catch(e) { console.warn('Analytics load failed:', e); }
+  }
+  window.loadAnalytics = loadAnalytics;
+
+  window.generateGrowthReport = async function() {
+    const box = document.getElementById('growthResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const weekAgo = Date.now() - 7 * 86400000;
+      let plays7d = 0;
+      const activeUsers = new Set();
+      for (const u in data) for (const q in data[u]) for (const a in data[u][q]) {
+        const t = new Date(data[u][q][a].time || 0).getTime();
+        if (t > weekAgo) { plays7d++; activeUsers.add(u); }
+      }
+      box.innerHTML = `
+        <div class="list-item"><span>📅 محاولات 7 أيام</span><b>${plays7d}</b></div>
+        <div class="list-item"><span>👥 لاعبين نشطين</span><b>${activeUsers.size}</b></div>
+        <div class="list-item"><span>📊 متوسط/يوم</span><b>${Math.round(plays7d/7)}</b></div>
+      `;
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
   };
 
-  window.vote = async function(key) {
-      const refVote = window.ref(window.db, 'partner_ideas/' + key + '/votes/' + currentUser.toLowerCase());
-      const snap = await window.get(refVote);
-      if(snap.exists()) await window.set(refVote, null);
-      else await window.set(refVote, true);
+  window.loadPopularQuizzes = async function() {
+    const box = document.getElementById('popularResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const counts = {};
+      for (const u in data) for (const q in data[u]) counts[q] = (counts[q] || 0) + Object.keys(data[u][q]).length;
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      box.innerHTML = top.map(([q, c]) => `<div class="list-item"><span>🎮 ${escapeHtml(q)}</span><b>${c}</b></div>`).join('') || '<div style="text-align:center; color:var(--text-secondary); padding:10px;">لا يوجد بيانات</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
   };
 
-  // ------------------ الرقابة ------------------
-  function initVigilance() {
-      window.onValue(window.ref(window.db, 'support_tickets'), snap => {
-          const container = document.getElementById('vigilanceList');
-          if(!container) return;
-          container.innerHTML = '';
-          if(!snap.exists()) { container.innerHTML = '<div style="text-align:center; color:#666;">لا توجد بلاغات بعد.</div>'; return; }
-          
-          Object.values(snap.val()).filter(t => t.by === 'Partner: ' + currentUser).reverse().forEach(t => {
-              const div = document.createElement('div');
-              div.className = 'list-item';
-              div.innerHTML = `
-                  <div class="content">
-                      <div class="header">${new Date(t.time).toLocaleDateString('ar-EG')}</div>
-                      <div>${t.text}</div>
-                  </div>
-              `;
-              container.appendChild(div);
-          });
+  window.loadTopPlayers = async function() {
+    const box = document.getElementById('topPlayersResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'users_data'));
+      const data = snap.exists() ? snap.val() : {};
+      const top = Object.entries(data).map(([u, d]) => [u, d.xp || 0]).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      box.innerHTML = top.map(([u, xp], i) => `<div class="list-item"><span>#${i+1} ${escapeHtml(u)}</span><b>${xp} XP</b></div>`).join('') || '<div style="text-align:center; color:var(--text-secondary); padding:10px;">لا يوجد بيانات</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 4: المتصلين حالياً
+  window.loadOnlineUsers = async function() {
+    const box = document.getElementById('onlineResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'presence'));
+      const data = snap.exists() ? snap.val() : {};
+      const online = Object.entries(data).filter(([u, v]) => v.status === 'online');
+      if (online.length === 0) {
+        box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">مفيش حد متصل دلوقتي</div>';
+        return;
+      }
+      box.innerHTML = online.map(([u, v]) => {
+        const lastSeen = v.last_seen ? new Date(v.last_seen).toLocaleTimeString('ar-EG', {hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<div class="list-item"><span>🟢 ${escapeHtml(u)}</span><span style="font-size:11px; color:var(--text-secondary);">${lastSeen}</span></div>`;
+      }).join('');
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 5: أفضل 5 الأسبوع
+  window.loadTopWeekly = async function() {
+    const box = document.getElementById('topWeeklyResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const weekAgo = Date.now() - 7 * 86400000;
+      const totals = {};
+      for (const u in data) {
+        for (const q in data[u]) {
+          for (const a in data[u][q]) {
+            const attempt = data[u][q][a];
+            const t = new Date(attempt.time || 0).getTime();
+            if (t > weekAgo) totals[u] = (totals[u] || 0) + (attempt.score || 0);
+          }
+        }
+      }
+      const top5 = Object.entries(totals).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      box.innerHTML = top5.length ? top5.map(([u, s], i) => `<div class="list-item"><span>${['🥇','🥈','🥉','4️⃣','5️⃣'][i]} ${escapeHtml(u)}</span><b>${s} نقطة</b></div>`).join('') : '<div style="text-align:center; padding:10px; color:var(--text-secondary);">مفيش نشاط الأسبوع ده</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 6: لاعبين جدد
+  window.loadNewPlayers = async function() {
+    const box = document.getElementById('newPlayersResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const weekAgo = Date.now() - 7 * 86400000;
+      const firstPlays = {};
+      for (const u in data) {
+        let first = Infinity;
+        for (const q in data[u]) for (const a in data[u][q]) {
+          const t = new Date(data[u][q][a].time || 0).getTime();
+          if (t > 0 && t < first) first = t;
+        }
+        if (first < Infinity) firstPlays[u] = first;
+      }
+      const newPlayers = Object.entries(firstPlays).filter(([, t]) => t > weekAgo).sort((a, b) => b[1] - a[1]);
+      box.innerHTML = newPlayers.length ? newPlayers.map(([u, t]) => `<div class="list-item"><span>🆕 ${escapeHtml(u)}</span><span style="font-size:11px; color:var(--text-secondary);">${new Date(t).toLocaleDateString('ar-EG')}</span></div>`).join('') : '<div style="text-align:center; padding:10px; color:var(--text-secondary);">مفيش لاعبين جدد الأسبوع ده</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 7: آخر 10 مسجلين
+  window.loadRecentPlayers = async function() {
+    const box = document.getElementById('recentPlayersResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const firstPlays = {};
+      for (const u in data) {
+        let first = Infinity;
+        for (const q in data[u]) for (const a in data[u][q]) {
+          const t = new Date(data[u][q][a].time || 0).getTime();
+          if (t > 0 && t < first) first = t;
+        }
+        if (first < Infinity) firstPlays[u] = first;
+      }
+      const recent = Object.entries(firstPlays).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      box.innerHTML = recent.length ? recent.map(([u, t], i) => `<div class="list-item"><span>${i+1}. ${escapeHtml(u)}</span><span style="font-size:11px; color:var(--text-secondary);">${new Date(t).toLocaleDateString('ar-EG')}</span></div>`).join('') : '<div style="text-align:center; padding:10px; color:var(--text-secondary);">لا يوجد بيانات</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 8: مقارنة أسبوعية
+  window.compareWeekly = async function() {
+    const box = document.getElementById('weeklyCompareResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'scores'));
+      const data = snap.exists() ? snap.val() : {};
+      const w1 = Date.now() - 7 * 86400000;
+      const w2 = Date.now() - 14 * 86400000;
+      let thisWeek = 0, lastWeek = 0;
+      const thisUsers = new Set(), lastUsers = new Set();
+      for (const u in data) for (const q in data[u]) for (const a in data[u][q]) {
+        const t = new Date(data[u][q][a].time || 0).getTime();
+        if (t > w1) { thisWeek++; thisUsers.add(u); }
+        else if (t > w2) { lastWeek++; lastUsers.add(u); }
+      }
+      const playsDiff = lastWeek > 0 ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : (thisWeek > 0 ? 100 : 0);
+      const arrow = playsDiff > 0 ? '📈' : playsDiff < 0 ? '📉' : '➡️';
+      const color = playsDiff > 0 ? 'var(--success)' : playsDiff < 0 ? 'var(--danger)' : 'var(--text-secondary)';
+      box.innerHTML = `
+        <div class="list-item"><span>📅 محاولات الأسبوع ده</span><b>${thisWeek}</b></div>
+        <div class="list-item"><span>📅 محاولات الأسبوع اللي فات</span><b>${lastWeek}</b></div>
+        <div class="list-item"><span>👥 لاعبين نشطين (ده)</span><b>${thisUsers.size}</b></div>
+        <div class="list-item"><span>👥 لاعبين نشطين (فات)</span><b>${lastUsers.size}</b></div>
+        <div class="list-item"><span>${arrow} الفرق</span><b style="color:${color};">${playsDiff > 0 ? '+' : ''}${playsDiff}%</b></div>
+      `;
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 9: عرض لاعب عشوائي
+  window.showRandomPlayer = async function() {
+    try {
+      const snap = await window.get(window.ref(window.db, 'usernames'));
+      const users = Object.keys(snap.val() || {});
+      if (!users.length) return window.toast('مفيش لاعبين', 'error');
+      const pick = users[Math.floor(Math.random() * users.length)];
+      window.open('profile.html?user=' + encodeURIComponent(pick), '_blank');
+      window.toast(`🎯 فتحت ملف ${pick}`);
+    } catch(e) { window.toast('خطأ: ' + e.message, 'error'); }
+  };
+
+  // ✅ 10: الإعلان الحالي
+  window.showAnnouncement = async function() {
+    const box = document.getElementById('announcementResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'site_settings/announcement'));
+      box.innerHTML = snap.exists() && snap.val() 
+        ? `<div class="list-item"><span style="flex:1;">📢 ${escapeHtml(snap.val())}</span></div>`
+        : '<div style="text-align:center; padding:10px; color:var(--text-secondary);">لا يوجد إعلان نشط</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  // ✅ 11: الفعاليات النشطة
+  window.showActiveEvents = async function() {
+    const box = document.getElementById('activeEventsResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const [offers, poll, contests] = await Promise.all([
+        window.get(window.ref(window.db, 'site_events/active_offers')),
+        window.get(window.ref(window.db, 'site_events/active_poll')),
+        window.get(window.ref(window.db, 'site_events/contests'))
+      ]);
+      let html = '';
+      if (offers.exists()) {
+        const o = offers.val();
+        html += '<div style="font-weight:bold; margin:8px 0; color:var(--primary);">🎁 العروض</div>';
+        for (const k in o) html += `<div class="list-item"><span>• ${escapeHtml(o[k].text || '')}</span></div>`;
+      }
+      if (poll.exists()) {
+        html += '<div style="font-weight:bold; margin:8px 0; color:var(--primary);">🗳️ الاستفتاء</div>';
+        const p = poll.val();
+        html += `<div class="list-item"><span>${escapeHtml(p.question || '')}</span></div>`;
+      }
+      if (contests.exists()) {
+        html += '<div style="font-weight:bold; margin:8px 0; color:var(--primary);">🏆 المسابقات</div>';
+        const c = contests.val();
+        for (const k in c) html += `<div class="list-item"><span>• ${escapeHtml(c[k].name || '')}</span><b>${escapeHtml(c[k].prize || '')}</b></div>`;
+      }
+      box.innerHTML = html || '<div style="text-align:center; padding:10px; color:var(--text-secondary);">لا يوجد فعاليات نشطة</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
+  };
+
+  /* ============ الأفكار ============ */
+  async function sendRequest(node, payload, btn) {
+    const original = btn.innerHTML;
+    btn.innerHTML = '⏳ جاري الإرسال...';
+    btn.disabled = true;
+    try {
+      await window.push(window.ref(window.db, 'partner_requests/' + node), {
+        from: currentUser, ...payload, time: Date.now(), status: 'pending'
       });
+      window.toast('✅ تم الإرسال للأونر!');
+      return true;
+    } catch(e) {
+      window.toast('خطأ: ' + e.message, 'error');
+      return false;
+    } finally {
+      btn.innerHTML = original;
+      btn.disabled = false;
+    }
   }
 
-  window.sendVigilanceReport = async function() {
-      const user = document.getElementById('vigilanceUser').value.trim();
-      const reason = document.getElementById('vigilanceReason').value.trim();
-      if (!user || !reason) return window.showToast('اكتب الاسم والسبب!', true);
-      await window.push(window.ref(window.db, 'support_tickets'), { text: '🚨 بلاغ: ' + user + ' - ' + reason, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
-      window.showToast('✅ تم إرسال البلاغ!');
-      document.getElementById('vigilanceUser').value = '';
-      document.getElementById('vigilanceReason').value = '';
+  window.sendIdea = async function(btn) {
+    const title = document.getElementById('ideaInput').value.trim();
+    const desc = document.getElementById('ideaDesc').value.trim();
+    if (!title && !desc) return window.toast('اكتب فكرة!', 'error');
+    const ok = await sendRequest('ideas', { title: title || '(بدون عنوان)', desc }, btn);
+    if (ok) { document.getElementById('ideaInput').value = ''; document.getElementById('ideaDesc').value = ''; }
   };
 
-  // ------------------ Quick Tools ------------------
-  window.quickAd = async function() {
-      const text = document.getElementById('quickAd').value.trim();
-      if (!text) return window.showToast('اكتب الإعلان!', true);
-      await window.push(window.ref(window.db, 'site_events/active_offers'), { text: text, time: Date.now() });
-      window.showToast('✅ تم النشر!');
-      document.getElementById('quickAd').value = '';
+  window.sendBugReport = async function(btn) {
+    const text = document.getElementById('bugReport').value.trim();
+    if (!text) return window.toast('اكتب وصف المشكلة!', 'error');
+    const ok = await sendRequest('bug_reports', { text }, btn);
+    if (ok) document.getElementById('bugReport').value = '';
   };
 
-  window.quickMsg = async function() {
-      const text = document.getElementById('quickMsg').value.trim();
-      if (!text) return window.showToast('اكتب الرسالة!', true);
-      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Partner: ' + currentUser, text: text, time: Date.now() });
-      window.showToast('✅ تم الإرسال!');
-      document.getElementById('quickMsg').value = '';
+  window.sendEventIdea = async function(btn) {
+    const text = document.getElementById('eventInput').value.trim();
+    if (!text) return window.toast('اكتب العرض أو الفعالية!', 'error');
+    const ok = await sendRequest('event_ideas', { text }, btn);
+    if (ok) document.getElementById('eventInput').value = '';
   };
 
-  window.quickTicket = async function() {
-      const text = document.getElementById('quickTicket').value.trim();
-      if (!text) return window.showToast('اكتب المشكلة!', true);
-      await window.push(window.ref(window.db, 'support_tickets'), { text: text, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
-      window.showToast('✅ تم فتح التذكرة!');
-      document.getElementById('quickTicket').value = '';
+  window.sendSponsorIdea = async function(btn) {
+    const name = document.getElementById('sponsorName').value.trim();
+    const contact = document.getElementById('sponsorContact').value.trim();
+    if (!name) return window.toast('اكتب اسم الشريك!', 'error');
+    const ok = await sendRequest('sponsor_ideas', { name, contact }, btn);
+    if (ok) { document.getElementById('sponsorName').value = ''; document.getElementById('sponsorContact').value = ''; }
   };
 
-  window.quickReport = async function() {
-      const user = document.getElementById('quickReportUser').value.trim();
-      const reason = document.getElementById('quickReportReason').value.trim();
-      if (!user || !reason) return window.showToast('اكتب الاسم والسبب!', true);
-      await window.push(window.ref(window.db, 'support_tickets'), { text: '🚨 بلاغ: ' + user + ' - ' + reason, by: 'Partner: ' + currentUser, time: Date.now(), status: 'open' });
-      window.showToast('✅ تم الإرسال!');
-      document.getElementById('quickReportUser').value = '';
-      document.getElementById('quickReportReason').value = '';
+  /* ============ رسائل الأونر - مميزات جديدة ============ */
+
+  // ✅ 12: ملاحظة سريعة
+  window.sendQuickNote = async function(btn) {
+    const text = document.getElementById('quickNoteInput').value.trim();
+    if (!text) return window.toast('اكتب الملاحظة!', 'error');
+    if (text.length > 100) return window.toast('الحد الأقصى 100 حرف', 'error');
+    const ok = await sendRequest('quick_notes', { text }, btn);
+    if (ok) document.getElementById('quickNoteInput').value = '';
   };
 
-  window.quickStats = async function() {
-      const s = await window.get(window.ref(window.db, 'usernames'));
-      const on = await window.get(window.ref(window.db, 'presence'));
-      let onlineCount = 0; if(on.exists()) Object.values(on.val()).forEach(u => { if(u.status === 'online') onlineCount++; });
-      window.showToast('اللاعبين: ' + (s.exists() ? Object.keys(s.val()).length : 0) + ' | متصلين: ' + onlineCount);
+  // ✅ 13: طلب اجتماع
+  window.requestMeeting = async function(btn) {
+    const date = document.getElementById('meetingDate').value;
+    const reason = document.getElementById('meetingReason').value.trim();
+    if (!date) return window.toast('اختر تاريخ ووقت الاجتماع', 'error');
+    if (!reason) return window.toast('اكتب سبب الاجتماع', 'error');
+    const ok = await sendRequest('meeting_requests', { date, reason }, btn);
+    if (ok) {
+      document.getElementById('meetingDate').value = '';
+      document.getElementById('meetingReason').value = '';
+    }
   };
 
-  window.quickRooms = async function() {
-      const s = await window.get(window.ref(window.db, 'rooms'));
-      window.showToast('عدد الغرف النشطة: ' + (s.exists() ? Object.keys(s.val()).length : 0));
+  // ✅ 14: تقرير أسبوعي
+  window.sendWeeklyReport = async function(btn) {
+    const text = document.getElementById('weeklyReportInput').value.trim();
+    if (!text) return window.toast('اكتب التقرير!', 'error');
+    const ok = await sendRequest('weekly_reports', { text }, btn);
+    if (ok) document.getElementById('weeklyReportInput').value = '';
   };
 
-  // ------------------ Analytics ------------------
-  window.showSiteStats = async function() {
-      const u = await window.get(window.ref(window.db, 'usernames'));
-      const s = await window.get(window.ref(window.db, 'scores'));
-      let plays = 0; if(s.exists()) for(let user in s.val()) for(let q in s.val()[user]) plays += Object.keys(s.val()[user][q]).length;
-      window.showToast('لاعبين: ' + (u.exists() ? Object.keys(u.val()).length : 0) + ' | كويزات: ' + plays);
+  // ✅ 15: الإشعارات
+  window.showNotifications = async function() {
+    const box = document.getElementById('notificationsResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const [msgsSnap, annSnap] = await Promise.all([
+        window.get(window.ref(window.db, 'messages/' + currentUser)),
+        window.get(window.ref(window.db, 'site_settings/announcement'))
+      ]);
+      let html = '';
+      // الرسائل
+      if (msgsSnap.exists()) {
+        const msgs = Object.values(msgsSnap.val()).sort((a, b) => (b.time || 0) - (a.time || 0)).slice(0, 5);
+        html += '<div style="font-weight:bold; margin:8px 0; color:var(--primary);">📩 آخر الرسائل</div>';
+        html += msgs.map(m => `<div class="list-item"><span style="flex:1;">${escapeHtml((m.text || '').slice(0, 60))}</span><span style="font-size:10px; color:var(--text-secondary);">${escapeHtml(m.from || '')}</span></div>`).join('');
+      }
+      // الإعلان
+      if (annSnap.exists() && annSnap.val()) {
+        html += '<div style="font-weight:bold; margin:8px 0; color:var(--primary);">📢 إعلان جديد</div>';
+        html += `<div class="list-item"><span>${escapeHtml(annSnap.val())}</span></div>`;
+      }
+      box.innerHTML = html || '<div style="text-align:center; padding:10px; color:var(--text-secondary);">لا توجد إشعارات جديدة</div>';
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
   };
 
-  window.showTopUsers = async function() {
-      const s = await window.get(window.ref(window.db, 'scores'));
-      if(!s.exists()) return window.showToast('لا يوجد بيانات.', true);
-      window.showToast('أعلى اللاعبين في المتصدرين.');
+  /* ============ سجل وطلباتي ============ */
+
+  // ✅ 16: سجل طلباتي
+  window.loadMyRequests = async function() {
+    const box = document.getElementById('myRequestsResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      const snap = await window.get(window.ref(window.db, 'partner_requests'));
+      if (!snap.exists()) {
+        box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">مفيش طلبات لسه</div>';
+        return;
+      }
+      const all = snap.val();
+      const mine = [];
+      for (const node in all) {
+        if (typeof all[node] !== 'object') continue;
+        for (const id in all[node]) {
+          const req = all[node][id];
+          if (req && (req.from || '').toLowerCase() === currentUser.toLowerCase()) {
+            mine.push({ node, ...req, id });
+          }
+        }
+      }
+      mine.sort((a, b) => (b.time || 0) - (a.time || 0));
+      if (!mine.length) {
+        box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">مفيش طلبات لسه</div>';
+        return;
+      }
+      const icons = { ideas:'💡', bug_reports:'⚠️', event_ideas:'🎁', sponsor_ideas:'🤝', quick_notes:'✏️', meeting_requests:'📅', weekly_reports:'📝' };
+      box.innerHTML = mine.slice(0, 20).map(r => {
+        const date = r.time ? new Date(r.time).toLocaleDateString('ar-EG') : '—';
+        const status = r.status === 'approved' ? '✅' : r.status === 'rejected' ? '❌' : '⏳';
+        return `<div class="list-item"><span>${icons[r.node] || '📋'} ${escapeHtml(r.title || r.text || r.reason || 'طلب')}</span><span style="font-size:11px;">${status} ${date}</span></div>`;
+      }).join('');
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
   };
 
-  window.showQuizStats = async function() {
-      const s = await window.get(window.ref(window.db, 'scores'));
-      let plays = 0; if(s.exists()) for(let u in s.val()) for(let q in s.val()[u]) plays += Object.keys(s.val()[u][q]).length;
-      window.showToast('إجمالي الكويزات: ' + plays);
+  // ✅ 17: إحصائياتي كشريك
+  window.loadMyPartnerStats = async function() {
+    const box = document.getElementById('myPartnerStatsResult');
+    box.innerHTML = '<div style="text-align:center; padding:10px; color:var(--text-secondary);">جاري التحميل...</div>';
+    try {
+      // عدد رسائل الشات
+      let chatMsgs = 0;
+      for (const r of ADMIN_ROOMS) {
+        const snap = await window.get(window.ref(window.db, 'admin_chat/' + r.key));
+        const data = snap.exists() ? snap.val() : {};
+        for (const id in data) {
+          if ((data[id].sender || '').toLowerCase() === currentUser.toLowerCase()) chatMsgs++;
+        }
+      }
+      // عدد الطلبات
+      const reqSnap = await window.get(window.ref(window.db, 'partner_requests'));
+      let requests = 0;
+      if (reqSnap.exists()) {
+        const all = reqSnap.val();
+        for (const node in all) {
+          if (typeof all[node] !== 'object') continue;
+          for (const id in all[node]) {
+            if (all[node][id] && (all[node][id].from || '').toLowerCase() === currentUser.toLowerCase()) requests++;
+          }
+        }
+      }
+      // رسائل الأونر
+      const msgSnap = await window.get(window.ref(window.db, 'messages/' + currentUser));
+      const ownerMsgs = msgSnap.exists() ? Object.keys(msgSnap.val()).length : 0;
+      box.innerHTML = `
+        <div class="list-item"><span>💬 رسائل الشات</span><b>${chatMsgs}</b></div>
+        <div class="list-item"><span>📋 طلبات مرسلة</span><b>${requests}</b></div>
+        <div class="list-item"><span>📩 رسائل من الأونر</span><b>${ownerMsgs}</b></div>
+      `;
+    } catch(e) { box.innerHTML = '<div style="color:var(--danger);">فشل التحميل</div>'; }
   };
 
-  window.showSuggestionsCount = async function() {
-      const s = await window.get(window.ref(window.db, 'suggestions'));
-      window.showToast('عدد الاقتراحات: ' + (s.exists() ? Object.keys(s.val()).length : 0));
-  };
-
-  window.showTicketsCount = async function() {
-      const s = await window.get(window.ref(window.db, 'support_tickets'));
-      window.showToast('التذاكر المفتوحة: ' + (s.exists() ? Object.keys(s.val()).length : 0));
-  };
-
-  window.exportReport = function() {
-      const text = "تقرير سريع - Quiz Hub\nالتاريخ: " + new Date().toLocaleString('ar-EG');
-      const blob = new Blob([text], {type: 'text/plain'});
+  // ✅ 18: تصدير تقريري
+  window.exportMyReport = async function() {
+    try {
+      window.toast('⏳ جاري تجميع البيانات...', 'info');
+      let chatMsgs = 0;
+      for (const r of ADMIN_ROOMS) {
+        const snap = await window.get(window.ref(window.db, 'admin_chat/' + r.key));
+        const data = snap.exists() ? snap.val() : {};
+        for (const id in data) {
+          if ((data[id].sender || '').toLowerCase() === currentUser.toLowerCase()) chatMsgs++;
+        }
+      }
+      const reqSnap = await window.get(window.ref(window.db, 'partner_requests'));
+      const myRequests = [];
+      if (reqSnap.exists()) {
+        const all = reqSnap.val();
+        for (const node in all) {
+          if (typeof all[node] !== 'object') continue;
+          for (const id in all[node]) {
+            const req = all[node][id];
+            if (req && (req.from || '').toLowerCase() === currentUser.toLowerCase()) {
+              myRequests.push({ type: node, ...req });
+            }
+          }
+        }
+      }
+      const report = {
+        partner: currentUser,
+        exportedAt: new Date().toISOString(),
+        chatMessagesSent: chatMsgs,
+        totalRequestsSent: myRequests.length,
+        requests: myRequests
+      };
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = 'report.txt';
+      a.download = `partner-report-${currentUser}-${Date.now()}.json`;
       a.click();
+      URL.revokeObjectURL(a.href);
+      window.toast('✅ تم تحميل التقرير');
+    } catch(e) { window.toast('خطأ: ' + e.message, 'error'); }
   };
 
-  // ------------------ Ideas Management ------------------
-  window.clearAllIdeas = async function() {
-      if(!confirm('هل أنت متأكد من مسح كل الأفكار؟')) return;
-      await window.remove(window.ref(window.db, 'partner_ideas'));
-      window.showToast('✅ تم مسح جميع الأفكار.');
+  // ✅ 19: نسخ إحصائياتي
+  window.copyMyStats = async function() {
+    try {
+      let chatMsgs = 0;
+      for (const r of ADMIN_ROOMS) {
+        const snap = await window.get(window.ref(window.db, 'admin_chat/' + r.key));
+        const data = snap.exists() ? snap.val() : {};
+        for (const id in data) {
+          if ((data[id].sender || '').toLowerCase() === currentUser.toLowerCase()) chatMsgs++;
+        }
+      }
+      const reqSnap = await window.get(window.ref(window.db, 'partner_requests'));
+      let reqs = 0;
+      if (reqSnap.exists()) {
+        const all = reqSnap.val();
+        for (const node in all) {
+          if (typeof all[node] !== 'object') continue;
+          for (const id in all[node]) {
+            if (all[node][id] && (all[node][id].from || '').toLowerCase() === currentUser.toLowerCase()) reqs++;
+          }
+        }
+      }
+      const text = `📊 إحصائياتي كشريك\n👤 الشريك: ${currentUser}\n💬 رسائل الشات: ${chatMsgs}\n📋 طلبات مرسلة: ${reqs}\n📅 التاريخ: ${new Date().toLocaleString('ar-EG')}`;
+      await navigator.clipboard.writeText(text);
+      window.toast('✅ تم نسخ الإحصائيات');
+    } catch(e) { window.toast('❌ فشل النسخ: ' + e.message, 'error'); }
   };
 
-  window.exportIdeas = async function() {
-      const s = await window.get(window.ref(window.db, 'partner_ideas'));
-      const t = s.exists() ? JSON.stringify(s.val(), null, 2) : 'لا توجد أفكار';
-      const b = new Blob([t], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = 'ideas.json';
-      a.click();
+  // ✅ 20: تحديث الكل
+  window.refreshAllStats = async function() {
+    window.toast('🔄 جاري التحديث...', 'info');
+    await loadAnalytics();
+    // مسح النتائج القديمة
+    ['growthResult','popularResult','topPlayersResult','onlineResult','topWeeklyResult','newPlayersResult','recentPlayersResult','weeklyCompareResult','announcementResult','activeEventsResult','myRequestsResult','myPartnerStatsResult'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '';
+    });
+    window.toast('✅ تم التحديث');
   };
 
-  window.showTopIdea = async function() {
-      const s = await window.get(window.ref(window.db, 'partner_ideas'));
-      if(!s.exists()) return window.showToast('لا توجد أفكار بعد.', true);
-      const sorted = Object.values(s.val()).sort((a,b) => {
-          return (b.votes ? Object.keys(b.votes).length : 0) - (a.votes ? Object.keys(a.votes).length : 0);
-      });
-      window.showToast('أفضل فكرة: ' + sorted[0].text);
-  };
-
-  // ------------------ Vigilance Extras ------------------
-  window.showRecentUsers = async function() {
-      const s = await window.get(window.ref(window.db, 'presence'));
-      if(!s.exists()) return window.showToast('لا يوجد لاعبين.', true);
-      const users = Object.keys(s.val()).slice(-5).join(', ');
-      window.showToast('آخر 5 لاعبين: ' + users);
-  };
-
-  window.showRecentChat = async function() {
-      const s = await window.get(window.ref(window.db, 'global_chat'));
-      if(!s.exists()) return window.showToast('لا توجد رسائل.', true);
-      const msgs = Object.values(s.val()).slice(-5).map(m => m.text).join(' | ');
-      window.showToast('آخر 5 رسائل: ' + msgs.substring(0, 100));
-  };
-
-  window.showBannedCount = async function() {
-      const s = await window.get(window.ref(window.db, 'banned_users'));
-      window.showToast('المحظورين: ' + (s.exists() ? Object.keys(s.val()).length : 0));
-  };
-
-  window.exportVigilanceReport = function() {
-      const text = "تقرير الرقابة - Quiz Hub\nالتاريخ: " + new Date().toLocaleString('ar-EG');
-      const blob = new Blob([text], {type: 'text/plain'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'vigilance.txt';
-      a.click();
-  };
-
-  // ------------------ Developer ------------------
-  window.testPing = async function() {
-      const res = document.getElementById('pingResult');
-      res.innerText = 'جاري الفحص...';
-      const t = Date.now();
-      await window.get(window.ref(window.db, '.info/connected'));
-      res.innerText = 'الاستجابة: ' + (Date.now() - t) + 'ms';
-  };
-
-  window.showFirebaseData = async function() {
-      const s = await window.get(window.ref(window.db, 'users_data'));
-      console.log('users_data:', s.val());
-      window.showToast('تم طباعة البيانات في الـ Console (F12)');
-  };
-
-  window.clearLocalStorage = function() {
-      localStorage.clear();
-      window.showToast('✅ تم مسح LocalStorage');
-  };
-
-  window.exportMyData = async function() {
-      const s = await window.get(window.ref(window.db, 'users_data/' + currentUser));
-      const t = s.exists() ? JSON.stringify(s.val(), null, 2) : 'لا توجد بيانات';
-      const b = new Blob([t], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(b);
-      a.download = 'my_data.json';
-      a.click();
-  };
-
-  window.showVersion = async function() {
-      const s = await window.get(window.ref(window.db, 'site_settings/version'));
-      window.showToast('الإصدار: ' + (s.exists() ? s.val() : 'غير محدد'));
-  };
-
-  window.testError = function() {
-      console.error('Test Error Triggered');
-      window.showToast('تم تسجيل خطأ تجريبي', 'error');
-  };
+  /* ============ بدء التشغيل ============ */
+  checkAccess();
 </script>
 </body>
 </html>
