@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="quiz-style.css">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
-  /* التعديلات دي عشان نصلح شكل الكروت ونخليهم 4 في الصف */
   .grid-container {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important; 
@@ -37,7 +36,7 @@
       font-size: 18px !important;
       text-align: center !important;
       width: 100% !important;
-      background: rgba(0, 0, 0, 0.8) !important; /* خلفية سودة للنص عشان يبان */
+      background: rgba(0, 0, 0, 0.8) !important;
       padding: 10px !important;
       border-radius: 8px !important;
       margin: 0 !important;
@@ -95,10 +94,12 @@
     <div class="quiz-card" onclick="startGame('part8')" style="background-image: url('pic/Spider-Man No Way Home.jpeg');">
         <h2 class="card-title" data-ar="No Way Home (2021)" data-en="No Way Home (2021)">No Way Home (2021)</h2>
     </div>
+    
     <!-- كارت 2026 -->
     <div class="quiz-card" onclick="startGame('part2026')" style="background-image: url('pic/Spider-Man Brand New Day.jpeg');">
         <h2 class="card-title" data-ar="Brand New Day (2026)" data-en="Brand New Day (2026)">Brand New Day (2026)</h2>
     </div>
+
     <!-- الكارت الشامل -->
     <div class="quiz-card" onclick="startGame('all')" style="background-image: url('pic/Spider-Man.jpeg');">
         <h2 class="card-title" data-ar="الشامل" data-en="Comprehensive">الشامل</h2>
@@ -141,21 +142,22 @@
 <script src="questions.js"></script>
 <script src="quiz-core.js" type="module"></script>
 <script>
-    // ✅ تأمين التشغيل عشان ميرميش إيرور لو الداتا ناقصة
     window.addEventListener('load', () => {
-        
-        // لو ملف questions.js فيه مشكلة أو allQuizzesData مش موجود
         if (typeof allQuizzesData === 'undefined') {
-            console.error("خطأ: allQuizzesData غير معرف. تأكد من ملف questions.js");
+            console.error("خطأ: allQuizzesData غير معرف. تأكد من تحميل ملف questions.js بشكل صحيح.");
             return;
         }
 
         const quizKey = 'spiderman'; 
-        // استخدام || {} كحماية لو البيانات ناقصة
         const quizData = allQuizzesData.spiderman || {};
         const quizData2026 = allQuizzesData.spiderman2026 || {};
 
-        // حماية كل جزء عشان لو مش موجود ميكسرش اللعبة
+        // ✅ إصلاح: لو spiderman2026 مش موجود أو فاضي، نرجع لأسئلة الشامل عشان كارت 2026 يشتغل
+        const part2026Questions =
+            (quizData2026.comprehensive && quizData2026.comprehensive.length > 0)
+                ? quizData2026.comprehensive
+                : (quizData.comprehensive || []);
+
         const partsList = { 
             part1: quizData.part1 || [], 
             part2: quizData.part2 || [], 
@@ -165,10 +167,16 @@
             part6: quizData.part6 || [],
             part7: quizData.part7 || [],
             part8: quizData.part8 || [],
-            part2026: quizData2026.comprehensive || [] 
+            part2026: part2026Questions   // ← مربوط بالحل الجديد
         };
 
-        // التأكد إن الـ initQuiz اتحمل من quiz-core.js
+        // ✅ تحذير لو فيه جزء فاضي (لمساعدة في التصحيح)
+        Object.keys(partsList).forEach(part => {
+            if (!partsList[part] || partsList[part].length === 0) {
+                console.warn(`⚠️ الجزء "${part}" مفيش فيه أسئلة متسجلة.`);
+            }
+        });
+
         if (typeof initQuiz === 'function') {
             initQuiz({ 
                 title: "🕷️ كويز سبايدرمان 🕷️", 
@@ -179,7 +187,6 @@
                 bgMusic: 'sounds/heartbeat.wav' 
             }); 
         } else {
-            // لو الموديول لسه بيحمل بانتظار لحظة كمان
             setTimeout(() => {
                 if (typeof initQuiz === 'function') {
                     initQuiz({ 
@@ -191,7 +198,7 @@
                         bgMusic: 'sounds/heartbeat.wav' 
                     }); 
                 } else {
-                    console.error("خطأ: دالة initQuiz غير موجودة. تأكد من ملف quiz-core.js");
+                    console.error("❌ لم يتم العثور على دالة initQuiz في quiz-core.js");
                 }
             }, 500);
         }
@@ -199,4 +206,4 @@
 </script>
 <script src="room-cleaner.js"></script>
 </body>
-</html>
+</html> 
