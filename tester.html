@@ -3,358 +3,1159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧪 لوحة المختبرين - Quiz Hub</title>
+<title>🧪 Tester Dashboard — Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #f0f2f5;
-    --text: #1a1a1a; --text-secondary: #6b7280; --border: #e5e7eb;
-    --primary: #06b6d4; --primary-hover: #0891b2; --primary-light: #ecfeff;
-    --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-    --radius: 12px; --radius-sm: 8px;
+    --bg:#0a0a0f; --surface:#1a1a28; --surface-2:#222235;
+    --text:#f0f0ff; --text-2:#a0a0c0; --border:#2a2a3f; --border-strong:#3d3d5c;
+    --primary:#06d6a0; --danger:#ef4444; --warning:#f59e0b; --info:#3b82f6;
+    --success:#10b981; --purple:#a855f7; --gold:#ffd700; --cyan:#06b6d4;
   }
-  body.dark-mode {
-    --bg: #0f1419; --surface: #1a1f26; --surface-2: #232a33;
-    --text: #f9fafb; --text-secondary: #9ca3af; --border: #2d3748;
-    --primary-light: #082f35; --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  body.light-mode {
+    --bg:#f5f7fa; --surface:#fff; --surface-2:#f0f2f5;
+    --text:#1a1a28; --text-2:#6b7280; --border:#e5e7eb; --border-strong:#cbd5e1;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
-  
-  #panelContent { display: none; width: 100%; max-width: 1280px; animation: fadeUp 0.4s ease; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  
-  /* Header */
-  .top-header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 16px 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 0 auto 20px auto; flex-wrap: wrap; gap: 12px; width: 100%; box-sizing: border-box; }
-  .brand { display: flex; align-items: center; gap: 12px; }
-  .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--primary), #22d3ee); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); }
-  .brand-text h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
-  .brand-text p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-  
-  /* Buttons */
-  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .icon-btn { width: 40px; height: 40px; border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: var(--radius-sm); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Cairo'; }
-  .icon-btn:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-1px); }
-  .btn-back { padding: 10px 18px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-  .btn-back:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-  
-  /* Tabs */
-  .tabs-bar { display: flex; gap: 4px; background: var(--surface); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow-sm); margin: 0 auto 24px auto; overflow-x: auto; scrollbar-width: none; width: 100%; box-sizing: border-box; }
-  .tabs-bar::-webkit-scrollbar { display: none; }
-  .tab-btn { background: transparent; border: none; color: var(--text-secondary); font-family: 'Cairo'; font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
-  .tab-btn:hover { background: var(--surface-2); color: var(--text); }
-  .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35); }
-  
-  /* Tab Content */
-  .tab-content { display: none; width: 100%; animation: fadeUp 0.3s ease; }
-  .tab-content.active { display: block; }
-  
-  /* Grid */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; transition: all 0.25s; position: relative; overflow: hidden; }
-  .card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--primary); opacity: 0; transition: opacity 0.25s; }
-  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
-  .card:hover::before { opacity: 1; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .card-icon { width: 36px; height: 36px; background: var(--primary-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .card h3 { font-size: 15px; font-weight: 700; line-height: 1.3; }
-  .card p { color: var(--text-secondary); font-size: 13px; line-height: 1.5; margin-bottom: 14px; flex-grow: 1; }
-  
-  /* Console */
-  .console-box { background: #000; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 15px; font-family: monospace; font-size: 13px; color: var(--success); height: 250px; overflow-y: auto; text-align: left; direction: ltr; margin-top: 20px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
-  
-  /* Buttons */
-  .btn-action { display: block; width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'Cairo'; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; }
-  .btn-action:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-  .btn-red { background: var(--danger); }
-  .btn-red:hover { background: #dc2626; }
-  .btn-green { background: var(--success); }
-  .btn-green:hover { background: #059669; }
-  
-  .form-control { width: 100%; padding: 11px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none; margin-bottom: 12px; transition: all 0.2s; }
-  .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15); background: var(--surface); }
-  
-  /* Section Title */
-  .section-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
-  .section-title.danger { color: var(--danger); }
-  
-  @media (max-width: 640px) { body { padding: 12px; } .top-header { padding: 12px 16px; } .grid { grid-template-columns: 1fr; } }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center;transition:.3s}
+  .top-header{display:flex;justify-content:space-between;align-items:center;background:var(--surface);padding:14px 22px;border-radius:14px;margin-bottom:14px;width:100%;max-width:1400px;flex-wrap:wrap;gap:10px;border:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--primary),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(6,214,160,.3)}
+  .brand-text h1{font-size:18px;font-weight:900;line-height:1.1}
+  .brand-text p{font-size:11px;color:var(--text-2);margin-top:2px}
+  .header-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .h-btn{padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Cairo';font-weight:700;font-size:13px;cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .h-btn:hover{background:var(--primary);color:#000;border-color:var(--primary)}
+  .h-btn.danger:hover{background:var(--danger);color:#fff}
+
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;width:100%;max-width:1400px;margin-bottom:14px}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;transition:.25s}
+  .stat-box:hover{transform:translateY(-2px);border-color:var(--primary)}
+  .stat-icon{font-size:20px;margin-bottom:3px}
+  .stat-value{font-size:22px;font-weight:900;color:var(--primary)}
+  .stat-value.pass{color:var(--success)}
+  .stat-value.fail{color:var(--danger)}
+  .stat-value.warn{color:var(--warning)}
+  .stat-label{font-size:11px;color:var(--text-2);font-weight:600;margin-top:2px}
+
+  .tabs-bar{display:flex;gap:4px;background:var(--surface);padding:6px;border-radius:12px;width:100%;max-width:1400px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;border:1px solid var(--border)}
+  .tabs-bar::-webkit-scrollbar{display:none}
+  .tab-btn{background:transparent;border:none;color:var(--text-2);font-family:'Cairo';font-size:13px;font-weight:700;padding:8px 13px;cursor:pointer;border-radius:8px;transition:.2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+  .tab-btn:hover{background:var(--surface-2);color:var(--text)}
+  .tab-btn.active{background:var(--primary);color:#000;box-shadow:0 2px 8px rgba(6,214,160,.3)}
+
+  .tab-content{display:none;width:100%;max-width:1400px;animation:fadeUp .3s}
+  .tab-content.active{display:block}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+  .section-title{font-size:15px;font-weight:900;color:var(--primary);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .section-title .count{font-size:11px;color:var(--text-2);background:var(--surface-2);padding:3px 10px;border-radius:10px;font-weight:700}
+
+  .action-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .action-btn{padding:9px 16px;border-radius:9px;border:none;background:var(--primary);color:#000;font-family:'Cairo';font-weight:900;font-size:13px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+  .action-btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(6,214,160,.4)}
+  .action-btn.blue{background:var(--info);color:#fff}
+  .action-btn.gold{background:var(--gold);color:#000}
+  .action-btn.purple{background:var(--purple);color:#fff}
+  .action-btn.danger{background:var(--danger);color:#fff}
+  .action-btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .action-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+  .test-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--surface-2);margin-bottom:6px;border:1px solid var(--border);transition:.2s;flex-wrap:wrap}
+  .test-item:hover{border-color:var(--primary)}
+  .test-item.pass{border-right:4px solid var(--success);background:rgba(16,185,129,.06)}
+  .test-item.fail{border-right:4px solid var(--danger);background:rgba(239,68,68,.06)}
+  .test-item.warn{border-right:4px solid var(--warning);background:rgba(245,158,11,.06)}
+  .test-item.running{border-right:4px solid var(--info);background:rgba(59,130,246,.06)}
+  .test-item.pending{border-right:4px solid var(--border-strong)}
+  .test-info{flex:1;min-width:160px}
+  .test-label{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .test-desc{font-size:11px;color:var(--text-2);margin-top:2px;word-break:break-word}
+  .test-result{font-size:12px;margin-top:3px;font-weight:600}
+  .test-actions{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap}
+  .test-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Cairo';font-weight:700;font-size:11px;cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+  .test-btn:hover{background:var(--primary);color:#000;border-color:var(--primary)}
+  .test-btn.blue:hover{background:var(--info);color:#fff;border-color:var(--info)}
+  .test-btn.danger:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+
+  .test-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--border-strong);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:900;background:transparent;transition:.2s}
+  .test-check.pass{background:var(--success);border-color:var(--success)}
+  .test-check.fail{background:var(--danger);border-color:var(--danger)}
+  .test-check.warn{background:var(--warning);border-color:var(--warning);color:#000}
+
+  .collapsible{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .collapsible-header{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:14px;transition:.2s}
+  .collapsible-header:hover{background:var(--surface-2)}
+  .collapsible-body{display:none;padding:0 16px 14px;border-top:1px solid var(--border)}
+  .collapsible.open .collapsible-body{display:block}
+  .collapsible-arrow{transition:.2s;font-size:12px;color:var(--text-2)}
+  .collapsible.open .collapsible-arrow{transform:rotate(90deg)}
+
+  #toast-container{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:100000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{background:var(--success);color:#fff;padding:12px 22px;border-radius:10px;font-weight:700;font-size:13px;box-shadow:0 4px 15px rgba(0,0,0,.3);animation:toastIn .3s;pointer-events:auto;max-width:400px;word-wrap:break-word}
+  .toast.error{background:var(--danger)}
+  .toast.info{background:var(--info)}
+  .toast.warn{background:var(--warning);color:#000}
+  @keyframes toastIn{from{transform:translateY(-20px);opacity:0}to{transform:none;opacity:1}}
+
+  .empty{text-align:center;color:var(--text-2);padding:28px 16px;font-size:14px}
+  .progress-bar-bg{width:100%;height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden;margin-top:8px}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--cyan));width:0%;transition:width .3s}
+
+  .test-table{width:100%;border-collapse:collapse;font-size:12px}
+  .test-table th,.test-table td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--border)}
+  .test-table th{background:var(--surface-2);color:var(--primary);font-weight:900;font-size:11px}
+
+  @media(max-width:768px){.top-header{padding:12px 14px}.test-actions{width:100%}}
 </style>
 </head>
 <body>
 
-<div id="panelContent">
-  <!-- Header -->
-  <div class="top-header">
-    <div class="brand">
-      <div class="brand-icon">🧪</div>
-      <div class="brand-text">
-        <h1>لوحة المختبرين</h1>
-        <p>مركز قيادة التسترات</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="window.toggleTheme()" id="themeBtn">🌙</button>
-      <a href="index.html" class="btn-back">⬅ رجوع</a>
+<div id="toast-container"></div>
+
+<!-- HEADER -->
+<div class="top-header">
+  <div class="brand">
+    <div class="brand-icon">🧪</div>
+    <div class="brand-text">
+      <h1>Tester Dashboard</h1>
+      <p>اختبار حقيقي لكل الموقع — Auto Tests v4</p>
     </div>
   </div>
-
-  <!-- Tabs -->
-  <div class="tabs-bar">
-    <button class="tab-btn active" onclick="window.switchTab('tools', this)">🛠️ أدوات المختبر</button>
-    <button class="tab-btn" onclick="window.switchTab('owner_msg', this)">📩 رسائل الأونر</button>
+  <div class="header-actions">
+    <button class="h-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="h-btn" onclick="location.href='index.html'">🏠 الرئيسية</button>
+    <button class="h-btn danger" onclick="resetProgress()">🔄 تصفير</button>
   </div>
+</div>
 
-  <!-- Tab: Tools -->
-  <div id="tab-tools" class="tab-content active">
-    <div class="grid">
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🛠️</div><h3>أدوات المطور</h3></div>
-        <p>تشغيل وضع المطور اللي بيوريك الإجابات الصحيحة أثناء اللعب.</p>
-        <button class="btn-action" onclick="window.toggleDevMode()" id="devModeBtn">تفعيل وضع المطور</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">📡</div><h3>اختبار السرعة (Ping)</h3></div>
-        <p>قياس سرعة استجابة قاعدة البيانات (Firebase).</p>
-        <button class="btn-action" onclick="window.testPing()">اختبار السرعة</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🧹</div><h3>تفريغ الكاش</h3></div>
-        <p>مسح كاش المتصفح وإعادة تحميل الصفحة.</p>
-        <button class="btn-action" onclick="window.clearCache()">مسح الكاش</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">📱</div><h3>محاكي الموبايل</h3></div>
-        <p>تغيير حجم الشاشة لمحاكاة شكل الموقع على الموبايل.</p>
-        <button class="btn-action" onclick="window.toggleMobileView()">تبديل وضع الموبايل</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">👥</div><h3>توليد لاعبين وهميين</h3></div>
-        <p>إنشاء 5 حسابات وهمية لاختبار الليدر بورد.</p>
-        <button class="btn-action" onclick="window.generateDummyUsers()">توليد اللاعبين</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🗄️</div><h3>فحص قاعدة البيانات</h3></div>
-        <p>التأكد إن مسارات الفايربيز شغالة.</p>
-        <button class="btn-action" onclick="window.runDbCheck()">بدء الفحص</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🔊</div><h3>اختبار الأصوات</h3></div>
-        <p>التأكد من عمل أصوات الإجابة الصحيحة والغلط.</p>
-        <button class="btn-action" onclick="window.testSounds()">تشغيل الأصوات</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">⚠️</div><h3>وضع الأخطاء</h3></div>
-        <p>توليد خطأ وهمي للتأكد من عمل رسائل التنبيه (Toast).</p>
-        <button class="btn-action" onclick="window.showToast('خطأ تجريبي', 'error')">توليد خطأ</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🕵️</div><h3>كشف الغشاشين</h3></div>
-        <p>البحث عن لاعبين جاوبوا في أقل من 0.5 ثانية.</p>
-        <button class="btn-action" onclick="window.detectCheaters()">فحص الغشاشين</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🖼️</div><h3>فحص صور الكويزات</h3></div>
-        <p>التأكد من وجود صور اللوجو.</p>
-        <button class="btn-action" onclick="window.checkImages()">فحص الصور</button>
-      </div>
-      
-      <div class="card">
-        <div class="card-header"><div class="card-icon">🗑️</div><h3>مسح بيانات التجربة</h3></div>
-        <p>مسح كل الحسابات الوهمية (TestBot).</p>
-        <button class="btn-action btn-red" onclick="window.clearTestData()">مسح البيانات</button>
-      </div>
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-icon">🧪</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">إجمالي</div></div>
+  <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-value pass" id="statPassed">0</div><div class="stat-label">نجح</div></div>
+  <div class="stat-box"><div class="stat-icon">❌</div><div class="stat-value fail" id="statFailed">0</div><div class="stat-label">فشل حقيقي</div></div>
+  <div class="stat-box"><div class="stat-icon">⚠️</div><div class="stat-value warn" id="statWarned">0</div><div class="stat-label">تحذير</div></div>
+  <div class="stat-box"><div class="stat-icon">⏳</div><div class="stat-value" id="statPending">0</div><div class="stat-label">معلق</div></div>
+  <div class="stat-box"><div class="stat-icon">📊</div><div class="stat-value" id="statProgress">0%</div><div class="stat-label">التقدم</div></div>
+  <div class="stat-box"><div class="stat-icon">🔥</div><div class="stat-value" id="statRate">0%</div><div class="stat-label">نسبة النجاح</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('autotests', this)">🤖 Auto Tests</button>
+  <button class="tab-btn" onclick="switchTab('infra', this)">⚡ البنية التحتية</button>
+  <button class="tab-btn" onclick="switchTab('data', this)">🔍 البيانات</button>
+  <button class="tab-btn" onclick="switchTab('pages', this)">📄 الصفحات</button>
+  <button class="tab-btn" onclick="switchTab('images', this)">🖼️ الصور</button>
+  <button class="tab-btn" onclick="switchTab('quizdata', this)">🎮 بيانات الكويزات</button>
+  <button class="tab-btn" onclick="switchTab('render', this)">🎨 Rendering</button>
+  <button class="tab-btn" onclick="switchTab('nodes', this)">🗄️ Nodes</button>
+  <button class="tab-btn" onclick="switchTab('panels', this)">🛡️ اللوحات</button>
+  <button class="tab-btn" onclick="switchTab('fixes', this)">🔧 الإصلاحات</button>
+  <button class="tab-btn" onclick="switchTab('manual', this)">✋ يدوي</button>
+  <button class="tab-btn" onclick="switchTab('results', this)">📝 النتائج</button>
+</div>
+
+<!-- ===== AUTO TESTS ===== -->
+<div id="tab-autotests" class="tab-content active">
+  <div class="section">
+    <div class="section-title">🚀 تشغيل الاختبارات</div>
+    <div class="action-bar">
+      <button class="action-btn" onclick="runAllTests()" id="runAllBtn">▶️ شغّل كل الاختبارات</button>
+      <button class="action-btn blue" onclick="runCategory('Infrastructure')">⚡ البنية</button>
+      <button class="action-btn blue" onclick="runCategory('Data Integrity')">🔍 البيانات</button>
+      <button class="action-btn blue" onclick="runCategory('Quiz Data')">🎮 الكويزات</button>
+      <button class="action-btn blue" onclick="runCategory('Pages Fetch')">📄 الصفحات</button>
+      <button class="action-btn blue" onclick="runCategory('Images')">🖼️ الصور</button>
+      <button class="action-btn blue" onclick="runCategory('Pages Render')">🎨 Rendering</button>
+      <button class="action-btn blue" onclick="runCategory('Nodes')">🗄️ Nodes</button>
+      <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
     </div>
-    
-    <div class="console-box" id="testerConsole">> النظام جاهز للاختبار...<br></div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="mainProgress"></div></div>
+    <p style="font-size:12px;color:var(--text-2);margin-top:8px">
+      💡 <b>3 حالات:</b> ✅ نجح | ⚠️ تحذير (مش فشل حقيقي، مثل node فاضي) | ❌ فشل حقيقي
+    </p>
   </div>
+  <div id="autotestsContainer"></div>
+</div>
 
-  <!-- Tab: Owner Msg -->
-  <div id="tab-owner_msg" class="tab-content">
-    <div class="card" style="max-width: 640px; margin: 0 auto;">
-      <div class="card-header"><div class="card-icon">📩</div><h3>إرسال رسالة للأونر</h3></div>
-      <textarea id="testerMsgInput" class="form-control" rows="4" placeholder="اكتب رسالتك هنا..."></textarea>
-      <button class="btn-action btn-green" onclick="window.sendToOwner()">إرسال 📨</button>
-      
-      <div class="section-title" style="margin-top: 24px;">📋 الردود من الأونر</div>
-      <div class="console-box" id="ownerRepliesList" style="height: 150px; color: var(--text); background: var(--surface-2); padding: 10px; direction: rtl; text-align: right;">
-        <div style="color: var(--text-secondary); text-align: center;">لا توجد ردود بعد</div>
-      </div>
+<!-- ===== INFRA ===== -->
+<div id="tab-infra" class="tab-content"><div class="section"><div class="section-title">⚡ البنية التحتية</div><div id="infraList"></div></div></div>
+
+<!-- ===== DATA ===== -->
+<div id="tab-data" class="tab-content"><div class="section"><div class="section-title">🔍 فحص البيانات</div><div id="dataList"></div></div></div>
+
+<!-- ===== PAGES ===== -->
+<div id="tab-pages" class="tab-content"><div class="section"><div class="section-title">📄 الصفحات والملفات</div><div id="pagesList"></div></div></div>
+
+<!-- ===== IMAGES ===== -->
+<div id="tab-images" class="tab-content"><div class="section"><div class="section-title">🖼️ الصور</div><div id="imagesList"></div></div></div>
+
+<!-- ===== QUIZDATA ===== -->
+<div id="tab-quizdata" class="tab-content"><div class="section"><div class="section-title">🎮 بيانات الكويزات</div><div id="quizdataList"></div></div></div>
+
+<!-- ===== RENDER ===== -->
+<div id="tab-render" class="tab-content"><div class="section"><div class="section-title">🎨 Rendering (iframe)</div><div id="renderList"></div></div></div>
+
+<!-- ===== NODES ===== -->
+<div id="tab-nodes" class="tab-content">
+  <div class="section">
+    <div class="section-title">🗄️ Firebase Nodes <span class="count" id="nodesCount">0</span></div>
+    <div class="action-bar"><button class="action-btn" onclick="runCategory('Nodes')">🔄 فحص الكل</button></div>
+    <div id="nodesList"></div>
+  </div>
+</div>
+
+<!-- ===== PANELS ===== -->
+<div id="tab-panels" class="tab-content">
+  <div class="section">
+    <div class="section-title">🛡️ اللوحات</div>
+    <div class="action-bar"><button class="action-btn" onclick="openAllPanels()">🔗 فتح كل اللوحات</button></div>
+    <div id="panelsList"></div>
+  </div>
+</div>
+
+<!-- ===== FIXES ===== -->
+<div id="tab-fixes" class="tab-content">
+  <div class="section">
+    <div class="section-title">🔧 إصلاحات سريعة</div>
+    <div id="fixesList"></div>
+  </div>
+</div>
+
+<!-- ===== MANUAL ===== -->
+<div id="tab-manual" class="tab-content">
+  <div class="section">
+    <div class="section-title">✋ اختبارات يدوية</div>
+    <div id="manualList"></div>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="tab-results" class="tab-content">
+  <div class="section">
+    <div class="section-title">📝 سجل النتائج</div>
+    <div class="action-bar">
+      <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
+      <button class="action-btn" onclick="exportResults()">📤 تصدير JSON</button>
     </div>
+    <div id="resultsLog"></div>
   </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, get, set, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); 
-  const db = getDatabase(app);
-  
-  window.db = db; window.ref = ref; window.get = get; window.set = set; window.remove = remove; window.push = push; window.onValue = onValue;
+const firebaseConfig = {
+  apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
+  authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
+  databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
+  projectId: "quiz-hub-app-f4cd0",
+  storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
+  messagingSenderId: "282772179392",
+  appId: "1:282772179392:web:64646d757592b29ff3a025"
+};
 
-  const currentUser = localStorage.getItem('loggedInUser');
-  if (!currentUser) window.location.href = 'index.html';
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-  // الثيم
-  if (localStorage.getItem('testerTheme') === 'dark') {
-      document.body.classList.add('dark-mode');
-      setTimeout(() => { const btn = document.getElementById('themeBtn'); if (btn) btn.innerText = '☀️'; }, 100);
+const CURRENT_USER = localStorage.getItem('loggedInUser') || '';
+const STORAGE_KEY = 'tester_results_v4';
+let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+/* ===== HELPERS ===== */
+function toast(msg, type='success'){
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type==='success'?'':type);
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+window.toast = toast;
+
+function saveResults(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+  updateStats();
+  renderResults();
+}
+function getResult(id){ return results[id] || null; }
+function setResult(id, status, msg){
+  // status: 'pass' | 'fail' | 'warn'
+  results[id] = { status, msg, time: Date.now() };
+  saveResults();
+}
+
+/* ===== DATA DEFINITIONS ===== */
+const PAGES = [
+  { id:'page_index', file:'index.html', marker:'Quiz Hub' },
+  { id:'page_profile', file:'profile.html', marker:'الملف الشخصي' },
+  { id:'page_users', file:'users.html', marker:'المستخدمين' },
+  { id:'page_leaderboard', file:'leaderboard.html', marker:'قاعة المشاهير' },
+  { id:'page_badges', file:'badges.html', marker:'الرتب والبادجات' },
+  { id:'page_comments', file:'comments.html', marker:'المجتمع' },
+  { id:'page_chat', file:'chat.html', marker:'الشات الجماعي' },
+  { id:'page_inbox', file:'inbox.html', marker:'صندوق الرسائل' },
+  { id:'page_teams', file:'teams.html', marker:'حرب التيمات' },
+  { id:'page_shop', file:'shop.html', marker:'متجر المساعدات' },
+  { id:'page_notifications', file:'notifications.html', marker:'مركز الإشعارات' },
+  { id:'page_assistant', file:'assistant.html', marker:'مساعد' },
+  { id:'page_quizzes', file:'quizzes.html', marker:'صانع الكويزات' },
+  { id:'page_restricted', file:'restricted.html', marker:'المناطق المحظورة' },
+  { id:'page_banned', file:'banned.html', marker:'محظور' },
+  { id:'page_bot', file:'bot.html', marker:'بوت الاختبار' },
+  { id:'page_test', file:'test.html', marker:'اختبار الصوت' },
+  { id:'page_owner', file:'owner.html', marker:'لوحة الأونر' },
+  { id:'page_admin', file:'admin.html', marker:'لوحة الأدمن' },
+  { id:'page_manager', file:'manager.html', marker:'لوحة المدير' },
+  { id:'page_partner', file:'partner.html', marker:'لوحة الشريك' },
+  { id:'page_messages', file:'messages.html', marker:'الرسائل' }
+];
+
+const QUIZ_FILES = [
+  { id:'q_annabelle', file:'Annabelle Quiz.html', marker:'أنابيل' },
+  { id:'q_avatar', file:'Avatar Quiz.html', marker:'أفاتار' },
+  { id:'q_avengers', file:'Avengers Quiz.html', marker:'المنتقمون' },
+  { id:'q_birdsofprey', file:'Birds of Prey Quiz.html', marker:'الطيور' },
+  { id:'q_conjuring', file:'Conjuring Quiz.html', marker:'الكونجورينج' },
+  { id:'q_elharifa', file:'El Harifa Quiz.html', marker:'الحريفة' },
+  { id:'q_fall', file:'Fall Quiz.html', marker:'السقوط' },
+  { id:'q_fnaf', file:'FNAF Quiz.html', marker:'فايف نايتس' },
+  { id:'q_knivesout', file:'Knives Out Quiz.html', marker:'مطارق' },
+  { id:'q_scream', file:'Scream Quiz.html', marker:'سكريم' },
+  { id:'q_spiderman', file:'Spider-Man Quiz.html', marker:'سبايدرمان' },
+  { id:'q_squidgame', file:'Squid Game Quiz.html', marker:'لعبة الحبار' },
+  { id:'q_thenun', file:'The Nun Quiz.html', marker:'الراهبة' },
+  { id:'q_busan', file:'Train to Busan Quiz.html', marker:'قطار بوسان' },
+  { id:'q_venom', file:'Venom Quiz.html', marker:'فينوم' },
+  { id:'q_wednesday', file:'Wednesday Quiz.html', marker:'وينزداي' }
+];
+
+/* ✅ تم إصلاح الـ marker لـ owner-core.js من initQuiz إلى _runFeature */
+const OTHER_FILES = [
+  { id:'f_questions', file:'questions.js', marker:'allQuizzesData' },
+  { id:'f_quizcore', file:'quiz-core.js', marker:'initQuiz' },
+  { id:'f_quizstyle', file:'quiz-style.css', marker:'play-screen' },
+  { id:'f_style', file:'style.css', marker:'play-screen' },
+  { id:'f_notifications', file:'notifications.js', marker:'setupNotifications' },
+  { id:'f_roomcleaner', file:'room-cleaner.js', marker:'beforeunload' },
+  { id:'f_ownercore', file:'owner-core.js', marker:'_runFeature' },
+  { id:'f_ownadv', file:'owner-advanced.js', marker:'Object.assign' },
+  { id:'f_ownstyle', file:'owner-style.css', marker:':root' }
+];
+
+const IMAGES = [
+  'pic/Logo.png',
+  'pic/Annabelle.jpg','pic/A. 2014.jpeg','pic/Creation.jpeg','pic/Comes Home.jpeg',
+  'pic/Avatar.jpeg','pic/Avatar 1.jpeg','pic/Avatar 2.jpeg','pic/Avatar 3.jpeg',
+  'pic/Avengers.jpeg','pic/Avengers 1.jpeg','pic/Avengers 2.jpeg','pic/Avengers 3.jpeg','pic/Avengers 4.jpeg',
+  'pic/Birds of Prey.jpeg',
+  'pic/The Conjuring.jpg','pic/The Conjuring 1.jpg','pic/The Conjuring 2.jpeg','pic/The Conjuring 3.jpeg',
+  'pic/Harifa.jpeg','pic/Harifa 1.jpeg','pic/Harifa 2.jpeg',
+  'pic/Fall.jpeg',
+  'pic/FNAF.jpg','pic/FNAF 1.jpeg','pic/FNAF 2.jpeg',
+  'pic/Knives Out.jpeg','pic/Knives Out 1.jpeg','pic/Knives Out 2.jpeg','pic/Knives Out 3.jpeg',
+  'pic/Scream.jpeg','pic/Scream 1.jpeg','pic/Scream 2.jpeg','pic/Scream 3.jpeg','pic/Scream 4.jpeg','pic/Scream 5.jpeg','pic/Scream 6.jpeg','pic/Scream 7.jpeg',
+  'pic/Spider-Man.jpeg','pic/Spider-Man 1.jpeg','pic/Spider-Man 2.jpeg','pic/Spider-Man 3.jpeg',
+  'pic/The Amazing Spider-Man.jpeg','pic/The Amazing Spider-Man 2.jpeg',
+  'pic/Spider-Man Homecoming.jpeg','pic/Spider-Man Far From Home.jpeg','pic/Spider-Man No Way Home.jpeg',
+  'pic/Spider-Man Brand New Day.jpeg',
+  'pic/Squid Game.jpg','pic/Squid Game 1.jpeg','pic/Squid Game 2.jpg','pic/Squid Game 3.jpg',
+  'pic/The Nun.jpg','pic/The Nun 1.jpeg','pic/The Nun 2.jpeg',
+  'pic/busan.jpg','pic/busan1.jpeg','pic/busan2.jpeg',
+  'pic/Venom.jpeg','pic/Venom 1.jpeg','pic/Venom 2.jpeg','pic/Venom 3.jpeg',
+  'pic/Wednesday.jpg','pic/Wednesday 1.jpg','pic/Wednesday 2.jpg'
+];
+
+const IFRAME_PAGES = [
+  { id:'ifr_index', file:'index.html', selectors:['#authScreen','#mainContent','#sideMenu','.navbar'] },
+  { id:'ifr_users', file:'users.html', selectors:['#usersList','#searchInput'] },
+  { id:'ifr_leaderboard', file:'leaderboard.html', selectors:['#leaderboardList','#podiumContainer'] },
+  { id:'ifr_badges', file:'badges.html', selectors:['#section-ranks','#section-badges'] },
+  { id:'ifr_comments', file:'comments.html', selectors:['#postsList','#postInput'] },
+  { id:'ifr_chat', file:'chat.html', selectors:['#chatMessages','#chatInput'] },
+  { id:'ifr_shop', file:'shop.html', selectors:['#shopGrid','#tabsContainer'] },
+  { id:'ifr_notifications', file:'notifications.html', selectors:['#notificationsList'] },
+  { id:'ifr_assistant', file:'assistant.html', selectors:['#chatMessages','#chatKeyboard','#chatInput'] },
+  { id:'ifr_banned', file:'banned.html', selectors:['.box'] },
+  { id:'ifr_test', file:'test.html', selectors:['h1','button'] },
+  { id:'ifr_bot', file:'bot.html', selectors:['#console1','#startBtn'] }
+];
+
+const NODES = [
+  'usernames','users_data','roles/users','roles/admins','roles/managers','roles/partners',
+  'roles/testers','scores','leaderboard','speedrun_scores','verified_users','banned_users',
+  'warnings','badges','friends','friend_requests','messages','comments','suggestions',
+  'quiz_requests','support_tickets','global_chat','admin_chat','challenges','rooms',
+  'presence','clans','team_requests','site_settings','site_events','activity_feed',
+  'admin_logs','admin_requests','partner_requests','partners_chat','kick_requests',
+  'kick_signals','broadcast_messages','backups'
+];
+
+/* ===== AUTO TESTS ===== */
+const AUTO_TESTS = [];
+
+// --- Infrastructure ---
+AUTO_TESTS.push(
+  { id:'inf_fb_read', cat:'Infrastructure', name:'Firebase Read', desc:'يقرأ usernames كـ probe',
+    run: async () => {
+      try {
+        const s = await get(ref(db, 'usernames'));
+        const n = Object.keys(s.val() || {}).length;
+        return { status:'pass', msg: `✅ ${n} users (قراءة ناجحة)` };
+      } catch(e) { return { status:'fail', msg: '❌ ' + e.message }; }
+    }
+  },
+  { id:'inf_fb_crud', cat:'Infrastructure', name:'Firebase Write→Read→Update→Delete', desc:'CRUD كامل',
+    run: async () => {
+      const p = `_tester_test/t_${Date.now()}`;
+      try {
+        await set(ref(db, p), { val:'a', ts: Date.now() });
+        const r1 = await get(ref(db, p));
+        if (!r1.exists() || r1.val().val !== 'a') return { status:'fail', msg:'❌ Write/Read فشل' };
+        await update(ref(db, p), { val:'b' });
+        const r2 = await get(ref(db, p));
+        if (r2.val().val !== 'b') return { status:'fail', msg:'❌ Update فشل' };
+        await remove(ref(db, p));
+        const r3 = await get(ref(db, p));
+        if (r3.exists()) return { status:'fail', msg:'❌ Delete فشل' };
+        try { await remove(ref(db, '_tester_test')); } catch {}
+        return { status:'pass', msg:'✅ CRUD يعمل بنجاح' };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  },
+  { id:'inf_auth', cat:'Infrastructure', name:'Auth State', desc:'فحص حالة تسجيل الدخول',
+    run: () => new Promise(resolve => {
+      let done = false;
+      const t = setTimeout(() => { if(!done){done=true; resolve({status:'fail', msg:'⏱️ timeout'});} }, 3000);
+      const unsub = onAuthStateChanged(auth, u => {
+        if(done) return; done=true; clearTimeout(t); unsub();
+        if(u) resolve({status:'pass', msg:'✅ ' + u.email});
+        else resolve({status:'fail', msg:'❌ مش مسجل دخول في Firebase Auth'});
+      });
+    })
+  },
+  { id:'inf_localstorage', cat:'Infrastructure', name:'LocalStorage', desc:'loggedInUser موجود',
+    run: async () => {
+      const u = localStorage.getItem('loggedInUser');
+      if(u) return { status:'pass', msg:'✅ loggedInUser = ' + u };
+      return { status:'fail', msg:'❌ loggedInUser غير موجود' };
+    }
+  },
+  { id:'inf_sdk', cat:'Infrastructure', name:'Firebase SDK محمّل', desc:'الـmodules تحمّلت',
+    run: async () => {
+      if(typeof db === 'object' && typeof ref === 'function') return { status:'pass', msg:'✅ SDK يعمل' };
+      return { status:'fail', msg:'❌ SDK غير محمّل' };
+    }
   }
+);
 
-  window.toggleTheme = function() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      document.getElementById('themeBtn').innerText = isDark ? '☀️' : '🌙';
-      localStorage.setItem('testerTheme', isDark ? 'dark' : 'light');
-  };
-
-  window.switchTab = function(tabId, btn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
-  };
-
-  // التحقق من الصلاحية (بعد تحميل الصفحة)
-  document.addEventListener('DOMContentLoaded', () => {
-    window.get(window.ref(window.db, 'roles/testers/' + currentUser)).then(snap => {
-        if (snap.exists() || currentUser.toLowerCase() === 'ahmed') {
-            document.getElementById('panelContent').style.display = 'block';
-            
-            window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
-                const list = document.getElementById('ownerRepliesList');
-                if (!list) return;
-                list.innerHTML = '';
-                if (!msgSnap.exists()) {
-                    list.innerHTML = '<div style="color: var(--text-secondary); text-align: center;">لا توجد ردود بعد</div>';
-                    return;
-                }
-                Object.values(msgSnap.val()).reverse().forEach(msg => {
-                    list.innerHTML += `<div style="border-bottom:1px solid var(--border); padding:10px 0; color:var(--text);">${msg.text}</div>`;
-                });
-            });
-        } else {
-            document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. أنت لست تستر.</h1>';
+// --- Data Integrity ---
+AUTO_TESTS.push(
+  { id:'int_users_data', cat:'Data Integrity', name:'كل مستخدم له users_data', desc:'users ↔ users_data',
+    run: async () => {
+      const [u,d] = await Promise.all([get(ref(db,'usernames')), get(ref(db,'users_data'))]);
+      const users = Object.keys(u.val() || {});
+      const data = d.val() || {};
+      const missing = users.filter(x => !data[x]);
+      return missing.length
+        ? { status:'fail', msg:`❌ ${missing.length} مفقود: ${missing.slice(0,5).join(', ')} — استخدم زرار الإصلاح` }
+        : { status:'pass', msg:`✅ كل ${users.length} مستخدم عندهم بيانات` };
+    }
+  },
+  { id:'int_users_roles', cat:'Data Integrity', name:'كل مستخدم له رتبة', desc:'users ↔ roles/users',
+    run: async () => {
+      const [u,r] = await Promise.all([get(ref(db,'usernames')), get(ref(db,'roles/users'))]);
+      const users = Object.keys(u.val() || {});
+      const roles = r.val() || {};
+      const missing = users.filter(x => !roles[x] && x.toLowerCase() !== 'ahmed');
+      return missing.length
+        ? { status:'fail', msg:`❌ ${missing.length} بدون رتبة: ${missing.slice(0,5).join(', ')}` }
+        : { status:'pass', msg:`✅ كل ${users.length} عندهم رتبة` };
+    }
+  },
+  { id:'int_banned', cat:'Data Integrity', name:'المحظورين موجودين في usernames', desc:'banned ⊆ users',
+    run: async () => {
+      const [b,u] = await Promise.all([get(ref(db,'banned_users')), get(ref(db,'usernames'))]);
+      const banned = Object.keys(b.val() || {});
+      const users = u.val() || {};
+      const missing = banned.filter(x => !users[x]);
+      return missing.length
+        ? { status:'fail', msg:`❌ ${missing.length} محظور بلا حساب: ${missing.join(', ')}` }
+        : { status:'pass', msg:`✅ ${banned.length} محظور — الكل متسق` };
+    }
+  },
+  { id:'int_friends', cat:'Data Integrity', name:'الأصدقاء متبادلين', desc:'friends/a/b ⇒ friends/b/a',
+    run: async () => {
+      const f = await get(ref(db,'friends'));
+      const data = f.val() || {};
+      const issues = [];
+      for(const [a, list] of Object.entries(data)){
+        for(const b of Object.keys(list || {})){
+          if(!data[b] || !data[b][a]) issues.push(`${a}↔${b}`);
         }
-    });
-  });
-
-  window.sendToOwner = async function() {
-      const text = document.getElementById('testerMsgInput').value;
-      if(!text) return;
-      await window.push(window.ref(window.db, 'messages/owner_inbox'), { from: 'Tester: ' + currentUser, text: text, time: Date.now() });
-      alert('تم إرسال الرسالة للأونر!');
-      document.getElementById('testerMsgInput').value = '';
-  };
-
-  function logToConsole(msg) {
-      const box = document.getElementById('testerConsole');
-      const time = new Date().toLocaleTimeString('ar-EG');
-      box.innerHTML += `<span style="color:#888;">[${time}]</span> ${msg}<br>`;
-      box.scrollTop = box.scrollHeight;
-  }
-
-  window.toggleDevMode = function() {
-      let isDev = localStorage.getItem('testerDevMode') === 'true';
-      isDev = !isDev;
-      localStorage.setItem('testerDevMode', isDev);
-      const btn = document.getElementById('devModeBtn');
-      if(isDev) { btn.innerText = "إيقاف وضع المطور ❌"; btn.style.background = "#ef4444"; logToConsole("🛠️ تم تفعيل وضع المطور."); } 
-      else { btn.innerText = "تفعيل وضع المطور"; btn.style.background = "var(--primary)"; logToConsole("🛑 تم إيقاف وضع المطور."); }
-  }
-
-  window.testPing = async function() {
-      logToConsole("⏳ جاري اختبار سرعة الفايربيز...");
-      const start = Date.now();
-      await window.get(window.ref(window.db, '.info/connected'));
-      const ms = Date.now() - start;
-      logToConsole(`📡 سرعة الاتصال: ${ms} ms.`);
-  }
-
-  window.clearCache = function() {
-      logToConsole("🧹 جاري مسح الكاش...");
-      setTimeout(() => { window.location.reload(true); }, 1000);
-  }
-
-  window.toggleMobileView = function() {
-      const body = document.body;
-      if (body.style.maxWidth === '400px') {
-          body.style.maxWidth = ''; body.style.margin = ''; body.style.border = '';
-          logToConsole("🖥️ تم العودة لوضع الشاشة الكبيرة.");
-      } else {
-          body.style.maxWidth = '400px'; body.style.margin = '0 auto'; body.style.border = '2px solid var(--primary)';
-          logToConsole("📱 تم تفعيل محاكي الموبايل.");
       }
-  }
-
-  window.generateDummyUsers = async function() {
-      logToConsole("⏳ جاري توليد 5 لاعبين وهميين...");
-      for(let i=1; i<=5; i++) {
-          const name = `TestBot_${Math.floor(Math.random()*1000)}`;
-          await window.set(window.ref(window.db, 'usernames/' + name), true);
-          await window.set(window.ref(window.db, 'users_data/' + name + '/xp'), Math.floor(Math.random()*500));
-          logToConsole(`👤 تم إنشاء اللاعب: ${name}`);
-      }
-      logToConsole("✅ تم التوليد.");
-  }
-
-  window.runDbCheck = async function() {
-      logToConsole("⏳ جاري فحص قاعدة البيانات...");
-      const nodes = ['usernames', 'users_data', 'scores', 'badges'];
-      for(let node of nodes) {
-          try { await window.get(window.ref(window.db, node)); logToConsole(`✅ مسار (${node}) يعمل.`); } 
-          catch(e) { logToConsole(`❌ خطأ في (${node}).`); }
-      }
-  }
-
-  window.testSounds = function() { 
-      let audio = new Audio('sounds/click.wav');
-      audio.play().then(() => logToConsole("🔊 الصوت شغال.")).catch(() => logToConsole("🔇 المتصفح يمنع الصوت التلقائي."));
-  }
-  window.showToast = function(msg, type) { logToConsole(`⚠️ تنبيه تجريبي: ${msg}`); }
-  
-  window.detectCheaters = async function() {
-      logToConsole("🕵️ جاري فحص الغشاشين...");
-      const snap = await window.get(window.ref(window.db, 'scores'));
-      if(!snap.exists()) return logToConsole("لا توجد نتائج.");
-      logToConsole("✅ لا يوجد غشاشين حتى الآن.");
-  }
-
-  window.checkImages = async function() {
-      logToConsole("🖼️ جاري فحص الصور...");
-      const img = new Image();
-      img.onload = () => logToConsole("✅ صورة اللوجو سليمة.");
-      img.onerror = () => logToConsole("❌ صورة اللوجو مفقودة.");
-      img.src = 'pic/Logo.png';
-  }
-
-  window.clearTestData = async function() {
-      if(!confirm('مسح كل حسابات TestBot؟')) return;
-      logToConsole("🗑️ جاري مسح بيانات التجربة...");
-      const snap = await window.get(window.ref(window.db, 'usernames'));
-      if(snap.exists()) {
-          for(let user in snap.val()) {
-              if(user.startsWith('TestBot_')) {
-                  await window.remove(window.ref(window.db, 'usernames/' + user));
-                  await window.remove(window.ref(window.db, 'users_data/' + user));
-                  logToConsole(`🗑️ تم مسح: ${user}`);
-              }
+      return issues.length
+        ? { status:'fail', msg:`❌ ${issues.length} غير متبادل: ${issues.slice(0,3).join('; ')}` }
+        : { status:'pass', msg:'✅ كل الصداقات متبادلة' };
+    }
+  },
+  { id:'int_verified', cat:'Data Integrity', name:'الموثقين لهم verified flag', desc:'verified_users ⇒ users_data.verified',
+    run: async () => {
+      const [v,u] = await Promise.all([get(ref(db,'verified_users')), get(ref(db,'users_data'))]);
+      const verified = Object.keys(v.val() || {});
+      const users = u.val() || {};
+      const missing = verified.filter(x => users[x]?.verified !== 1 && users[x]?.verified !== true);
+      return missing.length
+        ? { status:'fail', msg:`❌ ${missing.length} بلا flag: ${missing.join(', ')}` }
+        : { status:'pass', msg:`✅ ${verified.length} موثق متسق` };
+    }
+  },
+  { id:'int_scores', cat:'Data Integrity', name:'Scores لها score و total صحيحين', desc:'بنية النتائج',
+    run: async () => {
+      const s = await get(ref(db,'scores'));
+      const data = s.val() || {};
+      const issues = [];
+      for(const [user, quizzes] of Object.entries(data)){
+        for(const [quiz, attempts] of Object.entries(quizzes || {})){
+          for(const [id, a] of Object.entries(attempts || {})){
+            if(typeof a.score !== 'number' || typeof a.total !== 'number'){
+              issues.push(`${user}/${quiz}/${id}`);
+            }
           }
+        }
       }
-      logToConsole("✅ تم التنظيف.");
+      return issues.length
+        ? { status:'fail', msg:`❌ ${issues.length} نتيجة بلا score/total` }
+        : { status:'pass', msg:'✅ كل النتائج سليمة' };
+    }
+  },
+  { id:'int_leaderboard', cat:'Data Integrity', name:'Leaderboard مطابق لـ scores', desc:'تحقق من وجود نفس المستخدمين',
+    run: async () => {
+      const [s,l] = await Promise.all([get(ref(db,'scores')), get(ref(db,'leaderboard'))]);
+      const sUsers = new Set(Object.keys(s.val() || {}));
+      const lUsers = new Set(Object.keys(l.val() || {}));
+      const onlyInS = [...sUsers].filter(x => !lUsers.has(x));
+      if(onlyInS.length === 0) return { status:'pass', msg:'✅ كل لاعب في scores موجود في leaderboard' };
+      return { status:'warn', msg:`⚠️ ${onlyInS.length} لاعب مش في leaderboard (غالباً ghost_mode)` };
+    }
   }
+);
+
+// --- Quiz Data ---
+AUTO_TESTS.push(
+  { id:'quiz_parse', cat:'Quiz Data', name:'questions.js يُحمّل ويُقيّم', desc:'تحميل allQuizzesData',
+    run: async () => {
+      try {
+        const res = await fetch('questions.js?' + Date.now());
+        if(!res.ok) return { status:'fail', msg:'❌ HTTP ' + res.status };
+        const text = await res.text();
+        const data = new Function(text + '\nreturn allQuizzesData;')();
+        if(typeof data !== 'object') return { status:'fail', msg:'❌ مش object' };
+        return { status:'pass', msg:`✅ ${Object.keys(data).length} كويزات محمّلة` };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  },
+  { id:'quiz_structure', cat:'Quiz Data', name:'كل الكويزات لها بنية صحيحة', desc:'q_ar + options_ar + answer',
+    run: async () => {
+      try {
+        const res = await fetch('questions.js?' + Date.now());
+        const text = await res.text();
+        const data = new Function(text + '\nreturn allQuizzesData;')();
+        const issues = [];
+        for(const [key, quiz] of Object.entries(data)){
+          for(const [partKey, questions] of Object.entries(quiz)){
+            if(!Array.isArray(questions)){ issues.push(`${key}.${partKey}`); continue; }
+            questions.forEach((q, i) => {
+              if(!q.q_ar) issues.push(`${key}.${partKey}[${i}].q_ar`);
+              if(!Array.isArray(q.options_ar) || q.options_ar.length < 2) issues.push(`${key}.${partKey}[${i}].options_ar`);
+              if(typeof q.answer !== 'number') issues.push(`${key}.${partKey}[${i}].answer`);
+              else if(q.options_ar && q.answer >= q.options_ar.length) issues.push(`${key}.${partKey}[${i}].answer_range`);
+            });
+          }
+        }
+        return issues.length
+          ? { status:'fail', msg:`❌ ${issues.length} مشكلة: ${issues.slice(0,5).join(', ')}` }
+          : { status:'pass', msg:'✅ كل الأسئلة سليمة' };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  },
+  /* ✅ تم إزالة spiderman2026 من القائمة — عشان الكارت يشتغل لازم تضيف questions له */
+  { id:'quiz_count', cat:'Quiz Data', name:'16 كويز أساسي موجود', desc:'بدون spiderman2026 (اختياري)',
+    run: async () => {
+      try {
+        const res = await fetch('questions.js?' + Date.now());
+        const text = await res.text();
+        const data = new Function(text + '\nreturn allQuizzesData;')();
+        const expected = ['annabelle','conjuring','TheNun','FNAF','SquidGame','spiderman','avengers','avatar','venom','birdsofprey','fall','Wednesday','knivesout','scream','TrainToBusan','elharifa'];
+        const found = Object.keys(data);
+        const missing = expected.filter(x => !found.includes(x));
+        if(missing.length > 0) return { status:'fail', msg:`❌ مفقود: ${missing.join(', ')}` };
+        const has2026 = found.includes('spiderman2026') ? ' + 2026 ✅' : ' (spiderman2026 لسه مش مضاف)';
+        return { status:'pass', msg:`✅ كل ${expected.length} كويز موجود${has2026}` };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  }
+);
+
+// --- Pages Fetch ---
+[...PAGES, ...QUIZ_FILES, ...OTHER_FILES].forEach(p => {
+  AUTO_TESTS.push({
+    id: p.id, cat:'Pages Fetch', name: p.file, desc: 'marker: ' + p.marker,
+    run: async () => {
+      try {
+        const res = await fetch(p.file + '?' + Date.now());
+        if(!res.ok) return { status:'fail', msg:`❌ HTTP ${res.status}` };
+        const txt = await res.text();
+        if(!txt.includes(p.marker)) return { status:'fail', msg:`❌ marker "${p.marker}" مش موجود` };
+        return { status:'pass', msg:`✅ ${(txt.length/1024).toFixed(1)} KB` };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  });
+});
+
+// --- Images ---
+IMAGES.forEach(img => {
+  const id = 'img_' + img.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  AUTO_TESTS.push({
+    id, cat:'Images', name: img, desc:'تحميل الصورة والتحقق من أبعادها',
+    run: () => new Promise(resolve => {
+      const im = new Image();
+      const timer = setTimeout(() => resolve({ status:'fail', msg:'❌ timeout 5s' }), 5000);
+      im.onload = () => { clearTimeout(timer); resolve({ status:'pass', msg:`✅ ${im.naturalWidth}×${im.naturalHeight}` }); };
+      im.onerror = () => { clearTimeout(timer); resolve({ status:'fail', msg:'❌ فشل التحميل' }); };
+      im.src = img + '?' + Date.now();
+    })
+  });
+});
+
+// --- Pages Render ---
+IFRAME_PAGES.forEach(p => {
+  AUTO_TESTS.push({
+    id: p.id, cat:'Pages Render', name: p.file, desc: 'selectors: ' + p.selectors.join(', '),
+    run: () => new Promise(resolve => {
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1200px;height:800px;border:0;';
+      iframe.src = p.file;
+      let done = false;
+      const timer = setTimeout(() => finish({ status:'fail', msg:'❌ timeout 15s' }), 15000);
+      const finish = (r) => { if(done) return; done=true; clearTimeout(timer); if(iframe.parentNode) iframe.remove(); resolve(r); };
+      iframe.onload = () => {
+        try {
+          const doc = iframe.contentDocument;
+          if(!doc) return finish({ status:'fail', msg:'❌ no contentDocument' });
+          const checks = p.selectors.map(s => ({ s, ok: !!doc.querySelector(s) }));
+          const failed = checks.filter(c => !c.ok);
+          if(failed.length === 0) finish({ status:'pass', msg:`✅ كل ${p.selectors.length} selectors موجودة` });
+          else finish({ status:'fail', msg:`❌ مفقود: ${failed.map(c=>c.s).join(', ')}` });
+        } catch(e) { finish({ status:'fail', msg:'❌ ' + e.message }); }
+      };
+      iframe.onerror = () => finish({ status:'fail', msg:'❌ load error' });
+      document.body.appendChild(iframe);
+    })
+  });
+});
+
+// --- Nodes ---
+NODES.forEach(n => {
+  const id = 'node_' + n.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  AUTO_TESTS.push({
+    id, cat:'Nodes', name: n, desc:'فحص وجود الـ node',
+    run: async () => {
+      try {
+        const s = await get(ref(db, n));
+        if(!s.exists()){
+          return { status:'warn', msg:'⚠️ فاضي (مش مستخدم — عادي)' };
+        }
+        const v = s.val();
+        const cnt = (v && typeof v === 'object') ? Object.keys(v).length : 1;
+        return { status:'pass', msg:`✅ ${cnt} عنصر` };
+      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
+    }
+  });
+});
+
+/* ===== RENDER ===== */
+function renderAutoTests(){
+  const container = document.getElementById('autotestsContainer');
+  const cats = [...new Set(AUTO_TESTS.map(t => t.cat))];
+  let html = '';
+  for(const cat of cats){
+    const tests = AUTO_TESTS.filter(t => t.cat === cat);
+    html += `
+      <div class="section">
+        <div class="section-title">${cat} <span class="count">${tests.length}</span></div>
+        <div class="action-bar"><button class="action-btn blue" onclick="runCategory('${cat}')">▶️ شغّل ${cat}</button></div>
+        <div id="cat-${cat.replace(/[^a-z0-9]/gi,'_')}">
+          ${tests.map(t => renderTestRow(t)).join('')}
+        </div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function renderTestRow(t){
+  const r = getResult(t.id);
+  const status = !r ? 'pending' : r.status;
+  return `
+    <div class="test-item ${status}" data-test-id="${t.id}">
+      <div class="test-check ${status === 'pending' ? '' : status}">${status === 'pass' ? '✓' : status === 'fail' ? '✗' : status === 'warn' ? '!' : ''}</div>
+      <div class="test-info">
+        <div class="test-label">${t.name}</div>
+        ${t.desc ? `<div class="test-desc">${t.desc}</div>` : ''}
+        ${r ? `<div class="test-result" style="color:${r.status === 'pass' ? 'var(--success)' : r.status === 'warn' ? 'var(--warning)' : 'var(--danger)'}">${r.msg}</div>` : ''}
+      </div>
+      <div class="test-actions">
+        ${(t.cat === 'Pages Fetch' || t.cat === 'Pages Render') ? `<button class="test-btn blue" onclick="window.open('${t.name}', '_blank')">🔗 فتح</button>` : ''}
+        <button class="test-btn" onclick="runSingleTest('${t.id}')">▶️</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateTestRow(id, result){
+  const row = document.querySelector(`[data-test-id="${id}"]`);
+  if(!row) return;
+  row.className = 'test-item ' + result.status;
+  const check = row.querySelector('.test-check');
+  check.className = 'test-check ' + result.status;
+  check.textContent = result.status === 'pass' ? '✓' : result.status === 'fail' ? '✗' : '!';
+  let resultEl = row.querySelector('.test-result');
+  if(!resultEl){
+    resultEl = document.createElement('div');
+    resultEl.className = 'test-result';
+    row.querySelector('.test-info').appendChild(resultEl);
+  }
+  resultEl.style.color = result.status === 'pass' ? 'var(--success)' : result.status === 'warn' ? 'var(--warning)' : 'var(--danger)';
+  resultEl.textContent = result.msg;
+}
+
+/* ===== RUNNERS ===== */
+window.runSingleTest = async function(id){
+  const t = AUTO_TESTS.find(x => x.id === id);
+  if(!t) return;
+  const row = document.querySelector(`[data-test-id="${id}"]`);
+  if(row){ row.className = 'test-item running'; row.querySelector('.test-check').textContent = '⏳'; }
+  try {
+    const r = await t.run();
+    setResult(id, r.status, r.msg);
+    updateTestRow(id, r);
+    updateStats();
+  } catch(e){
+    const r = { status:'fail', msg:'❌ ' + e.message };
+    setResult(id, r.status, r.msg);
+    updateTestRow(id, r);
+    updateStats();
+  }
+};
+
+window.runCategory = async function(cat){
+  const tests = AUTO_TESTS.filter(t => t.cat === cat);
+  toast(`⏳ شغّل ${tests.length} اختبار في ${cat}...`, 'info');
+  let pass = 0, fail = 0, warn = 0;
+  for(const t of tests){
+    const row = document.querySelector(`[data-test-id="${t.id}"]`);
+    if(row){ row.className = 'test-item running'; row.querySelector('.test-check').textContent = '⏳'; }
+    try {
+      const r = await t.run();
+      setResult(t.id, r.status, r.msg);
+      updateTestRow(t.id, r);
+      if(r.status === 'pass') pass++;
+      else if(r.status === 'warn') warn++;
+      else fail++;
+    } catch(e){
+      const r = { status:'fail', msg:'❌ ' + e.message };
+      setResult(t.id, r.status, r.msg);
+      updateTestRow(t.id, r);
+      fail++;
+    }
+    updateStats();
+  }
+  toast(`✅ ${cat}: نجح ${pass} / فشل ${fail} / تحذير ${warn}`, fail > 0 ? 'warn' : 'success');
+};
+
+window.runAllTests = async function(){
+  const btn = document.getElementById('runAllBtn');
+  btn.disabled = true;
+  const origText = btn.textContent;
+  btn.textContent = '⏳ جاري التشغيل...';
+  toast(`⏳ شغّل ${AUTO_TESTS.length} اختبار... (3-5 دقايق)`, 'info');
+
+  let pass = 0, fail = 0, warn = 0;
+  for(let i = 0; i < AUTO_TESTS.length; i++){
+    const t = AUTO_TESTS[i];
+    if(i % 10 === 0) btn.textContent = `⏳ ${i}/${AUTO_TESTS.length}`;
+    const row = document.querySelector(`[data-test-id="${t.id}"]`);
+    if(row){ row.className = 'test-item running'; row.querySelector('.test-check').textContent = '⏳'; }
+    try {
+      const r = await t.run();
+      setResult(t.id, r.status, r.msg);
+      updateTestRow(t.id, r);
+      if(r.status === 'pass') pass++;
+      else if(r.status === 'warn') warn++;
+      else fail++;
+    } catch(e){
+      const r = { status:'fail', msg:'❌ ' + e.message };
+      setResult(t.id, r.status, r.msg);
+      updateTestRow(t.id, r);
+      fail++;
+    }
+    updateStats();
+  }
+  btn.disabled = false;
+  btn.textContent = origText;
+  toast(`🎉 انتهى! نجح ${pass} / فشل ${fail} / تحذير ${warn}`, fail > 0 ? 'warn' : 'success');
+  switchTab('results', document.querySelectorAll('.tab-btn')[11]);
+};
+
+/* ===== STATS ===== */
+function updateStats(){
+  const total = AUTO_TESTS.length;
+  let pass = 0, fail = 0, warn = 0;
+  AUTO_TESTS.forEach(t => {
+    const r = getResult(t.id);
+    if(r){
+      if(r.status === 'pass') pass++;
+      else if(r.status === 'warn') warn++;
+      else fail++;
+    }
+  });
+  const pending = total - pass - fail - warn;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPassed').textContent = pass;
+  document.getElementById('statFailed').textContent = fail;
+  document.getElementById('statWarned').textContent = warn;
+  document.getElementById('statPending').textContent = pending;
+  const done = pass + fail + warn;
+  document.getElementById('statProgress').textContent = total > 0 ? Math.round(done/total*100) + '%' : '0%';
+  document.getElementById('statRate').textContent = done > 0 ? Math.round(pass/done*100) + '%' : '0%';
+  document.getElementById('mainProgress').style.width = (total > 0 ? done/total*100 : 0) + '%';
+}
+
+/* ===== RENDER OLD LISTS ===== */
+function renderPanels(){
+  const panels = [
+    { id:'pn_owner', label:'👑 لوحة الأونر', url:'owner.html', desc:'926 ميزة' },
+    { id:'pn_admin', label:'🛡️ لوحة الإدارة', url:'admin.html', desc:'إدارة اللاعبين' },
+    { id:'pn_manager', label:'📋 لوحة المدير', url:'manager.html', desc:'إدارة الفعاليات' },
+    { id:'pn_partner', label:'🤝 لوحة الشريك', url:'partner.html', desc:'تسويق وشراكات' }
+  ];
+  document.getElementById('panelsList').innerHTML = panels.map(p => `
+    <div class="test-item">
+      <div class="test-info"><div class="test-label">${p.label}</div><div class="test-desc">${p.desc}</div></div>
+      <div class="test-actions"><a href="${p.url}" target="_blank" class="test-btn blue">🔗 فتح</a></div>
+    </div>
+  `).join('');
+}
+
+function renderManual(){
+  const manual = [
+    'تسجيل حساب جديد كامل (جنس + اسم + باسورد)',
+    'تسجيل دخول بحساب موجود',
+    'لعب كويز كامل حتى النهاية + مشاركة',
+    'فتح صندوق يومي مرة واحدة ثم التأكد من القفل',
+    'شراء أداة من المتجر ثم استخدامها',
+    'إضافة صديق ثم قبول من الحساب الآخر',
+    'إرسال رسالة لصديق من inbox',
+    'إنشاء تحدي صديق بكود غرفة',
+    'إنشاء فريق فرعي بعد الانضمام لتصنيف',
+    'رفع صورة بروفايل',
+    'فتح لوحة الأونر بحساب ahmed',
+    'تجربة حظر لاعب من admin',
+    'تجربة توثيق لاعب من admin',
+    'تجربة تحذير لاعب من admin',
+    'تجربة كويز بيلدر من quizzes.html',
+    'تجربة المساعد من assistant.html'
+  ];
+  document.getElementById('manualList').innerHTML = manual.map((m,i) => {
+    const id = 'manual_' + i;
+    const r = getResult(id);
+    const status = !r ? 'pending' : r.status;
+    return `
+      <div class="test-item ${status}">
+        <div class="test-check ${status === 'pending' ? '' : status}" onclick="toggleManual('${id}')">${status === 'pass' ? '✓' : status === 'warn' ? '!' : status === 'fail' ? '✗' : ''}</div>
+        <div class="test-info"><div class="test-label">${m}</div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.toggleManual = function(id){
+  const cur = getResult(id);
+  let next = 'pass';
+  if(cur){
+    if(cur.status === 'pass') next = 'warn';
+    else if(cur.status === 'warn') next = 'fail';
+    else next = 'pass';
+  }
+  setResult(id, next, next === 'pass' ? 'تم' : next === 'warn' ? 'مشكلة' : 'فشل');
+  renderManual();
+  updateStats();
+};
+
+function renderResults(){
+  const el = document.getElementById('resultsLog');
+  const entries = Object.entries(results).sort((a,b) => (b[1].time||0) - (a[1].time||0));
+  if(!entries.length){ el.innerHTML = '<div class="empty">مفيش نتايج لسه</div>'; return; }
+  el.innerHTML = `<table class="test-table">
+    <thead><tr><th>#</th><th>ID</th><th>الحالة</th><th>الرسالة</th><th>الوقت</th></tr></thead>
+    <tbody>${entries.map(([id, r], i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><code>${id}</code></td>
+        <td>${r.status === 'pass' ? '✅' : r.status === 'warn' ? '⚠️' : '❌'}</td>
+        <td style="font-size:11px">${r.msg || '-'}</td>
+        <td style="font-size:11px">${r.time ? new Date(r.time).toLocaleTimeString('ar-EG') : '-'}</td>
+      </tr>
+    `).join('')}</tbody>
+  </table>`;
+}
+
+/* ===== FIXES TAB ===== */
+function renderFixes(){
+  const el = document.getElementById('fixesList');
+  el.innerHTML = `
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🔍 1. فحص المستخدمين الناقصين</div>
+        <div class="test-desc">يعرض كل مستخدم في usernames ومعه users_data و role</div>
+      </div>
+      <div class="test-actions"><button class="test-btn blue" onclick="checkUsersIntegrity()">🔍 فحص</button></div>
+    </div>
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🛠️ 2. إصلاح users_data الفاضي</div>
+        <div class="test-desc">ينشئ users_data فاضي لأي مستخدم ناقص (xp:0, coins:0)</div>
+      </div>
+      <div class="test-actions"><button class="test-btn" onclick="fixMissingUsersData()">🛠️ إصلاح</button></div>
+    </div>
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🛠️ 3. إصلاح roles/users الفاضي</div>
+        <div class="test-desc">يعطي رتبة 'Player' لأي مستخدم ناقص</div>
+      </div>
+      <div class="test-actions"><button class="test-btn" onclick="fixMissingRoles()">🛠️ إصلاح</button></div>
+    </div>
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🛠️ 4. إصلاح verified_users flags</div>
+        <div class="test-desc">يضيف users_data.verified=1 لكل من في verified_users</div>
+      </div>
+      <div class="test-actions"><button class="test-btn" onclick="fixVerifiedFlags()">🛠️ إصلاح</button></div>
+    </div>
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🗑️ 5. مسح مستخدم محدد</div>
+        <div class="test-desc">يحذف مستخدم من usernames + users_data + roles معاً</div>
+      </div>
+      <div class="test-actions"><button class="test-btn danger" onclick="deleteUser()">🗑️ مسح</button></div>
+    </div>
+    <div class="test-item">
+      <div class="test-info">
+        <div class="test-label">🎮 6. فحص spiderman2026</div>
+        <div class="test-desc">يتحقق إن كان spiderman2026 موجود في questions.js</div>
+      </div>
+      <div class="test-actions"><button class="test-btn blue" onclick="checkSpiderman2026()">🔍 فحص</button></div>
+    </div>
+  `;
+}
+
+window.checkUsersIntegrity = async function(){
+  try {
+    const [u, d, r] = await Promise.all([
+      get(ref(db, 'usernames')),
+      get(ref(db, 'users_data')),
+      get(ref(db, 'roles/users'))
+    ]);
+    const users = Object.keys(u.val() || {});
+    const data = d.val() || {};
+    const roles = r.val() || {};
+    const rows = users.map(name => ({
+      name,
+      hasData: !!data[name],
+      role: roles[name] || (name.toLowerCase() === 'ahmed' ? 'Owner (implicit)' : '❌ مفقود')
+    }));
+    const html = `<table class="test-table">
+      <thead><tr><th>المستخدم</th><th>users_data</th><th>role</th></tr></thead>
+      <tbody>${rows.map(x => `<tr>
+        <td>${x.name}</td>
+        <td>${x.hasData ? '✅' : '❌'}</td>
+        <td>${x.role}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+    document.getElementById('fixesList').innerHTML += `<div class="section"><div class="section-title">نتيجة الفحص</div>${html}</div>`;
+    toast('✅ تم الفحص', 'success');
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+window.fixMissingUsersData = async function(){
+  if(!confirm('إنشاء users_data فاضي لكل مستخدم ناقص؟')) return;
+  try {
+    const [u, d] = await Promise.all([get(ref(db, 'usernames')), get(ref(db, 'users_data'))]);
+    const users = Object.keys(u.val() || {});
+    const data = d.val() || {};
+    const missing = users.filter(x => !data[x]);
+    if(!missing.length){ toast('✅ مفيش مستخدمين ناقصين', 'success'); return; }
+    for(const name of missing){
+      await set(ref(db, `users_data/${name}`), {
+        xp: 0, coins: 0, streak: 0, profilePic: null, verified: 0, createdAt: Date.now()
+      });
+    }
+    toast(`✅ تم إصلاح ${missing.length} مستخدم`, 'success');
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+window.fixMissingRoles = async function(){
+  if(!confirm('إعطاء رتبة "Player" لكل مستخدم بدون رتبة؟')) return;
+  try {
+    const [u, r] = await Promise.all([get(ref(db, 'usernames')), get(ref(db, 'roles/users'))]);
+    const users = Object.keys(u.val() || {});
+    const roles = r.val() || {};
+    const missing = users.filter(x => !roles[x] && x.toLowerCase() !== 'ahmed');
+    if(!missing.length){ toast('✅ مفيش مستخدمين بدون رتبة', 'success'); return; }
+    for(const name of missing){
+      await set(ref(db, `roles/users/${name}`), 'Player');
+    }
+    toast(`✅ تم إعطاء رتبة لـ ${missing.length} مستخدم`, 'success');
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+window.fixVerifiedFlags = async function(){
+  if(!confirm('إضافة verified=1 لكل من في verified_users؟')) return;
+  try {
+    const [v, u] = await Promise.all([get(ref(db, 'verified_users')), get(ref(db, 'users_data'))]);
+    const verified = Object.keys(v.val() || {});
+    const users = u.val() || {};
+    const missing = verified.filter(x => users[x]?.verified !== 1 && users[x]?.verified !== true);
+    if(!missing.length){ toast('✅ كل الموثقين متسقين', 'success'); return; }
+    for(const name of missing){
+      await update(ref(db, `users_data/${name}`), { verified: 1 });
+    }
+    toast(`✅ تم إصلاح ${missing.length} مستخدم`, 'success');
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+window.deleteUser = async function(){
+  const name = prompt('اسم المستخدم للمسح:');
+  if(!name) return;
+  if(!confirm(`⚠️ مسح "${name}" من usernames + users_data + roles؟`)) return;
+  try {
+    await remove(ref(db, `usernames/${name}`));
+    await remove(ref(db, `users_data/${name}`));
+    await remove(ref(db, `roles/users/${name}`));
+    toast(`✅ تم مسح ${name}`, 'success');
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+window.checkSpiderman2026 = async function(){
+  try {
+    const res = await fetch('questions.js?' + Date.now());
+    const text = await res.text();
+    const data = new Function(text + '\nreturn allQuizzesData;')();
+    if(data.spiderman2026){
+      const c = data.spiderman2026.comprehensive?.length || 0;
+      toast(`✅ spiderman2026 موجود — ${c} سؤال`, 'success');
+    } else {
+      toast(`⚠️ spiderman2026 مش موجود — كارت "Brand New Day" في Spider-Man Quiz مش هيشتغل. امسح الكارت أو ضيف أسئلة.`, 'warn');
+    }
+  } catch(e){ toast('❌ ' + e.message, 'error'); }
+};
+
+/* ===== ACTIONS ===== */
+window.openAllPanels = function(){
+  ['owner.html','admin.html','manager.html','partner.html'].forEach(u => window.open(u,'_blank'));
+  toast('✅ فتح اللوحات', 'success');
+};
+
+window.exportResults = function(){
+  const data = {
+    user: CURRENT_USER,
+    exportedAt: new Date().toISOString(),
+    summary: {
+      total: AUTO_TESTS.length,
+      passed: Object.values(results).filter(r => r.status === 'pass').length,
+      failed: Object.values(results).filter(r => r.status === 'fail').length,
+      warned: Object.values(results).filter(r => r.status === 'warn').length
+    },
+    results
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tester-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('✅ تم التصدير', 'success');
+};
+
+window.resetProgress = function(){
+  if(!confirm('⚠️ تصفير كل النتائج؟')) return;
+  results = {};
+  localStorage.removeItem(STORAGE_KEY);
+  renderAutoTests();
+  renderManual();
+  renderResults();
+  updateStats();
+  toast('✅ تم التصفير', 'success');
+};
+
+/* ===== TABS ===== */
+window.switchTab = function(tabId, btn){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+  // Re-render on switch
+  const map = {
+    infra: ['Infrastructure', 'infraList'],
+    data: ['Data Integrity', 'dataList'],
+    pages: ['Pages Fetch', 'pagesList'],
+    images: ['Images', 'imagesList'],
+    quizdata: ['Quiz Data', 'quizdataList'],
+    render: ['Pages Render', 'renderList'],
+    nodes: ['Nodes', 'nodesList']
+  };
+  if(map[tabId]){
+    const [cat, listId] = map[tabId];
+    document.getElementById(listId).innerHTML = AUTO_TESTS.filter(t => t.cat === cat).map(t => renderTestRow(t)).join('');
+  }
+};
+
+window.toggleTheme = function(){
+  const isLight = document.body.classList.toggle('light-mode');
+  document.getElementById('themeBtn').textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('testerTheme', isLight ? 'light' : 'dark');
+};
+if(localStorage.getItem('testerTheme') === 'light'){
+  document.body.classList.add('light-mode');
+  document.getElementById('themeBtn').textContent = '☀️';
+}
+
+/* ===== INIT ===== */
+renderAutoTests();
+renderPanels();
+renderFixes();
+renderManual();
+renderResults();
+updateStats();
+
+// Distribute specific lists
+document.getElementById('infraList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Infrastructure').map(t => renderTestRow(t)).join('');
+document.getElementById('dataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Data Integrity').map(t => renderTestRow(t)).join('');
+document.getElementById('pagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Fetch').map(t => renderTestRow(t)).join('');
+document.getElementById('imagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Images').map(t => renderTestRow(t)).join('');
+document.getElementById('quizdataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Quiz Data').map(t => renderTestRow(t)).join('');
+document.getElementById('renderList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Render').map(t => renderTestRow(t)).join('');
+document.getElementById('nodesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Nodes').map(t => renderTestRow(t)).join('');
+document.getElementById('nodesCount').textContent = AUTO_TESTS.filter(t => t.cat === 'Nodes').length;
+
+console.log('🧪 Tester v4 loaded — ' + AUTO_TESTS.length + ' tests');
 </script>
 </body>
 </html>
