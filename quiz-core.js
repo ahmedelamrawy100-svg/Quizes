@@ -614,17 +614,6 @@ window.initQuiz = function(config) {
         optionsWithAnswers.forEach((opt) => { 
             const div = document.createElement('div'); div.className = 'option'; div.innerText = opt.text; 
             div.onclick = () => checkAnswer(opt.isCorrect, div); optEl.appendChild(div); 
-        if (localStorage.getItem('testerDevMode') === 'true') {
-            optionsWithAnswers.forEach((opt, index) => {
-                if (opt.isCorrect) {
-                    const correctOpt = document.querySelectorAll('.option')[index];
-                    if (correctOpt) {
-                        correctOpt.style.border = '3px solid #4caf50';
-                        correctOpt.style.boxShadow = '0 0 15px #4caf50';
-                    }
-                }
-            });
-        }
         }); 
         
         let scoreText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
