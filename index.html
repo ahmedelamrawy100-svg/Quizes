@@ -457,7 +457,7 @@
               if (chatMenu) chatMenu.style.display = 'none';
           } else {
               if (chatBtn) chatBtn.style.display = 'flex';
-              if (chatMenu) chatMenu.style.display = 'block';
+              if (chatMenu) chatMenu.style.display = 'flex';
           }
       });
 
@@ -645,13 +645,22 @@ window.loginUser = async function() {
           filterEgyptian('egyptian', document.querySelector('#egyptianFilters .sub-btn'));
       }
   };
-
-  window.filterForeign = function(cat, btn) {
+    window.filterForeign = function(cat, btn) {
     document.querySelectorAll('#foreignFilters .sub-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
     document.querySelectorAll('.quiz-card').forEach(card => {
         const cardCats = card.dataset.category || '';
-        card.style.display = ((cat === 'all' && !cardCats.includes('egyptian')) || cardCats.includes(cat)) ? 'flex' : 'none';
+        
+        if (cardCats.includes('egyptian')) {
+            card.style.display = 'none';
+            return;
+        }
+        
+        if (cat === 'all') {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = cardCats.includes(cat) ? 'flex' : 'none';
+        }
     });
   };
 
@@ -660,7 +669,16 @@ window.loginUser = async function() {
     if(btn) btn.classList.add('active');
     document.querySelectorAll('.quiz-card').forEach(card => {
         const cardCats = card.dataset.category || '';
-        card.style.display = cardCats.includes(cat) ? 'flex' : 'none';
+        
+        if (!cardCats.includes('egyptian')) {
+            card.style.display = 'none';
+            return;
+        }
+        if (cat === 'egyptian') {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = cardCats.includes(cat) ? 'flex' : 'none';
+        }
     });
   };
 
