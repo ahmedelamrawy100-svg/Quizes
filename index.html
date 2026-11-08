@@ -133,7 +133,7 @@
 
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="sideMenu">
-  <div class="menu-title" id="menuTitle" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
+<div class="menu-title" id="menuTitle" data-ar="Quiz Hub" data-en="Quiz Hub">Quiz Hub</div>
   <a href="index.html" class="menu-item" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
   <a href="leaderboard.html" class="menu-item" data-ar="🏆 المتصدرين" data-en="🏆 Leaderboard">🏆 المتصدرين</a>
   <a href="users.html" class="menu-item" data-ar="👥 اللاعبين" data-en="👥 Players">👥 اللاعبين</a>
@@ -144,6 +144,7 @@
   <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat" id="chatMenuBtn">💬 الشات الجماعي</a>
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
+  <a href="shop.html" class="menu-item" style="color: #ff9800;" data-ar="🛒 المتجر" data-en="🛒 Shop">🛒 المتجر</a>
   
   <div id="restrictedArea" style="border-top: 2px dashed #ff0000; margin: 10px 0; padding-top: 10px; display: block;">
     <a href="restricted.html" class="menu-item" style="color: #ff0000; font-weight: 900; background: rgba(255,0,0,0.1); border: 1px solid #ff0000; border-radius: 8px; justify-content: center; margin-top: 10px;" data-ar="🚫 المناطق المحظورة" data-en="🚫 Restricted Areas">🚫 المناطق المحظورة</a>
@@ -256,6 +257,7 @@
     <button class="sub-btn" onclick="filterEgyptian('egyptian comedy-eg', this)" data-ar="كوميدي 😂" data-en="Comedy 😂">كوميدي 😂</button>
     <button class="sub-btn" onclick="filterEgyptian('egyptian action-eg', this)" data-ar="أكشن 💥" data-en="Action 💥">أكشن 💥</button>
     <button class="sub-btn" onclick="filterEgyptian('egyptian drama-eg', this)" data-ar="دراما 🎭" data-en="Drama 🎭">دراما 🎭</button>
+    <button class="sub-btn" onclick="filterEgyptian('egyptian mystery-eg', this)" data-ar="غموض 🕵️" data-en="Mystery 🕵️">غموض 🕵️</button>
   </div>
 
   <div class="grid-container" id="cards-container">
@@ -272,6 +274,8 @@
     <a href="Avatar Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avatar.jpeg');"><h2 class="card-title">Avatar</h2></a>
     <a href="Venom Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Venom.jpeg');"><h2 class="card-title">Venom</h2></a>
     <a href="Birds of Prey Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Birds of Prey.jpeg');"><h2 class="card-title">Birds of Prey</h2></a>
+    <a href="Maze Runner Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Maze Runner.jpeg');"><h2 class="card-title">The Maze Runner</h2></a>
+    <a href="Rambo Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Rambo.jpeg');"><h2 class="card-title">Rambo</h2></a>
 
     <a href="Fall Quiz.html" class="quiz-card" data-category="thriller" style="background-image: url('pic/Fall.jpeg');"><h2 class="card-title">Fall</h2></a>
 
@@ -279,7 +283,33 @@
     <a href="Knives Out Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Knives Out.jpeg');"><h2 class="card-title">Knives Out</h2></a>
 
     <a href="El Harifa Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Harifa.jpeg');"><h2 class="card-title">الحريفة</h2></a>
-  </div>
+    <a href="The Blue Elephant Quiz.html" class="quiz-card" data-category="egyptian mystery-eg" style="background-image: url('pic/Blue Elephant.jpg');"><h2 class="card-title">الفيل الأزرق</h2></a>
+    <a href="Fol El Seen Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Fol El Seen.jpg');"><h2 class="card-title">فول الصين العظيم</h2></a>
+    <a href="El Shater Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/El Shater.jpeg');"><h2 class="card-title">الشاطر</h2></a>
+    <a href="Shalaby Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Shalaby.jpeg');"><h2 class="card-title">شلبي</h2></a>
+    <a href="Wesh X Wesh Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Wesh X Wesh.jpeg');"><h2 class="card-title">وش في وش</h2></a>
+    <a href="Siko Siko Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Siko Siko.jpeg');"><h2 class="card-title">سيكو سيكو</h2></a>
+    <a href="El Mashroa X Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Mashroa X.jpg');"><h2 class="card-title">المشروع إكس</h2></a>
+    <a href="Mister X Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Mister X.jpeg');"><h2 class="card-title">مستر إكس</h2></a>
+    <a href="Barshama Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Barshama.jpeg');"><h2 class="card-title">برشامة</h2></a>
+    <a href="Rocky El Ghalaba Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Rocky El Ghalaba.jpg');"><h2 class="card-title">روكي الغلابة</h2></a>
+    <a href="Beit El Ruby Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Beit El Ruby.jpeg');"><h2 class="card-title">بيت الروبي</h2></a>
+    <a href="Meraty X Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty X.jpg');"><h2 class="card-title">مراتي إكس</h2></a>
+    <a href="El Serb Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Serb.jpeg');"><h2 class="card-title">السرب</h2></a>
+    <a href="El Eskandarany Quiz.html" class="quiz-card" data-category="egyptian drama-eg" style="background-image: url('pic/El Eskandarany.jpeg');"><h2 class="card-title">الإسكندراني</h2></a>
+    <a href="Shako Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/Shako.jpeg');"><h2 class="card-title">شقو</h2></a>
+    <a href="Meraty W Zegty Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty W Zegty.jpeg');"><h2 class="card-title">مراتي وزوجتي</h2></a>
+    <a href="Nadi El Regal Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Nadi El Regal.jpg');"><h2 class="card-title">نادي الرجال السري</h2></a>
+    <a href="El Aref Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Aref.jpeg');"><h2 class="card-title">العارف</h2></a>
+    <a href="El Mamar Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Mamar.jpeg');"><h2 class="card-title">الممر</h2></a>
+    <a href="Ahmed Wa Ahmed Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Ahmed Wa Ahmed.jpeg');"><h2 class="card-title">أحمد وأحمد</h2></a>
+    <a href="Bahebak Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Bahebak.jpg');"><h2 class="card-title">بحبك</h2></a>
+    <a href="Fasel Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Fasel.jpg');"><h2 class="card-title">فاصل من اللحظات اللذيذة</h2></a>
+    <a href="Akhy Fok El Shagara Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Akhy Fok El Shagara.jpeg');"><h2 class="card-title">أخي فوق الشجرة</h2></a>
+    <a href="Restart Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Restart.jpg');"><h2 class="card-title">ريستارت</h2></a>
+    <a href="Tag Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/Tag.jpg');"><h2 class="card-title">تاج</h2></a>
+
+</div>
 </div>
 
 <style>
