@@ -3,80 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>👑 لوحة الأونر العليا - Quiz Hub</title>
+<title>👑 لوحة الأونر — Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="owner-style.css">
 </head>
 <body>
+<div class="bg-particles" id="bgParticles"></div>
 
-<div class="gold-particles" id="goldParticles"></div>
+<div id="loadingScreen">
+  <div class="loader-crown">👑</div>
+  <div class="loader-text">VERIFYING OWNER</div>
+</div>
 
 <div class="access-denied" id="accessDenied">
   <h1>⛔</h1>
-  <h2>وصول مرفوض</h2>
-  <p>هذه الصفحة للأونر فقط.</p>
+  <h2 class="text-danger">وصول مرفوض</h2>
+  <p>هذه الصفحة مخصصة للأونر فقط.</p>
   <a href="index.html">⬅ العودة للرئيسية</a>
 </div>
 
-<div id="ownerContent">
-
-  <nav class="exec-navbar">
-    <div class="nav-brand">
-      <div class="brand-crown">👑</div>
+<div id="ownerPanel">
+  <header class="owner-header">
+    <div class="brand-logo">
+      <div class="brand-icon">👑</div>
       <div>
-        <div class="brand-main">OWNER PANEL</div>
-        <div class="brand-tag">SUPREME CONTROL</div>
+        <div class="brand-title">Owner Panel</div>
+        <div class="brand-sub">926 FEATURES · QUIZ HUB</div>
       </div>
     </div>
-    <div class="nav-actions">
-      <button class="nav-btn cmd-trigger" onclick="window.openCommandPalette()">
-        <span>🔍</span>
-        <span class="cmd-hint">بحث سريع (Ctrl+K)</span>
-      </button>
-      <button class="nav-btn icon-only" onclick="window.toggleTheme()" id="themeBtn" title="الثيم">🌙</button>
-      <button class="nav-btn icon-only" onclick="window.refreshAll()" title="تحديث">🔄</button>
-      <a href="index.html" class="nav-btn" title="الرئيسية">🏠</a>
-      <button class="nav-btn danger" onclick="window.logout()" title="خروج">🚪</button>
+    <div class="header-actions">
+      <div class="live-clock" id="liveClock">⏰ --:--:--</div>
+      <button class="h-btn" onclick="window.ownerToggleTheme()" id="themeBtn">☀️</button>
+      <button class="h-btn" onclick="window._openPalette()">⌘ K</button>
+      <a href="index.html" class="h-btn">🏠 الرئيسية</a>
+      <button class="h-btn" onclick="window.ownerLogout()">🚪 خروج</button>
     </div>
-  </nav>
+  </header>
 
-  <div class="status-strip">
-    <div class="status-item"><span class="status-label">الأونر:</span><span class="status-value gold" id="ownerName">...</span></div>
-    <div class="status-item"><span class="status-label">الوقت:</span><span class="status-value" id="liveClock">--:--</span></div>
-    <div class="status-item"><span class="status-label">الميزات:</span><span class="status-value gold" id="featureCount">0</span></div>
-    <div class="status-item"><span class="status-label">الاتصال:</span><span class="status-value green" id="connStatus">🟢 متصل</span></div>
-  </div>
+  <div class="owner-layout">
+    <aside class="owner-sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="ownerAvatar">👑</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="ownerName">...</div>
+          <div class="sidebar-user-role">👑 OWNER</div>
+        </div>
+      </div>
+      <div id="sidebarNav"><!-- Populated by JS --></div>
+    </aside>
 
-  <div class="tabs-wrapper">
-    <div class="tabs-bar" id="tabsBar"></div>
-  </div>
-
-  <div class="tabs-container" id="tabsContainer"></div>
-
-</div>
-
-<div class="cmd-palette-overlay" id="cmdPaletteOverlay" onclick="if(event.target.id==='cmdPaletteOverlay') window.closeCommandPalette()">
-  <div class="cmd-palette">
-    <div class="cmd-palette-input-wrapper">
-      <span class="cmd-icon">⌘</span>
-      <input type="text" id="cmdInput" placeholder="ابحث عن أي ميزة... (حظر، بادج، مسح، تصدير...)" oninput="window.filterCommandPalette()" onkeydown="window.handleCmdKeydown(event)">
-      <span class="cmd-esc" onclick="window.closeCommandPalette()">ESC</span>
-    </div>
-    <div class="cmd-palette-results" id="cmdResults"></div>
-    <div class="cmd-palette-footer">↑↓ للتنقل • Enter للتنفيذ • ESC للإغلاق</div>
+    <main class="owner-main" id="ownerMain">
+      <!-- All 28 tabs populated dynamically by JS -->
+    </main>
   </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target.id==='modalOverlay') window.closeModal()">
+<div id="toast-container"></div>
+
+<div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <button class="modal-close" onclick="window.closeModal()">✖</button>
     <div class="modal-title" id="modalTitle">معلومات</div>
-    <div class="modal-content" id="modalContent"></div>
+    <div id="modalContent"></div>
   </div>
 </div>
 
-<div id="toastContainer"></div>
+<div id="commandPalette">
+  <div class="palette-box">
+    <input type="text" class="palette-input" id="paletteInput" placeholder="🔍 ابحث في 926 خاصية...">
+    <div class="palette-results" id="paletteResults"></div>
+    <div class="palette-hint">
+      <span><span class="palette-kbd">↑</span> <span class="palette-kbd">↓</span> للتنقل</span>
+      <span><span class="palette-kbd">Enter</span> للتأكيد</span>
+      <span><span class="palette-kbd">Esc</span> للإغلاق</span>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Dialog -->
+<div id="customDialog" class="dialog-overlay">
+  <div class="dialog-box">
+    <div class="dialog-title" id="dialogTitle">تنبيه</div>
+    <div class="dialog-message" id="dialogMessage">الرسالة</div>
+    <input type="text" class="dialog-input" id="dialogInput" style="display:none;">
+    <div class="dialog-actions">
+      <button class="dialog-btn dialog-btn-ok" id="dialogOk">تأكيد</button>
+      <button class="dialog-btn dialog-btn-cancel" id="dialogCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
 
 <script type="module" src="owner-core.js"></script>
 </body>
