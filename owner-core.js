@@ -207,6 +207,77 @@ const H = {
     const fn = window[fnName];
     if (typeof fn === 'function') await fn();
     else toast('⚠️ الدالة غير موجودة', 'error');
+  },
+  
+  // المميزات الديناميكية للكويزات (بتشتغل مع أي كويز)
+  quizStats: async (quizKey) => {
+    const s = await get(ref(db, 'scores'));
+    const data = s.exists() ? s.val() : {};
+    let plays = 0, players = new Set(), totalScore = 0, totalDuration = 0, durationCount = 0, topScores = [];
+
+    for (const u in data) {
+      if (data[u][quizKey]) {
+        for (const attempt in data[u][quizKey]) {
+          const record = data[u][quizKey][attempt];
+          plays++; players.add(u);
+          if (record.score) totalScore += record.score;
+          if (record.duration) { totalDuration += record.duration; durationCount++; }
+          topScores.push({ user: u, score: record.score || 0, time: record.time || 0 });
+        }
+      }
+    }
+
+    topScores.sort((a, b) => b.score - a.score);
+    const top5 = topScores.slice(0, 5);
+    const avgScore = plays ? Math.round(totalScore / plays) : 0;
+    const avgTime = durationCount ? Math.round(totalDuration / durationCount) : 0;
+    const L = QUIZ_LABELS[quizKey] || quizKey;
+
+    let html = `
+      <div class="stats-grid" style="margin-bottom: 20px;">
+        <div class="stat-card"><div class="stat-icon">🎮</div><div class="stat-value">${plays}</div><div class="stat-label">مرات اللعب</div></div>
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value">${players.size}</div><div class="stat-label">لاعبين فريدين</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value">${avgScore}</div><div class="stat-label">متوسط النقاط</div></div>
+        <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-value">${avgTime}s</div><div class="stat-label">متوسط الوقت</div></div>
+      </div>
+      <h4 style="color:var(--gold); margin-bottom:10px;">🏆 أعلى 5 لاعبين</h4>
+    `;
+
+    if (top5.length) {
+      html += `<table class="data-table"><thead><tr><th>#</th><th>اللاعب</th><th>النقاط</th><th>التاريخ</th></tr></thead><tbody>`;
+      top5.forEach((t, i) => {
+        html += `<tr><td>#${i+1}</td><td>${escapeHtml(t.user)}</td><td>${t.score}</td><td>${t.time ? new Date(t.time).toLocaleDateString('ar-EG') : '—'}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    } else {
+      html += `<div class="empty-state">لا يوجد لاعبين لعبوا هذا الكويز بعد</div>`;
+    }
+
+    openModal(`📊 إحصائيات كويز: ${L}`, html);
+  },
+  quizExport: async (quizKey) => {
+    const L = QUIZ_LABELS[quizKey] || quizKey;
+    const s = await get(ref(db, 'scores'));
+    const data = s.exists() ? s.val() : {};
+    const exportData = {};
+    for (const u in data) if (data[u][quizKey]) exportData[u] = data[u][quizKey];
+    exportJSON(exportData, 'scores-' + L);
+    toast('✅ تم التصدير');
+  },
+  quizReset: async (quizKey) => {
+    const L = QUIZ_LABELS[quizKey] || quizKey;
+    if (!confirm(`تصفير ${L}؟`)) return;
+    const s = (await get(ref(db, 'scores'))).val() || {};
+    for (const u in s) if (s[u][quizKey]) await remove(ref(db, `scores/${u}/${quizKey}`));
+    toast('✅ تم تصفير الكويز');
+  },
+  quizDelete: async (quizKey) => {
+    const L = QUIZ_LABELS[quizKey] || quizKey;
+    if (!confirm(`⚠️ حذف كويز ${L} من عند كل اللاعبين نهائياً؟`)) return;
+    if (!confirm('تأكيد أخير؟')) return;
+    const s = (await get(ref(db, 'scores'))).val() || {};
+    for (const u in s) if (s[u][quizKey]) await remove(ref(db, `scores/${u}/${quizKey}`));
+    toast('✅ تم حذف الكويز نهائياً');
   }
 };
 
@@ -217,7 +288,6 @@ const H = {
 const F = (id, icon, label, h, style) => ({ id, icon, label, h, style });
 const FQ = (id, icon, label, fnName, style) => ({ id, icon, label, h: ['custom', fnName], style });
 
-const QUIZ_KEYS = ['annabelle','conjuring','TheNun','FNAF','SquidGame','spiderman','spiderman2026','avengers','avatar','venom','birdsofprey','fall','Wednesday','knivesout','scream','TrainToBusan','elharifa'];
 const QUIZ_LABELS = {annabelle:'🎃 أنابيل',conjuring:'👻 الكونجورينج',TheNun:'✝️ الراهبة',FNAF:'🐻 فايف نايتس',SquidGame:'🦑 لعبة الحبار',spiderman:'🕷️ سبايدرمان',spiderman2026:'🕷️ سبايدرمان 2026',avengers:'🛡️ المنتقمون',avatar:'🌊 أفاتار',venom:'🖤 فينوم',birdsofprey:'🦅 الطيور الجارحة',fall:'🪜 السقوط',Wednesday:'🖤 وينزداي',knivesout:'🔪 مطارق',scream:'👻 سكريم',TrainToBusan:'🚄 قطار بوسان',elharifa:'⚽ الحريفة'};
 
 const CONTENT_TYPES = ['comments','suggestions','quiz_requests','warnings','support_tickets','admin_requests','activity_feed','partner_ideas','global_chat','challenges'];
@@ -259,25 +329,25 @@ FEATURES.players = {
   ]
 };
 
-/* TAB 3: Content */
-const contentItems = []; let cid = 92;
-QUIZ_KEYS.forEach(k => {
-  const L = QUIZ_LABELS[k];
-  contentItems.push(FQ(cid++,'📊',`${L} — إحصائيات`,`quizStats_${k}`));
-  contentItems.push(FQ(cid++,'📤',`${L} — تصدير`,`quizExport_${k}`));
-  contentItems.push(FQ(cid++,'0️⃣',`${L} — تصفير`,`quizReset_${k}`,'danger'));
-  contentItems.push(FQ(cid++,'🗑️',`${L} — حذف`,`quizDelete_${k}`,'danger'));
-});
+/* TAB 3: Content (Dynamic) */
 const contentTypeItems = [];
+let cid = 92;
 CONTENT_TYPES.forEach(t => {
   const L = CONTENT_LABELS[t];
   contentTypeItems.push(F(cid++,'👁️',`${L} — عرض`,['view',t,L]));
   contentTypeItems.push(F(cid++,'📤',`${L} — تصدير`,['export',t,L]));
   contentTypeItems.push(FQ(cid++,'🗑️',`${L} — مسح`,`contentClear_${t}`,'danger'));
 });
+
 FEATURES.content = {
-  title: '📝 المحتوى', sub: '98 خاصية — إدارة كاملة للكويزات والمحتوى',
-  sections: [{ title: '🎮 إدارة الكويزات (17 × 4 = 68)', items: contentItems }, { title: '📝 أنواع المحتوى (10 × 3 = 30)', items: contentTypeItems }]
+  title: '📝 المحتوى', sub: 'إدارة ديناميكية للكويزات — يتم جلبها أوتوماتيك من قاعدة البيانات',
+  sections: [
+    { title: '🎮 إدارة الكويزات', items: [
+      FQ(90, '🔄', 'تحديث قائمة الكويزات', 'refreshQuizzesList'),
+      FQ(91, '➕', 'إضافة كويز جديد يدوياً', 'addQuizManually')
+    ]},
+    { title: '📝 أنواع المحتوى (10 × 3 = 30)', items: contentTypeItems }
+  ]
 };
 
 /* TAB 4: Roles */
@@ -572,7 +642,7 @@ function renderSidebar() {
   nav.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 }
 
-function renderTab(tabKey) {
+async function renderTab(tabKey) {
   const main = $('ownerMain');
   if (!main) return;
   let pane = $(`tab-${tabKey}`);
@@ -584,21 +654,66 @@ function renderTab(tabKey) {
   }
   const tab = FEATURES[tabKey];
   if (!tab) { pane.innerHTML = '<div class="empty-state">التاب غير موجود</div>'; return; }
+
   pane.innerHTML = `
     <div class="page-title">${tab.title}</div>
     <div class="page-sub">${tab.sub}</div>
-    ${tab.sections.map((s, si) => `
+    <div id="dynamicContent_${tabKey}"></div>
+  `;
+
+  let dynamicSectionHTML = '';
+  if (tabKey === 'content') {
+    toast('⏳ جاري جلب الكويزات...', 'info');
+    
+    const scores = await all('scores');
+    const manualQuizzes = await all('site_settings/manual_quizzes');
+    const uniqueQuizzes = new Set(Object.keys(manualQuizzes));
+    
+    for (const user in scores) {
+      for (const quizKey in scores[user]) {
+        if (quizKey !== 'system_sync') uniqueQuizzes.add(quizKey);
+      }
+    }
+    
+    if (uniqueQuizzes.size === 0) uniqueQuizzes.add('general_quiz');
+    
+    const quizItems = [];
+    let quizId = 200;
+    
+    Array.from(uniqueQuizzes).forEach(k => {
+      const L = QUIZ_LABELS[k] || k;
+      quizItems.push(F(quizId++,'📊',`${L} — إحصائيات`,['quizStats', k]));
+      quizItems.push(F(quizId++,'📤',`${L} — تصدير`,['quizExport', k]));
+      quizItems.push(F(quizId++,'0️⃣',`${L} — تصفير`,['quizReset', k],'danger'));
+      quizItems.push(F(quizId++,'🗑️',`${L} — حذف`,['quizDelete', k],'danger'));
+    });
+
+    dynamicSectionHTML = `
       <div class="features-section">
-        <div class="features-section-title"><span>${s.title}</span><span class="count">${s.items.length}</span></div>
+        <div class="features-section-title"><span>📊 كويزات موجودة في الداتابيز (${uniqueQuizzes.size})</span></div>
         <div class="features-grid">
-          ${s.items.map((f, fi) => {
-            const featureId = f.id || `${tabKey}_${si}_${fi}`;
-            return `<button class="feature-btn ${f.style || ''}" data-feature-id="${featureId}" onclick="window._runFeature('${tabKey}', ${si}, ${fi})"><span class="icon">${f.icon}</span><span class="label">${escapeHtml(f.label)}</span>${f.id ? `<span class="num">#${f.id}</span>` : ''}</button>`;
-          }).join('')}
+          ${quizItems.map(f => `
+            <button class="feature-btn ${f.style || ''}" onclick='window._runFeature(${JSON.stringify(tabKey)}, -1, -1, ${JSON.stringify(f)})'>
+              <span class="icon">${f.icon}</span><span class="label">${escapeHtml(f.label)}</span>
+            </button>
+          `).join('')}
         </div>
       </div>
-    `).join('')}
-  `;
+    `;
+  }
+
+  pane.innerHTML += dynamicSectionHTML;
+  pane.innerHTML += tab.sections.map((s, si) => `
+    <div class="features-section">
+      <div class="features-section-title"><span>${s.title}</span><span class="count">${s.items.length}</span></div>
+      <div class="features-grid">
+        ${s.items.map((f, fi) => {
+          const featureId = f.id || `${tabKey}_${si}_${fi}`;
+          return `<button class="feature-btn ${f.style || ''}" data-feature-id="${featureId}" onclick='window._runFeature(${JSON.stringify(tabKey)}, ${si}, ${fi})'><span class="icon">${f.icon}</span><span class="label">${escapeHtml(f.label)}</span>${f.id ? `<span class="num">#${f.id}</span>` : ''}</button>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
 }
 
 function switchTab(tabKey) {
@@ -611,11 +726,10 @@ function switchTab(tabKey) {
 window.ownerSwitchTab = switchTab;
 window.switchTab = switchTab;
 
-window._runFeature = async (tabKey, sectionIdx, featureIdx) => {
-  const feature = FEATURES[tabKey]?.sections[sectionIdx]?.items[featureIdx];
+window._runFeature = async (tabKey, sectionIdx, featureIdx, featureObj = null) => {
+  let feature = featureObj || FEATURES[tabKey]?.sections[sectionIdx]?.items[featureIdx];
   if (!feature) return toast('الخاصية غير موجودة', 'error');
-  const btn = document.querySelector(`button[data-feature-id="${feature.id || `${tabKey}_${sectionIdx}_${featureIdx}`}"]`);
-  if (btn) btn.classList.add('loading');
+  
   try {
     const [handlerKey, ...args] = feature.h;
     const handler = H[handlerKey];
@@ -623,8 +737,6 @@ window._runFeature = async (tabKey, sectionIdx, featureIdx) => {
     else toast('⚠️ قيد التطوير', 'info');
   } catch (e) {
     console.error(e); toast('خطأ: ' + e.message, 'error');
-  } finally {
-    if (btn) btn.classList.remove('loading');
   }
 };
 
@@ -934,23 +1046,6 @@ window.sendBulkNotification = async () => {
   const text = prompt('نص الإشعار:'); if (!text) return;
   const s = (await get(ref(db, 'usernames'))).val() || {}; for (const u in s) await push(ref(db, 'messages/' + u), { from: '🔔 إشعار', text, time: Date.now() }); toast('✅ تم');
 };
-
-QUIZ_KEYS.forEach(k => {
-  window[`quizStats_${k}`] = async () => {
-    const s = await get(ref(db, 'scores')); const data = s.exists() ? s.val() : {};
-    let plays = 0; for (const u in data) if (data[u][k]) plays += Object.keys(data[u][k]).length;
-    toast(`📊 ${QUIZ_LABELS[k]}: ${plays} لعبة`, 'info');
-  };
-  window[`quizExport_${k}`] = async () => H.export('scores', 'scores-' + k);
-  window[`quizReset_${k}`] = async () => {
-    if (!confirm(`تصفير ${QUIZ_LABELS[k]}؟`)) return;
-    const s = (await get(ref(db, 'scores'))).val() || {}; for (const u in s) if (s[u][k]) await remove(ref(db, `scores/${u}/${k}`)); toast('✅');
-  };
-  window[`quizDelete_${k}`] = async () => {
-    if (!confirm(`⚠️ حذف كويز ${QUIZ_LABELS[k]} نهائياً؟`)) return;
-    if (!confirm('تأكيد أخير؟')) return; await remove(ref(db, `scores/${k}`)); toast('✅');
-  };
-});
 
 CONTENT_TYPES.forEach(t => {
   window[`contentClear_${t}`] = async () => { if (!confirm(`مسح ${CONTENT_LABELS[t]}؟`)) return; await remove(ref(db, t)); toast('✅'); };
@@ -1629,4 +1724,13 @@ async function init() {
   }).catch(() => {});
   renderSidebar(); switchTab('overview');
 }
+
+window.refreshQuizzesList = () => switchTab('content');
+window.addQuizManually = async () => {
+  const name = prompt('اسم الكويز (مثال: TheNewMovie):');
+  if (!name) return;
+  await set(ref(db, 'site_settings/manual_quizzes/' + name), true);
+  toast('✅ تمت إضافة الكويز للقائمة، اضغط تحديث.');
+  switchTab('content');
+};
 init();
