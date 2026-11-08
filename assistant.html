@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🤖 مساعد الكويزات - Quiz Hub</title>
+<title>🤖 مساعد Quiz Hub الذكي</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -36,7 +36,7 @@
     width: 100%; max-width: 700px; background: var(--chat-bg); 
     border: 2px solid var(--border-color); border-radius: 20px; 
     box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; 
-    height: 80vh; overflow: hidden;
+    height: 85vh; overflow: hidden;
   }
   
   .chat-header { 
@@ -57,7 +57,7 @@
   .msg-row.user .msg-avatar { background: #333; color: #fff; }
   .msg-row.bot .msg-avatar { background: #ff0000; color: #fff; }
 
-  .msg-bubble { padding: 12px 16px; border-radius: 15px; font-size: 15px; line-height: 1.5; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .msg-bubble { padding: 12px 16px; border-radius: 15px; font-size: 15px; line-height: 1.6; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
   .msg-row.user .msg-bubble { background: var(--user-bubble); color: #fff; border-bottom-left-radius: 2px; }
   .msg-row.bot .msg-bubble { background: var(--bot-bubble); color: var(--text-color); border-bottom-right-radius: 2px; border: 1px solid var(--border-color); }
 
@@ -70,6 +70,7 @@
   .chat-keyboard { 
     background: var(--kb-bg); border-top: 1px solid var(--border-color); 
     padding: 10px; display: flex; flex-direction: column; gap: 8px;
+    max-height: 280px; overflow-y: auto;
   }
   
   .kb-top-bar { display: flex; justify-content: flex-start; margin-bottom: -5px; }
@@ -84,7 +85,7 @@
   
   .kb-btn { 
     background: var(--chat-bg); color: var(--text-color); border: 1px solid var(--border-color); 
-    padding: 12px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-size: 14px; 
+    padding: 10px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-size: 13px; 
     font-weight: bold; text-align: center; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 5px;
   }
   .kb-btn:hover { background: #ff0000; color: #fff; border-color: #ff0000; }
@@ -95,7 +96,7 @@
   .chat-input-container button { padding: 0 20px; background: #ff0000; color: #fff; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
 
   @media (max-width: 768px) {
-    .assistant-container { height: 85vh; border-radius: 15px; }
+    .assistant-container { height: 88vh; border-radius: 15px; }
     .kb-row { grid-template-columns: 1fr; }
   }
 </style>
@@ -113,7 +114,7 @@
     <div class="bot-avatar">🤖</div>
     <div class="header-text">
       <h2 id="headerTitle">مساعد Quiz Hub</h2>
-      <p id="headerSubtitle">متصل الآن 🟢</p>
+      <p id="headerSubtitle">متصل الآن 🟢 (دليلك الشامل)</p>
     </div>
   </div>
   
@@ -121,7 +122,7 @@
     <div class="msg-row bot">
       <div class="msg-avatar">🤖</div>
       <div class="msg-bubble" id="welcomeMsg">
-        أهلاً بيك في Quiz Hub! اختار من القايمة اللي تحت عشان أساعدك تلاقي الكويز اللي يناسبك أو تعرف أكتر عن الموقع.
+        أهلاً بيك في Quiz Hub! أنا المساعد الذكي بتاعك. اقدر أشرحلك مميزات الموقع، المتجر، ألعاب التحدي، وأي حاجة محتاجها. اختار من القايمة اللي تحت!
       </div>
     </div>
   </div>
@@ -129,7 +130,7 @@
   <div class="chat-keyboard" id="chatKeyboard"></div>
 
   <div class="chat-input-container">
-    <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا..." onkeypress="handleChatEnter(event)">
+    <input type="text" id="chatInput" placeholder="اسألني عن أي حاجة في الموقع..." onkeypress="handleChatEnter(event)">
     <button onclick="sendMessage()" id="sendBtn">إرسال</button>
   </div>
 </div>
@@ -143,55 +144,94 @@
 
   const ui = {
     ar: {
-      back: "⬅ رجوع", title: "مساعد Quiz Hub", subtitle: "متصل الآن 🟢",
-      welcome: "أهلاً بيك في Quiz Hub! اختار من القايمة اللي تحت عشان أساعدك تلاقي الكويز اللي يناسبك أو تعرف أكتر عن الموقع.",
-      placeholder: "اكتب رسالتك هنا...", send: "إرسال",
-      btnSiteFeatures: "🛠️ مميزات الموقع", btnRanks: "🎖️ الرتب والبادجات", btnHelp: "❓ إزاي أستخدم الموقع؟", 
+      back: "⬅ رجوع", title: "مساعد Quiz Hub", subtitle: "متصل الآن 🟢 (دليلك الشامل)",
+      welcome: "أهلاً بيك في Quiz Hub! أنا المساعد الذكي بتاعك. اقدر أشرحلك مميزات الموقع، المتجر، ألعاب التحدي، وأي حاجة محتاجها. اختار من القايمة اللي تحت!",
+      placeholder: "اسألني عن أي حاجة في الموقع...", send: "إرسال",
+      
+      btnFeatures: "✨ مميزات الموقع", btnHelp: "❓ إزاي ألعب؟",
       btnForeign: "🌍 كويزات أجنبية", btnEgyptian: "🇪🇬 كويزات مصرية",
+      
+      // Features Menu
+      btnShop: "🛒 المتجر والمساعدات", btnModes: "🎮 أوضاع اللعب", 
+      btnProfile: "👤 البروفايل والمخزون", btnTeams: "⚔️ التيمات والحروب", btnSocial: "💬 المجتمع والإشعارات",
+      
+      // Foreign Menu
       btnHorror: "🎃 رعب", btnAction: "💥 أكشن", btnMystery: "🕵️ غموض", btnThriller: "🎬 تشويق",
-      btnComedyEg: "😂 كوميدي", btnActionEg: "💥 أكشن مصري", btnDramaEg: "🎭 دراما",
+      
+      // Egyptian Menu
+      btnComedyEg: "😂 كوميدي", btnActionEg: "💥 أكشن مصري", btnDramaEg: "🎭 دراما", btnMysteryEg: "🕵️ غموض مصري",
       btnBack: "🔙 رجوع",
-      btnFriends: "👥 الأصدقاء", btnRating: "⭐ تقييم الموقع",
-      replyWelcome: "اختار القسم اللي عايز تلعب فيه:",
+      
+      // Replies
+      replyWelcome: "اختار القسم اللي عايز تعرفه:",
       replyForeign: "اختار التصنيف الأجنبي اللي يعجبك:",
       replyEgyptian: "اختار التصنيف المصري اللي يعجبك:",
-      replyHorror: "عندنا كويزات رعب قوية زي: أنابيل (Annabelle)، الكونجورينج (The Conjuring)، الراهبة (The Nun)، فايف نايتس (FNAF)، قطار بوسان (Train to Busan)، وسكريم (Scream). تقدر تلعبهم من الصفحة الرئيسية!",
-      replyAction: "عندنا كويزات أكشن جبارة زي: سبايدرمان (Spider-Man)، المنتقمون (Avengers)، أفاتار (Avatar)، لعبة الحبار (Squid Game)، فينوم (Venom)، والطيور الجارحة (Birds of Prey). ادخل العب واثبت نفسك!",
-      replyMystery: "عندنا كويزات غموض وتشويق للعقل زي: وينزداي (Wednesday).",
-      replyThriller: "عندنا فيلم السقوط (Fall)، ده كويز تشويق وإثارة هيخليك مش قادر تتنفس!",
-      replyComedyEg: "عندنا فيلم الحريفة (1 و 2) في قسم الكوميدي المصري. ادخل قسم (🇪🇬 مصري) في الصفحة الرئيسية والعب!",      
-      replyDramaEg: "قسم الدراما المصرية لسه فاضي، بس عندنا فيلم الحريفة في قسم الكوميدي المصري. ادخل قسم (🇪🇬 مصري) في الصفحة الرئيسية!",      replyActionEg: "قسم الأكشن المصري لسه فاضي، بس عندنا فيلم الحريفة في قسم الكوميدي المصري. ادخل قسم (🇪🇬 مصري) في الصفحة الرئيسية!",
-      replyFriends: "من صفحة 'اللاعبين' تقدر تضيف أصحابك. أول ما يقبلوا، تقدر تكلمهم في الشات أو تتحداهم في أي كويز (تحدي صديق)!",
-      replyRanks: "الأنظمة شغالة كالتالي: أنت بتلعب كويزات وبتجمع XP، وبعدها بتبعت طلب للـ (Owner) عشان يطلعلك الرتبة المناسبة. لو مستواك عالي، الأونر هيديك رتبة أسطورية أو بادج مميز! تقدر تبعت الطلب من صفحة 'صندوق الرسائل' -> تبويب 'طلبات الأونر'.",
-      replyHelp: "الموقع فيه كويزات لكل التصنيفات (أجنبي ومصري)، ليدر بورد (عشان تشوف ترتيبك)، ونظام أصدقاء. كل اللي عليك تدخل وتلعب وتجمع XP!",
-      replyRating: "رأيك يهمنا جداً! من القائمة الجانبية اختار 'قيّم الموقع' وقولي رأيك في التحديثات الجديدة.",
-      replyDefault: "معلش مفهمتش قصدك. جرب تختار من الأزرار اللي تحت، أو اسألني عن قسم معين."
+      
+      // Feature Replies
+      replyShop: "🛒 المتجر والمساعدات:\nتقدر تجمع كوينز من اللعب وتشتري أدوات تساعدك جوه الكويز زي:\n- ❄️ تجميد الوقت / ⏱️ إضافة وقت.\n- ✂️ حذف إجابتين (50/50).\n- 👁️ إظهار الإجابة.\n- 🎁 صناديق حظ (برونزي لحد أسطوري).\n- دروع لحماية الستريك بتاعك.\nكل ده هتلاقيه في صفحة المتجر (Shop).",
+      
+      replyModes: "🎮 أوضاع اللعب:\n- ⚡ وضع السرعة (Speedrun): 5 ثواني بس لكل سؤال!\n- ⚔️ تحدي صديق: اعمل غرفة وابعت الكود لصاحبك.\n- 🎲 تحدي عشوائي: دور على خصم عشوائي.\n- 👻 وضع الشبح: العب ضد أفضل نتيجة سجلتها قبل كده.\nجربهم من جوه أي كويز!",
+      
+      replyProfile: "👤 البروفايل والمخزون:\nمن صفحة بروفايلي تقدر:\n- ترفع صورة شخصية.\n- تفتح صندوقك اليومي (Loot Box).\n- تشوف الـ XP والمستوى والدقة بتاعتك.\n- تستخدم أدواتك اللي اشتريتها من المتجر.\n- تشوف الـ Badges (الإنجازات) والأرشيف بتاعك.",
+      
+      replyTeams: "⚔️ التيمات وحرب التيمات:\nمن صفحة Teams تقدر تنضم لتصنيفات (رعب، أكشن...). وتعمل فريق فرعي مع أصحابك (Clan) وتتجوزا في حرب تيمات عشان تجمعوا نقاط وتتصدروا الليدربورد!",
+      
+      replySocial: "💬 المجتمع:\n- الشات العام (Chat): اتكلم مع كل اللاعبين.\n- المجتمع (Community): اكتب تعليقات، اقتراحات، واطلب كويزات.\n- صندوق الرسائل (Inbox): كلم أصحابك، اقبل طلبات الصداقة، وابعت طلبات للأونر عشان تاخد رتبة.",
+      
+      // Quiz Replies
+      replyHorror: "كويزات الرعب: أنابيل، الكونجورينج، الراهبة، فايف نايتس، قطار بوسان، وسكريم.",
+      replyAction: "كويزات الأكشن: سبايدرمان، المنتقمون، أفاتار، لعبة الحبار، فينوم، الطيور الجارحة، المتاهة، ورامبو.",
+      replyMystery: "كويزات الغموض: وينزداي، ومطارق (Knives Out).",
+      replyThriller: "كويز التشويق: فيلم السقوط (Fall).",
+      replyComedyEg: "الكوميديا المصرية: الحريفة 1 و 2، بيت الروبي، مراتي وزوجتي، نادي الرجال السري، أحمد وأحمد، بحبك، فاصل من اللحظات اللذيذة، أخي فوق الشجرة، ريستارت، مراتي إكس، برشامة، روكي الغلابة، وش في وش، سيكو سيكو، فول الصين، شلبي، والشاطر.",
+      replyActionEg: "الأكشن المصري: السرب، شقو، المشروع إكس.",
+      replyDramaEg: "الدراما المصرية: الإسكندراني.",
+      replyMysteryEg: "الغموض المصري: الفيل الأزرق (الجزء الأول والتاني).",
+      
+      replyHelp: "عشان تلعب، ادخل على أي كويز، اختار الجزء أو الشامل، وابدأ جاوب. هتجمع XP ونقاط وترتفع في الليدربورد!",
+      replyDefault: "معلش مفهمتش قصدك. جرب تختار من الأزرار اللي تحت، أو اسألني عن 'المتجر' أو 'التيمات' أو 'أوضاع اللعب'."
     },
     en: {
-      back: "⬅ Back", title: "Quiz Hub Assistant", subtitle: "Online 🟢",
-      welcome: "Welcome to Quiz Hub! Choose from the menu below to find a quiz or learn more about the site.",
-      placeholder: "Type your message...", send: "Send",
-      btnSiteFeatures: "🛠️ Site Features", btnRanks: "🎖️ Ranks & Badges", btnHelp: "❓ How to use?", 
+      back: "⬅ Back", title: "Quiz Hub Assistant", subtitle: "Online 🟢 (Full Guide)",
+      welcome: "Welcome to Quiz Hub! I'm your smart assistant. I can explain the site features, shop, game modes, and more. Choose from the menu below!",
+      placeholder: "Ask me anything about the site...", send: "Send",
+      
+      btnFeatures: "✨ Site Features", btnHelp: "❓ How to play?",
       btnForeign: "🌍 Foreign Quizzes", btnEgyptian: "🇪🇬 Egyptian Quizzes",
+      
+      btnShop: "🛒 Shop & Assistants", btnModes: "🎮 Game Modes", 
+      btnProfile: "👤 Profile & Inventory", btnTeams: "⚔️ Teams & Battles", btnSocial: "💬 Social & Inbox",
+      
       btnHorror: "🎃 Horror", btnAction: "💥 Action", btnMystery: "🕵️ Mystery", btnThriller: "🎬 Thriller",
-      btnComedyEg: "😂 Comedy", btnActionEg: "💥 Action", btnDramaEg: "🎭 Drama",
+      
+      btnComedyEg: "😂 Comedy", btnActionEg: "💥 Action", btnDramaEg: "🎭 Drama", btnMysteryEg: "🕵️ Mystery",
       btnBack: "🔙 Back",
-      btnFriends: "👥 Friends", btnRating: "⭐ Rate Website",
-      replyWelcome: "Choose a section to play:",
+      
+      replyWelcome: "Choose the section you want to explore:",
       replyForeign: "Choose a foreign category:",
       replyEgyptian: "Choose an Egyptian category:",
-      replyHorror: "We have great horror quizzes: Annabelle, The Conjuring, The Nun, FNAF, Train to Busan, and Scream. Play from the Home page!",
-      replyAction: "We have amazing action quizzes: Spider-Man, Avengers, Avatar, Squid Game, Venom, and Birds of Prey. Go play and prove yourself!",
-      replyMystery: "We have mind-bending mystery quizzes: Wednesday.",
-      replyThriller: "We have the movie Fall, a thriller quiz that will leave you breathless!",
-      replyComedyEg: "We have El Harifa (1 & 2) in the Egyptian Comedy section. Go to the (🇪🇬 Egyptian) section on the Home page and play!",
-      replyActionEg: "The Egyptian Action section is empty, but we have El Harifa in the Egyptian Comedy section. Go to the (🇪🇬 Egyptian) section on the Home page!",
-      replyDramaEg: "The Egyptian Drama section is empty, but we have El Harifa in the Egyptian Comedy section. Go to the (🇪🇬 Egyptian) section on the Home page!",
-      replyFriends: "On the 'Players' page, you can add friends. Once they accept, you can chat or challenge them to any quiz (Challenge Friend)!",
-      replyRanks: "The Rank & Badge system works like this: You play quizzes and earn XP. Then you submit a request to the (Owner) to give you the appropriate rank. If your level is high, the Owner will give you a legendary rank or a special badge! You can send the request from the 'Inbox' page -> 'Owner Requests' tab.",
-      replyHelp: "The site has quizzes for all categories (Foreign & Egyptian), a leaderboard, and a friend system. All you have to do is log in, play, and earn XP!",
-      replyRating: "We value your opinion! From the side menu, choose 'Rate the Website' and tell us what you think of the new updates.",
-      replyDefault: "Sorry, I didn't understand. Try choosing from the buttons below, or ask me about a specific category."
+      
+      replyShop: "🛒 Shop & Assistants:\nCollect coins and buy tools to help you in quizzes:\n- ❄️ Freeze time / ⏱️ Add time.\n- ✂️ 50/50.\n- 👁️ Reveal answer.\n- 🎁 Loot Boxes (Bronze to Legendary).\n- Shields to protect your streak.\nFind them all in the Shop page.",
+      
+      replyModes: "🎮 Game Modes:\n- ⚡ Speedrun: Only 5 seconds per question!\n- ⚔️ Challenge Friend: Create a room and share the code.\n- 🎲 Random Match: Find a random opponent.\n- 👻 Ghost Mode: Play against your own best time.\nTry them inside any quiz!",
+      
+      replyProfile: "👤 Profile & Inventory:\nFrom your profile you can:\n- Upload a profile picture.\n- Open your daily Loot Box.\n- Check your XP, Level, and Accuracy.\n- Use items you bought from the shop.\n- View your Badges and Timeline.",
+      
+      replyTeams: "⚔️ Teams & Battles:\nFrom the Teams page, join main categories (Horror, Action...). Create a sub-team (Clan) with friends and compete in team battles to top the leaderboard!",
+      
+      replySocial: "💬 Social:\n- Global Chat: Talk to all players.\n- Community: Post comments, suggestions, and quiz requests.\n- Inbox: Message friends, accept friend requests, and send requests to the Owner for ranks.",
+      
+      replyHorror: "Horror quizzes: Annabelle, Conjuring, The Nun, FNAF, Train to Busan, and Scream.",
+      replyAction: "Action quizzes: Spider-Man, Avengers, Avatar, Squid Game, Venom, Birds of Prey, Maze Runner, and Rambo.",
+      replyMystery: "Mystery quizzes: Wednesday and Knives Out.",
+      replyThriller: "Thriller quizzes: Fall.",
+      replyComedyEg: "Egyptian Comedy: El Harifa 1 & 2, Beit El Ruby, Meraty W Zegty, Nadi El Regal, Ahmed Wa Ahmed, Bahebak, Fasel Men El Lahazat El Laziza, Akhy Fok El Shagara, Restart, Meraty X, Barshama, Rocky El Ghalaba, Wesh X Wesh, Siko Siko, Fol El Seen, Shalaby, and El Shater.",
+      replyActionEg: "Egyptian Action: El Serb, Sheko, El Mashroa X.",
+      replyDramaEg: "Egyptian Drama: El Eskandarany.",
+      replyMysteryEg: "Egyptian Mystery: The Blue Elephant (Parts 1 & 2).",
+      
+      replyHelp: "To play, enter any quiz, choose a part or comprehensive, and start answering. Earn XP and points to climb the leaderboard!",
+      replyDefault: "Sorry, I didn't understand. Try the buttons below, or ask about 'Shop', 'Teams', or 'Game Modes'."
     }
   };
 
@@ -203,11 +243,30 @@
         <button class="kb-btn" onclick="handleMenuClick('egyptian')">${t.btnEgyptian}</button>
       </div>
       <div class="kb-row">
-        <button class="kb-btn" onclick="handleMenuClick('siteFeatures')">${t.btnSiteFeatures}</button>
-        <button class="kb-btn" onclick="handleMenuClick('ranks')">${t.btnRanks}</button>
+        <button class="kb-btn full-width" onclick="handleMenuClick('features')">${t.btnFeatures}</button>
       </div>
       <div class="kb-row">
         <button class="kb-btn full-width" onclick="handleMenuClick('help')">${t.btnHelp}</button>
+      </div>
+    `;
+  }
+
+  function renderFeaturesMenu() {
+    const t = ui[currentLang];
+    chatKeyboard.innerHTML = `
+      <div class="kb-top-bar">
+        <button class="kb-back" onclick="renderMainMenu()">${t.btnBack}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('shop')">${t.btnShop}</button>
+        <button class="kb-btn" onclick="handleMenuClick('modes')">${t.btnModes}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('profile')">${t.btnProfile}</button>
+        <button class="kb-btn" onclick="handleMenuClick('teams')">${t.btnTeams}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn full-width" onclick="handleMenuClick('social')">${t.btnSocial}</button>
       </div>
     `;
   }
@@ -226,9 +285,6 @@
         <button class="kb-btn" onclick="handleMenuClick('mystery')">${t.btnMystery}</button>
         <button class="kb-btn" onclick="handleMenuClick('thriller')">${t.btnThriller}</button>
       </div>
-      <div class="kb-row">
-        <button class="kb-btn full-width" onclick="handleMenuClick('allForeign')">${t.btnAllForeign}</button>
-      </div>
     `;
   }
 
@@ -244,22 +300,7 @@
       </div>
       <div class="kb-row">
         <button class="kb-btn" onclick="handleMenuClick('dramaEg')">${t.btnDramaEg}</button>
-      </div>
-      <div class="kb-row">
-        <button class="kb-btn full-width" onclick="handleMenuClick('allEgyptian')">${t.btnAllEgyptian}</button>
-      </div>
-    `;
-  }
-
-  function renderSiteFeaturesMenu() {
-    const t = ui[currentLang];
-    chatKeyboard.innerHTML = `
-      <div class="kb-top-bar">
-        <button class="kb-back" onclick="renderMainMenu()">${t.btnBack}</button>
-      </div>
-      <div class="kb-row">
-        <button class="kb-btn" onclick="handleMenuClick('friends')">${t.btnFriends}</button>
-        <button class="kb-btn" onclick="handleMenuClick('rating')">${t.btnRating}</button>
+        <button class="kb-btn" onclick="handleMenuClick('mysteryEg')">${t.btnMysteryEg}</button>
       </div>
     `;
   }
@@ -302,7 +343,7 @@
     avatar.innerText = sender === 'bot' ? '🤖' : '👤';
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
-    bubble.innerHTML = text;
+    bubble.innerHTML = text.replace(/\n/g, '<br>');
     row.appendChild(avatar);
     row.appendChild(bubble);
     chatMessages.appendChild(row);
@@ -328,19 +369,31 @@
     let btnText = '';
     let reply = '';
 
+    // Menus
     if (action === 'foreign') { btnText = t.btnForeign; reply = t.replyForeign; renderForeignMenu(); }
     else if (action === 'egyptian') { btnText = t.btnEgyptian; reply = t.replyEgyptian; renderEgyptianMenu(); }
-    else if (action === 'siteFeatures') { btnText = t.btnSiteFeatures; reply = t.replyWelcome; renderSiteFeaturesMenu(); }
+    else if (action === 'features') { btnText = t.btnFeatures; reply = t.replyWelcome; renderFeaturesMenu(); }
+    
+    // Features
+    else if (action === 'shop') { btnText = t.btnShop; reply = t.replyShop; }
+    else if (action === 'modes') { btnText = t.btnModes; reply = t.replyModes; }
+    else if (action === 'profile') { btnText = t.btnProfile; reply = t.replyProfile; }
+    else if (action === 'teams') { btnText = t.btnTeams; reply = t.replyTeams; }
+    else if (action === 'social') { btnText = t.btnSocial; reply = t.replySocial; }
+    
+    // Foreign
     else if (action === 'horror') { btnText = t.btnHorror; reply = t.replyHorror; }
     else if (action === 'action') { btnText = t.btnAction; reply = t.replyAction; }
     else if (action === 'mystery') { btnText = t.btnMystery; reply = t.replyMystery; }
     else if (action === 'thriller') { btnText = t.btnThriller; reply = t.replyThriller; }
+    
+    // Egyptian
     else if (action === 'comedyEg') { btnText = t.btnComedyEg; reply = t.replyComedyEg; }
     else if (action === 'actionEg') { btnText = t.btnActionEg; reply = t.replyActionEg; }
     else if (action === 'dramaEg') { btnText = t.btnDramaEg; reply = t.replyDramaEg; }
-    else if (action === 'friends') { btnText = t.btnFriends; reply = t.replyFriends; }
-    else if (action === 'rating') { btnText = t.btnRating; reply = t.replyRating; }
-    else if (action === 'ranks') { btnText = t.btnRanks; reply = t.replyRanks; }
+    else if (action === 'mysteryEg') { btnText = t.btnMysteryEg; reply = t.replyMysteryEg; }
+    
+    // Help
     else if (action === 'help') { btnText = t.btnHelp; reply = t.replyHelp; }
 
     addMessage(btnText, 'user');
@@ -366,9 +419,16 @@
       const lowerText = text.toLowerCase();
       let reply = ui[currentLang].replyDefault;
 
-      if (lowerText.includes('فيلم') || lowerText.includes('movie') || lowerText.includes('كويز') || lowerText.includes('quiz')) reply = ui[currentLang].replyWelcome;
-      else if (lowerText.includes('صديق') || lowerText.includes('friend')) reply = ui[currentLang].replyFriends;
-      else if (lowerText.includes('رتبة') || lowerText.includes('rank') || lowerText.includes('بادج') || lowerText.includes('badge')) reply = ui[currentLang].replyRanks;
+      if (lowerText.includes('متجر') || lowerText.includes('shop') || lowerText.includes('مساعد') || lowerText.includes('coins') || lowerText.includes('كوينز')) reply = ui[currentLang].replyShop;
+      else if (lowerText.includes('وضع') || lowerText.includes('mode') || lowerText.includes('سبيد') || lowerText.includes('speedrun') || lowerText.includes('شبح') || lowerText.includes('ghost')) reply = ui[currentLang].replyModes;
+      else if (lowerText.includes('بروفايل') || lowerText.includes('profile') || lowerText.includes('مخزون') || lowerText.includes('inventory') || lowerText.includes('صورة')) reply = ui[currentLang].replyProfile;
+      else if (lowerText.includes('تيم') || lowerText.includes('team') || lowerText.includes('حرب') || lowerText.includes('clan')) reply = ui[currentLang].replyTeams;
+      else if (lowerText.includes('شات') || lowerText.includes('chat') || lowerText.includes('مجتمع') || lowerText.includes('community')) reply = ui[currentLang].replySocial;
+      
+      else if (lowerText.includes('فيل') || lowerText.includes('blue elephant')) reply = ui[currentLang].replyMysteryEg;
+      else if (lowerText.includes('رعب') || lowerText.includes('horror')) reply = ui[currentLang].replyHorror;
+      else if (lowerText.includes('اكشن') || lowerText.includes('action')) reply = ui[currentLang].replyAction;
+      else if (lowerText.includes('مصري') || lowerText.includes('egyptian')) reply = ui[currentLang].replyComedyEg;
 
       addMessage(reply, 'bot');
     }, 800);
