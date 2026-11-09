@@ -5,55 +5,181 @@ import { getDatabase, ref, onValue, get, set, remove, update, push } from "https
 const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+window.db = db; window.ref = ref;
 
+// ==========================================
+// 1. محرك الإشعارات الجديد (اللي بيتبعت من أي مكان)
+// ==========================================
+window.triggerNotification = async function(targetUser, title, message, type = 'info', isGlobal = false) {
+    const time = Date.now();
+    
+    if (isGlobal) {
+        await push(ref(db, 'global_notifications'), { title, message, type, time });
+        return;
+    }
+
+    if (targetUser) {
+        await push(ref(db, `notifications/${targetUser.toLowerCase()}`), { title, message, type, time, read: false });
+        
+        const currentUser = localStorage.getItem('loggedInUser');
+        if (currentUser && currentUser.toLowerCase() === targetUser.toLowerCase()) {
+            showToastNotif(title, message, type);
+        }
+    }
+};
+
+// ==========================================
+// 2. دالة عرض الإشعارات (Toast) الموحدة
+// ==========================================
+function showToastNotif(title, message, type = 'info') {
+    let container = document.getElementById('global-notif-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'global-notif-container';
+        container.style.cssText = 'position:fixed; top:20px; right:20px; z-index:999999; display:flex; flex-direction:column; gap:10px; pointer-events:none; direction:rtl;';
+        document.body.appendChild(container);
+    }
+
+    const colors = { success: '#4caf50', error: '#f44336', info: '#00bcd4', warning: '#ff9800' };
+    const borderColor = colors[type] || colors.info;
+
+    const toast = document.createElement('div');
+    toast.style.cssText = `background:#111; border-right:5px solid ${borderColor}; color:#fff; padding:15px 20px; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.5); font-family:Cairo, sans-serif; min-width:250px; max-width:350px; pointer-events:auto; animation: slideInRight 0.3s ease-out; display:flex; flex-direction:column; gap:5px;`;
+    
+    if (message) {
+        toast.innerHTML = `
+            <div style="font-weight:900; font-size:15px; color:${borderColor};">${title}</div>
+            <div style="font-size:13px; line-height:1.4; color:#ddd;">${message}</div>
+        `;
+    } else {
+        toast.innerHTML = `<div style="font-weight:bold; font-size:14px;">${title}</div>`;
+    }
+    
+    if (!document.getElementById('notif-anim-style')) {
+        const style = document.createElement('style');
+        style.id = 'notif-anim-style';
+        style.innerHTML = `@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }`;
+        document.head.appendChild(style);
+    }
+
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = '0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// ==========================================
+// 3. الاستماع للإشعارات من فايربيز
+// ==========================================
+function listenToNotifications() {
+    const currentUser = localStorage.getItem('loggedInUser');
+    if (!currentUser || currentUser === 'Unknown' || currentUser === 'زائر') return;
+
+    // إشعارات شخصية
+    const userNotifsRef = ref(db, `notifications/${currentUser.toLowerCase()}`);
+    let isFirstLoad = true;
+
+    onValue(userNotifsRef, (snapshot) => {
+        if (isFirstLoad) { isFirstLoad = false; return; }
+        const data = snapshot.val();
+        if (!data) return;
+        
+        const keys = Object.keys(data);
+        const latestKey = keys[keys.length - 1];
+        const notif = data[latestKey];
+        
+        if (notif && !notif.read) {
+            showToastNotif(notif.title, notif.message, notif.type);
+        }
+    });
+
+    // إشعارات عامة
+    const globalNotifsRef = ref(db, 'global_notifications');
+    let isGlobalFirstLoad = true;
+    onValue(globalNotifsRef, (snapshot) => {
+        if (isGlobalFirstLoad) { isGlobalFirstLoad = false; return; }
+        const data = snapshot.val();
+        if (!data) return;
+        const keys = Object.keys(data);
+        const latestKey = keys[keys.length - 1];
+        const notif = data[latestKey];
+        
+        if (notif) {
+            showToastNotif(`📢 ${notif.title}`, notif.message, notif.type);
+        }
+    });
+}
+
+// ==========================================
+// 4. النظام القديم (التحديات، الباند، الطرد، الرسائل)
+// ==========================================
 function setupNotifications() {
     const currentUser = localStorage.getItem('loggedInUser');
     if (!currentUser || currentUser === 'Unknown' || currentUser === 'زائر') return;
 
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = 'position:fixed; top:20px; right:20px; z-index:999999; display:flex; flex-direction:column; gap:10px; pointer-events:none;';
-        document.body.appendChild(toastContainer);
+    onValue(ref(db, 'banned_users/' + currentUser), (snap) => { 
+        if (snap.exists()) window.location.replace('banned.html'); 
+    });
+    
+    onValue(ref(db, 'kick_signals/' + currentUser), (snap) => { 
+        if (snap.exists()) { 
+            set(ref(db, 'kick_signals/' + currentUser), null); 
+            window.location.replace('banned.html'); 
+        } 
+    });
+
+    let unreadCount = 0;
+    const originalTitle = document.title;
+    
+    function updateTabTitle() { 
+        if (unreadCount > 0) document.title = `(${unreadCount}) 🔔 ` + originalTitle; 
+        else document.title = originalTitle; 
     }
+    
+    window.addEventListener('focus', () => { 
+        unreadCount = 0; 
+        updateTabTitle(); 
+    });
 
-    function showToast(msg, color = '#ff0000') {
-        const toast = document.createElement('div');
-        toast.style.cssText = `background:#111; border-right:5px solid ${color}; color:#fff; padding:15px 20px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.5); font-weight:bold; font-family:'Cairo', sans-serif; display:flex; align-items:center; gap:8px; animation: slideIn 0.3s forwards; direction:rtl; pointer-events:auto;`;
-        toast.innerHTML = `<span>🔔</span> <span>${msg}</span>`;
-        toastContainer.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 5000);
-    }
-
-    onValue(ref(db, 'banned_users/' + currentUser), (snap) => { if (snap.exists()) window.location.replace('banned.html'); });
-    onValue(ref(db, 'kick_signals/' + currentUser), (snap) => { if (snap.exists()) { set(ref(db, 'kick_signals/' + currentUser), null); window.location.replace('banned.html'); } });
-
-    const originalTitle = document.title; let unreadCount = 0;
-    function updateTabTitle() { if (unreadCount > 0) document.title = `(${unreadCount}) 🔔 ` + originalTitle; else document.title = originalTitle; }
-    window.addEventListener('focus', () => { unreadCount = 0; updateTabTitle(); });
-
+    // رسائل جديدة
     let lastMsgCount = -1;
     onValue(ref(db, 'messages/' + currentUser), (snap) => {
         const count = snap.exists() ? Object.keys(snap.val()).length : 0;
-        if (lastMsgCount !== -1 && count > lastMsgCount) { unreadCount++; updateTabTitle(); showToast("📩 وصلك رسالة جديدة!", '#0088cc'); }
+        if (lastMsgCount !== -1 && count > lastMsgCount) { 
+            unreadCount++; 
+            updateTabTitle(); 
+            showToastNotif("📩 رسالة جديدة!", "وصلك رسالة جديدة في صندوق الوارد.", 'info'); 
+        }
         lastMsgCount = count;
     });
 
+    // طلبات صداقة
     let lastReqCount = -1;
     onValue(ref(db, 'friend_requests/' + currentUser), (snap) => {
         const count = snap.exists() ? Object.keys(snap.val()).length : 0;
-        if (lastReqCount !== -1 && count > lastReqCount) { unreadCount++; updateTabTitle(); showToast("👤 وصلك طلب صداقة جديد!", '#ffd700'); }
+        if (lastReqCount !== -1 && count > lastReqCount) { 
+            unreadCount++; 
+            updateTabTitle(); 
+            showToastNotif("👤 طلب صداقة جديد!", "وصلك طلب صداقة جديد.", 'warning'); 
+        }
         lastReqCount = count;
     });
 
+    // تحذيرات
     let lastWarnText = "";
     onValue(ref(db, 'warnings/' + currentUser), (snap) => {
         if (snap.exists() && snap.val().text !== lastWarnText) {
-            lastWarnText = snap.val().text; unreadCount++; updateTabTitle(); showToast("⚠️ وصلك تحذير من الإدارة: " + lastWarnText, '#ff3333');
+            lastWarnText = snap.val().text; 
+            unreadCount++; 
+            updateTabTitle(); 
+            showToastNotif("⚠️ تحذير من الإدارة", lastWarnText, 'error');
         }
     });
 
+    // التحديات
     let challengePopup = document.getElementById('challengePopup');
     if (!challengePopup) {
         challengePopup = document.createElement('div');
@@ -63,7 +189,7 @@ function setupNotifications() {
             background: #111; border: 2px solid #ff0000; border-radius: 15px;
             padding: 20px; z-index: 9999999; text-align: center; color: #fff;
             font-family: 'Cairo', sans-serif; box-shadow: 0 0 30px rgba(255,0,0,0.5);
-            width: 90%; max-width: 350px; animation: slideDown 0.3s ease-out;
+            width: 90%; max-width: 350px; animation: slideDown 0.3s ease-out; direction: rtl;
         `;
         const style = document.createElement('style');
         style.innerHTML = `@keyframes slideDown { from { transform: translate(-50%, -50px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }`;
@@ -119,6 +245,9 @@ function setupNotifications() {
     });
 }
 
+// ==========================================
+// 5. دوال التحدي (قبول/رفض)
+// ==========================================
 window.acceptChallenge = async function(challenger, quiz, challengeKey, roomCode) {
     const currentLang = localStorage.getItem('lang') || 'ar';
     try {
@@ -193,11 +322,9 @@ window.rejectChallenge = async function(challengeKey, roomCode) {
     }
 };
 
-if (!window.hasNotificationsSetup) {
-    window.hasNotificationsSetup = true;
-    window.addEventListener('load', () => { setTimeout(setupNotifications, 1000); });
-}
-
+// ==========================================
+// 6. فحص إصدار الموقع (عشان التحديثات)
+// ==========================================
 (async function checkVersion() {
     try {
         const snap = await get(ref(db, 'site_settings/version'));
@@ -213,3 +340,16 @@ if (!window.hasNotificationsSetup) {
         }
     } catch (e) {}
 })();
+
+// ==========================================
+// 7. تشغيل كل حاجة أول ما الصفحة تحمل
+// ==========================================
+if (!window.hasNotificationsSetup) {
+    window.hasNotificationsSetup = true;
+    window.addEventListener('load', () => { 
+        setTimeout(() => {
+            setupNotifications();
+            listenToNotifications();
+        }, 1000); 
+    });
+}
