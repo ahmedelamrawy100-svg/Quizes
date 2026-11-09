@@ -81,48 +81,72 @@
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const auth = getAuth(app);
+  const FIREBASE_API_KEY = "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo";
 
   window.checkRestrictedPass = async function() {
       let user = document.getElementById('restrictedUser').value.trim().toLowerCase();
       let pass = document.getElementById('restrictedPass').value;
       const errorMsg = document.getElementById('errorMsg');
+      const btn = document.querySelector('.lock-btn');
 
-      // التأكد إن الاسم هو banned
       if (user !== 'banned') {
           errorMsg.innerText = "هذا الحساب غير مصرح له بالدخول!";
           errorMsg.style.display = 'block';
           return;
       }
 
+      const originalText = btn.innerText;
+      btn.innerText = '⏳ جاري التحقق...';
+      btn.disabled = true;
+
       try {
-          // بنحاول نسجل دخول بالاسم والباسورد اللي في الفايربيز
-          await signInWithEmailAndPassword(auth, user + "@quizhub.com", pass);
-          
-          // لو نجح
-          document.getElementById('lockScreen').style.display = 'none';
-          document.getElementById('restrictedContent').style.display = 'block';
-          sessionStorage.setItem('isRestrictedAuthed', 'true');
-          
+          const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  email: user + "@quizhub.com", 
+                  password: pass,
+                  returnSecureToken: true
+              })
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.idToken) {
+              // ✅ الحماية هنا: بنتأكد إن العناصر موجودة قبل ما نغير الستايل
+              const lockScreen = document.getElementById('lockScreen');
+              const content = document.getElementById('restrictedContent');
+              
+              if (lockScreen) lockScreen.style.display = 'none';
+              if (content) content.style.display = 'block';
+              
+              sessionStorage.setItem('isRestrictedAuthed', 'true');
+          } else {
+              errorMsg.innerText = "كلمة المرور غير صحيحة!";
+              errorMsg.style.display = 'block';
+              document.getElementById('restrictedPass').value = '';
+          }
       } catch (error) {
-          // لو فشل (باسورد غلط)
-          errorMsg.innerText = "كلمة المرور غير صحيحة!";
+          console.error(error);
+          errorMsg.innerText = "حدث خطأ في الاتصال بالسيرفر!";
           errorMsg.style.display = 'block';
-          document.getElementById('restrictedPass').value = '';
+      } finally {
+          btn.innerText = originalText;
+          btn.disabled = false;
       }
   }
 
   window.onload = function() {
       if (sessionStorage.getItem('isRestrictedAuthed') === 'true') {
-          document.getElementById('lockScreen').style.display = 'none';
-          document.getElementById('restrictedContent').style.display = 'block';
+          // ✅ الحماية هنا برضه
+          const lockScreen = document.getElementById('lockScreen');
+          const content = document.getElementById('restrictedContent');
+          
+          if (lockScreen) lockScreen.style.display = 'none';
+          if (content) content.style.display = 'block';
       }
   }
 </script>
-
+<script type="module" src="theme-engine.js"></script>
 </body>
 </html>
