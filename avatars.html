@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎭 الشخصيات - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="features/new-features.css">
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
+  .container { max-width:1100px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); font-size:32px; margin-bottom:20px; }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; }
+  #avatarsGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:15px; }
+  .theme-card { background:var(--card); border:2px solid var(--border); border-radius:14px; padding:15px; text-align:center; transition:0.3s; position:relative; }
+  .theme-card:hover { transform:translateY(-4px); }
+  .theme-card.active { border-color:#4caf50 !important; box-shadow:0 0 20px rgba(76,175,80,0.4); }
+  .theme-name { font-size:14px; font-weight:900; margin:8px 0; }
+  .theme-price { font-size:13px; color:var(--gold); font-weight:bold; }
+  .theme-active-badge { position:absolute; top:8px; right:8px; background:#4caf50; color:#fff; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:900; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="profile.html" class="back-btn">⬅ رجوع</a>
+  </div>
+  <h1>🎭 متجر الشخصيات</h1>
+  <div id="avatarsGrid"></div>
+</div>
+
+<script type="module">
+import './features/avatars.js';
+import { showToast } from './firebase-shared.js';
+
+setTimeout(async () => {
+  if (window.NFAvatars) {
+    await window.NFAvatars.renderAvatarsGrid(document.getElementById('avatarsGrid'));
+  }
+}, 300);
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+</body>
+</html>
