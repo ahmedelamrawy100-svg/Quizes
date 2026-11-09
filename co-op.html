@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤝 كويز تعاوني - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="quiz-style.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  body { justify-content:flex-start; padding-top:80px; }
+  .container { max-width:800px; width:100%; background:#111; border:2px solid #8b0000; border-radius:15px; padding:25px; }
+  .code-display { font-size:48px; text-align:center; padding:25px; background:#000; border:3px dashed #ff0000; border-radius:12px; letter-spacing:8px; font-family:monospace; color:#fff; margin:20px 0; }
+  .btn { padding:15px; width:100%; border:none; border-radius:10px; font-family:Cairo; font-weight:bold; font-size:16px; cursor:pointer; margin-bottom:10px; }
+  .btn-primary { background:#ff0000; color:#fff; }
+  .btn-info { background:#0088cc; color:#fff; }
+  .score-board { display:grid; grid-template-columns:1fr auto 1fr; gap:15px; background:#000; padding:20px; border-radius:12px; margin-bottom:20px; align-items:center; text-align:center; }
+  .score-val { font-size:38px; font-weight:900; color:#ffd700; }
+  /* تنسيق قائمة الكويزات */
+  #coopQuizSelect { width:100%; padding:15px; border-radius:10px; border:2px solid #ff0000; background:#000; color:#fff; font-family:Cairo; font-size:16px; margin-bottom:20px; outline:none; cursor:pointer; }
+</style>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div class="top-buttons-container">
+  <a href="index.html" class="back-btn">⬅ رجوع</a>
+</div>
+
+<div id="setupScreen" class="container">
+  <h1 style="color:#ff0000;text-align:center;margin-bottom:20px;">🤝 كويز تعاوني (20 سؤال)</h1>
+  <p style="color:#aaa;text-align:center;margin-bottom:25px;">العبوا مع بعض، كل واحد بيجاوب سؤال، ومجموع النقاط بتتجمع!</p>
+  
+  <!-- ✅ القائمة دي هتتملي تلقائياً بكل الكويزات من questions.js -->
+  <select id="coopQuizSelect"></select>
+  
+  <button class="btn btn-primary" onclick="window._createCoopRoom()">🎮 إنشاء غرفة</button>
+  <div style="text-align:center;color:#aaa;margin:10px 0;">— أو —</div>
+  <input type="text" id="joinCode" placeholder="XXXXXX" maxlength="6" style="width:100%;padding:12px;border-radius:8px;border:1px solid #555;background:#000;color:#fff;font-family:Cairo;text-align:center;font-size:18px;letter-spacing:3px;margin-bottom:10px;">
+  <button class="btn btn-info" onclick="window._joinCoopRoom()">🚪 انضمام بكود</button>
+</div>
+
+<div id="waitingScreen" class="container" style="display:none;">
+  <h2 style="text-align:center;color:#ffd700;">⏳ استنى صاحبك...</h2>
+  <div class="code-display" id="roomCodeDisplay">------</div>
+  <p style="text-align:center;color:#aaa;">ابعت الكود ده لصاحبك</p>
+</div>
+
+<div id="gameScreen" class="container" style="display:none;">
+  <div class="score-board">
+    <div>
+      <div style="font-size:12px;color:#aaa;" id="p1Name">-</div>
+      <div class="score-val" id="p1Score">0</div>
+    </div>
+    <div style="color:#ff0000;font-size:22px;font-weight:900;">🤝</div>
+    <div>
+      <div style="font-size:12px;color:#aaa;" id="p2Name">-</div>
+      <div class="score-val" id="p2Score">0</div>
+    </div>
+  </div>
+  <div id="turnIndicator" style="text-align:center;padding:15px;background:#000;border-radius:10px;margin-bottom:15px;font-weight:bold;"></div>
+  <div id="questionBox"></div>
+</div>
+
+<script src="questions.js"></script>
+<script type="module">
+import { db, ref, get, set, update, onValue, remove, push, currentUser, showToast } from './firebase-shared.js';
+
+let roomCode, myRole, roomData, unsub, currentQ = 0, answered = false;
+
+// ✅ قاموس لأسماء الكويزات (عشان تظهر بشكل حلو في القائمة)
+const quizNames = {
+    annabelle: '🎃 أنابيل', conjuring: '👻 الكونجورينج', TheNun: '✝️ الراهبة', FNAF: '🐻 فايف نايتس',
+    SquidGame: '🦑 لعبة الحبار', spiderman: '🕷️ سبايدرمان', spiderman2026: '🕷️ سبايدرمان 2026',
+    avengers: '🛡️ المنتقمون', avatar: '🌊 أفاتار', venom: '🖤 فينوم', birdsofprey: '🦅 الطيور الجارحة',
+    fall: '🪜 السقوط', Wednesday: '🖤 وينزداي', knivesout: '🔪 مطارق', scream: '👻 سكريم',
+    TrainToBusan: '🚄 قطار بوسان', elharifa: '⚽ الحريفة', blueelephant: '🐘 الفيل الأزرق',
+    mazerunner: '🏃 المتاهة', rambo: '🔫 رامبو', foolelseen: '🍲 فول الصين', elshater: '⚔️ الشاطر',
+    shalaby: '🎭 شلبي', weshxwesh: '🤼 وش في وش', sikosiko: '🎮 سيكو سيكو', elmashroax: '🔍 المشروع إكس',
+    misterx: '🕵️ مستر إكس', barshama: '💊 برشامة', rockyelghalaba: '🥊 روكي الغلابة', beitelruby: '🏠 بيت الروبي',
+    meratyx: '🕵️♀️ مراتي إكس', elserb: '🦅 السرب', eleskandarany: '🌊 الإسكندراني', shako: '💰 شقو',
+    meratywzegty: '💍 مراتي وزوجتي', nadielregal: '🤫 نادي الرجال', elaref: '🕵️ العارف',
+    elmamar: '🇪🇬 الممر', ahmedwaahmed: '👥 أحمد وأحمد', bahebak: '❤️ بحبك', fasel: '😋 فاصل',
+    akhyfok: '🌳 أخي فوق الشجرة', restart: '🔄 ريستارت', tag: '👑 تاج'
+};
+
+// ✅ 1. ملء القائمة بكل الكويزات المتاحة
+window.addEventListener('load', () => {
+    const select = document.getElementById('coopQuizSelect');
+    if (typeof allQuizzesData !== 'undefined') {
+        select.innerHTML = Object.keys(allQuizzesData).map(key => {
+            const name = quizNames[key] || key; // لو الاسم مش في القاموس، هيظهر الكود بتاعه
+            return `<option value="${key}">${name}</option>`;
+        }).join('');
+    } else {
+        select.innerHTML = '<option value="">خطأ في تحميل الكويزات</option>';
+    }
+});
+
+// ✅ 2. جلب 20 سؤال بدل 10
+function buildQuestionPool(quizKey) {
+  if (typeof allQuizzesData === 'undefined') return [];
+  const quiz = allQuizzesData[quizKey];
+  if (!quiz) return [];
+  
+  let pool = [];
+  for (const part in quiz) {
+    if (Array.isArray(quiz[part])) pool.push(...quiz[part]);
+  }
+  
+  // فلترة الأسئلة اللي ليها اختيارات عشان ميعملش مشاكل
+  let validPool = pool.filter(q => q.q_ar && q.options_ar && q.options_ar.length > 0);
+  
+  // 👇 التعديل هنا: خليها 20 سؤال بدل 10
+  return validPool.sort(() => Math.random() - 0.5).slice(0, 20);
+}
+
+window._createCoopRoom = async () => {
+  const quizKey = document.getElementById('coopQuizSelect').value;
+  if(!quizKey) return showToast('اختار كويز', 'error');
+  
+  const questions = buildQuestionPool(quizKey);
+  if (questions.length === 0) return showToast('مفيش أسئلة كفاية في الكويز ده', 'error');
+  
+  roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  myRole = 'player1';
+  
+  await set(ref(db, `coop_rooms/${roomCode}`), {
+    player1: currentUser, player2: null,
+    p1Score: 0, p2Score: 0,
+    currentTurn: 'player1', currentQ: 0,
+    questions, quizKey, status: 'waiting',
+    createdAt: Date.now()
+  });
+  
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('waitingScreen').style.display = 'block';
+  document.getElementById('roomCodeDisplay').textContent = roomCode;
+  listenRoom();
+};
+
+window._joinCoopRoom = async () => {
+  const code = document.getElementById('joinCode').value.trim().toUpperCase();
+  if (!code) return showToast('اكتب الكود', 'error');
+  const snap = await get(ref(db, `coop_rooms/${code}`));
+  if (!snap.exists()) return showToast('❌ كود غلط', 'error');
+  const room = snap.val();
+  if (room.status !== 'waiting') return showToast('الغرفة بدأت', 'error');
+  
+  roomCode = code;
+  myRole = 'player2';
+  await update(ref(db, `coop_rooms/${code}`), { player2: currentUser, status: 'playing' });
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  listenRoom();
+};
+
+function listenRoom() {
+  if (unsub) unsub();
+  unsub = onValue(ref(db, `coop_rooms/${roomCode}`), snap => {
+    if (!snap.exists()) return;
+    roomData = snap.val();
+    renderRoom();
+  });
+}
+
+function renderRoom() {
+  if (roomData.status === 'waiting') return;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('waitingScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  
+  document.getElementById('p1Name').textContent = roomData.player1;
+  document.getElementById('p2Name').textContent = roomData.player2 || '...';
+  document.getElementById('p1Score').textContent = roomData.p1Score || 0;
+  document.getElementById('p2Score').textContent = roomData.p2Score || 0;
+  
+  const q = roomData.currentQ || 0;
+  if (q >= roomData.questions.length) return showFinal();
+  
+  const isMyTurn = roomData.currentTurn === myRole;
+  const indicator = document.getElementById('turnIndicator');
+  const box = document.getElementById('questionBox');
+  
+  if (isMyTurn) {
+    indicator.innerHTML = '🎯 <b style="color:#4caf50;">دورك!</b>';
+    indicator.style.color = '#4caf50';
+    if (box.dataset.q !== String(q)) renderQuestion(q);
+  } else {
+    indicator.innerHTML = '⏳ <b style="color:#ff9800;">دور صاحبك...</b>';
+    indicator.style.color = '#ff9800';
+    box.innerHTML = '<p style="text-align:center;padding:30px;color:#aaa;">استنى صاحبك يجاوب...</p>';
+    box.dataset.q = '';
+  }
+}
+
+function renderQuestion(idx) {
+  const q = roomData.questions[idx];
+  const box = document.getElementById('questionBox');
+  box.dataset.q = String(idx);
+  box.innerHTML = `
+    <div style="background:#000;padding:20px;border-radius:10px;">
+      <div style="font-size:13px;color:#ffd700;margin-bottom:10px;">سؤال ${idx + 1} / ${roomData.questions.length}</div>
+      <div style="font-size:18px;margin-bottom:15px;font-weight:bold;">${escapeHtml(q.q_ar)}</div>
+      <div id="coopOptions"></div>
+    </div>
+  `;
+  const opts = document.getElementById('coopOptions');
+  const optsWA = q.options_ar.map((o, i) => ({ text: o, correct: i === q.answer })).sort(() => Math.random() - 0.5);
+  optsWA.forEach(o => {
+    const d = document.createElement('div');
+    d.className = 'option';
+    d.innerText = o.text;
+    d.onclick = () => {
+      if (answered) return;
+      answered = true;
+      const correct = o.correct;
+      d.style.background = correct ? '#4caf50' : '#f44336';
+      if (correct) { if (window.confetti) confetti({ particleCount: 50 }); }
+      setTimeout(() => submitAnswer(correct), 800);
+    };
+    opts.appendChild(d);
+  });
+}
+
+async function submitAnswer(correct) {
+  const field = myRole === 'player1' ? 'p1Score' : 'p2Score';
+  await update(ref(db, `coop_rooms/${roomCode}`), {
+    [field]: (roomData[field] || 0) + (correct ? 1 : 0),
+    currentQ: roomData.currentQ + 1,
+    currentTurn: myRole === 'player1' ? 'player2' : 'player1'
+  });
+  answered = false;
+}
+
+function showFinal() {
+  const myScore = myRole === 'player1' ? roomData.p1Score : roomData.p2Score;
+  const oppScore = myRole === 'player1' ? roomData.p2Score : roomData.p1Score;
+  const total = myScore + oppScore;
+  document.getElementById('questionBox').innerHTML = `
+    <div style="text-align:center;padding:40px;">
+      <h2 style="color:#ffd700;font-size:32px;">🎉 انتهى الكويز!</h2>
+      <p style="font-size:22px;margin:15px 0;">المجموع التعاوني: <b style="color:#4caf50;">${total}</b> / ${roomData.questions.length}</p>
+      <p>نقاطك: ${myScore} | نقاط صاحبك: ${oppScore}</p>
+      <a href="index.html" style="display:inline-block;margin-top:20px;padding:12px 30px;background:#ff0000;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;">العودة</a>
+    </div>
+  `;
+  if (window.confetti) confetti({ particleCount: 200, spread: 100 });
+  setTimeout(() => remove(ref(db, `coop_rooms/${roomCode}`)), 60000);
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+</script>
+<script type="module" src="notifications.js"></script>
+</body>
+</html>
