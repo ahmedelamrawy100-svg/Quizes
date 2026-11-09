@@ -33,10 +33,28 @@
 
   .username { font-size: 32px; color: var(--accent); margin-bottom: 10px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px;}
   .persona-badge { font-size: 16px; color: #00bcd4; background: rgba(0, 188, 212, 0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid #00bcd4; font-weight: bold;}
-  .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+  
+  .equipped-title-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,140,0,0.15));
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    padding: 8px 25px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+
+  .rank-box { background: linear-gradient(135deg, #1a1a1a, #000); border: 2px solid var(--purple); padding: 10px 30px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(156, 39, 176, 0.3); }
   body.light-mode .rank-box { background: #fff; }
   .rank-label { font-size: 14px; color: var(--subtitle-color); margin-left: 5px; }
-  .rank-value { font-size: 20px; font-weight: bold; color: var(--gold); }
+  .rank-value { font-size: 20px; font-weight: bold; color: var(--purple); }
+  
   .stats-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;}
   .stat-badge { font-size: 16px; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-weight: bold; border: 1px solid; }
   .score-badge { color: var(--gold); background: rgba(255, 215, 0, 0.1); border-color: var(--gold); }
@@ -52,16 +70,25 @@
   .adv-stat-box:hover { transform: translateY(-5px); border-color: var(--accent); }
   .adv-stat-title { font-size: 13px; color: var(--subtitle-color); margin-bottom: 8px; font-weight: bold; }
   .adv-stat-value { font-size: 24px; font-weight: 900; color: var(--text-color); }
+  
   .badges-section { width: 100%; margin-top: 15px; }
   .badges-title { font-size: 14px; color: var(--subtitle-color); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
   .badges-container { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .badge-item { background: rgba(255,0,0,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+  
+  .achievements-section { width: 100%; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px dashed var(--gold); }
+  body.light-mode .achievements-section { background: rgba(0,0,0,0.05); }
+  .ach-badge { background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,140,0,0.1)); border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 10px; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
   #warningBox { display: none; background: rgba(255,0,0,0.1); border: 2px solid var(--accent); color: var(--accent); padding: 15px; border-radius: 10px; width: 100%; margin-top: 15px; text-align: center; font-weight: bold; }
+  
   .upload-section { display: flex; gap: 10px; align-items: center; justify-content: center; background: var(--bg-color); padding: 10px; border-radius: 10px; border: 1px dashed var(--card-border); margin-top: 15px; flex-wrap: wrap; }
   .upload-section input[type="file"] { display: none; }
   .upload-label { background: #333; color: #fff; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 14px; }
   .upload-btn { background: #4caf50; color: #fff; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; display: none;}
+  
   .section-title { color: var(--accent); margin-bottom: 15px; font-size: 22px; border-bottom: 2px solid var(--card-border); padding-bottom: 10px; }
+  
   .friends-container { display: flex; flex-direction: column; gap: 10px; }
   .friend-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
   .friend-info { display: flex; align-items: center; gap: 15px; }
@@ -69,7 +96,9 @@
   .friend-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .friend-name { font-weight: bold; font-size: 16px; }
   .action-btn { padding: 6px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; background: #0088cc; font-size: 13px; }
+  
   .no-data { text-align: center; color: var(--subtitle-color); padding: 20px; background: var(--card-bg); border-radius: 15px; }
+  
   .timeline-container { width: 100%; margin-top: 30px; }
   #timelineList { position: relative; padding-right: 30px; border-right: 3px solid var(--card-border); display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
   .timeline-item-wrapper { position: relative; }
@@ -78,6 +107,7 @@
   .timeline-date { font-size: 12px; color: var(--subtitle-color); margin-bottom: 5px; }
   .timeline-title { font-size: 16px; color: var(--accent); margin-bottom: 5px; }
   .timeline-desc { font-size: 14px; color: var(--text-color); }
+  
   .avatar.fire-frame { border-color: #ff5722; box-shadow: 0 0 25px #ff5722, 0 0 50px #ff9800; animation: firePulse 1.5s infinite alternate; }
   @keyframes firePulse { from { box-shadow: 0 0 15px #ff5722, 0 0 30px #ff9800; } to { box-shadow: 0 0 35px #ff5722, 0 0 70px #ff9800; } }
   
@@ -101,10 +131,21 @@
   .inv-tab { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-family: Cairo, sans-serif; font-weight: bold; font-size: 13px; transition: 0.2s; }
   .inv-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
   
+  .achievements-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, #a855f7, #ec4899);
+    color: #fff; text-decoration: none; padding: 15px 30px;
+    border-radius: 15px; font-size: 18px; font-weight: 900;
+    transition: 0.3s; box-shadow: 0 4px 15px rgba(168,85,247,0.4);
+    width: 100%; max-width: 400px; margin: 0 auto;
+  }
+  .achievements-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(168,85,247,0.6); }
+
   @media (max-width: 600px) { .advanced-stats { grid-template-columns: 1fr; } .stats-row { flex-direction: column; gap: 10px; } .stat-badge { justify-content: center; } }
 </style>
 </head>
 <body>
+<div id="mysteryBoxContainer" style="margin-top:20px; max-width: 600px; width: 100%; margin-left: auto; margin-right: auto;"></div>
 
 <div class="custom-alert-overlay" id="customAlert">
     <div class="custom-alert-box">
@@ -122,9 +163,14 @@
 <div class="profile-container">
   <div class="header-card">
     <div class="avatar" id="userAvatar">A</div>
+    
     <div class="username" id="userName">
         <span id="userNameText">Loading...</span>
         <span class="persona-badge" id="personaBadge" style="display: none;"></span>
+    </div>
+
+    <div id="equippedTitleBox" class="equipped-title-box" style="display: none;">
+        <span>🎖️</span> <span id="equippedTitleName">اللقب</span>
     </div>
     
     <div class="rank-box" id="rankBox" style="display: none;">
@@ -166,6 +212,11 @@
         <div class="badges-container" id="badgesContainer"></div>
     </div>
 
+    <div class="achievements-section" id="achievementsSection" style="display: none;">
+        <div class="badges-title" id="achievementsTitleText">🏆 بعض إنجازاتك</div>
+        <div class="badges-container" id="achievementsContainer"></div>
+    </div>
+
     <div id="lootBoxContainer" style="display: none; margin-top: 20px;">
         <button id="openBoxBtn" onclick="window.openLootBox()" style="padding: 15px 40px; background: linear-gradient(45deg, #ff9800, #ff5722); color: #fff; border: none; border-radius: 30px; font-family: 'Cairo'; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(255, 87, 34, 0.5); transition: 0.3s;">🎁 افتح صندوقك اليومي</button>
         <p id="lootBoxTimer" style="color: #aaa; font-size: 14px; margin-top: 10px; display: none;"></p>
@@ -178,6 +229,10 @@
       <button class="upload-btn" style="background: #ff3333; display: none;" id="removeImgBtn" onclick="window.removeProfilePic()">🗑️ مسح</button>
     </div>
   </div>
+
+  <a href="achievements.html" class="achievements-btn">
+    <span>🎖️</span> عرض كل الإنجازات والألقاب
+  </a>
 
   <div id="inventorySection" style="display: none;">
     <h3 id="inventoryTitle">🎒 مخزونك <span id="invTotalCount" style="font-size: 14px; color: var(--subtitle-color); font-weight: normal;"></span></h3>
@@ -216,6 +271,28 @@
   let profileUser = urlParams.get('user') ? urlParams.get('user').toLowerCase() : loggedInUser; 
 
   if (!profileUser) { window.location.href = 'index.html'; }
+
+  const titlesMap = {
+    'title_beginner': '🌱 المبتدئ', 'title_pro': '💼 المحترف', 'title_expert': '🎓 الخبير', 
+    'title_genius': '🧠 العبقري', 'title_legend': '👑 الأسطورة', 'title_coin_king': '💰 ملك الكوينز',
+    'title_millionaire': '💎 المليونير', 'title_theme_king': '🎨 ملك الثيمات', 'title_collector': '🖼️ الجامع',
+    'title_legendary_lover': '🌟 محب الأسطورية', 'title_night_star': '🌙 نجم الليل', 'title_everyone_friend': '🤝 صديق الجميع',
+    'title_team_leader': '⚔️ قائد التيم', 'title_comp_champ': '🏆 بطل المسابقات', 'title_always_first': '🥇 الأول دايماً',
+    'title_fast': '⚡ السريع', 'title_precise': '🎯 الدقيق', 'title_persistent': '💪 المثابر', 'title_constant': '📈 المستمر',
+    'title_loyal': '❤️ المخلص', 'title_box_king': '📦 ملك الصناديق', 'title_smart': '🧠 الذكي', 'title_creator': '✨ المبدع',
+    'title_designer': '🎨 المصمم', 'title_adventurer': '🗺️ المغامر', 'title_conqueror': '🏰 الفاتح', 'title_legendary': '👑 الأسطوري',
+    'title_trophy_hunter': '🏅 صائد الجوائز', 'title_lb_star': '⭐ نجم الليدر', 'title_living_legend': '🔥 الأسطورة الحية'
+  };
+
+  const achievementsMap = {
+    'first_quiz': '🎯 أول اختبار', 'quiz_10': '📝 10 اختبارات', 'quiz_50': '📋 50 اختبار', 'quiz_100': '📚 100 اختبار',
+    'quiz_500': '📖 500 اختبار', 'quiz_1000': '🎓 1000 اختبار', 'correct_10': '✅ 10 صح', 'correct_50': '👍 50 صح',
+    'correct_100': '💯 100 صح', 'correct_500': '🔥 500 صح', 'correct_1000': '⭐ 1000 صح', 'perfect_quiz': '🎯 اختبار كامل',
+    'streak_3': '🔥 3 أيام', 'streak_7': '🔥 أسبوع', 'streak_30': '💥 شهر', 'coins_1000': '🪙 1000 كوين',
+    'first_theme': '🎨 أول ثيم', 'themes_5': '🎨 5 ثيمات', 'first_friend': '👥 أول صديق', 'first_team': '⚔️ أول تيم',
+    'comp_first': '🏁 أول مسابقة', 'box_first': '📦 أول صندوق', 'level_10': '📈 مستوى 10', 'level_50': '📊 مستوى 50',
+    'night_owl': '🦉 بومة الليل', 'speedster': '⚡ سريع', 'completionist': '👑 كامل'
+  };
 
   window.showAlert = function(title, message) {
       document.getElementById('alertTitle').innerText = title;
@@ -307,6 +384,8 @@
       document.getElementById('streakLabel').innerText = t.bestStreak;
       document.getElementById('compLabel').innerText = t.completed;
       document.getElementById('alertOkBtn').innerText = t.okBtn;
+      document.getElementById('achievementsTitleText').innerText = currentLang === 'ar' ? '🏆 بعض إنجازاتك' : '🏆 Your Achievements';
+      
       const invTitleEl = document.getElementById('inventoryTitle');
       if (invTitleEl) invTitleEl.childNodes[0].textContent = t.inventoryTitle + ' ';
       
@@ -370,7 +449,6 @@
           
           const getUser = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
           
-          // ============ 1. البيانات الأساسية ============
           const userSnap = getUser(0);
           const userData = (userSnap && userSnap.val()) || {};
           currentUserData = userData;
@@ -391,6 +469,12 @@
               badge.innerText = userData.persona;
               badge.style.display = 'inline-block';
           }
+
+          if (userData.currentTitle) {
+              document.getElementById('equippedTitleBox').style.display = 'inline-flex';
+              const titleId = userData.currentTitle;
+              document.getElementById('equippedTitleName').innerText = titlesMap[titleId] || titleId;
+          }
           
           let xp = userData.xp || 0;
           document.getElementById('xpDisplay').innerText = xp;
@@ -398,7 +482,6 @@
           let coins = userData.coins || 0;
           document.getElementById('coinsDisplay').innerText = coins;
           
-          // ✅ نظام XP الجديد (1000 لفل، كل لفل 500 XP، الإجمالي 500,000 XP)
           let xpPerLevel = 500;
           let maxLevel = 1000;
           
@@ -406,15 +489,12 @@
           if (level > maxLevel) level = maxLevel;
           
           document.getElementById('levelDisplay').innerText = level;
-          
-          // ✅ هنا التعديل: بيظهر المستوى الحالي من 1000 زي ما طلبت
           document.getElementById('xpProgressText').innerText = `${level} / ${maxLevel}`;
           document.getElementById('xpProgressBar').style.width = `${(level / maxLevel) * 100}%`;
           
           let streak = userData.streak || 0;
           document.getElementById('bestStreakDisplay').innerText = streak;
           
-          // ============ 2. النقاط ============
           const scoresSnap = getUser(1);
           const scoresData = scoresSnap ? scoresSnap.val() : null;
           
@@ -442,7 +522,6 @@
               document.getElementById('accuracyDisplay').innerText = accuracy + '%';
           } else { document.getElementById('accuracyDisplay').innerText = '0%'; }
           
-          // ============ 3. الرتب ============
           const adminsSnap = getUser(2);
           const ranksSnap = getUser(3);
           const admins = (adminsSnap && adminsSnap.val()) || {};
@@ -459,7 +538,6 @@
           document.getElementById('rankBox').style.display = 'inline-flex';
           document.getElementById('userRankValue').innerText = rankText;
           
-          // ============ 4. الشارات ============
           const badgesSnap = getUser(4);
           const badgesData = badgesSnap ? badgesSnap.val() : null;
           const badgesContainer = document.getElementById('badgesContainer');
@@ -471,8 +549,29 @@
                   const span = document.createElement('span'); span.className = 'badge-item'; span.innerText = badge; badgesContainer.appendChild(span);
               });
           } else { badgesSection.style.display = 'none'; }
+
+          if (userData.achievements && Object.keys(userData.achievements).length > 0) {
+              document.getElementById('achievementsSection').style.display = 'block';
+              const achContainer = document.getElementById('achievementsContainer');
+              achContainer.innerHTML = '';
+              
+              const achievedIds = Object.keys(userData.achievements).filter(id => userData.achievements[id]);
+              achievedIds.slice(0, 6).forEach(id => {
+                  const achName = achievementsMap[id] || id;
+                  const span = document.createElement('span');
+                  span.className = 'ach-badge';
+                  span.innerText = achName;
+                  achContainer.appendChild(span);
+              });
+              
+              if (achievedIds.length > 6) {
+                  const moreSpan = document.createElement('span');
+                  moreSpan.className = 'ach-badge';
+                  moreSpan.innerText = `+${achievedIds.length - 6} ...`;
+                  achContainer.appendChild(moreSpan);
+              }
+          }
           
-          // ============ 5. التحذير ============
           const warningSnap = getUser(5);
           if (warningSnap && warningSnap.exists()) {
               const w = warningSnap.val();
@@ -484,7 +583,6 @@
               document.getElementById('warningBox').style.display = 'none'; 
           }
           
-          // ============ 6. الأرشيف ============
           const historySnap = getUser(6);
           if (historySnap && historySnap.exists()) {
               currentTimelineEvents = historySnap.val();
@@ -494,7 +592,6 @@
               document.getElementById('timelineList').innerHTML = `<div class="no-data">${translations[currentLang].noEvents}</div>`;
           }
           
-          // ============ 7. صندوق اليوم + المخزون ============
           if (profileUser.toLowerCase() === loggedInUser.toLowerCase()) {
               document.getElementById('lootBoxContainer').style.display = 'block';
               checkLootBoxTimer(userData);
@@ -726,6 +823,7 @@
       const updates = {};
       updates[`users_data/${user}/inventory/${itemId}`] = newCount > 0 ? newCount : null;
       await window.update(window.ref(window.db), updates);
+      
       currentInventory[itemId] = newCount > 0 ? newCount : 0;
       if (newCount <= 0) delete currentInventory[itemId];
       renderInventory(currentInventory);
@@ -918,6 +1016,9 @@
       const data = await response.json();
       if (data.success) {
           await window.set(window.ref(window.db, 'users_data/' + profileUser.toLowerCase() + '/profilePic'), data.data.url);
+          if (window.triggerNotification) {
+              window.triggerNotification(profileUser, "🖼️ صورة جديدة", "تم تغيير صورة البروفايل بنجاح.", "success");
+          }
           showAlert(t.successTitle, t.uploadedImg);
           btn.style.display = 'none';
       } else { showAlert(t.errTitle, t.errorImg); }
@@ -1021,6 +1122,11 @@
           }
 
           await window.update(window.ref(window.db), updates);
+          
+          if (window.triggerNotification) {
+              window.triggerNotification(user, "🎁 صندوق يومي", `لقد فتحت صندوقك اليومي وحصلت على: ${randomReward.text}`, "warning");
+          }
+
           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
           
           showAlert(t.lootBoxCongrats, `${t.lootBoxResult}${randomReward.text}`);
@@ -1037,9 +1143,15 @@
           btn.disabled = false;
       }
   }
+  
+  import './features/mystery-box.js';
+  setTimeout(() => {
+    if (window.NFMysteryBox) window.NFMysteryBox.renderMysteryBoxUI(document.getElementById('mysteryBoxContainer'));
+  }, 500);
 
   if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
 </script>
-<script src="notifications.js" type="module"></script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
 </body>
 </html>
