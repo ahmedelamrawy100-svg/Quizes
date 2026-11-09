@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎖️ الإنجازات - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#121212; --text:#fff; --sub:#aaa; --card:rgba(17,17,17,0.85); --border:rgba(255,255,255,0.1); --accent:#ff0000; --gold:#ffd700; --green:#4caf50; --cyan:#00bcd4; --blue: #2196f3; }
+  body.light-mode { --bg:#e0e0e0; --text:#111; --sub:#444; --card:rgba(255,255,255,0.95); --border:rgba(0,0,0,0.15); }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px 0; }
+  
+  .top-bar { width:100%; max-width:1200px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; background:var(--card); backdrop-filter:blur(20px); padding:15px 25px; border-radius:15px; border:1px solid var(--border); flex-wrap:wrap; gap:10px; }
+  .back-btn,.lang-btn { background:rgba(0,0,0,0.5); color:#fff; border:1px solid rgba(255,255,255,0.2); padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px; cursor:pointer; font-family:'Cairo'; transition: 0.3s; }
+  body.light-mode .back-btn, body.light-mode .lang-btn { background:rgba(0,0,0,0.1); color:#111; border-color:rgba(0,0,0,0.2); }
+  .back-btn:hover,.lang-btn:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .stat-pill { font-weight:900; font-size:16px; background:rgba(0,0,0,0.5); padding:8px 20px; border-radius:20px; border:1px solid var(--gold); color:var(--gold); }
+
+  .progress-ring-wrap { width:100%; max-width:1200px; display:flex; align-items:center; gap:20px; background:var(--card); border:1px solid var(--border); border-radius:15px; padding:15px 25px; margin-bottom:20px; flex-wrap:wrap; }
+  .progress-ring { width:80px; height:80px; flex-shrink:0; }
+  .progress-ring circle { fill:none; stroke-width:8; }
+  .progress-ring .bg { stroke:var(--border); }
+  .progress-ring .fg { stroke:var(--gold); stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
+  .progress-text-info h3 { font-size:18px; margin-bottom:4px; }
+  .progress-text-info p { color:var(--sub); font-size:13px; }
+
+  .tabs-wrapper { width:100%; max-width:1200px; overflow-x:auto; scrollbar-width:none; margin-bottom:25px; padding:0 10px; }
+  .tabs-wrapper::-webkit-scrollbar { display:none; }
+  .tabs { display:flex; gap:10px; width:max-content; min-width:100%; }
+  .tab-btn { background:var(--card); color:var(--text); border:1px solid var(--border); padding:12px 25px; border-radius:25px; cursor:pointer; font-family:'Cairo'; font-weight:900; font-size:15px; white-space:nowrap; transition:0.2s; }
+  .tab-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+  .content-area { width:100%; max-width:1200px; display:none; padding:0 15px; margin-bottom:40px; }
+  .content-area.active { display:block; }
+
+  .status-bar { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 20px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:14px; }
+  .status-text { color:var(--sub); }
+  .retry-btn { background:var(--accent); color:#fff; border:none; padding:6px 15px; border-radius:8px; font-family:'Cairo'; font-weight:900; font-size:12px; cursor:pointer; }
+  
+  .owner-tools { margin-right: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+  .owner-btn { background: linear-gradient(135deg, #9c27b0, #2196f3); color: #fff; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 900; cursor: pointer; font-family: 'Cairo'; box-shadow: 0 0 15px rgba(156,39,176,0.5); transition: 0.3s; }
+  .owner-btn.reset { background: linear-gradient(135deg, #d32f2f, #b71c1c); box-shadow: 0 0 15px rgba(211,47,47,0.5); }
+  .owner-btn:hover { transform: scale(1.05); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:15px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:15px 12px; text-align:center; display:flex; flex-direction:column; transition:0.2s; position:relative; min-height:190px; }
+  .card:hover { transform:translateY(-4px); border-color:var(--gold); }
+
+  .icon-wrap { width:60px; height:60px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:30px; background:rgba(128,128,128,0.1); border:2px solid var(--border); transition: 0.3s; }
+  .card.owned .icon-wrap { background:linear-gradient(135deg,rgba(255,215,0,0.25),rgba(76,175,80,0.15)); border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.3); }
+  .card.locked .icon-wrap { filter:grayscale(0.9); opacity:0.5; }
+  .card.locked { opacity:0.85; }
+
+  .card-name { font-weight:900; font-size:15px; margin-bottom:6px; }
+  .card-desc { font-size:11px; color:var(--sub); margin-bottom:8px; min-height:26px; line-height:1.3; flex-grow:1; }
+
+  .progress-bar-mini { width:100%; height:6px; background:rgba(128,128,128,0.2); border-radius:3px; margin-bottom:4px; overflow:hidden; }
+  .progress-fill-mini { height:100%; background:var(--gold); border-radius:3px; transition:width 0.5s; }
+  .progress-label { font-size:10px; color:var(--sub); margin-bottom:6px; }
+
+  .count-badge { display:inline-flex; align-items:center; justify-content:center; gap:4px; background:rgba(0,188,212,0.15); border:1px solid rgba(0,188,212,0.4); color:var(--cyan); font-size:12px; font-weight:900; padding:5px 12px; border-radius:14px; margin-bottom:8px; min-width:70px; }
+  .count-badge.loading { opacity:0.6; }
+  .count-badge.failed { background:rgba(255,0,0,0.15); border-color:rgba(255,0,0,0.4); color:#ff6b6b; }
+
+  .status-badge { display:inline-block; font-size:11px; font-weight:900; padding:5px 12px; border-radius:10px; width: 100%;}
+  .status-badge.owned { background:var(--green); color:#fff; }
+  .status-badge.locked { background:rgba(128,128,128,0.2); color:var(--sub); }
+
+  .action-btn { width: 100%; margin-top: 10px; padding: 8px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 13px; text-transform: uppercase; }
+  .btn-claim { background: #00bcd4; color: #fff; animation: pulseClaim 1.5s infinite; }
+  .btn-claim:hover { background: #0097a7; }
+  .btn-equip { background: #333; color: #fff; }
+  body.light-mode .btn-equip { background: #ccc; color: #111; }
+  .btn-equip:hover { background: #555; }
+  .btn-equipped { background: var(--green); color: #fff; cursor: default; }
+
+  @keyframes pulseClaim { 0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(0, 188, 212, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); } }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #222; color: #fff; padding: 12px 24px; border-radius: 10px; border: 2px solid var(--gold); font-weight: bold; z-index: 9999; transition: 0.3s; opacity: 0; text-align: center; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.error { border-color: #ff0000; }
+  #toast.success { border-color: var(--green); }
+
+  @media (max-width:768px) {
+    .grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+    .icon-wrap { width:50px; height:50px; font-size:24px; }
+    .card { min-height:170px; padding:12px 10px; }
+    .card-name { font-size:13px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast">رسالة</div>
+
+<div class="top-bar">
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="profile.html" class="back-btn" id="btnBack">⬅ رجوع</a>
+    <button class="lang-btn" onclick="toggleLang()" id="btnLang">EN</button>
+  </div>
+  <div class="stat-pill" id="coinPill">🪙 <span id="topCoins">0</span> <span id="lblCoins">كوينز</span></div>
+</div>
+
+<div class="progress-ring-wrap">
+  <svg class="progress-ring" viewBox="0 0 100 100">
+    <circle class="bg" cx="50" cy="50" r="45"/>
+    <circle class="fg" id="ringFg" cx="50" cy="50" r="45" stroke-dasharray="283" stroke-dashoffset="283"/>
+  </svg>
+  <div class="progress-text-info">
+    <h3 id="progressTitle">0%</h3>
+    <p id="progressSub">0 / 0</p>
+  </div>
+  <div class="owner-tools" id="ownerTools"></div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="achievements" id="tabAch">🏆 الإنجازات (89)</button>
+    <button class="tab-btn" data-tab="titles" id="tabTitles">🎖️ الألقاب</button>
+    <button class="tab-btn" data-tab="inventory" id="tabInventory">🎒 المقتنيات</button>
+  </div>
+</div>
+
+<div id="tab-achievements" class="content-area active">
+  <div class="status-bar">
+    <span class="status-text" id="achStatus">⏳ جاري تحميل العدّادات...</span>
+    <button class="retry-btn" id="achRetry" style="display:none;" onclick="loadCounts()">🔄 إعادة المحاولة</button>
+  </div>
+  <div class="grid" id="achGrid"></div>
+</div>
+
+<div id="tab-titles" class="content-area">
+  <div class="status-bar">
+    <span class="status-text" id="titleStatus">⏳ جاري تحميل العدّادات...</span>
+    <button class="retry-btn" id="titleRetry" style="display:none;" onclick="loadCounts()">🔄 إعادة المحاولة</button>
+  </div>
+  <div class="grid" id="titlesGrid"></div>
+</div>
+
+<div id="tab-inventory" class="content-area">
+  <div class="grid" id="inventoryGrid"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, get, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey:"AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain:"quiz-hub-app-f4cd0.firebaseapp.com", databaseURL:"https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId:"quiz-hub-app-f4cd0", storageBucket:"quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId:"282772179392", appId:"1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const CU = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+  if (!CU) window.location.href = 'index.html';
+  const isOwner = CU === 'ahmed';
+
+  let lang = localStorage.getItem('lang') || 'ar';
+  let userData = {};
+  let achCounts = null;
+  let titleCounts = null;
+  let playersCount = 0;
+  let lastFetchTime = 0;
+
+  const T = {
+    ar: {
+      back:"⬅ رجوع", coins:"كوينز",
+      tabAch:"🏆 الإنجازات (89)", tabTitles:"🎖️ الألقاب", tabInv:"🎒 المقتنيات",
+      owned:"✓ معاك", locked:"🔒 مقفول", players:"لاعب معاه",
+      loading:"⏳ جاري التحميل...", success:"✅ تم التحميل", failed:"⚠️ فشل التحميل", retry:"🔄 إعادة المحاولة",
+      progressTitle:"نسبة الإنجاز", progressSub:"{done} من {total} إنجاز",
+      emptyInv:"لا توجد مقتنيات حتى الآن. اذهب للمتجر لشراء بعض المساعدات!", youHave:"معاك:",
+      claim:"استلام", claimAll:"👑 استلام كل شيء (أونر)", resetAll:"🗑️ مسح تقدمي (للتصفير)", 
+      equip:"equip", equipped:"✓ EQUIPPED", // تم تغيير النص هنا
+      items:"مساعدات", themes:"ثيمات",
+      titleUnlocked:"تم استلام اللقب!", achUnlocked:"تم استلام الإنجاز!", error:"خطأ", resetSuccess:"تم مسح بياناتك بنجاح! الصفحة هتتحدث."
+    },
+    en: {
+      back:"⬅ Back", coins:"Coins",
+      tabAch:"🏆 Achievements (89)", tabTitles:"🎖️ Titles", tabInv:"🎒 Inventory",
+      owned:"✓ Owned", locked:"🔒 Locked", players:"players",
+      loading:"⏳ Loading...", success:"✅ Loaded", failed:"⚠️ Load failed", retry:"🔄 Retry",
+      progressTitle:"Completion", progressSub:"{done} of {total} achievements",
+      emptyInv:"No items yet. Go to the shop!", youHave:"Owned:",
+      claim:"Claim", claimAll:"👑 Claim All (Owner)", resetAll:"🗑️ Reset My Data", 
+      equip:"equip", equipped:"✓ EQUIPPED",
+      items:"Assistants", themes:"Themes",
+      titleUnlocked:"Title claimed!", achUnlocked:"Achievement claimed!", error:"Error", resetSuccess:"Data reset successfully!"
+    }
+  };
+
+  const SHOP_ITEMS = [
+    { id: 'freeze10', icon: '⏱️', title: 'تجميد الوقت 10ث', titleEn: 'Freeze 10s' }, { id: 'freeze20', icon: '⏱️', title: 'تجميد الوقت 20ث', titleEn: 'Freeze 20s' },
+    { id: 'add10', icon: '➕', title: 'إضافة 10 ثواني', titleEn: '+10 Seconds' }, { id: 'add30', icon: '➕', title: 'إضافة 30 ثانية', titleEn: '+30 Seconds' },
+    { id: 'stop_timer', icon: '🛑', title: 'إيقاف العداد', titleEn: 'Stop Timer' }, { id: 'fifty', icon: '✂️', title: 'حذف إجابتين (50/50)', titleEn: '50/50' },
+    { id: 'skip', icon: '⏭️', title: 'تخطي سؤال', titleEn: 'Skip Question' }, { id: 'hint_half', icon: '💡', title: 'تلميح', titleEn: 'Hint' },
+    { id: 'reveal', icon: '👁️', title: 'إظهار الإجابة', titleEn: 'Reveal Answer' }, { id: 'second_chance', icon: '🎲', title: 'فرصة ثانية', titleEn: 'Second Chance' },
+    { id: 'double_xp', icon: '✨', title: 'مضاعف XP', titleEn: 'Double XP' }, { id: 'double_coins', icon: '💰', title: 'مضاعف كوينز', titleEn: 'Double Coins' },
+    { id: 'shield', icon: '🛡️', title: 'درع الحماية', titleEn: 'Shield' }, { id: 'double_lb', icon: '🏆', title: 'مضاعف ليدربورد', titleEn: 'Double LB' },
+    { id: 'fix_streak', icon: '🔥', title: 'إصلاح الستريك', titleEn: 'Fix Streak' }, { id: 'box_bronze', icon: '📦', title: 'صندوق برونزي', titleEn: 'Bronze Box' },
+    { id: 'box_silver', icon: '🎁', title: 'صندوق فضي', titleEn: 'Silver Box' }, { id: 'box_gold', icon: '🏆', title: 'صندوق ذهبي', titleEn: 'Gold Box' },
+    { id: 'box_diamond', icon: '💎', title: 'صندوق ألماسي', titleEn: 'Diamond Box' }, { id: 'box_legendary', icon: '👑', title: 'صندوق أسطوري', titleEn: 'Legendary Box' },
+    { id: 'team_boost', icon: '⚔️', title: 'دعم التيم', titleEn: 'Team Boost' }, { id: 'ghost_mode', icon: '👻', title: 'وضع الشبح', titleEn: 'Ghost Mode' },
+    { id: 'starter_bundle', icon: '🎁', title: 'حزمة المبتدئين', titleEn: 'Starter Bundle' }, { id: 'survival_kit', icon: '🎒', title: 'حقيبة النجاة', titleEn: 'Survival Kit' },
+    { id: 'speed_demon', icon: '💨', title: 'شيطان السرعة', titleEn: 'Speed Demon' }, { id: 'ultimate_pack', icon: '👑', title: 'الحزمة المطلقة', titleEn: 'Ultimate Pack' }
+  ];
+
+  const SHOP_THEMES = [
+    { id:'vibrant_synth', name:'موجة اصطناعية', nameEn:'Synthwave', bg:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80' },
+    { id:'vibrant_aurora', name:'شفق قطبي', nameEn:'Aurora', bg:'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80' },
+    { id:'vibrant_cosmic', name:'ألوان كونية', nameEn:'Cosmic Paint', bg:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80' },
+    { id:'space_nebula', name:'سديم أزرق', nameEn:'Blue Nebula', bg:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80' },
+    { id:'nature_sunset', name:'غروب دافئ', nameEn:'Warm Sunset', bg:'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80' },
+    { id:'nature_forest', name:'غابة خضراء', nameEn:'Green Forest', bg:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=80' },
+    { id:'cyber_neon', name:'مدينة النيون', nameEn:'Neon City', bg:'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80' },
+    { id:'cyber_tokyo', name:'شوارع طوكيو', nameEn:'Tokyo Streets', bg:'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1920&q=80' },
+    { id:'tech_neon', name:'إضاءة نيون', nameEn:'Neon Lights', bg:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80' },
+    { id:'fan_magic', name:'غابة سحرية', nameEn:'Magic Forest', bg:'https://images.pexels.com/photos/2832034/pexels-photo-2832034.jpeg?auto=compress&cs=tinysrgb&w=1920' },
+    { id:'abs_liquid', name:'ألوان سائلة', nameEn:'Liquid Colors', bg:'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=1920&q=80' },
+    { id:'vibrant_retro', name:'ريترو 80s', nameEn:'Retro 80s', bg:'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=1920&q=80' },
+    { id:'pastel_dream', name:'حلم مبهج', nameEn:'Pastel Dream', bg:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&q=80' },
+    { id:'golden_hour', name:'الساعة الذهبية', nameEn:'Golden Hour', bg:'https://images.unsplash.com/photo-1495571758719-6ec1e876d6ae?auto=format&fit=crop&w=1920&q=80' },
+    { id:'ocean_blue', name:'أعماق زرقاء', nameEn:'Deep Blue', bg:'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920&q=80' }
+  ];
+
+  window.toggleLang = () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', lang); applyLang(); };
+
+  const ACH = [
+    {id:'first_quiz',icon:'🎯',name:'أول اختبار',nameEn:'First Quiz',desc:'لعبت أول اختبار', target:1, stat:'quizzes_played'},
+    {id:'quiz_10',icon:'📝',name:'10 اختبارات',nameEn:'10 Quizzes',desc:'لعبت 10 اختبارات', target:10, stat:'quizzes_played'},
+    {id:'quiz_50',icon:'📋',name:'50 اختبار',nameEn:'50 Quizzes',desc:'لعبت 50 اختبار', target:50, stat:'quizzes_played'},
+    {id:'quiz_100',icon:'📚',name:'100 اختبار',nameEn:'100 Quizzes',desc:'لعبت 100 اختبار', target:100, stat:'quizzes_played'},
+    {id:'quiz_500',icon:'📖',name:'500 اختبار',nameEn:'500 Quizzes',desc:'لعبت 500 اختبار', target:500, stat:'quizzes_played'},
+    {id:'quiz_1000',icon:'🎓',name:'1000 اختبار',nameEn:'1000 Quizzes',desc:'لعبت 1000 اختبار', target:1000, stat:'quizzes_played'},
+    {id:'correct_10',icon:'✅',name:'10 صح',nameEn:'10 Correct',desc:'10 إجابات صحيحة', target:10, stat:'correct_count'},
+    {id:'correct_50',icon:'👍',name:'50 صح',nameEn:'50 Correct',desc:'50 إجابة صحيحة', target:50, stat:'correct_count'},
+    {id:'correct_100',icon:'💯',name:'100 صح',nameEn:'100 Correct',desc:'100 إجابة صحيحة', target:100, stat:'correct_count'},
+    {id:'correct_500',icon:'🔥',name:'500 صح',nameEn:'500 Correct',desc:'500 إجابة صحيحة', target:500, stat:'correct_count'},
+    {id:'correct_1000',icon:'⭐',name:'1000 صح',nameEn:'1000 Correct',desc:'1000 إجابة صحيحة', target:1000, stat:'correct_count'},
+    {id:'correct_5000',icon:'🌟',name:'5000 صح',nameEn:'5000 Correct',desc:'5000 إجابة صحيحة', target:5000, stat:'correct_count'},
+    {id:'correct_10000',icon:'💫',name:'10000 صح',nameEn:'10000 Correct',desc:'10000 إجابة صحيحة', target:10000, stat:'correct_count'},
+    {id:'perfect_quiz',icon:'🎯',name:'اختبار كامل',nameEn:'Perfect',desc:'بدون أي غلط', target:1, stat:'perfect_quizzes'},
+    {id:'perfect_10',icon:'🏅',name:'10 كاملة',nameEn:'10 Perfect',desc:'10 اختبارات كاملة', target:10, stat:'perfect_quizzes'},
+    
+    {id:'streak_3',icon:'🔥',name:'3 أيام',nameEn:'3 Days',desc:'3 أيام متتالية', target:3, stat:'streak'},
+    {id:'streak_7',icon:'🔥',name:'أسبوع',nameEn:'1 Week',desc:'7 أيام متتالية', target:7, stat:'streak'},
+    {id:'streak_14',icon:'🔥',name:'أسبوعين',nameEn:'2 Weeks',desc:'14 يوم', target:14, stat:'streak'},
+    {id:'streak_30',icon:'💥',name:'شهر',nameEn:'1 Month',desc:'30 يوم', target:30, stat:'streak'},
+    {id:'streak_50',icon:'🔥',name:'50 يوم',nameEn:'50 Days',desc:'50 يوم', target:50, stat:'streak'},
+    {id:'streak_60',icon:'💥',name:'شهرين',nameEn:'2 Months',desc:'60 يوم', target:60, stat:'streak'},
+    {id:'streak_100',icon:'⚡',name:'100 يوم',nameEn:'100 Days',desc:'100 يوم', target:100, stat:'streak'},
+    {id:'streak_365',icon:'👑',name:'سنة كاملة',nameEn:'1 Year',desc:'365 يوم', target:365, stat:'streak'},
+    {id:'streak_break_1',icon:'💔',name:'أول كسر',nameEn:'First Break',desc:'كسرت ستريكك'},
+    {id:'streak_save',icon:'🛡️',name:'إنقاذ',nameEn:'Saved',desc:'أنقذت ستريكك'},
+    
+    {id:'coins_100',icon:'🪙',name:'100 كوين',nameEn:'100 Coins',desc:'جمعت 100', target:100, stat:'total_coins_earned'},
+    {id:'coins_1000',icon:'🪙',name:'1000 كوين',nameEn:'1K Coins',desc:'جمعت 1000', target:1000, stat:'total_coins_earned'},
+    {id:'coins_5000',icon:'💰',name:'5000 كوين',nameEn:'5K Coins',desc:'جمعت 5000', target:5000, stat:'total_coins_earned'},
+    {id:'coins_10000',icon:'💰',name:'10 آلاف',nameEn:'10K Coins',desc:'جمعت 10000', target:10000, stat:'total_coins_earned'},
+    {id:'coins_50000',icon:'💎',name:'50 ألف',nameEn:'50K Coins',desc:'جمعت 50000', target:50000, stat:'total_coins_earned'},
+    {id:'coins_100000',icon:'💎',name:'100 ألف',nameEn:'100K Coins',desc:'جمعت 100000', target:100000, stat:'total_coins_earned'},
+    {id:'coins_500000',icon:'👑',name:'نص مليون',nameEn:'500K',desc:'جمعت 500000', target:500000, stat:'total_coins_earned'},
+    {id:'coins_1000000',icon:'🏆',name:'مليونير',nameEn:'Millionaire',desc:'جمعت مليون', target:1000000, stat:'total_coins_earned'},
+    {id:'coins_spend_10000',icon:'🛒',name:'صرف 10 آلاف',nameEn:'Spent 10K',desc:'صرفت 10000', target:10000, stat:'total_coins_spent'},
+    {id:'coins_spend_100000',icon:'🛒',name:'صرف 100 ألف',nameEn:'Spent 100K',desc:'صرفت 100000', target:100000, stat:'total_coins_spent'},
+    
+    {id:'first_theme',icon:'🎨',name:'أول ثيم',nameEn:'First Theme',desc:'اشتريت أول ثيم', target:1, stat:'themes_owned'},
+    {id:'themes_5',icon:'🎨',name:'5 ثيمات',nameEn:'5 Themes',desc:'عندك 5 ثيمات', target:5, stat:'themes_owned'},
+    {id:'themes_10',icon:'🎨',name:'10 ثيمات',nameEn:'10 Themes',desc:'عندك 10 ثيمات', target:10, stat:'themes_owned'},
+    {id:'themes_20',icon:'🖼️',name:'20 ثيم',nameEn:'20 Themes',desc:'عندك 20 ثيم', target:20, stat:'themes_owned'},
+    {id:'themes_30',icon:'🖼️',name:'30 ثيم',nameEn:'30 Themes',desc:'عندك 30 ثيم', target:30, stat:'themes_owned'},
+    {id:'themes_all',icon:'🏆',name:'كل الثيمات',nameEn:'All Themes',desc:'كل الثيمات', target:15, stat:'themes_owned'},
+    {id:'first_legendary',icon:'👑',name:'أول أسطوري',nameEn:'First Leg',desc:'أول ثيم أسطوري', target:1, stat:'legendary_themes'},
+    {id:'legendary_5',icon:'👑',name:'5 أسطورية',nameEn:'5 Legendary',desc:'5 أسطورية', target:5, stat:'legendary_themes'},
+    {id:'legendary_all',icon:'👑',name:'كل الأسطورية',nameEn:'All Legendary',desc:'كل الأسطورية', target:5, stat:'legendary_themes'},
+    {id:'custom_theme',icon:'🎨',name:'مخصص',nameEn:'Custom',desc:'ثيم مخصص', target:1, stat:'custom_themes'},
+    
+    {id:'first_friend',icon:'👥',name:'أول صديق',nameEn:'First Friend',desc:'أول صديق', target:1, stat:'friends_count'},
+    {id:'friends_5',icon:'👥',name:'5 أصدقاء',nameEn:'5 Friends',desc:'5 أصدقاء', target:5, stat:'friends_count'},
+    {id:'friends_10',icon:'👥',name:'10 أصدقاء',nameEn:'10 Friends',desc:'10 أصدقاء', target:10, stat:'friends_count'},
+    {id:'friends_25',icon:'👨‍👩‍👧',name:'25 صديق',nameEn:'25 Friends',desc:'25 صديق', target:25, stat:'friends_count'},
+    {id:'friends_50',icon:'👨‍👩‍👧‍👦',name:'50 صديق',nameEn:'50 Friends',desc:'50 صديق', target:50, stat:'friends_count'},
+    {id:'first_team',icon:'⚔️',name:'أول تيم',nameEn:'First Team',desc:'انضميت لتيم', target:1, stat:'team_joined'},
+    {id:'team_leader',icon:'🛡️',name:'قائد',nameEn:'Leader',desc:'قائد تيم', target:1, stat:'is_team_leader'},
+    {id:'team_top1',icon:'🏆',name:'التيم الأول',nameEn:'Top Team',desc:'تيمك الأول', target:1, stat:'team_top1_count'},
+    {id:'first_match',icon:'⚔️',name:'أول مبارزة',nameEn:'First Match',desc:'أول مبارزة', target:1, stat:'matches_played'},
+    {id:'matches_50',icon:'⚔️',name:'50 مبارزة',nameEn:'50 Matches',desc:'50 مبارزة', target:50, stat:'matches_played'},
+    
+    {id:'comp_first',icon:'🏁',name:'أول مسابقة',nameEn:'First Comp',desc:'أول مسابقة', target:1, stat:'comps_played'},
+    {id:'comp_10',icon:'🏁',name:'10 مسابقات',nameEn:'10 Comps',desc:'10 مسابقات', target:10, stat:'comps_played'},
+    {id:'comp_50',icon:'🏁',name:'50 مسابقة',nameEn:'50 Comps',desc:'50 مسابقة', target:50, stat:'comps_played'},
+    {id:'comp_win',icon:'🥇',name:'فوز',nameEn:'Winner',desc:'فزت بمسابقة', target:1, stat:'comps_won'},
+    {id:'comp_top3',icon:'🥉',name:'توب 3',nameEn:'Top 3',desc:'وصلت توب 3', target:1, stat:'comps_top3'},
+    {id:'comp_top1_10',icon:'🥇',name:'الأول ×10',nameEn:'Top 1 x10',desc:'فزت 10 مرات', target:10, stat:'comps_won'},
+    {id:'comp_champion',icon:'👑',name:'بطل الموسم',nameEn:'Champion',desc:'بطل الموسم', target:1, stat:'season_champion'},
+    {id:'comp_finalist',icon:'🎯',name:'النهائي',nameEn:'Finalist',desc:'وصلت النهائي', target:1, stat:'comp_finalist'},
+    
+    {id:'box_first',icon:'📦',name:'أول صندوق',nameEn:'First Box',desc:'أول صندوق', target:1, stat:'boxes_opened'},
+    {id:'box_10',icon:'📦',name:'10 صناديق',nameEn:'10 Boxes',desc:'10 صناديق', target:10, stat:'boxes_opened'},
+    {id:'box_50',icon:'🎁',name:'50 صندوق',nameEn:'50 Boxes',desc:'50 صندوق', target:50, stat:'boxes_opened'},
+    {id:'box_100',icon:'🎁',name:'100 صندوق',nameEn:'100 Boxes',desc:'100 صندوق', target:100, stat:'boxes_opened'},
+    {id:'box_legendary',icon:'👑',name:'صندوق أسطوري',nameEn:'Leg Box',desc:'صندوق أسطوري', target:1, stat:'legendary_boxes_opened'},
+    {id:'item_first',icon:'🧰',name:'أول مساعد',nameEn:'First Item',desc:'أول مساعد', target:1, stat:'items_bought'},
+    {id:'items_50',icon:'🎒',name:'50 مساعد',nameEn:'50 Items',desc:'50 مساعد', target:50, stat:'items_bought'},
+    {id:'items_100',icon:'🎒',name:'100 مساعد',nameEn:'100 Items',desc:'100 مساعد', target:100, stat:'items_bought'},
+    
+    {id:'level_10',icon:'📈',name:'مستوى 10',nameEn:'Level 10',desc:'وصلت 10', target:10, stat:'level'},
+    {id:'level_25',icon:'📈',name:'مستوى 25',nameEn:'Level 25',desc:'وصلت 25', target:25, stat:'level'},
+    {id:'level_50',icon:'📊',name:'مستوى 50',nameEn:'Level 50',desc:'وصلت 50', target:50, stat:'level'},
+    {id:'level_100',icon:'👑',name:'مستوى 100',nameEn:'Level 100',desc:'وصلت 100', target:100, stat:'level'},
+    {id:'login_100',icon:'🔑',name:'100 دخول',nameEn:'100 Logins',desc:'100 دخول', target:100, stat:'login_count'},
+    {id:'login_365',icon:'🔑',name:'سنة دخول',nameEn:'1 Year Login',desc:'365 دخول', target:365, stat:'login_count'},
+    {id:'play_30days',icon:'📅',name:'30 يوم لعب',nameEn:'30 Days',desc:'لعبت 30 يوم', target:30, stat:'days_played'},
+    {id:'play_100days',icon:'📅',name:'100 يوم لعب',nameEn:'100 Days',desc:'لعبت 100 يوم', target:100, stat:'days_played'},
+    
+    {id:'night_owl',icon:'🦉',name:'بومة الليل',nameEn:'Night Owl',desc:'لعبت بعد نص الليل'},
+    {id:'early_bird',icon:'🐦',name:'طير الفجر',nameEn:'Early Bird',desc:'لعبت قبل الفجر'},
+    {id:'speedster',icon:'⚡',name:'سريع',nameEn:'Speedster',desc:'إجابة في أقل من ثانية'},
+    {id:'sniper',icon:'🎯',name:'قناص',nameEn:'Sniper',desc:'10 إجابات سريعة', target:10, stat:'fast_answers'},
+    {id:'lucky_7',icon:'🍀',name:'محظوظ',nameEn:'Lucky',desc:'لعبت يوم 7/7'},
+    {id:'ramadan',icon:'🌙',name:'رمضان',nameEn:'Ramadan',desc:'لعبت في رمضان'},
+    {id:'birthday',icon:'🎂',name:'عيد ميلاد',nameEn:'Birthday',desc:'لعبت في عيد ميلادك'},
+    {id:'first_1000_xp',icon:'✨',name:'1000 XP',nameEn:'1000 XP',desc:'1000 XP', target:1000, stat:'xp'},
+    {id:'leaderboard_top1',icon:'🏆',name:'الأول',nameEn:'Top 1',desc:'المركز الأول', target:1, stat:'lb_top1_count'},
+    {id:'completionist',icon:'👑',name:'كامل',nameEn:'Completionist',desc:'كل الإنجازات', target:89, stat:'achievements_count'}
+  ];
+
+  const TITLES = [
+    {id:'title_beginner',icon:'🌱',name:'المبتدئ',nameEn:'Beginner',desc:'لعبت أول اختبار', target:1, stat:'quizzes_played'},
+    {id:'title_pro',icon:'💼',name:'المحترف',nameEn:'Pro',desc:'لعبت 20 اختبار', target:20, stat:'quizzes_played'},
+    {id:'title_expert',icon:'🎓',name:'الخبير',nameEn:'Expert',desc:'لعبت 50 اختبار', target:50, stat:'quizzes_played'},
+    {id:'title_genius',icon:'🧠',name:'العبقري',nameEn:'Genius',desc:'لعبت 100 اختبار', target:100, stat:'quizzes_played'},
+    {id:'title_legend',icon:'👑',name:'الأسطورة',nameEn:'Legend',desc:'لعبت 500 اختبار', target:500, stat:'quizzes_played'},
+    {id:'title_coin_king',icon:'💰',name:'ملك الكوينز',nameEn:'Coin King',desc:'جمعت 10,000 كوينز', target:10000, stat:'total_coins_earned'},
+    {id:'title_millionaire',icon:'💎',name:'المليونير',nameEn:'Millionaire',desc:'جمعت مليون كوينز', target:1000000, stat:'total_coins_earned'},
+    {id:'title_theme_king',icon:'🎨',name:'ملك الثيمات',nameEn:'Theme King',desc:'امتلكت 10 ثيمات', target:10, stat:'themes_owned'},
+    {id:'title_collector',icon:'🖼️',name:'الجامع',nameEn:'Collector',desc:'امتلكت 15 ثيم', target:15, stat:'themes_owned'},
+    {id:'title_legendary_lover',icon:'🌟',name:'محب الأسطورية',nameEn:'Leg Lover',desc:'امتلكت 5 ثيمات أسطورية', target:5, stat:'legendary_themes'},
+    {id:'title_night_star',icon:'🌙',name:'نجم الليل',nameEn:'Night Star',desc:'لعبت بعد نص الليل'},
+    {id:'title_everyone_friend',icon:'🤝',name:'صديق الجميع',nameEn:'Friend',desc:'عندك 10 أصدقاء', target:10, stat:'friends_count'},
+    {id:'title_team_leader',icon:'⚔️',name:'قائد التيم',nameEn:'Leader',desc:'أسست أو قدت تيم'},
+    {id:'title_comp_champ',icon:'🏆',name:'بطل المسابقات',nameEn:'Comp Champ',desc:'فزت بـ 5 مسابقات', target:5, stat:'comps_won'},
+    {id:'title_always_first',icon:'🥇',name:'الأول دايماً',nameEn:'Always First',desc:'فزت بـ 10 مسابقات', target:10, stat:'comps_won'},
+    {id:'title_fast',icon:'⚡',name:'السريع',nameEn:'Fast',desc:'10 إجابات سريعة', target:10, stat:'fast_answers'},
+    {id:'title_precise',icon:'🎯',name:'الدقيق',nameEn:'Precise',desc:'1000 إجابة صحيحة', target:1000, stat:'correct_count'},
+    {id:'title_persistent',icon:'💪',name:'المثابر',nameEn:'Persistent',desc:'100 اختبار', target:100, stat:'quizzes_played'},
+    {id:'title_constant',icon:'📈',name:'المستمر',nameEn:'Constant',desc:'لعبت 30 يوم', target:30, stat:'days_played'},
+    {id:'title_loyal',icon:'❤️',name:'المخلص',nameEn:'Loyal',desc:'لعبت 365 يوم', target:365, stat:'days_played'},
+    {id:'title_box_king',icon:'📦',name:'ملك الصناديق',nameEn:'Box King',desc:'فتحت 100 صندوق', target:100, stat:'boxes_opened'},
+    {id:'title_smart',icon:'🧠',name:'الذكي',nameEn:'Smart',desc:'2000 إجابة صحيحة', target:2000, stat:'correct_count'},
+    {id:'title_creator',icon:'✨',name:'المبدع',nameEn:'Creator',desc:'صنعت ثيم مخصص'},
+    {id:'title_designer',icon:'🎨',name:'المصمم',nameEn:'Designer',desc:'امتلكت 30 ثيم', target:30, stat:'themes_owned'},
+    {id:'title_adventurer',icon:'🗺️',name:'المغامر',nameEn:'Adventurer',desc:'لعبت 50 مبارزة', target:50, stat:'matches_played'},
+    {id:'title_conqueror',icon:'🏰',name:'الفاتح',nameEn:'Conqueror',desc:'لعبت 50 مسابقة', target:50, stat:'comps_played'},
+    {id:'title_legendary',icon:'👑',name:'الأسطوري',nameEn:'Legendary',desc:'وصلت لمستوى 50', target:50, stat:'level'},
+    {id:'title_trophy_hunter',icon:'🏅',name:'صائد الجوائز',nameEn:'Hunter',desc:'اشتريت 100 مساعد', target:100, stat:'items_bought'},
+    {id:'title_lb_star',icon:'⭐',name:'نجم الليدر',nameEn:'LB Star',desc:'وصلت للمركز الأول', target:1, stat:'lb_top1_count'},
+    {id:'title_living_legend',icon:'🔥',name:'الأسطورة الحية',nameEn:'Living Legend',desc:'وصلت لمستوى 100', target:100, stat:'level'}
+  ];
+
+  function isOwned(srcObj, id) {
+    if (!srcObj) return false;
+    if (typeof srcObj === 'string') return srcObj === id;
+    if (Array.isArray(srcObj)) {
+        return srcObj.some(v => v === id || (v && typeof v === 'object' && (v.id === id || v.key === id)));
+    }
+    if (typeof srcObj === 'object') {
+        const val = srcObj[id];
+        if (val === true || val === 1 || (val && typeof val === 'object' && val.unlocked === true)) return true;
+    }
+    return false;
+  }
+
+  function hasAch(id) {
+    return isOwned(userData.achievements, id) 
+        || isOwned(userData.unlocked_achievements, id) 
+        || isOwned(userData.achievements_list, id) 
+        || isOwned(userData.ach, id);
+  }
+
+  function hasTitle(id) {
+    return isOwned(userData.owned_titles, id) 
+        || isOwned(userData.titles, id) 
+        || isOwned(userData.purchased_titles, id);
+  }
+
+  window.claimAch = async function(id) {
+    if (hasAch(id)) return;
+    const a = ACH.find(x => x.id === id);
+    if (!a) return;
+    
+    if (a.stat && a.target) {
+        if ((userData[a.stat] || 0) < a.target) {
+            showToast(lang === 'ar' ? 'أنت لم تحقق الشروط بعد!' : 'You have not met the requirements yet!', 'error');
+            return;
+        }
+    }
+
+    try {
+        await set(ref(db, `users_data/${CU}/achievements/${id}`), true);
+        if (achCounts && achCounts[id] !== undefined) achCounts[id]++;
+        else if (achCounts) achCounts[id] = 1;
+        localStorage.removeItem('ach_counts_v3'); localStorage.removeItem('ach_counts_v3_at');
+        showToast(T[lang].achUnlocked, 'success');
+    } catch(e) { showToast(T[lang].error + ": " + e.message, 'error'); }
+  };
+
+  window.claimTitle = async function(id) {
+    if (hasTitle(id)) return;
+    const t = TITLES.find(x => x.id === id);
+    if (!t) return;
+
+    if (t.stat && t.target) {
+        if ((userData[t.stat] || 0) < t.target) {
+            showToast(lang === 'ar' ? 'أنت لم تحقق شروط اللقب بعد!' : 'You have not met the title requirements yet!', 'error');
+            return;
+        }
+    }
+
+    try {
+        await set(ref(db, `users_data/${CU}/owned_titles/${id}`), true);
+        if (titleCounts && titleCounts[id] !== undefined) titleCounts[id]++;
+        else if (titleCounts) titleCounts[id] = 1;
+        localStorage.removeItem('ach_counts_v3'); localStorage.removeItem('ach_counts_v3_at');
+        showToast(T[lang].titleUnlocked, 'success');
+    } catch(e) { showToast(T[lang].error + ": " + e.message, 'error'); }
+  };
+
+  window.equipTitle = async function(id) {
+    if (!hasTitle(id)) return;
+    try {
+        await update(ref(db, `users_data/${CU}`), { currentTitle: id });
+        showToast(lang === 'ar' ? 'تم التجهيز!' : 'Equipped!', 'success');
+    } catch(e) { showToast(e.message, 'error'); }
+  };
+
+  window.claimAllOwner = async function() {
+    if (!isOwner) return;
+    if (!confirm(lang === 'ar' ? 'هل أنت متأكد من استلام كل الإنجازات والألقاب؟' : 'Claim everything?')) return;
+    
+    try {
+        const updates = {};
+        ACH.forEach(a => updates[`achievements/${a.id}`] = true);
+        TITLES.forEach(t => updates[`owned_titles/${t.id}`] = true);
+        
+        await update(ref(db, `users_data/${CU}`), updates);
+        localStorage.removeItem('ach_counts_v3'); localStorage.removeItem('ach_counts_v3_at');
+        showToast(lang === 'ar' ? 'تم استلام كل شيء بنجاح (أونر)!' : 'All claimed!', 'success');
+        loadCounts(true);
+    } catch(e) { showToast(e.message, 'error'); }
+  };
+
+  window.resetUserData = async function() {
+    if (!confirm(lang === 'ar' ? 'هل أنت متأكد من مسح كل الإنجازات والألقاب من حسابك للتصفير؟' : 'Are you sure you want to reset everything?')) return;
+    
+    try {
+        await update(ref(db, `users_data/${CU}`), {
+            achievements: null, unlocked_achievements: null, achievements_list: null, ach: null,
+            owned_titles: null, titles: null, purchased_titles: null,
+            currentTitle: null
+        });
+        localStorage.removeItem('ach_counts_v3'); localStorage.removeItem('ach_counts_v3_at');
+        showToast(T[lang].resetSuccess, 'success');
+        setTimeout(() => window.location.reload(), 1500);
+    } catch(e) { showToast(e.message, 'error'); }
+  };
+
+  window.loadCounts = async function(force = false) {
+    const now = Date.now();
+    if (!force && now - lastFetchTime < 5000) return; 
+    lastFetchTime = now;
+
+    const t = T[lang];
+    achCounts = null; titleCounts = null;
+    document.getElementById('achStatus').innerText = t.loading;
+    document.getElementById('titleStatus').innerText = t.loading;
+    document.getElementById('achRetry').style.display = 'none';
+    document.getElementById('titleRetry').style.display = 'none';
+    
+    renderAch(); renderTitles();
+
+    const CACHE_KEY = 'ach_counts_v3';
+    const CACHE_TIME = 'ach_counts_v3_at';
+    if (!force) {
+      const cached = localStorage.getItem(CACHE_KEY);
+      const cachedAt = +localStorage.getItem(CACHE_TIME);
+      if (cached && now - cachedAt < 3600_000) {
+        try {
+          const parsed = JSON.parse(cached);
+          achCounts = parsed.ach || {}; titleCounts = parsed.title || {}; playersCount = parsed.players || 0;
+          updateStatusTexts(); renderAch(); renderTitles();
+          return;
+        } catch(e) {}
+      }
+    }
+
+    try {
+      const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000));
+      const snap = await Promise.race([get(ref(db, 'users_data')), timeout]);
+      const users = snap.val() || {};
+      
+      const ac = {}; const tc = {};
+      ACH.forEach(a => ac[a.id] = 0); TITLES.forEach(t => tc[t.id] = 0);
+
+      const achFields = ['achievements', 'unlocked_achievements', 'achievements_list', 'ach'];
+      const titleFields = ['owned_titles', 'titles', 'purchased_titles'];
+
+      Object.values(users).forEach(u => {
+        if (!u || typeof u !== 'object') return;
+        
+        const userAchSet = new Set();
+        achFields.forEach(field => {
+          const v = u[field];
+          if (!v) return;
+          let ids = Array.isArray(v) ? v.map(x => typeof x === 'string' ? x : (x && (x.id || x.key))) : (typeof v === 'object' ? Object.keys(v).filter(k => v[k]) : (typeof v === 'string' ? [v] : []));
+          ids.forEach(id => { if (id && ac[id] !== undefined) userAchSet.add(id); });
+        });
+        userAchSet.forEach(id => ac[id]++);
+
+        const userTitleSet = new Set();
+        titleFields.forEach(field => {
+          const v = u[field];
+          if (!v) return;
+          let ids = Array.isArray(v) ? v.map(x => typeof x === 'string' ? x : (x && (x.id || x.key))) : (typeof v === 'object' ? Object.keys(v).filter(k => v[k]) : (typeof v === 'string' ? [v] : []));
+          ids.forEach(id => { if (id && tc[id] !== undefined) userTitleSet.add(id); });
+        });
+        userTitleSet.forEach(id => tc[id]++);
+      });
+
+      achCounts = ac; titleCounts = tc; playersCount = Object.keys(users).length;
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ ach: ac, title: tc, players: playersCount }));
+        localStorage.setItem(CACHE_TIME, String(now));
+      } catch(e) {}
+      updateStatusTexts(); renderAch(); renderTitles();
+    } catch(err) {
+      console.error('Counts failed:', err);
+      achCounts = {}; titleCounts = {};
+      document.getElementById('achStatus').innerText = T[lang].failed;
+      document.getElementById('titleStatus').innerText = T[lang].failed;
+      document.getElementById('achRetry').style.display = 'inline-block';
+      document.getElementById('titleRetry').style.display = 'inline-block';
+      renderAch(); renderTitles();
+    }
+  };
+
+  function updateStatusTexts() {
+    const t = T[lang];
+    const playerWord = lang === 'ar' ? 'لاعب' : 'players';
+    const msg = `${t.success} — ${playersCount} ${playerWord}`;
+    document.getElementById('achStatus').innerText = msg;
+    document.getElementById('titleStatus').innerText = msg;
+  }
+
+  function countBadge(counts, id) {
+    const t = T[lang];
+    if (counts === null) return `<span class="count-badge loading">⏳ ${t.players}</span>`;
+    const n = counts[id];
+    if (n === undefined) return `<span class="count-badge failed">— ${t.players}</span>`;
+    return `<span class="count-badge">👥 ${n} ${t.players}</span>`;
+  }
+
+  function renderAch() {
+    const grid = document.getElementById('achGrid');
+    const t = T[lang];
+
+    grid.innerHTML = ACH.map(a => {
+      const owned = hasAch(a.id);
+      const nm = lang === 'ar' ? a.name : a.nameEn;
+      
+      let actionHtml = '';
+      if (!owned) {
+         let progHtml = '';
+         let canClaim = false;
+         
+         if (a.stat && a.target) {
+             const curr = userData[a.stat] || 0;
+             const pct = Math.min(100, Math.round((curr / a.target) * 100));
+             progHtml = `<div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${pct}%"></div></div><div class="progress-label">${curr} / ${a.target}</div>`;
+             if (curr >= a.target) canClaim = true;
+         } else {
+             canClaim = true; 
+         }
+
+         if (canClaim) {
+             actionHtml = `${progHtml}<button class="action-btn btn-claim" onclick="claimAch('${a.id}')">${t.claim}</button>`;
+         } else {
+             actionHtml = `${progHtml}<div class="status-badge locked" style="margin-top:10px;">${t.locked}</div>`;
+         }
+      } else {
+         actionHtml = `<div class="status-badge owned" style="margin-top:10px;">${t.owned}</div>`;
+      }
+
+      return `
+        <div class="card ${owned ? 'owned' : 'locked'}">
+          <div class="icon-wrap">${a.icon}</div>
+          <div class="card-name">${nm}</div>
+          <div class="card-desc">${a.desc}</div>
+          ${countBadge(achCounts, a.id)}
+          ${actionHtml}
+        </div>`;
+    }).join('');
+  }
+
+  function renderTitles() {
+    const grid = document.getElementById('titlesGrid');
+    const t = T[lang];
+    const currentEquipped = userData.currentTitle || '';
+
+    grid.innerHTML = TITLES.map(tt => {
+      const owned = hasTitle(tt.id);
+      const isEquipped = currentEquipped === tt.id;
+      const nm = lang === 'ar' ? tt.name : tt.nameEn;
+      
+      let actionHtml = '';
+      if (!owned) {
+         let progHtml = '';
+         let canClaim = false;
+         
+         if (tt.stat && tt.target) {
+             const curr = userData[tt.stat] || 0;
+             const pct = Math.min(100, Math.round((curr / tt.target) * 100));
+             progHtml = `<div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${pct}%"></div></div><div class="progress-label">${curr} / ${tt.target}</div>`;
+             if (curr >= tt.target) canClaim = true;
+         } else {
+             canClaim = true; 
+         }
+
+         if (canClaim) {
+             actionHtml = `${progHtml}<button class="action-btn btn-claim" onclick="claimTitle('${tt.id}')">${t.claim}</button>`;
+         } else {
+             actionHtml = `${progHtml}<div class="status-badge locked" style="margin-top:10px;">${t.locked}</div>`;
+         }
+      } else {
+          actionHtml = isEquipped 
+            ? `<button class="action-btn btn-equipped">${t.equipped}</button>` 
+            : `<button class="action-btn btn-equip" onclick="equipTitle('${tt.id}')">${t.equip}</button>`;
+      }
+
+      return `
+        <div class="card ${owned ? 'owned' : 'locked'}" style="${isEquipped ? 'border-color: var(--green); box-shadow: 0 0 15px rgba(76,175,80,0.3);' : ''}">
+          <div class="icon-wrap">${tt.icon}</div>
+          <div class="card-name" style="color:var(--gold);">${nm}</div>
+          <div class="card-desc">${tt.desc}</div>
+          ${countBadge(titleCounts, tt.id)}
+          ${actionHtml}
+        </div>`;
+    }).join('');
+  }
+
+  function renderInventory() {
+    const grid = document.getElementById('inventoryGrid');
+    if (!grid) return;
+    const t = T[lang];
+    const inv = userData.inventory || {};
+    const ownedThemes = userData.ownedThemes || {};
+    
+    let html = '';
+    let hasItems = false;
+    
+    for (const [id, count] of Object.entries(inv)) {
+      if (count > 0) {
+        hasItems = true;
+        const item = SHOP_ITEMS.find(i => i.id === id);
+        if (item) {
+           html += `
+             <div class="card owned">
+               <div class="icon-wrap">${item.icon}</div>
+               <div class="card-name">${lang === 'ar' ? item.title : item.titleEn}</div>
+               <div class="count-badge" style="margin-top: 10px; background:rgba(76,175,80,0.15); border-color:rgba(76,175,80,0.4); color:#4caf50;">${t.youHave} ${count}</div>
+             </div>`;
+        }
+      }
+    }
+
+    for (const [id, owned] of Object.entries(ownedThemes)) {
+      if (owned) {
+        hasItems = true;
+        const theme = SHOP_THEMES.find(t => t.id === id);
+        if (theme) {
+           html += `
+             <div class="card owned" style="padding:0; overflow:hidden;">
+               <img src="${theme.bg}" style="width:100%; height:120px; object-fit:cover; filter: saturate(1.5);">
+               <div style="padding: 10px;">
+                   <div class="card-name">${lang === 'ar' ? theme.name : theme.nameEn}</div>
+                   <div class="count-badge" style="margin-top: 5px; background:rgba(156,39,176,0.15); border-color:rgba(156,39,176,0.4); color:#9c27b0;">${t.themes}</div>
+               </div>
+             </div>`;
+        }
+      }
+    }
+    
+    if (!hasItems) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 50px; color: var(--sub); font-size: 18px;">🎒<br><br>${t.emptyInv}</div>`;
+    } else {
+      grid.innerHTML = html;
+    }
+  }
+
+  function updateProgressRing() {
+    const total = ACH.length;
+    const done = ACH.filter(a => hasAch(a.id)).length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const circumference = 283; 
+    const offset = circumference - (pct / 100) * circumference;
+    const ring = document.getElementById('ringFg');
+    if (ring) ring.style.strokeDashoffset = offset;
+    const t = T[lang];
+    document.getElementById('progressTitle').innerText = `${pct}%`;
+    document.getElementById('progressSub').innerText = t.progressSub.replace('{done}', done).replace('{total}', total);
+  }
+
+  function applyLang() {
+    const t = T[lang];
+    document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('btnBack').innerText = t.back;
+    document.getElementById('lblCoins').innerText = t.coins;
+    document.getElementById('tabAch').innerText = t.tabAch;
+    document.getElementById('tabTitles').innerText = t.tabTitles;
+    document.getElementById('tabInventory').innerText = t.tabInv;
+    document.getElementById('btnLang').innerText = lang === 'ar' ? 'EN' : 'AR';
+
+    if (achCounts === null) {
+      document.getElementById('achStatus').innerText = t.loading;
+      document.getElementById('titleStatus').innerText = t.loading;
+    } else if (achCounts && Object.keys(achCounts).length === 0) {
+      document.getElementById('achStatus').innerText = t.failed;
+      document.getElementById('achRetry').innerText = t.retry;
+      document.getElementById('titleStatus').innerText = t.failed;
+      document.getElementById('titleRetry').innerText = t.retry;
+    } else {
+      updateStatusTexts();
+    }
+
+    let toolsHtml = `<button class="owner-btn reset" onclick="resetUserData()">${t.resetAll}</button>`;
+    if (isOwner) {
+        document.getElementById('coinPill').style.display = 'none';
+        toolsHtml = `<button class="owner-btn" onclick="claimAllOwner()">${t.claimAll}</button>` + toolsHtml;
+    }
+    document.getElementById('ownerTools').innerHTML = toolsHtml;
+
+    renderAch();
+    renderTitles();
+    renderInventory();
+    updateProgressRing();
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.content-area').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById('tab-' + id);
+      if (target) target.classList.add('active');
+    });
+  });
+
+  onValue(ref(db, `users_data/${CU}`), snap => {
+    userData = snap.val() || {};
+    document.getElementById('topCoins').innerText = userData.coins || 0;
+    renderAch();
+    renderTitles();
+    renderInventory();
+    updateProgressRing();
+  });
+
+  applyLang();
+  loadCounts();
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+  // Toast Notification Logic
+  let toastTimeout;
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.className = `show ${type}`;
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+</body>
+</html>
