@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏰 وضع القصة - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --green:#4caf50; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
+  .container { max-width:900px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); font-size:32px; margin-bottom:10px; }
+  .subtitle { text-align:center; color:#aaa; margin-bottom:30px; }
+  .chapter { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
+  .chapter.locked { opacity:0.5; }
+  .chapter-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
+  .chapter-title { font-size:22px; font-weight:900; color:var(--gold); }
+  .chapter-icon { font-size:40px; }
+  .stage { background:#1a1a1a; border:1px solid #333; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .stage.completed { border-color:var(--green); background:rgba(76,175,80,0.1); }
+  .stage-info { flex:1; }
+  .stage-title { font-weight:bold; font-size:14px; }
+  .stage-hint { font-size:11px; color:#aaa; margin-top:3px; }
+  .stage-status { font-size:20px; }
+  .btn-play { padding:8px 20px; background:var(--green); color:#fff; border:none; border-radius:8px; font-family:Cairo; font-weight:bold; cursor:pointer; text-decoration:none; font-size:13px; }
+  .btn-play:disabled { background:#444; cursor:not-allowed; }
+  .reward-box { background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,140,0,0.1)); border:2px dashed var(--gold); border-radius:10px; padding:12px; margin-top:10px; text-align:center; color:var(--gold); font-weight:bold; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="back-btn">⬅ رجوع</a>
+  <h1>🏰 وضع القصة</h1>
+  <p class="subtitle">كمّل المراحل بالترتيب، واكسب مكافآت أسطورية</p>
+  <div id="chaptersContainer"></div>
+</div>
+
+<script type="module">
+import './features/story-mode.js';
+import { db, ref, get, currentUser, showToast } from './firebase-shared.js';
+
+async function renderChapters() {
+  const progress = await window.NFStory.getUserStoryProgress();
+  const container = document.getElementById('chaptersContainer');
+  
+  container.innerHTML = window.NFStory.STORY_CHAPTERS.map((ch, chIndex) => {
+    const chProg = progress[ch.id] || { completedStages: 0 };
+    const prevChapter = chIndex > 0 ? window.NFStory.STORY_CHAPTERS[chIndex - 1] : null;
+    const prevCompleted = !prevChapter || (progress[prevChapter.id]?.completedAt);
+    const isLocked = !prevCompleted;
+    const isCompleted = !!chProg.completedAt;
+    
+    return `
+      <div class="chapter ${isLocked ? 'locked' : ''}">
+        <div class="chapter-header">
+          <div>
+            <div class="chapter-icon">${isLocked ? '🔒' : ch.icon}</div>
+            <div class="chapter-title">${ch.name}</div>
+            <div style="font-size:13px;color:#aaa;">${ch.desc}</div>
+          </div>
+          ${isCompleted ? '<span style="color:var(--green);font-size:20px;">✅ مكتمل</span>' : `<span style="color:#aaa;">${chProg.completedStages}/${ch.stages.length}</span>`}
+        </div>
+        ${ch.stages.map((st, i) => {
+          const completed = i < chProg.completedStages;
+          const unlocked = !isLocked && i <= chProg.completedStages;
+          return `
+            <div class="stage ${completed ? 'completed' : ''}">
+              <div class="stage-status">${completed ? '✅' : (unlocked ? '🎯' : '🔒')}</div>
+              <div class="stage-info">
+                <div class="stage-title">المرحلة ${i+1}: ${st.title}</div>
+                ${st.hint ? `<div class="stage-hint">💡 ${st.hint}</div>` : ''}
+                <div class="stage-hint">الهدف: ${st.target} نقطة</div>
+              </div>
+              ${unlocked 
+                ? `<a href="${st.file}" class="btn-play" onclick="localStorage.setItem('story_stage','${ch.id}|${i}')">${completed ? '🔄 العب تاني' : '▶️ العب'}</a>`
+                : '<button class="btn-play" disabled>🔒 مقفول</button>'}
+            </div>
+          `;
+        }).join('')}
+        <div class="reward-box">🎁 مكافأة الشابتر: ${ch.reward.coins} كوينز + ${ch.reward.xp} XP + ${ch.reward.badge}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+setTimeout(renderChapters, 300);
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+</body>
+</html>
