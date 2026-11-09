@@ -729,24 +729,23 @@
 
   window.closeModal = function() { document.getElementById('manageModal').style.display = 'none'; };
 
-  // ✅ 1. رسم الكروت فوراً عشان الصفحة متفضلش فاضية
   renderMainTeams();
 
-  // ✅ 2. التأكد من الصلاحيات
   if (!isAdmin) {
       window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
           const role = snap.exists() ? snap.val() : 'Player';
           if (adminRoles.includes(role)) {
               isAdmin = true;
-              renderMainTeams(); // إعادة الرسم لو كان إداري
+              renderMainTeams(); 
           }
       }).catch(e => console.error("Error fetching role:", e));
   }
 
-  // ✅ 3. تشغيل الترجمة عند التحميل
   window.onload = () => {
       applyLanguage();
   };
 </script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
 </body>
 </html>
