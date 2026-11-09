@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="quiz-style.css">
+<link rel="stylesheet" href="features/new-features.css">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
@@ -24,6 +25,13 @@
         <h2 class="card-title" data-ar="العب الشامل" data-en="Play Comprehensive">العب الشامل</h2>
     </div>
   </div>
+  
+  <!-- الميزات الجديدة (تفاعلات وتقييم) -->
+  <div style="width: 100%; max-width: 750px; margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+      <div data-reactions-quiz="ahmedwaahmed"></div>
+      <div data-ratings-quiz="ahmedwaahmed"></div>
+  </div>
+
   <button class="speedrun-btn" onclick="startSpeedrun()" data-ar="⚡ العب في وضع السرعة" data-en="⚡ Play Speedrun">⚡ العب في وضع السرعة</button>
   <button class="speedrun-btn" style="background: #222; border-color: #ff0000; margin-top: 10px;" onclick="openChallengeModal()" data-ar="⚔️ تحدي صديق" data-en="⚔️ Challenge Friend">⚔️ تحدي صديق</button>
   <button class="speedrun-btn" style="background: #ff9800; border-color: #ffd700; margin-top: 10px; color: #000;" onclick="startRandomMatch()" data-ar="🎲 تحدي عشوائي" data-en="🎲 Random Match">🎲 تحدي عشوائي</button>
@@ -54,6 +62,7 @@
     <button class="room-btn" style="background:#222;" onclick="closeChallengeModal()" data-ar="إغلاق" data-en="Close">إغلاق</button>
   </div>
 </div>
+
 <script src="questions.js"></script>
 <script src="quiz-core.js" type="module"></script>
 <script>
@@ -66,6 +75,14 @@
         }
     });
 </script>
+
+<script type="module">
+  import './features/reactions.js';
+  import './features/ratings.js';
+</script>
+<script type="module" src="notifications.js"></script>
 <script src="room-cleaner.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
 </body>
 </html>
