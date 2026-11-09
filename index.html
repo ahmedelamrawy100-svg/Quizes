@@ -6,6 +6,9 @@
 <title>🎬 منصة الكويزات - Quiz Hub</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="features/new-features.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff0000">
 <style>
   :root { 
       --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%); 
@@ -48,13 +51,7 @@
   .btn-lang { background: #333 !important; color: #fff !important; border-color: #555 !important; }
   .btn-notify { background: #ffd700 !important; color: #000 !important; }
 
-  /* ✅ علامة التوثيق */
-  .verified-badge {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 16px; height: 16px; background: #1DA1F2; color: #fff;
-      border-radius: 50%; font-size: 10px; font-weight: bold;
-      margin-right: 4px; vertical-align: middle; box-shadow: 0 0 5px rgba(29, 161, 242, 0.5);
-  }
+  .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 10px; font-weight: bold; margin-right: 4px; vertical-align: middle; box-shadow: 0 0 5px rgba(29, 161, 242, 0.5); }
 
   .side-menu { position: fixed; top: 0; right: -320px; width: 300px; height: 100vh; background: var(--card-bg); border-left: 2px solid var(--card-border); z-index: 2000; transition: 0.3s ease-in-out; display: flex; flex-direction: column; padding-top: 20px; overflow-y: auto; }
   .side-menu.open { right: 0; }
@@ -66,7 +63,6 @@
 
   #announcement-bar { width: 100%; max-width: 1200px; background: var(--accent); color: #fff; text-align: center; padding: 12px; font-weight: bold; display: none; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,0,0,0.3); }
   
-  /* ✅ لوحة الفعاليات */
   .events-dashboard { width: 100%; max-width: 1000px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
   .event-card { background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 15px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; overflow: hidden; }
   .event-card.poll { border-color: #00bcd4; box-shadow: 0 0 15px rgba(0, 188, 212, 0.2); }
@@ -142,6 +138,13 @@
   <a href="inbox.html" class="menu-item" data-ar="📩 صندوق الرسائل" data-en="📩 Inbox">📩 صندوق الرسائل</a>
   <a href="teams.html" class="menu-item" style="color: #ffd700;" data-ar="⚔️ حرب التيمات" data-en="⚔️ Team Battles">⚔️ حرب التيمات</a>
   <a href="chat.html" class="menu-item" style="color: #25D366;" data-ar="💬 الشات الجماعي" data-en="💬 Global Chat" id="chatMenuBtn">💬 الشات الجماعي</a>
+  
+  <!-- 🆕 روابط جديدة -->
+  <a href="story.html" class="menu-item" style="color: #a855f7;" data-ar="🏰 وضع القصة" data-en="🏰 Story Mode">🏰 وضع القصة</a>
+  <a href="co-op.html" class="menu-item" style="color: #4caf50;" data-ar="🤝 كويز تعاوني" data-en="🤝 Co-op Quiz">🤝 كويز تعاوني</a>
+  <a href="avatars.html" class="menu-item" style="color: #e91e63;" data-ar="🎭 الشخصيات" data-en="🎭 Avatars">🎭 الشخصيات</a>
+  <a href="market.html" class="menu-item" style="color: #00bcd4;" data-ar="💼 السوق" data-en="💼 Market">💼 السوق</a>
+  
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
   <a href="shop.html" class="menu-item" style="color: #ff9800;" data-ar="🛒 المتجر" data-en="🛒 Shop">🛒 المتجر</a>
@@ -202,11 +205,13 @@
   
   <div id="announcement-bar"></div>
 
+  <!-- 🆕 Seasonal Banner -->
+  <div id="seasonalBanner" style="display:none;max-width:1200px;width:100%;margin-bottom:20px;"></div>
+
   <div id="offersMarquee" style="display: none; width: 100%; max-width: 1200px; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); border-radius: 10px; padding: 10px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; position: relative;">
       <div id="offersText" style="display: inline-block; font-size: 18px; font-weight: bold; color: var(--gold); animation: marquee 15s linear infinite; padding-left: 100%;"></div>
   </div>
 
-  <!-- ✅ لوحة الفعاليات (استفتاءات ومسابقات) -->
   <div class="events-dashboard" id="eventsDashboard">
       <div class="event-card poll" id="pollCard" style="display: none;">
           <div class="event-title poll">🗳️ استفتاء مباشر</div>
@@ -261,53 +266,53 @@
   </div>
 
   <div class="grid-container" id="cards-container">
-    <a href="Conjuring Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title">The Conjuring</h2></a>
-    <a href="FNAF Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title">FNAF</h2></a>
-    <a href="The Nun Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title">The Nun</h2></a>
-    <a href="Annabelle Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title">Annabelle</h2></a>
-    <a href="Train to Busan Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/busan.jpg');"><h2 class="card-title">Train to Busan</h2></a>
-    <a href="Scream Quiz.html" class="quiz-card" data-category="horror" style="background-image: url('pic/Scream.jpeg');"><h2 class="card-title">Scream</h2></a>
+    <a href="Conjuring Quiz.html" class="quiz-card" data-quiz-key="conjuring" data-category="horror" style="background-image: url('pic/The Conjuring.jpg');"><h2 class="card-title">The Conjuring</h2></a>
+    <a href="FNAF Quiz.html" class="quiz-card" data-quiz-key="fnaf" data-category="horror" style="background-image: url('pic/FNAF.jpg');"><h2 class="card-title">FNAF</h2></a>
+    <a href="The Nun Quiz.html" class="quiz-card" data-quiz-key="thenun" data-category="horror" style="background-image: url('pic/The Nun.jpg');"><h2 class="card-title">The Nun</h2></a>
+    <a href="Annabelle Quiz.html" class="quiz-card" data-quiz-key="annabelle" data-category="horror" style="background-image: url('pic/Annabelle.jpg');"><h2 class="card-title">Annabelle</h2></a>
+    <a href="Train to Busan Quiz.html" class="quiz-card" data-quiz-key="traintobusan" data-category="horror" style="background-image: url('pic/busan.jpg');"><h2 class="card-title">Train to Busan</h2></a>
+    <a href="Scream Quiz.html" class="quiz-card" data-quiz-key="scream" data-category="horror" style="background-image: url('pic/Scream.jpeg');"><h2 class="card-title">Scream</h2></a>
 
-    <a href="Squid Game Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title">Squid Game</h2></a>
-    <a href="Spider-Man Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Spider-Man.jpeg');"><h2 class="card-title">Spider-Man</h2></a>
-    <a href="Avengers Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avengers.jpeg');"><h2 class="card-title">Avengers</h2></a>
-    <a href="Avatar Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Avatar.jpeg');"><h2 class="card-title">Avatar</h2></a>
-    <a href="Venom Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Venom.jpeg');"><h2 class="card-title">Venom</h2></a>
-    <a href="Birds of Prey Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Birds of Prey.jpeg');"><h2 class="card-title">Birds of Prey</h2></a>
-    <a href="Maze Runner Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Maze Runner.jpeg');"><h2 class="card-title">The Maze Runner</h2></a>
-    <a href="Rambo Quiz.html" class="quiz-card" data-category="action" style="background-image: url('pic/Rambo.jpg');"><h2 class="card-title">Rambo</h2></a>
+    <a href="Squid Game Quiz.html" class="quiz-card" data-quiz-key="squidgame" data-category="action" style="background-image: url('pic/Squid Game.jpg');"><h2 class="card-title">Squid Game</h2></a>
+    <a href="Spider-Man Quiz.html" class="quiz-card" data-quiz-key="spiderman" data-category="action" style="background-image: url('pic/Spider-Man.jpeg');"><h2 class="card-title">Spider-Man</h2></a>
+    <a href="Avengers Quiz.html" class="quiz-card" data-quiz-key="avengers" data-category="action" style="background-image: url('pic/Avengers.jpeg');"><h2 class="card-title">Avengers</h2></a>
+    <a href="Avatar Quiz.html" class="quiz-card" data-quiz-key="avatar" data-category="action" style="background-image: url('pic/Avatar.jpeg');"><h2 class="card-title">Avatar</h2></a>
+    <a href="Venom Quiz.html" class="quiz-card" data-quiz-key="venom" data-category="action" style="background-image: url('pic/Venom.jpeg');"><h2 class="card-title">Venom</h2></a>
+    <a href="Birds of Prey Quiz.html" class="quiz-card" data-quiz-key="birdsofprey" data-category="action" style="background-image: url('pic/Birds of Prey.jpeg');"><h2 class="card-title">Birds of Prey</h2></a>
+    <a href="Maze Runner Quiz.html" class="quiz-card" data-quiz-key="mazerunner" data-category="action" style="background-image: url('pic/Maze Runner.jpeg');"><h2 class="card-title">The Maze Runner</h2></a>
+    <a href="Rambo Quiz.html" class="quiz-card" data-quiz-key="rambo" data-category="action" style="background-image: url('pic/Rambo.jpg');"><h2 class="card-title">Rambo</h2></a>
 
-    <a href="Fall Quiz.html" class="quiz-card" data-category="thriller" style="background-image: url('pic/Fall.jpeg');"><h2 class="card-title">Fall</h2></a>
+    <a href="Fall Quiz.html" class="quiz-card" data-quiz-key="fall" data-category="thriller" style="background-image: url('pic/Fall.jpeg');"><h2 class="card-title">Fall</h2></a>
 
-    <a href="Wednesday Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title">Wednesday</h2></a>
-    <a href="Knives Out Quiz.html" class="quiz-card" data-category="mystery" style="background-image: url('pic/Knives Out.jpeg');"><h2 class="card-title">Knives Out</h2></a>
+    <a href="Wednesday Quiz.html" class="quiz-card" data-quiz-key="wednesday" data-category="mystery" style="background-image: url('pic/Wednesday.jpg');"><h2 class="card-title">Wednesday</h2></a>
+    <a href="Knives Out Quiz.html" class="quiz-card" data-quiz-key="knivesout" data-category="mystery" style="background-image: url('pic/Knives Out.jpeg');"><h2 class="card-title">Knives Out</h2></a>
 
-    <a href="El Harifa Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Harifa.jpeg');"><h2 class="card-title">الحريفة</h2></a>
-    <a href="The Blue Elephant Quiz.html" class="quiz-card" data-category="egyptian mystery-eg" style="background-image: url('pic/Blue Elephant.jpg');"><h2 class="card-title">الفيل الأزرق</h2></a>
-    <a href="Fol El Seen Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Fol El Seen.jpg');"><h2 class="card-title">فول الصين العظيم</h2></a>
-    <a href="El Shater Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/El Shater.jpeg');"><h2 class="card-title">الشاطر</h2></a>
-    <a href="Shalaby Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Shalaby.jpeg');"><h2 class="card-title">شلبي</h2></a>
-    <a href="Wesh X Wesh Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Wesh X Wesh.jpeg');"><h2 class="card-title">وش في وش</h2></a>
-    <a href="Siko Siko Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Siko Siko.jpeg');"><h2 class="card-title">سيكو سيكو</h2></a>
-    <a href="El Mashroa X Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Mashroa X.jpg');"><h2 class="card-title">المشروع إكس</h2></a>
-    <a href="Mister X Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Mister X.jpeg');"><h2 class="card-title">مستر إكس</h2></a>
-    <a href="Barshama Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Barshama.jpeg');"><h2 class="card-title">برشامة</h2></a>
-    <a href="Rocky El Ghalaba Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Rocky El Ghalaba.jpg');"><h2 class="card-title">روكي الغلابة</h2></a>
-    <a href="Beit El Ruby Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Beit El Ruby.jpeg');"><h2 class="card-title">بيت الروبي</h2></a>
-    <a href="Meraty X Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty X.jpg');"><h2 class="card-title">مراتي إكس</h2></a>
-    <a href="El Serb Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Serb.jpeg');"><h2 class="card-title">السرب</h2></a>
-    <a href="El Eskandarany Quiz.html" class="quiz-card" data-category="egyptian drama-eg" style="background-image: url('pic/El Eskandarany.jpeg');"><h2 class="card-title">الإسكندراني</h2></a>
-    <a href="Shako Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/Shako.jpeg');"><h2 class="card-title">شقو</h2></a>
-    <a href="Meraty W Zegty Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty W Zegty.jpeg');"><h2 class="card-title">مراتي وزوجتي</h2></a>
-    <a href="Nadi El Regal Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Nadi El Regal.jpg');"><h2 class="card-title">نادي الرجال السري</h2></a>
-    <a href="El Aref Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Aref.jpeg');"><h2 class="card-title">العارف</h2></a>
-    <a href="El Mamar Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/El Mamar.jpeg');"><h2 class="card-title">الممر</h2></a>
-    <a href="Ahmed Wa Ahmed Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Ahmed Wa Ahmed.jpeg');"><h2 class="card-title">أحمد وأحمد</h2></a>
-    <a href="Bahebak Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Bahebak.jpg');"><h2 class="card-title">بحبك</h2></a>
-    <a href="Fasel Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Fasel.jpg');"><h2 class="card-title">فاصل من اللحظات اللذيذة</h2></a>
-    <a href="Akhy Fok El Shagara Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Akhy Fok El Shagara.jpeg');"><h2 class="card-title">أخي فوق الشجرة</h2></a>
-    <a href="Restart Quiz.html" class="quiz-card" data-category="egyptian comedy-eg" style="background-image: url('pic/Restart.jpg');"><h2 class="card-title">ريستارت</h2></a>
-    <a href="Tag Quiz.html" class="quiz-card" data-category="egyptian action-eg" style="background-image: url('pic/Tag.jpg');"><h2 class="card-title">تاج</h2></a>
+    <a href="El Harifa Quiz.html" class="quiz-card" data-quiz-key="elharifa" data-category="egyptian comedy-eg" style="background-image: url('pic/Harifa.jpeg');"><h2 class="card-title">الحريفة</h2></a>
+    <a href="The Blue Elephant Quiz.html" class="quiz-card" data-quiz-key="blueelephant" data-category="egyptian mystery-eg" style="background-image: url('pic/Blue Elephant.jpg');"><h2 class="card-title">الفيل الأزرق</h2></a>
+    <a href="Fol El Seen Quiz.html" class="quiz-card" data-quiz-key="foolelseen" data-category="egyptian comedy-eg" style="background-image: url('pic/Fol El Seen.jpg');"><h2 class="card-title">فول الصين العظيم</h2></a>
+    <a href="El Shater Quiz.html" class="quiz-card" data-quiz-key="elshater" data-category="egyptian comedy-eg" style="background-image: url('pic/El Shater.jpeg');"><h2 class="card-title">الشاطر</h2></a>
+    <a href="Shalaby Quiz.html" class="quiz-card" data-quiz-key="shalaby" data-category="egyptian comedy-eg" style="background-image: url('pic/Shalaby.jpeg');"><h2 class="card-title">شلبي</h2></a>
+    <a href="Wesh X Wesh Quiz.html" class="quiz-card" data-quiz-key="weshxwesh" data-category="egyptian comedy-eg" style="background-image: url('pic/Wesh X Wesh.jpeg');"><h2 class="card-title">وش في وش</h2></a>
+    <a href="Siko Siko Quiz.html" class="quiz-card" data-quiz-key="sikosiko" data-category="egyptian comedy-eg" style="background-image: url('pic/Siko Siko.jpeg');"><h2 class="card-title">سيكو سيكو</h2></a>
+    <a href="El Mashroa X Quiz.html" class="quiz-card" data-quiz-key="elmashroax" data-category="egyptian action-eg" style="background-image: url('pic/El Mashroa X.jpg');"><h2 class="card-title">المشروع إكس</h2></a>
+    <a href="Mister X Quiz.html" class="quiz-card" data-quiz-key="misterx" data-category="egyptian comedy-eg" style="background-image: url('pic/Mister X.jpeg');"><h2 class="card-title">مستر إكس</h2></a>
+    <a href="Barshama Quiz.html" class="quiz-card" data-quiz-key="barshama" data-category="egyptian comedy-eg" style="background-image: url('pic/Barshama.jpeg');"><h2 class="card-title">برشامة</h2></a>
+    <a href="Rocky El Ghalaba Quiz.html" class="quiz-card" data-quiz-key="rockyelghalaba" data-category="egyptian comedy-eg" style="background-image: url('pic/Rocky El Ghalaba.jpg');"><h2 class="card-title">روكي الغلابة</h2></a>
+    <a href="Beit El Ruby Quiz.html" class="quiz-card" data-quiz-key="beitelruby" data-category="egyptian comedy-eg" style="background-image: url('pic/Beit El Ruby.jpeg');"><h2 class="card-title">بيت الروبي</h2></a>
+    <a href="Meraty X Quiz.html" class="quiz-card" data-quiz-key="meratyx" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty X.jpg');"><h2 class="card-title">مراتي إكس</h2></a>
+    <a href="El Serb Quiz.html" class="quiz-card" data-quiz-key="elserb" data-category="egyptian action-eg" style="background-image: url('pic/El Serb.jpeg');"><h2 class="card-title">السرب</h2></a>
+    <a href="El Eskandarany Quiz.html" class="quiz-card" data-quiz-key="eleskandarany" data-category="egyptian drama-eg" style="background-image: url('pic/El Eskandarany.jpeg');"><h2 class="card-title">الإسكندراني</h2></a>
+    <a href="Shako Quiz.html" class="quiz-card" data-quiz-key="shako" data-category="egyptian action-eg" style="background-image: url('pic/Shako.jpeg');"><h2 class="card-title">شقو</h2></a>
+    <a href="Meraty W Zegty Quiz.html" class="quiz-card" data-quiz-key="meratywzegty" data-category="egyptian comedy-eg" style="background-image: url('pic/Meraty W Zegty.jpeg');"><h2 class="card-title">مراتي وزوجتي</h2></a>
+    <a href="Nadi El Regal Quiz.html" class="quiz-card" data-quiz-key="nadielregal" data-category="egyptian comedy-eg" style="background-image: url('pic/Nadi El Regal.jpg');"><h2 class="card-title">نادي الرجال السري</h2></a>
+    <a href="El Aref Quiz.html" class="quiz-card" data-quiz-key="elaref" data-category="egyptian action-eg" style="background-image: url('pic/El Aref.jpeg');"><h2 class="card-title">العارف</h2></a>
+    <a href="El Mamar Quiz.html" class="quiz-card" data-quiz-key="elmamar" data-category="egyptian action-eg" style="background-image: url('pic/El Mamar.jpeg');"><h2 class="card-title">الممر</h2></a>
+    <a href="Ahmed Wa Ahmed Quiz.html" class="quiz-card" data-quiz-key="ahmedwaahmed" data-category="egyptian comedy-eg" style="background-image: url('pic/Ahmed Wa Ahmed.jpeg');"><h2 class="card-title">أحمد وأحمد</h2></a>
+    <a href="Bahebak Quiz.html" class="quiz-card" data-quiz-key="bahebak" data-category="egyptian comedy-eg" style="background-image: url('pic/Bahebak.jpg');"><h2 class="card-title">بحبك</h2></a>
+    <a href="Fasel Quiz.html" class="quiz-card" data-quiz-key="fasel" data-category="egyptian comedy-eg" style="background-image: url('pic/Fasel.jpg');"><h2 class="card-title">فاصل من اللحظات اللذيذة</h2></a>
+    <a href="Akhy Fok El Shagara Quiz.html" class="quiz-card" data-quiz-key="akhyfok" data-category="egyptian comedy-eg" style="background-image: url('pic/Akhy Fok El Shagara.jpeg');"><h2 class="card-title">أخي فوق الشجرة</h2></a>
+    <a href="Restart Quiz.html" class="quiz-card" data-quiz-key="restart" data-category="egyptian comedy-eg" style="background-image: url('pic/Restart.jpg');"><h2 class="card-title">ريستارت</h2></a>
+    <a href="Tag Quiz.html" class="quiz-card" data-quiz-key="tag" data-category="egyptian action-eg" style="background-image: url('pic/Tag.jpg');"><h2 class="card-title">تاج</h2></a>
 
 </div>
 </div>
@@ -323,6 +328,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get, set, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import './features/seasonal-quizzes.js'; // 🆕 Import Seasonal
 
   const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
   const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app);
@@ -353,7 +359,13 @@
   });
 
   function loadUserSettings(username) {
-      // 1. الإعلان العام
+      // 🆕 Seasonal Banner
+      if (window.NFSeasonal) {
+          window.NFSeasonal.listenActiveSeason(s => {
+              window.NFSeasonal.renderSeasonalBanner(document.getElementById('seasonalBanner'), s);
+          });
+      }
+
       window.onValue(window.ref(window.db, 'site_settings/announcement'), snap => {
           const bar = document.getElementById('announcement-bar');
           if (!bar) return;
@@ -361,7 +373,6 @@
           else { bar.style.display = 'none'; }
       });
 
-      // ✅ 2. التوثيق
       window.onValue(window.ref(window.db, 'verified_users/' + username), snap => {
           const isVerified = snap.exists();
           const profileBtn = document.getElementById('navProfileBtn');
@@ -370,7 +381,6 @@
           }
       });
 
-      // ✅ 3. الحظر والطرد
       window.onValue(window.ref(window.db, 'banned_users/' + username), snap => {
           if (snap.exists()) {
               alert('⛔ أنت محظور! السبب: ' + (snap.val().reason || 'مخالفة'));
@@ -386,7 +396,6 @@
           }
       });
 
-      // 4. العروض
       window.onValue(window.ref(window.db, 'site_events/active_offers'), snap => {
           const marquee = document.getElementById('offersMarquee');
           const text = document.getElementById('offersText');
@@ -397,15 +406,12 @@
           } else { marquee.style.display = 'none'; }
       });
 
-      // 5. الاستفتاءات
       window.onValue(window.ref(window.db, 'site_events/active_poll'), snap => {
           const pollCard = document.getElementById('pollCard');
           if (snap.exists()) {
               currentPoll = snap.val();
               document.getElementById('pollQuestion').innerText = currentPoll.question;
               pollCard.style.display = 'block';
-              
-              // التحقق لو اللاعب صوت قبل كده
               window.get(window.ref(window.db, 'site_events/active_poll/votes/' + username)).then(voteSnap => {
                   currentUserVote = voteSnap.exists() ? voteSnap.val() : null;
                   renderPollOptions();
@@ -415,7 +421,6 @@
           }
       });
 
-      // 6. المسابقات
       window.onValue(window.ref(window.db, 'site_events/contests'), snap => {
           const contestCard = document.getElementById('contestCard');
           if (snap.exists()) {
@@ -432,7 +437,6 @@
           }
       });
 
-      // 7. المواسم
       window.onValue(window.ref(window.db, 'site_events/seasons'), snap => {
           if (snap.exists()) {
               const seasons = snap.val();
@@ -440,7 +444,6 @@
               if (seasons[latestKey]) {
                   const marquee = document.getElementById('offersMarquee');
                   const text = document.getElementById('offersText');
-                  // إضافة الموسم للشريط
                   if (marquee.style.display !== 'none') {
                       text.innerText = `🎊 الموسم الحالي: ${seasons[latestKey].name}  |  ` + text.innerText;
                   }
@@ -448,7 +451,6 @@
           }
       });
 
-      // 8. إخفاء/إظهار الشات
       window.onValue(window.ref(window.db, 'site_settings/chatOff'), snap => {
           const chatBtn = document.getElementById('chatBtn');
           const chatMenu = document.getElementById('chatMenuBtn');
@@ -461,7 +463,6 @@
           }
       });
 
-      // 9. إعدادات الموقع
       window.onValue(window.ref(window.db, 'site_settings/siteName'), snap => {
           if (snap.exists() && snap.val()) {
               document.getElementById('brandName').innerText = snap.val();
@@ -700,6 +701,12 @@ window.loginUser = async function() {
   document.getElementById('genderSection').style.display = 'none';
   switchMainSection('foreign');
 </script>
-<script src="notifications.js"></script>
+<script type="module">
+  import './features/favorites.js';
+  import './features/auto-badges.js';
+  import './features/push-notifications.js';
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
 </body>
 </html>
