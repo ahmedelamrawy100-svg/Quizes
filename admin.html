@@ -908,6 +908,9 @@
       } else {
         await set(ref(db, 'verified_users/' + user), { by: currentUser, time: Date.now() });
         await set(ref(db, 'users_data/' + user + '/verified'), 1);
+        if (window.triggerNotification) {
+    window.triggerNotification(user, "✅ تم توثيق حسابك", "مبروك! لقد قامت الإدارة بتوثيق حسابك.", "success");
+}
         await logAction('verify', user);
         window.toast('تم التوثيق ✓');
       }
@@ -1307,5 +1310,7 @@
   /* ===== Init ===== */
   checkAccess();
 </script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
 </body>
 </html>
