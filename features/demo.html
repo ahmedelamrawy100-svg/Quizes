@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 اختبار الميزات الجديدة</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="new-features.css">
+<style>
+  body { background: #0a0510; color: #fff; font-family: 'Cairo', sans-serif; padding: 20px; min-height: 100vh; }
+  .demo-section { max-width: 900px; margin: 0 auto 30px; background: #1a1a1a; border: 1px solid #333; border-radius: 14px; padding: 20px; }
+  .demo-section h2 { color: #ffd700; font-size: 20px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+  .demo-link { display: inline-block; padding: 10px 20px; background: #ffd700; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1 style="text-align:center; color:#ffd700; margin-bottom:30px;">🧪 اختبار الميزات الجديدة</h1>
+
+<div class="demo-section">
+  <h2>1. ❤️ المفضلة (Favorites)</h2>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+    <div style="position:relative; height:100px; background: linear-gradient(135deg, #ff0000, #8b0000); border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:bold;" id="favDemo">
+      🎃 Annabelle Quiz
+    </div>
+  </div>
+</div>
+
+<div class="demo-section">
+  <h2>4. 🏅 شارات تلقائية (Auto Badges)</h2>
+  <button class="nf-btn nf-btn-primary" onclick="window.NFAutoBadges.checkAndUnlockBadges()">🔍 افحص البادجات دلوقتي</button>
+  <div class="badges-wall" id="badges-wall"></div>
+</div>
+
+<div class="demo-section">
+  <h2>7. 🎨 ثيمات البروفايل</h2>
+  <div class="themes-grid" id="themes-grid"></div>
+</div>
+
+<div class="demo-section">
+  <h2>9. 💬 تفاعلات إيموجي</h2>
+  <div class="reactions-bar" id="reactions-demo"></div>
+</div>
+
+<div class="demo-section">
+  <h2>10. ⭐ تقييم الكويز</h2>
+  <div id="ratings-demo"></div>
+</div>
+
+<div class="demo-section">
+  <h2>12. 🎁 أكواد الخصم (Promo Codes)</h2>
+  <div id="promo-demo"></div>
+</div>
+
+<div class="demo-section">
+  <h2>14. 🔔 إشعارات Push</h2>
+  <div id="push-permission-container"></div>
+</div>
+
+<div class="demo-section">
+  <h2>8. ⚔️ تحدي الأدوار</h2>
+  <a href="../turn-battle.html" class="demo-link">🎮 جرب التحدي</a>
+</div>
+
+<script type="module">
+import './favorites.js';
+import './auto-badges.js';
+import './profile-themes.js';
+import './reactions.js';
+import './ratings.js';
+import './promo-codes.js';
+import './push-notifications.js';
+
+// Init all
+setTimeout(() => {
+  if (window.NFFavorites) {
+    window.NFFavorites.initFavorites();
+    const demo = document.getElementById('favDemo');
+    setTimeout(() => window.NFFavorites.renderFavoriteButton(demo, 'annabelle', 'Annabelle Quiz'), 500);
+  }
+  if (window.NFAutoBadges) window.NFAutoBadges.renderBadgesWall(document.getElementById('badges-wall'));
+  if (window.NFThemes) { window.NFThemes.initThemes(); setTimeout(() => window.NFThemes.renderThemesGrid(document.getElementById('themes-grid')), 800); }
+  if (window.NFReactions) window.NFReactions.initReactions('demo_quiz', document.getElementById('reactions-demo'));
+  if (window.NFRatings) window.NFRatings.initRatings('annabelle', document.getElementById('ratings-demo'));
+  if (window.NFPromoCodes) window.NFPromoCodes.renderPromoSection(document.getElementById('promo-demo'));
+  if (window.NFPush) window.NFPush.renderPushPermissionBox(document.getElementById('push-permission-container'));
+}, 1500);
+</script>
+</body>
+</html>
