@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💼 السوق - Quiz Hub</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="features/new-features.css">
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --green:#4caf50; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
+  .container { max-width:1100px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); font-size:32px; margin-bottom:20px; }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; }
+  .tabs { display:flex; gap:10px; margin-bottom:20px; }
+  .tab { padding:12px 25px; background:var(--card); border:2px solid var(--border); border-radius:10px; cursor:pointer; font-family:Cairo; font-weight:bold; color:#fff; }
+  .tab.active { background:var(--gold); color:#000; border-color:var(--gold); }
+  .listing { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .listing-info { flex:1; min-width:150px; }
+  .listing-title { font-weight:bold; font-size:15px; color:var(--gold); }
+  .listing-seller { font-size:12px; color:#aaa; margin-top:3px; }
+  .listing-price { font-size:18px; font-weight:bold; color:var(--green); }
+  .btn-buy { padding:10px 20px; background:var(--green); color:#fff; border:none; border-radius:8px; font-family:Cairo; font-weight:bold; cursor:pointer; }
+  .btn-cancel { padding:10px 20px; background:#dc3545; color:#fff; border:none; border-radius:8px; font-family:Cairo; font-weight:bold; cursor:pointer; }
+  .create-box { background:var(--card); border:2px dashed var(--gold); border-radius:12px; padding:20px; margin-bottom:20px; }
+  .create-box input, .create-box select { padding:10px; border-radius:8px; border:1px solid var(--border); background:#000; color:#fff; font-family:Cairo; margin:5px; width:150px; }
+  .empty { text-align:center; padding:40px; color:#aaa; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="back-btn">⬅ رجوع</a>
+    <div style="color:var(--gold);font-weight:bold;">🪙 <span id="myCoins">0</span></div>
+  </div>
+  <h1>💼 سوق المبادلة</h1>
+  
+  <div class="create-box">
+    <h3 style="color:var(--gold);margin-bottom:10px;">➕ اعرض حاجة للبيع</h3>
+    <select id="listItemId"></select>
+    <input type="number" id="listQty" placeholder="الكمية" value="1" min="1">
+    <input type="number" id="listPrice" placeholder="السعر" value="100" min="10">
+    <button class="btn-buy" onclick="window._createListing()">📤 اعرض</button>
+    <div style="font-size:12px;color:#aaa;margin-top:10px;">⚠️ 5% عمولة للمنصة</div>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab active" onclick="window._switchMarketTab('all',this)">🌐 الكل</button>
+    <button class="tab" onclick="window._switchMarketTab('mine',this)">📦 إعلاناتي</button>
+  </div>
+  
+  <div id="listingsContainer"></div>
+</div>
+
+<script type="module">
+import './features/trading-market.js';
+import { db, ref, get, onValue, currentUser, showToast } from './firebase-shared.js';
+
+let currentFilter = 'all';
+let allListings = [];
+const SHOP_ITEMS = [
+  { id: 'fifty', name: '50/50' }, { id: 'shield', name: 'درع' },
+  { id: 'freeze10', name: 'تجميد 10ث' }, { id: 'add30', name: '+30ث' },
+  { id: 'box_gold', name: 'صندوق ذهبي' }, { id: 'box_legendary', name: 'صندوق أسطوري' }
+];
+
+// جلب الكوينز
+onValue(ref(db, `users_data/${currentUser}/coins`), snap => {
+  document.getElementById('myCoins').innerText = snap.val() || 0;
+});
+
+// جلب المخزون
+onValue(ref(db, `users_data/${currentUser}/inventory`), snap => {
+  const inv = snap.val() || {};
+  const sel = document.getElementById('listItemId');
+  sel.innerHTML = SHOP_ITEMS
+    .filter(i => (inv[i.id] || 0) > 0)
+    .map(i => `<option value="${i.id}">${i.name} (x${inv[i.id]})</option>`)
+    .join('');
+  if (!sel.innerHTML) sel.innerHTML = '<option value="">مفيش أدوات</option>';
+});
+
+// الـ listings
+window.NFMarket.listenListings(listings => {
+  allListings = listings;
+  renderMarket();
+});
+
+function renderMarket() {
+  const container = document.getElementById('listingsContainer');
+  let filtered = currentFilter === 'mine' 
+    ? allListings.filter(([, l]) => l.seller === currentUser)
+    : allListings;
+  
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty">مفيش إعلانات</div>';
+    return;
+  }
+  
+  container.innerHTML = filtered.map(([id, l]) => {
+    const item = SHOP_ITEMS.find(i => i.id === l.itemId) || { name: l.itemId };
+    const isMine = l.seller === currentUser;
+    return `
+      <div class="listing">
+        <div class="listing-info">
+          <div class="listing-title">${item.name} ×${l.qty}</div>
+          <div class="listing-seller">البائع: ${l.seller}</div>
+        </div>
+        <div class="listing-price">🪙 ${l.price}</div>
+        ${isMine 
+          ? `<button class="btn-cancel" onclick="window._cancelListing('${id}')">❌ إلغاء</button>`
+          : `<button class="btn-buy" onclick="window._buyListing('${id}')">🛒 شراء</button>`}
+      </div>
+    `;
+  }).join('');
+}
+
+window._switchMarketTab = (filter, btn) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = filter;
+  renderMarket();
+};
+
+window._createListing = async () => {
+  const itemId = document.getElementById('listItemId').value;
+  const qty = parseInt(document.getElementById('listQty').value);
+  const price = parseInt(document.getElementById('listPrice').value);
+  if (!itemId) return showToast('اختار أداة', 'error');
+  const r = await window.NFMarket.createListing(itemId, qty, price);
+  if (r.error) return showToast(r.error, 'error');
+  showToast('✅ الإعلان اتعمل', 'success');
+};
+
+window._buyListing = async (id) => {
+  const r = await window.NFMarket.buyListing(id);
+  if (r.error) return showToast(r.error, 'error');
+  showToast('🎉 اشتريت!', 'gold');
+};
+
+window._cancelListing = async (id) => {
+  const r = await window.NFMarket.cancelListing(id);
+  if (r.error) return showToast(r.error, 'error');
+  showToast('✅ اتلغى', 'info');
+};
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+</body>
+</html>
