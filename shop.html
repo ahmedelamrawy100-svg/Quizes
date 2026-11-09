@@ -1,254 +1,804 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🛒 متجر المساعدات - Quiz Hub</title>
-<link rel="icon" type="image/png" href="pic/Logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<style>
-  :root { --bg: #080808; --text: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; --purple: #9c27b0; --subtitle: #aaa; --input-bg: #000; }
-  body.light-mode { --bg: #f4f4f4; --text: #111; --card-bg: #fff; --border: #ccc; --gold: #b8860b; --subtitle: #555; --input-bg: #fff;}
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-  
-  .top-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: 'Cairo'; cursor: pointer; }
-  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; font-size: 14px; }
-  .coin-badge { background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-  
-  .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,0,0,0.3); }
-  .header-subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; text-align: center; }
-  
-  .tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
-  .tab-btn { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.3s; }
-  .tab-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-  
-  .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 1200px; }
-  .shop-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 20px; text-align: center; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; }
-  .shop-card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.1); }
-  
-  .item-icon { font-size: 40px; margin-bottom: 10px; }
-  .item-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-  .item-desc { font-size: 12px; color: #aaa; margin-bottom: 15px; flex-grow: 1; min-height: 36px; }
-  .item-owned { position: absolute; top: 10px; left: 10px; background: var(--green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
-  
-  .btn-buy { width: 100%; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; background: var(--gold); color: #000; }
-  .btn-buy:hover { background: #ffcc00; transform: scale(1.02); }
-  .btn-buy:disabled { background: #333; color: #888; cursor: not-allowed; transform: none; }
-
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--green); color: #fff; padding: 15px 30px; border-radius: 8px; font-weight: bold; z-index: 9999; opacity: 0; transition: 0.3s; font-family: 'Cairo'; text-align: center; }
-  .toast.show { opacity: 1; top: 30px; }
-  .toast.error { background: var(--accent); }
-</style>
-</head>
-<body>
-
-<div class="top-bar">
-  <div style="display: flex; gap: 10px;">
-    <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع للرئيسية</a>
-    <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
-  </div>
-  <div class="coin-badge">🪙 <span id="userCoins">0</span> <span id="coinsText">كوينز</span></div>
-</div>
-
-<h1 class="header-title" id="shopTitle">🛒 متجر المساعدات</h1>
-<p class="header-subtitle" id="shopSubtitle">أدوات بتساعدك في الكويزات (تقدر تستخدمها من البروفايل أو جوه الكويز)</p>
-
-<div class="tabs" id="tabsContainer"></div>
-<div class="shop-grid" id="shopGrid"></div>
-
-<div class="toast" id="toast">تمت العملية</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
-  window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.update = update;
-
-  const currentUser = localStorage.getItem('loggedInUser');
-  if (!currentUser) { window.location.href = 'index.html'; }
-
-  let userCoins = 0;
-  let userInventory = {};
-  let currentTab = 'all';
-  let currentLang = localStorage.getItem('lang') || 'ar';
-
-  // ✅ التراجم الثابتة
-  const translations = {
-    ar: { 
-      back: "⬅ رجوع للرئيسية", coins: "كوينز", title: "🛒 متجر المساعدات", 
-      subtitle: "أدوات بتساعدك في الكويزات (تقدر تستخدمها من البروفايل أو جوه الكويز)",
-      success: "تمت العملية", buySuccess: "تم الشراء بنجاح! اذهب للبروفايل لاستخدامه.",
-      notEnough: "معندكش كوينز كافية!", error: "حدث خطأ: ", owned: "تملك: ",
-      buy: "شراء بـ ", noCoins: "كوينز غير كافية" 
-    },
-    en: { 
-      back: "⬅ Back to Home", coins: "Coins", title: "🛒 Assistants Shop", 
-      subtitle: "Tools to help you in quizzes (Use them from your profile or inside the quiz)",
-      success: "Success", buySuccess: "Purchased successfully! Go to your profile to use it.",
-      notEnough: "Not enough coins!", error: "Error: ", owned: "Owned: ",
-      buy: "Buy for ", noCoins: "Not enough coins" 
+  <!DOCTYPE html>
+  <html lang="ar" dir="rtl">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 المتجر - Quiz Hub</title>
+  <link rel="icon" type="image/png" href="pic/Logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root { 
+      --bg: #050505; --text: #fff; --card-bg: #111; --border: #333; 
+      --accent: #ff0000; --gold: #ffd700; --green: #4caf50; --blue: #0088cc; 
+      --purple: #9c27b0; --subtitle: #aaa; 
     }
+    body.light-mode { 
+      --bg: #121212; --text: #fff; --card-bg: #1a1a1a; --border: #444; 
+      --gold: #ffd700; --subtitle: #bbb; 
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+    
+    .top-bar { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-family: 'Cairo'; cursor: pointer; transition: 0.3s; }
+    .back-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; transition: 0.3s; }
+    .lang-btn:hover { background: var(--blue); border-color: var(--blue); }
+    .coin-badge { background: rgba(255, 215, 0, 0.1); border: 2px solid var(--gold); color: var(--gold); padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(255,215,0,0.2); }
+    
+    .header-title { text-align: center; color: var(--accent); font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 15px rgba(255,0,0,0.3); }
+    .header-subtitle { text-align: center; color: var(--subtitle); margin-bottom: 30px; }
+    
+    .main-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1000px;}
+    .main-tab-btn { background: var(--card-bg); color: var(--text); border: 2px solid var(--border); padding: 12px 20px; border-radius: 20px; cursor: pointer; font-family: 'Cairo'; font-weight: 900; font-size: 15px; transition: 0.3s; flex: 1; text-align: center; min-width: 150px;}
+    .main-tab-btn:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .main-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 20px rgba(255,0,0,0.4); }
+    
+    /* شريط الخصومات */
+    .flash-sale-banner { background: linear-gradient(90deg, #ff8c00, #ff0000); color: #fff; padding: 10px 20px; border-radius: 10px; text-align: center; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 0 20px rgba(255,0,0,0.5); animation: pulseBorder 2s infinite alternate; width: 100%; max-width: 1200px;}
+    @keyframes pulseBorder { from { box-shadow: 0 0 10px rgba(255,0,0,0.5); } to { box-shadow: 0 0 25px rgba(255,0,0,0.9); } }
+
+    .tab-content { width: 100%; max-width: 1200px; display: none; animation: fadeUp 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* الكاردات */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .card { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 15px; text-align: center; transition: 0.3s; position: relative; display: flex; flex-direction: column; justify-content: space-between;}
+    .card:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 5px 20px rgba(255,215,0,0.15); }
+    .card.has-discount { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+    .discount-badge { position: absolute; top: -10px; right: 10px; background: #ff0000; color: #fff; font-size: 12px; font-weight: 900; padding: 2px 8px; border-radius: 10px; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    
+    .item-icon { font-size: 40px; margin-bottom: 10px; display: block;}
+    .item-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; line-height: 1.2;}
+    .item-desc { font-size: 12px; color: var(--subtitle); margin-bottom: 15px; flex-grow: 1; min-height: 36px; }
+    .item-owned { position: absolute; top: 10px; left: 10px; background: #4caf50; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: bold; z-index: 2;}
+    
+    .price-wrap { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+    .old-price { text-decoration: line-through; color: #888; font-size: 14px; }
+    .new-price { color: var(--gold); font-weight: 900; font-size: 16px; }
+
+    .btn-buy { width: 100%; padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; background: var(--gold); color: #000; margin-top: auto; }
+    .btn-buy:hover { background: #ffcc00; transform: scale(1.02); }
+    .btn-buy:disabled { background: #333; color: #888; cursor: not-allowed; transform: none; }
+    .btn-discount { background: linear-gradient(135deg, #ff0000, #ff8c00); color: #fff; }
+    .btn-discount:hover { background: linear-gradient(135deg, #cc0000, #e67e00); }
+    .btn-owned { background: #4caf50; color: #fff; }
+
+    /* التخصيص */
+    .custom-box { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 25px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;}
+    .form-group { margin-bottom: 20px; position: relative;}
+    .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--subtitle); }
+    .form-control { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: var(--text); font-family: 'Cairo'; font-size: 15px; outline: none; }
+    .color-picker-wrapper { display: flex; align-items: center; gap: 15px; }
+    input[type="color"] { width: 60px; height: 60px; border: none; border-radius: 10px; cursor: pointer; background: transparent; padding: 0; }
+    .theme-preview { height: 100px; border-radius: 12px; border: 2px solid var(--border); margin-top: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; color: #fff; }
+
+    /* الثيمات */
+    .themes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .theme-card { background: #111; border: 2px solid #333; border-radius: 16px; overflow: hidden; transition: 0.3s; position: relative; display: flex; flex-direction: column; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .theme-card:hover { transform: translateY(-5px); border-color: #555; box-shadow: 0 10px 25px rgba(0,0,0,0.8); }
+    .theme-card.is-active { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    .theme-card.is-previewing { border-color: #00bcd4; box-shadow: 0 0 20px rgba(0,188,212,0.5); }
+    .theme-card.has-discount { border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+    .theme-img-wrap { position: relative; height: 150px; overflow: hidden; }
+    .theme-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; filter: saturate(1.6) contrast(1.1); }
+    .theme-rarity { position: absolute; top: 10px; right: 10px; font-size: 12px; padding: 4px 12px; border-radius: 8px; font-weight: 900; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); z-index: 2;}
+    .theme-info { padding: 15px; text-align: center; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to top, #111, #1a1a1a); flex-grow: 1; }
+    .theme-info h4 { font-size: 16px; color: #fff; font-weight: 900; }
+    
+    .theme-actions { display: flex; gap: 8px; flex-direction: column;}
+    .theme-btn { padding: 10px; border: none; border-radius: 8px; font-family: 'Cairo'; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.3s; width: 100%;}
+    .theme-btn.buy { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; }
+    .theme-btn.buy-discount { background: linear-gradient(135deg, #ff0000, #ff8c00); color: #fff; }
+    .theme-btn.apply { background: #2196f3; color: #fff; }
+    .theme-btn.active { background: #4caf50; color: #fff; cursor: default; }
+    .theme-btn.preview { background: #333; color: #fff; }
+    .theme-btn.preview:disabled { background: #111; color: #444; cursor: not-allowed; }
+
+    /* Modals */
+    .site-alert-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999999; display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+    .site-alert-box { background: #111; border: 2px solid var(--gold); border-radius: 20px; padding: 35px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); transform: scale(0.9); transition: 0.3s; }
+    .site-alert-overlay.active { display: flex; }
+    .site-alert-overlay.active .site-alert-box { transform: scale(1); }
+    .site-alert-title { color: var(--gold); font-size: 24px; margin-bottom: 15px; font-weight: 900; }
+    .site-alert-msg { color: #fff; font-size: 16px; margin-bottom: 25px; line-height: 1.6; }
+    .site-alert-actions { display: flex; gap: 10px; justify-content: center; }
+    .site-alert-btn { background: var(--gold); color: #000; border: none; padding: 12px 25px; border-radius: 10px; font-family: 'Cairo'; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .site-alert-btn.secondary { background: #333; color: #fff; }
+
+    @media (max-width: 600px) {
+      .header-title { font-size: 26px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+      .themes-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    }
+  </style>
+  </head>
+  <body>
+
+  <div class="site-alert-overlay" id="siteAlert">
+    <div class="site-alert-box">
+      <div class="site-alert-title" id="alertTitle">تنبيه</div>
+      <div class="site-alert-msg" id="alertMsg">رسالة التنبيه</div>
+      <div class="site-alert-actions">
+        <button class="site-alert-btn" id="alertBtnOk" onclick="closeAlert()">حسناً</button>
+        <button class="site-alert-btn secondary" id="alertBtnCancel" onclick="closeAlert()" style="display:none;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="top-bar">
+    <div style="display:flex; gap:10px;">
+      <a href="index.html" class="back-btn" id="btnBack">⬅ رجوع للرئيسية</a>
+      <button class="lang-btn" onclick="toggleLang()" id="btnLang">EN</button>
+    </div>
+    <div class="coin-badge" id="coinBadgeWrap">🪙 <span id="userCoins">0</span> <span id="lblCoins">كوينز</span></div>
+  </div>
+
+  <h1 class="header-title" id="lblTitle">🛒 المتجر</h1>
+  <p class="header-subtitle" id="lblSubTitle">كل ما تحتاجه لتطوير حسابك</p>
+
+  <div class="flash-sale-banner" id="flashSaleBanner">
+    <span id="flashSaleText">🔥 عروض فلاش (خصم حتى 70%)!</span>
+    <span id="flashSaleTimer">⏳ 00:00</span>
+  </div>
+
+  <div class="main-tabs">
+    <button class="main-tab-btn active" onclick="switchTab('assistants', this)" id="tabAssistants">🧰 المساعدات</button>
+    <button class="main-tab-btn" onclick="switchTab('custom', this)" id="tabCustom">⚙️ تخصيص</button>
+    <button class="main-tab-btn" onclick="switchTab('themes', this)" id="tabThemes">🎨 الثيمات</button>
+  </div>
+
+  <div id="tab-assistants" class="tab-content active">
+    <div class="grid" id="assistantsGrid"></div>
+  </div>
+
+  <div id="tab-custom" class="tab-content">
+    <div class="custom-box">
+      <div class="form-group" id="customColorGroup">
+        <label id="lblColor">🎨 تغيير لون الموقع</label>
+        <div class="color-picker-wrapper">
+          <input type="color" id="customColor" value="#ff0000" oninput="updateColorPreview()">
+        </div>
+        <div class="theme-preview" id="colorPreview" style="background:#ff0000;">معاينة</div>
+        <button class="btn-buy" style="margin-top:15px;" id="btnBuyColor" onclick="buyFeature('customColor', 20000)">شراء</button>
+      </div>
+
+      <div class="form-group" id="customBgGroup">
+        <label id="lblBg">🖼️ صورة خلفية مخصصة</label>
+        <input type="text" id="customBg" class="form-control" placeholder="https://example.com/image.jpg">
+        <button class="btn-buy" style="margin-top:15px;" id="btnBuyBg" onclick="buyFeature('customBg', 30000)">شراء</button>
+      </div>
+
+      <div class="form-group" id="customAnimGroup">
+        <label id="lblAnim">✨ تأثير حركي للخلفية</label>
+        <select id="customAnim" class="form-control">
+          <option value="none">بدون تأثير</option>
+          <option value="star">نجوم ✨</option>
+          <option value="sakura">ساكورا 🌸</option>
+          <option value="pulse">نبض 💓</option>
+        </select>
+        <button class="btn-buy" style="margin-top:15px;" id="btnBuyAnim" onclick="buyFeature('customAnim', 50000)">شراء</button>
+      </div>
+
+      <button class="btn-buy" style="background:linear-gradient(135deg, var(--purple), var(--blue)); color:#fff; padding:15px; font-size:18px;" onclick="saveCustomTheme()" id="btnSaveCustom">حفظ وتطبيق 🚀</button>
+    </div>
+  </div>
+
+  <div id="tab-themes" class="tab-content">
+    <div class="themes-grid" id="themesGrid"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, set, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+    const app = initializeApp(firebaseConfig); 
+    const db = getDatabase(app);
+    
+    window.db = db; window.ref = ref; window.onValue = onValue; window.get = get; window.update = update; window.set = set; window.runTransaction = runTransaction;
+
+    const currentUser = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+    if (!currentUser) window.location.href = 'index.html';
+
+    const isOwner = (currentUser === 'ahmed');
+
+    let currentLang = localStorage.getItem('shopLang') || 'ar';
+    let userCoins = 0;
+    let userInventory = {};
+    let unlockedFeatures = {};
+    let ownedThemes = {};
+    let savedTheme = {};
+    
+    let isPreviewing = false;
+    let previewTimer = null;
+    let previewedThemes = JSON.parse(localStorage.getItem('previewedThemes') || '{}');
+    let currentDiscounts = { assistants: {}, themes: {}, custom: {} };
+
+    const translations = {
+      ar: {
+        back: "⬅ رجوع للرئيسية", coins: "كوينز", title: "🛒 المتجر", subtitle: "كل ما تحتاجه لتطوير حسابك",
+        tabAssistants: "🧰 المساعدات", tabCustom: "⚙️ تخصيص", tabThemes: "🎨 الثيمات",
+        buy: "شراء بـ", notEnough: "غير كافية", owned: "مملوك",
+        lblColor: "🎨 تغيير لون الموقع", lblBg: "🖼️ صورة خلفية مخصصة", lblAnim: "✨ تأثير حركي (50,000 🪙)",
+        btnSaveCustom: "حفظ وتطبيق 🚀", ok: "حسناً", error: "خطأ", success: "نجاح 🎉",
+        confirmBuy: "تأكيد الشراء؟", yes: "نعم", no: "لا",
+        colorPreview: "معاينة اللون", missingCoins: "ناقصك",
+        applyTheme: "تطبيق", activeTheme: "مُطبق حالياً", buyTheme: "شراء",
+        preview: "👁️ معاينة", previewWait: "⏳ تمت المعاينة", free: "مجاناً (أونر)",
+        flashSale: "🔥 خصومات فلاش سارية الآن!", endsIn: "ينتهي في"
+      },
+      en: {
+        back: "⬅ Back to Home", coins: "Coins", title: "🛒 Shop", subtitle: "Everything you need to upgrade your account",
+        tabAssistants: "🧰 Assistants", tabCustom: "⚙️ Customization", tabThemes: "🎨 Themes",
+        buy: "Buy for", notEnough: "Not enough", owned: "Owned",
+        lblColor: "🎨 Custom Color", lblBg: "🖼️ Custom Background", lblAnim: "✨ Custom Animation",
+        btnSaveCustom: "Save & Apply 🚀", ok: "OK", error: "Error", success: "Success 🎉",
+        confirmBuy: "Confirm purchase?", yes: "Yes", no: "No",
+        colorPreview: "Color preview", missingCoins: "Missing",
+        applyTheme: "Apply", activeTheme: "Active", buyTheme: "Buy",
+        preview: "👁️ Preview", previewWait: "⏳ Previewed", free: "Free (Owner)",
+        flashSale: "🔥 Flash Sale Active!", endsIn: "Ends in"
+      }
+    };
+
+    const THEMES = [
+      { id:'vibrant_synth', name:'موجة اصطناعية', nameEn:'Synthwave', bg:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1920&q=80', animation:'pulse', rarity:'legendary', price: 15000 },
+      { id:'vibrant_aurora', name:'شفق قطبي', nameEn:'Aurora', bg:'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=1920&q=80', animation:'star', rarity:'legendary', price: 15000 },
+      { id:'vibrant_cosmic', name:'ألوان كونية', nameEn:'Cosmic Paint', bg:'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=1920&q=80', animation:'sakura', rarity:'epic', price: 7500 },
+      { id:'space_nebula', name:'سديم أزرق', nameEn:'Blue Nebula', bg:'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1920&q=80', animation:'star', rarity:'legendary', price: 15000 },
+      { id:'nature_sunset', name:'غروب دافئ', nameEn:'Warm Sunset', bg:'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'epic', price: 7500 },
+      { id:'nature_forest', name:'غابة خضراء', nameEn:'Green Forest', bg:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'rare', price: 2500 },
+      { id:'cyber_neon', name:'مدينة النيون', nameEn:'Neon City', bg:'https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'legendary', price: 15000 },
+      { id:'cyber_tokyo', name:'شوارع طوكيو', nameEn:'Tokyo Streets', bg:'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'epic', price: 7500 },
+      { id:'tech_neon', name:'إضاءة نيون', nameEn:'Neon Lights', bg:'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80', animation:'pulse', rarity:'epic', price: 7500 },
+      { id:'fan_magic', name:'غابة سحرية', nameEn:'Magic Forest', bg:'https://images.pexels.com/photos/2832034/pexels-photo-2832034.jpeg?auto=compress&cs=tinysrgb&w=1920', animation:'sakura', rarity:'epic', price: 7500 },
+      { id:'abs_liquid', name:'ألوان سائلة', nameEn:'Liquid Colors', bg:'https://images.unsplash.com/photo-1550684376-efcbd6e3f031?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'epic', price: 7500 },
+      { id:'vibrant_retro', name:'ريترو 80s', nameEn:'Retro 80s', bg:'https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&w=1920&q=80', animation:'pulse', rarity:'rare', price: 2500 },
+      { id:'pastel_dream', name:'حلم مبهج', nameEn:'Pastel Dream', bg:'https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&w=1920&q=80', animation:'star', rarity:'rare', price: 2500 },
+      { id:'golden_hour', name:'الساعة الذهبية', nameEn:'Golden Hour', bg:'https://images.unsplash.com/photo-1495571758719-6ec1e876d6ae?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'epic', price: 7500 },
+      { id:'ocean_blue', name:'أعماق زرقاء', nameEn:'Deep Blue', bg:'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1920&q=80', animation:'none', rarity:'rare', price: 2500 }
+    ];
+
+    const RARITY_COLORS = { common:'#888', rare:'#2196f3', epic:'#9c27b0', legendary:'#ffd700' };
+    const RARITY_LABELS = { ar:{common:'عادي',rare:'نادر',epic:'ملحمي',legendary:'أسطوري'}, en:{common:'Common',rare:'Rare',epic:'Epic',legendary:'Legendary'} };
+
+    window.toggleLang = () => {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('shopLang', currentLang);
+      applyLang();
+    };
+
+    function applyLang() {
+      const t = translations[currentLang];
+      document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+      document.getElementById('btnBack').innerText = t.back;
+      document.getElementById('lblCoins').innerText = t.coins;
+      document.getElementById('lblTitle').innerText = t.title;
+      document.getElementById('lblSubTitle').innerText = t.subtitle;
+      document.getElementById('tabAssistants').innerText = t.tabAssistants;
+      document.getElementById('tabCustom').innerText = t.tabCustom;
+      document.getElementById('tabThemes').innerText = t.tabThemes;
+      document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+      document.getElementById('lblColor').innerText = t.lblColor;
+      document.getElementById('lblBg').innerText = t.lblBg;
+      document.getElementById('lblAnim').innerText = t.lblAnim;
+      document.getElementById('btnSaveCustom').innerText = t.btnSaveCustom;
+      document.getElementById('alertBtnOk').innerText = t.ok;
+      document.getElementById('alertBtnCancel').innerText = t.no;
+      document.getElementById('colorPreview').innerText = t.colorPreview;
+      document.getElementById('flashSaleText').innerText = t.flashSale;
+
+      const animSelect = document.getElementById('customAnim');
+      const animLabels = {
+        ar: { none:'بدون تأثير', star:'نجوم ✨', sakura:'ساكورا 🌸', pulse:'نبض 💓' },
+        en: { none:'None', star:'Stars ✨', sakura:'Sakura 🌸', pulse:'Pulse 💓' }
+      };
+      Array.from(animSelect.options).forEach(opt => {
+        opt.textContent = animLabels[currentLang][opt.value];
+      });
+
+      if (isOwner) {
+        document.getElementById('coinBadgeWrap').style.display = 'none';
+      }
+
+      renderAssistants();
+      renderCustomStore();
+      renderThemes();
+    }
+
+    window.closeAlert = function() {
+      document.getElementById('siteAlert').classList.remove('active');
+    };
+
+    window.showSiteAlert = function(title, msg, showCancel = false, onConfirm = null) {
+      document.getElementById('alertTitle').innerText = title;
+      document.getElementById('alertMsg').innerText = msg;
+      document.getElementById('siteAlert').classList.add('active');
+      document.getElementById('alertBtnCancel').style.display = showCancel ? 'inline-block' : 'none';
+      document.getElementById('alertBtnOk').onclick = () => {
+        closeAlert();
+        if (onConfirm) onConfirm();
+      };
+    };
+
+    function updateColorPreview() {
+      const color = document.getElementById('customColor').value;
+      document.getElementById('colorPreview').style.background = color;
+    }
+
+    const shopItems = [
+      { id: 'freeze10', icon: '⏱️', title: 'تجميد الوقت 10ث', titleEn: 'Freeze 10s', desc: 'يوقف العداد 10 ثواني.', descEn: 'Stops the timer 10s.', price: 50 },
+      { id: 'freeze20', icon: '⏱️', title: 'تجميد الوقت 20ث', titleEn: 'Freeze 20s', desc: 'يوقف العداد 20 ثانية.', descEn: 'Stops the timer 20s.', price: 100 },
+      { id: 'add10', icon: '➕', title: 'إضافة 10 ثواني', titleEn: '+10 Seconds', desc: 'يزود وقت السؤال 10ث.', descEn: 'Adds 10s.', price: 30 },
+      { id: 'add30', icon: '➕', title: 'إضافة 30 ثانية', titleEn: '+30 Seconds', desc: 'يزود وقت السؤال 30ث.', descEn: 'Adds 30s.', price: 80 },
+      { id: 'stop_timer', icon: '🛑', title: 'إيقاف العداد', titleEn: 'Stop Timer', desc: 'يوقف العداد تماماً.', descEn: 'Stops the timer completely.', price: 120 },
+      { id: 'fifty', icon: '✂️', title: 'حذف إجابتين (50/50)', titleEn: '50/50', desc: 'يشيل إجابتين غلط.', descEn: 'Removes two wrong answers.', price: 60 },
+      { id: 'skip', icon: '⏭️', title: 'تخطي سؤال', titleEn: 'Skip Question', desc: 'يعدي السؤال.', descEn: 'Skips the question.', price: 80 },
+      { id: 'hint_half', icon: '💡', title: 'تلميح', titleEn: 'Hint', desc: 'يظهر نص الإجابة.', descEn: 'Reveals half the answer.', price: 100 },
+      { id: 'reveal', icon: '👁️', title: 'إظهار الإجابة', titleEn: 'Reveal Answer', desc: 'يظهر الإجابة فوراً.', descEn: 'Shows the answer.', price: 200 },
+      { id: 'second_chance', icon: '🎲', title: 'فرصة ثانية', titleEn: 'Second Chance', desc: 'تجاوب تاني لو غلطت.', descEn: 'Try again if wrong.', price: 90 },
+      { id: 'double_xp', icon: '✨', title: 'مضاعف XP', titleEn: 'Double XP', desc: 'يضاعف XP.', descEn: 'Doubles XP.', price: 200 },
+      { id: 'double_coins', icon: '💰', title: 'مضاعف كوينز', titleEn: 'Double Coins', desc: 'يضاعف كوينز.', descEn: 'Doubles Coins.', price: 200 },
+      { id: 'shield', icon: '🛡️', title: 'درع الحماية', titleEn: 'Shield', desc: 'يمنع كسر الستريك.', descEn: 'Prevents streak break.', price: 300 },
+      { id: 'double_lb', icon: '🏆', title: 'مضاعف ليدربورد', titleEn: 'Double LB', desc: 'يضاعف نقاط المتصدرين.', descEn: 'Doubles Leaderboard points.', price: 250 },
+      { id: 'fix_streak', icon: '🔥', title: 'إصلاح الستريك', titleEn: 'Fix Streak', desc: 'يرجع الستريك المكسور.', descEn: 'Restores broken streak.', price: 250 },
+      { id: 'box_bronze', icon: '📦', title: 'صندوق برونزي', titleEn: 'Bronze Box', desc: 'جايزة عشوائية.', descEn: 'Random reward.', price: 150 },
+      { id: 'box_silver', icon: '🎁', title: 'صندوق فضي', titleEn: 'Silver Box', desc: 'جايزة عشوائية أكبر.', descEn: 'Bigger random reward.', price: 300 },
+      { id: 'box_gold', icon: '🏆', title: 'صندوق ذهبي', titleEn: 'Gold Box', desc: 'جايزة نادرة.', descEn: 'Rare reward.', price: 600 },
+      { id: 'box_diamond', icon: '💎', title: 'صندوق ألماسي', titleEn: 'Diamond Box', desc: 'أفضل جايزة.', descEn: 'Best reward.', price: 1000 },
+      { id: 'box_legendary', icon: '👑', title: 'صندوق أسطوري', titleEn: 'Legendary Box', desc: 'جايزة أسطورية.', descEn: 'Legendary reward.', price: 2000 },
+      { id: 'team_boost', icon: '⚔️', title: 'دعم التيم', titleEn: 'Team Boost', desc: 'يضيف 1000 XP للتيم.', descEn: 'Adds 1000 XP to team.', price: 300 },
+      { id: 'ghost_mode', icon: '👻', title: 'وضع الشبح', titleEn: 'Ghost Mode', desc: 'تلعب بدون اسمك.', descEn: 'Play without name.', price: 200 },
+      { id: 'starter_bundle', icon: '🎁', title: 'حزمة المبتدئين', titleEn: 'Starter Bundle', desc: '50/50 + تجميد + تلميح.', descEn: '50/50 + Freeze + Hint.', price: 150 },
+      { id: 'survival_kit', icon: '🎒', title: 'حقيبة النجاة', titleEn: 'Survival Kit', desc: 'درع + 50/50 + فرصة تانية.', descEn: 'Shield + 50/50 + Second Chance.', price: 450 },
+      { id: 'speed_demon', icon: '💨', title: 'شيطان السرعة', titleEn: 'Speed Demon', desc: 'إضافة 30ث + إيقاف.', descEn: '+30s + Stop.', price: 160 },
+      { id: 'ultimate_pack', icon: '👑', title: 'الحزمة المطلقة', titleEn: 'Ultimate Pack', desc: 'مضاعف XP + كوينز + درع.', descEn: 'Double XP + Coins + Shield.', price: 500 }
+    ];
+
+    // حساب خصومات الساعة (3 مساعدات + 3 ثيمات + 3 تخصيص)
+    function calculateHourlyDiscounts() {
+      const now = Date.now();
+      const currentHour = Math.floor(now / 3600000);
+      const cacheKey = `discounts_v2_${currentHour}`;
+      let cached = localStorage.getItem(cacheKey);
+      
+      if (cached) return JSON.parse(cached);
+
+      let result = { assistants: {}, themes: {}, custom: {} };
+
+      // اختيار 3 مساعدات
+      let aIndices = [];
+      while(aIndices.length < 3) {
+          let r = Math.floor(Math.random() * shopItems.length);
+          if(!aIndices.includes(r)) {
+              aIndices.push(r);
+              result.assistants[shopItems[r].id] = Math.floor(Math.random() * 51) + 20;
+          }
+      }
+
+      // اختيار 3 ثيمات
+      let tIndices = [];
+      while(tIndices.length < 3) {
+          let r = Math.floor(Math.random() * THEMES.length);
+          if(!tIndices.includes(r)) {
+              tIndices.push(r);
+              result.themes[THEMES[r].id] = Math.floor(Math.random() * 51) + 20;
+          }
+      }
+
+      // التخصيص (الـ 3 حاجات مع بعض)
+      result.custom['customColor'] = Math.floor(Math.random() * 51) + 20;
+      result.custom['customBg'] = Math.floor(Math.random() * 51) + 20;
+      result.custom['customAnim'] = Math.floor(Math.random() * 51) + 20;
+      
+      localStorage.setItem(cacheKey, JSON.stringify(result));
+      // مسح الكاش القديم
+      for(let i=0; i<localStorage.length; i++){
+          let k = localStorage.key(i);
+          if(k.startsWith('discounts_v2_') && k !== cacheKey) localStorage.removeItem(k);
+      }
+      return result;
+    }
+
+    function startFlashSaleTimer() {
+      const updateTimer = () => {
+        const now = new Date();
+        const nextHour = new Date(now);
+        nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+        const diff = nextHour - now;
+        
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        document.getElementById('flashSaleTimer').innerText = `⏳ ${m}:${s < 10 ? '0' : ''}${s}`;
+        
+        if (diff <= 0) {
+          currentDiscounts = calculateHourlyDiscounts();
+          renderAssistants();
+          renderThemes();
+          renderCustomStore();
+        }
+      };
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    }
+
+    window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snap) => {
+        const data = snap.val() || {};
+        userCoins = data.coins || 0;
+        userInventory = data.inventory || {};
+        savedTheme = data.activeTheme || {};
+        ownedThemes = data.ownedThemes || {};
+        
+        document.getElementById('userCoins').innerText = userCoins;
+        if (savedTheme.color) document.getElementById('customColor').value = savedTheme.color;
+        if (savedTheme.bgImage) document.getElementById('customBg').value = savedTheme.bgImage;
+        if (savedTheme.animation) document.getElementById('customAnim').value = savedTheme.animation;
+        
+        updateColorPreview();
+        renderAssistants();
+        renderThemes();
+    });
+
+    window.onValue(window.ref(window.db, 'unlocked_features/' + currentUser), (snap) => {
+        unlockedFeatures = snap.val() || {};
+        renderCustomStore();
+    });
+
+    window.switchTab = (tabId, btn) => {
+      document.querySelectorAll('.main-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+    };
+
+    function renderAssistants() {
+      const t = translations[currentLang];
+      const grid = document.getElementById('assistantsGrid');
+      grid.innerHTML = shopItems.map(item => {
+        const discountPct = currentDiscounts.assistants[item.id] || 0;
+        const isDiscounted = discountPct > 0 && !isOwner;
+        const finalPrice = isDiscounted ? Math.floor(item.price * (1 - discountPct / 100)) : item.price;
+        
+        const canAfford = isOwner || userCoins >= finalPrice;
+        const ownedCount = userInventory[item.id] || 0;
+        const title = currentLang === 'ar' ? item.title : item.titleEn;
+        const desc = currentLang === 'ar' ? item.desc : item.descEn;
+        const missing = finalPrice - userCoins;
+        
+        let btnText = `${t.buy} ${finalPrice} 🪙`;
+        let btnClass = 'btn-buy';
+        if (isOwner) btnText = t.free;
+        else if (isDiscounted) {
+            btnText = `🔥 ${t.buy} ${finalPrice} 🪙`;
+            btnClass = 'btn-buy btn-discount';
+        } else if (!canAfford) btnText = `${t.missingCoins} ${missing} 🪙`;
+
+        let priceHtml = '';
+        if (isDiscounted) {
+            priceHtml = `<div class="price-wrap"><span class="old-price">${item.price} 🪙</span><span class="new-price">${finalPrice} 🪙</span></div>`;
+        }
+
+        return `
+          <div class="card ${isDiscounted ? 'has-discount' : ''}">
+            ${isDiscounted ? `<div class="discount-badge">-${discountPct}%</div>` : ''}
+            ${ownedCount > 0 ? `<div class="item-owned">${t.owned}: ${ownedCount}</div>` : ''}
+            <div>
+              <span class="item-icon">${item.icon}</span>
+              <div class="item-title">${title}</div>
+              <div class="item-desc">${desc}</div>
+            </div>
+            ${priceHtml}
+            <button class="${btnClass}" ${!canAfford && !isOwner ? 'disabled' : ''} onclick="buyItem('${item.id}', ${finalPrice})">
+              ${btnText}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCustomStore() {
+      if (isOwner) {
+          document.getElementById('btnBuyColor').innerText = "تطبيق (أونر)";
+          document.getElementById('btnBuyBg').innerText = "تطبيق (أونر)";
+          document.getElementById('btnBuyAnim').innerText = "تطبيق (أونر)";
+          return;
+      }
+      
+      const t = translations[currentLang];
+      const features = [
+          { id: 'customColor', price: 20000, btn: 'btnBuyColor', group: 'customColorGroup' },
+          { id: 'customBg', price: 30000, btn: 'btnBuyBg', group: 'customBgGroup' },
+          { id: 'customAnim', price: 50000, btn: 'btnBuyAnim', group: 'customAnimGroup' }
+      ];
+
+      features.forEach(f => {
+          const btn = document.getElementById(f.btn);
+          const group = document.getElementById(f.group);
+          
+          // شيل بادج الخصم القديم لو موجود
+          const oldBadge = group.querySelector('.discount-badge');
+          if (oldBadge) oldBadge.remove();
+          group.classList.remove('has-discount');
+
+          if (unlockedFeatures[f.id]) {
+              btn.className = 'btn-buy btn-owned';
+              btn.innerText = t.owned;
+              btn.disabled = true;
+          } else {
+              const discountPct = currentDiscounts.custom[f.id] || 0;
+              const isDiscounted = discountPct > 0;
+              const finalPrice = isDiscounted ? Math.floor(f.price * (1 - discountPct / 100)) : f.price;
+              
+              btn.className = isDiscounted ? 'btn-buy btn-discount' : 'btn-buy';
+              btn.innerText = `${t.buy} ${finalPrice} 🪙`;
+              btn.disabled = false;
+
+              if (isDiscounted) {
+                  group.classList.add('has-discount');
+                  const badge = document.createElement('div');
+                  badge.className = 'discount-badge';
+                  badge.innerText = `-${discountPct}%`;
+                  group.appendChild(badge);
+                  
+                  // تعديل شكل الزرار
+                  btn.innerHTML = `<span style="text-decoration:line-through; font-size:12px; opacity:0.7; margin-left:5px;">${f.price}</span> 🔥 ${finalPrice} 🪙`;
+              }
+          }
+      });
+    }
+
+    function renderThemes() {
+      const grid = document.getElementById('themesGrid');
+      if (!grid) return;
+      const t = translations[currentLang];
+      const rarLabel = RARITY_LABELS[currentLang];
+      
+      grid.innerHTML = THEMES.map(theme => {
+        const isOwned = isOwner || ownedThemes[theme.id] === true;
+        const isActive = savedTheme && savedTheme.presetId === theme.id;
+        
+        const discountPct = currentDiscounts.themes[theme.id] || 0;
+        const isDiscounted = discountPct > 0 && !isOwned && !isOwner;
+        const finalPrice = isDiscounted ? Math.floor(theme.price * (1 - discountPct / 100)) : theme.price;
+
+        const canAfford = isOwner || userCoins >= finalPrice;
+        const hasPreviewed = previewedThemes[theme.id] === true;
+        
+        let btnHtml = '';
+        if (isActive) {
+          btnHtml = `<button class="theme-btn active">${t.activeTheme}</button>`;
+        } else if (isOwned) {
+          btnHtml = `<button class="theme-btn apply" onclick="applyOwnedTheme('${theme.id}')">${t.applyTheme}</button>`;
+        } else if (canAfford) {
+          if (isDiscounted) {
+              btnHtml = `<button class="theme-btn buy-discount" onclick="buyTheme('${theme.id}', ${finalPrice})">🔥 ${t.buyTheme} <span style="text-decoration:line-through; font-size:11px; opacity:0.7;">${theme.price}</span> ${finalPrice} 🪙</button>`;
+          } else {
+              btnHtml = `<button class="theme-btn buy" onclick="buyTheme('${theme.id}', ${finalPrice})">${t.buyTheme} ${finalPrice} 🪙</button>`;
+          }
+        } else {
+          btnHtml = `<button class="theme-btn disabled" disabled>${t.buyTheme} ${finalPrice} 🪙</button>`;
+        }
+
+        let previewBtn = '';
+        if (!isActive && !isOwned) {
+          if (!hasPreviewed || isOwner) {
+              previewBtn = `<button class="theme-btn preview" title="معاينة 5 ثواني" onclick="startPreview('${theme.id}', '${theme.bg}', '${theme.animation}')">${t.preview}</button>`;
+          } else {
+              previewBtn = `<button class="theme-btn preview" disabled title="تمت المعاينة">${t.previewWait}</button>`;
+          }
+        }
+
+        return `
+          <div class="theme-card ${isActive ? 'is-active' : ''} ${isDiscounted ? 'has-discount' : ''}" id="card-${theme.id}">
+            ${isDiscounted ? `<div class="discount-badge">-${discountPct}%</div>` : ''}
+            <div class="theme-img-wrap">
+              <span class="theme-rarity" style="background:${RARITY_COLORS[theme.rarity]}">${rarLabel[theme.rarity]}</span>
+              <img src="${theme.bg}" alt="${theme.nameEn}" loading="lazy" onerror="this.src='pic/Logo.png'">
+            </div>
+            <div class="theme-info">
+              <h4>${currentLang === 'ar' ? theme.name : theme.nameEn}</h4>
+              <div class="theme-actions">
+                ${btnHtml}
+                ${previewBtn}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.startPreview = (themeId, bg, anim) => {
+      if (isPreviewing) return;
+      isPreviewing = true;
+      
+      const card = document.getElementById(`card-${themeId}`);
+      if (card) card.classList.add('is-previewing');
+      
+      if (window.applyTemporaryTheme) {
+        window.applyTemporaryTheme(bg, anim);
+      }
+
+      document.querySelectorAll('.theme-btn.preview').forEach(btn => btn.disabled = true);
+
+      let timeLeft = 5;
+      const previewBtn = card.querySelector('.theme-btn.preview');
+      if (previewBtn) previewBtn.innerHTML = `⏳ ${timeLeft}`;
+
+      previewTimer = setInterval(() => {
+        timeLeft--;
+        if (previewBtn) previewBtn.innerHTML = `⏳ ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(previewTimer);
+          stopPreview(themeId);
+        }
+      }, 1000);
+    };
+
+    function stopPreview(themeId) {
+      isPreviewing = false;
+      const card = document.getElementById(`card-${themeId}`);
+      if (card) card.classList.remove('is-previewing');
+      
+      if (window.revertTheme) window.revertTheme();
+      
+      if (!isOwner) {
+        previewedThemes[themeId] = true;
+        localStorage.setItem('previewedThemes', JSON.stringify(previewedThemes));
+      }
+      renderThemes();
+    }
+
+  window.buyTheme = async (themeId, price) => {
+    const t = translations[currentLang];
+    
+    if (isOwner) {
+      try {
+        await update(ref(db), { [`users_data/${currentUser}/ownedThemes/${themeId}`]: true });
+        if (window.triggerNotification) {
+            window.triggerNotification(currentUser, "🎨 ثيم جديد", `مبروك! لقد اشتريت ثيماً جديداً.`, "info");
+        }
+        showSiteAlert(t.success, 'تم تفعيل الثيم (أونر)');
+        return;
+      } catch(e) { return showSiteAlert(t.error, e.message); }
+    }
+
+    if (userCoins < price) return showSiteAlert(t.error, t.notEnough);
+    
+    showSiteAlert(t.confirmBuy, `${t.buyTheme} ${price} 🪙?`, true, async () => {
+      try {
+        const coinsRef = ref(db, `users_data/${currentUser}/coins`);
+        const result = await runTransaction(coinsRef, (current) => {
+          if ((current || 0) < price) return;
+          return current - price;
+        });
+        
+        if (!result.committed) return showSiteAlert(t.error, t.notEnough);
+        
+        await update(ref(db), { [`users_data/${currentUser}/ownedThemes/${themeId}`]: true });
+        
+        // ✅ الإشعار للاعب العادي
+        if (window.triggerNotification) {
+            window.triggerNotification(currentUser, "🎨 ثيم جديد", `مبروك! لقد اشتريت ثيماً جديداً.`, "info");
+        }
+        
+        showSiteAlert(t.success, currentLang === 'ar' ? 'مبروك! تم شراء الثيم.' : 'Theme purchased!');
+      } catch(e) { showSiteAlert(t.error, e.message); }
+    });
   };
 
-  // ✅ الأدوات مع الترجمة
-  const shopItems = [
-    // ⏳ الوقت (5)
-    { id: 'freeze10', icon: '⏱️', title: 'تجميد الوقت 10ث', titleEn: 'Freeze 10s', desc: 'يوقف العداد 10 ثواني.', descEn: 'Stops the timer for 10 seconds.', price: 50, cat: 'time' },
-    { id: 'freeze20', icon: '⏱️', title: 'تجميد الوقت 20ث', titleEn: 'Freeze 20s', desc: 'يوقف العداد 20 ثانية.', descEn: 'Stops the timer for 20 seconds.', price: 100, cat: 'time' },
-    { id: 'add10', icon: '➕', title: 'إضافة 10 ثواني', titleEn: '+10 Seconds', desc: 'يزود وقت السؤال 10ث.', descEn: 'Adds 10 seconds to the question timer.', price: 30, cat: 'time' },
-    { id: 'add30', icon: '➕', title: 'إضافة 30 ثانية', titleEn: '+30 Seconds', desc: 'يزود وقت السؤال 30ث.', descEn: 'Adds 30 seconds to the question timer.', price: 80, cat: 'time' },
-    { id: 'stop_timer', icon: '🛑', title: 'إيقاف العداد لسؤال', titleEn: 'Stop Timer', desc: 'يوقف العداد تماماً في السؤال ده.', descEn: 'Stops the timer completely for this question.', price: 120, cat: 'time' },
-
-    // ❓ الأسئلة (5)
-    { id: 'fifty', icon: '✂️', title: 'حذف إجابتين (50/50)', titleEn: '50/50', desc: 'يشيل إجابتين غلط.', descEn: 'Removes two wrong answers.', price: 60, cat: 'question' },
-    { id: 'skip', icon: '⏭️', title: 'تخطي سؤال', titleEn: 'Skip Question', desc: 'يعدي السؤال من غير خسارة.', descEn: 'Skip the question without losing.', price: 80, cat: 'question' },
-    { id: 'hint_half', icon: '💡', title: 'تلميح (نصف الإجابة)', titleEn: 'Hint (Half Answer)', desc: 'يظهر نص الإجابة الصحيحة.', descEn: 'Reveals the first half of the correct answer.', price: 100, cat: 'question' },
-    { id: 'reveal', icon: '👁️', title: 'إظهار الإجابة', titleEn: 'Reveal Answer', desc: 'يظهر الإجابة الصحيحة فوراً.', descEn: 'Shows the correct answer immediately.', price: 200, cat: 'question' },
-    { id: 'second_chance', icon: '🎲', title: 'فرصة ثانية', titleEn: 'Second Chance', desc: 'يخليك تجاوب تاني لو غلطت.', descEn: 'Lets you answer again if you get it wrong.', price: 90, cat: 'question' },
-
-    // ⚡ تعزيزات (5)
-    { id: 'double_xp', icon: '✨', title: 'مضاعف XP', titleEn: 'Double XP', desc: 'يضاعف XP في الكويز الحالي.', descEn: 'Doubles XP for the current quiz.', price: 200, cat: 'boost' },
-    { id: 'double_coins', icon: '💰', title: 'مضاعف كوينز', titleEn: 'Double Coins', desc: 'يضاعف كوينز في الكويز الحالي.', descEn: 'Doubles coins for the current quiz.', price: 200, cat: 'boost' },
-    { id: 'shield', icon: '🛡️', title: 'درع الحماية', titleEn: 'Streak Shield', desc: 'بيمنع الستريك ينكسر لو غبت.', descEn: 'Prevents your streak from breaking if you miss a day.', price: 300, cat: 'boost' },
-    { id: 'double_lb', icon: '🏆', title: 'مضاعف نقاط المتصدرين', titleEn: 'Double LB Points', desc: 'يضاعف نقاطك في الليدربورد.', descEn: 'Doubles your leaderboard points.', price: 250, cat: 'boost' },
-    { id: 'fix_streak', icon: '🔥', title: 'إصلاح الستريك', titleEn: 'Fix Streak', desc: 'يرجع الستريك بتاعك لو اتكسر.', descEn: 'Restores your broken streak.', price: 250, cat: 'boost' },
-
-    // 🎁 صناديق (5)
-    { id: 'box_bronze', icon: '📦', title: 'صندوق برونزي', titleEn: 'Bronze Box', desc: 'جايزة عشوائية (كوينز/XP).', descEn: 'Random reward (Coins/XP).', price: 150, cat: 'loot' },
-    { id: 'box_silver', icon: '🎁', title: 'صندوق فضي', titleEn: 'Silver Box', desc: 'جايزة عشوائية أكبر.', descEn: 'Bigger random reward.', price: 300, cat: 'loot' },
-    { id: 'box_gold', icon: '🏆', title: 'صندوق ذهبي', titleEn: 'Gold Box', desc: 'جايزة نادرة جداً.', descEn: 'Very rare reward.', price: 600, cat: 'loot' },
-    { id: 'box_diamond', icon: '💎', title: 'صندوق ألماسي', titleEn: 'Diamond Box', desc: 'أفضل جايزة في اللعبة.', descEn: 'Best reward in the game.', price: 1000, cat: 'loot' },
-    { id: 'box_legendary', icon: '👑', title: 'صندوق أسطوري', titleEn: 'Legendary Box', desc: 'جايزة أسطورية.', descEn: 'Legendary reward.', price: 2000, cat: 'loot' },
-
-    // 💬 اجتماعي (2) - تم حذف chat_announce زي ما طلبت
-    { id: 'team_boost', icon: '⚔️', title: 'دعم التيم', titleEn: 'Team Boost', desc: 'بتضيف 1000 XP للتيم بتاعك.', descEn: 'Adds 1000 XP to your team.', price: 300, cat: 'social' },
-    { id: 'ghost_mode', icon: '👻', title: 'وضع الشبح', titleEn: 'Ghost Mode', desc: 'تلعب كويز واحد بدون اسمك في الليدربورد.', descEn: 'Play one quiz without your name on the leaderboard.', price: 200, cat: 'social' },
-
-    // 📦 حزم (4)
-    { id: 'starter_bundle', icon: '🎁', title: 'حزمة المبتدئين', titleEn: 'Starter Bundle', desc: '50/50 + تجميد 10ث + تلميح.', descEn: '50/50 + Freeze 10s + Hint.', price: 150, cat: 'bundle' },
-    { id: 'survival_kit', icon: '🎒', title: 'حقيبة النجاة', titleEn: 'Survival Kit', desc: 'درع + 50/50 + فرصة ثانية.', descEn: 'Shield + 50/50 + Second Chance.', price: 450, cat: 'bundle' },
-    { id: 'speed_demon', icon: '💨', title: 'شيطان السرعة', titleEn: 'Speed Demon', desc: 'إضافة 30ث + إيقاف العداد.', descEn: '+30s + Stop Timer.', price: 160, cat: 'bundle' },
-    { id: 'ultimate_pack', icon: '👑', title: 'الحزمة المطلقة', titleEn: 'Ultimate Pack', desc: 'مضاعف XP + كوينز + درع.', descEn: 'Double XP + Coins + Shield.', price: 500, cat: 'bundle' }
-  ];
-
-  // ✅ التصنيفات مع الترجمة
-  const categories = [
-    { id: 'all', name: 'الكل', nameEn: 'All' },
-    { id: 'time', name: '⏳ الوقت', nameEn: '⏳ Time' },
-    { id: 'question', name: '❓ الأسئلة', nameEn: '❓ Questions' },
-    { id: 'boost', name: '⚡ تعزيزات', nameEn: '⚡ Boosts' },
-    { id: 'loot', name: '🎁 صناديق', nameEn: '🎁 Boxes' },
-    { id: 'social', name: '💬 اجتماعي', nameEn: '💬 Social' },
-    { id: 'bundle', name: '📦 حزم', nameEn: '📦 Bundles' }
-  ];
-
-  // جلب الكوينز والمخزون
-  window.onValue(window.ref(window.db, 'users_data/' + currentUser), (snap) => {
-      const data = snap.val() || {};
-      userCoins = data.coins || 0;
-      userInventory = data.inventory || {};
-      document.getElementById('userCoins').innerText = userCoins;
-      renderShop();
-  });
-
-  // ✅ تطبيق اللغة
-  function applyLanguage() {
-      const t = translations[currentLang];
-      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-      
-      document.getElementById('backBtn').innerText = t.back;
-      document.getElementById('coinsText').innerText = t.coins;
-      document.getElementById('shopTitle').innerText = t.title;
-      document.getElementById('shopSubtitle').innerText = t.subtitle;
-      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-
-      renderTabs();
-      renderShop();
-  }
-
-  window.toggleLanguage = function() {
-      currentLang = currentLang === 'ar' ? 'en' : 'ar';
-      localStorage.setItem('lang', currentLang);
-      applyLanguage();
-  }
-
-  function renderTabs() {
-      const tabsContainer = document.getElementById('tabsContainer');
-      tabsContainer.innerHTML = categories.map(c => 
-          `<button class="tab-btn ${currentTab === c.id ? 'active' : ''}" onclick="changeTab('${c.id}')">${currentLang === 'en' ? c.nameEn : c.name}</button>`
-      ).join('');
-  }
-
-  window.changeTab = function(tabId) {
-      currentTab = tabId;
-      renderTabs();
-      renderShop();
-  }
-
-  function renderShop() {
-      const t = translations[currentLang];
-      const grid = document.getElementById('shopGrid');
-      if (!grid) return;
-      grid.innerHTML = '';
-
-      const filteredItems = currentTab === 'all' ? shopItems : shopItems.filter(i => i.cat === currentTab);
-
-      filteredItems.forEach(item => {
-          const canAfford = userCoins >= item.price;
-          const ownedCount = userInventory[item.id] || 0;
-          const displayTitle = currentLang === 'en' ? item.titleEn : item.title;
-          const displayDesc = currentLang === 'en' ? item.descEn : item.desc;
-          
-          const div = document.createElement('div');
-          div.className = 'shop-card';
-          div.innerHTML = `
-              ${ownedCount > 0 ? `<div class="item-owned">${t.owned} ${ownedCount}</div>` : ''}
-              <div>
-                  <div class="item-icon">${item.icon}</div>
-                  <div class="item-title">${displayTitle}</div>
-                  <div class="item-desc">${displayDesc}</div>
-              </div>
-              <button class="btn-buy" ${!canAfford ? 'disabled' : ''} onclick="buyItem('${item.id}', ${item.price})">
-                  ${canAfford ? `${t.buy} ${item.price} 🪙` : t.noCoins}
-              </button>
-          `;
-          grid.appendChild(div);
-      });
-  }
-
   window.buyItem = async function(itemId, price) {
+    const t = translations[currentLang];
+    
+    if (isOwner) {
+      try {
+        await update(ref(db), { [`users_data/${currentUser}/inventory/${itemId}`]: (userInventory[itemId] || 0) + 1 });
+        if (window.triggerNotification) {
+            window.triggerNotification(currentUser, "🛒 عملية شراء", `لقد اشتريت أداة جديدة من المتجر بنجاح!`, "success");
+        }
+        showSiteAlert(t.success, 'تمت الإضافة (أونر)');
+      } catch(e) { showSiteAlert(t.error, e.message); }
+      return;
+    }
+
+    if (userCoins < price) return showSiteAlert(t.error, t.notEnough);
+    showSiteAlert(t.confirmBuy, `${t.buy} ${price} 🪙?`, true, async () => {
+      const btn = event.target;
+      const original = btn.innerText;
+      btn.disabled = true; btn.innerText = '⏳';
+      try {
+        const coinsRef = ref(db, `users_data/${currentUser}/coins`);
+        const result = await runTransaction(coinsRef, (current) => {
+          if ((current || 0) < price) return;
+          return current - price;
+        });
+        if (!result.committed) return showSiteAlert(t.error, t.notEnough);
+        await update(ref(db), { [`users_data/${currentUser}/inventory/${itemId}`]: (userInventory[itemId] || 0) + 1 });
+        
+        if (window.triggerNotification) {
+            window.triggerNotification(currentUser, "🛒 عملية شراء", `لقد اشتريت أداة جديدة من المتجر بنجاح!`, "success");
+        }
+
+        showSiteAlert(t.success, currentLang === 'ar' ? 'تم الشراء بنجاح!' : 'Purchased successfully!');
+      } catch(e) { showSiteAlert(t.error, e.message); }
+      finally { btn.disabled = false; btn.innerText = original; }
+    });
+  };
+        window.applyOwnedTheme = async (themeId) => {
+      const theme = THEMES.find(t => t.id === themeId);
+      if (!theme || (!isOwner && !ownedThemes[themeId])) return;
       const t = translations[currentLang];
-      if (userCoins < price) return showToast(t.notEnough, true);
+      const themeObj = { presetId: theme.id, bgImage: theme.bg, animation: theme.animation, color: '#ff0000' };
+      try {
+        await update(ref(db, `users_data/${currentUser}`), { activeTheme: themeObj });
+        showSiteAlert(t.success, currentLang === 'ar' ? 'تم تطبيق الثيم!' : 'Theme applied!');
+      } catch(e) { showSiteAlert(t.error, e.message); }
+    };
+    window.buyFeature = async function(featureName, price) {
+      const t = translations[currentLang];
+      
+      if (isOwner) {
+        try {
+          await update(ref(db, `unlocked_features/${currentUser}`), { [featureName]: true });
+          showSiteAlert(t.success, 'تم فتح الصلاحية (أونر)');
+        } catch(e) { showSiteAlert(t.error, e.message); }
+        return;
+      }
+
+      if (userCoins < price) return showSiteAlert(t.error, t.notEnough);
+      showSiteAlert(t.confirmBuy, `${t.buy} ${price} 🪙?`, true, async () => {
+        const btn = event.target;
+        const original = btn.innerText;
+        btn.disabled = true; btn.innerText = '⏳';
+        try {
+          const coinsRef = ref(db, `users_data/${currentUser}/coins`);
+          const result = await runTransaction(coinsRef, (current) => {
+            if ((current || 0) < price) return;
+            return current - price;
+          });
+          if (!result.committed) return showSiteAlert(t.error, t.notEnough);
+          await update(ref(db, `unlocked_features/${currentUser}`), { [featureName]: true });
+          showSiteAlert(t.success, currentLang === 'ar' ? 'مبروك! تم فتح الصلاحية.' : 'Feature unlocked!');
+        } catch(e) { showSiteAlert(t.error, e.message); }
+        finally { btn.disabled = false; btn.innerText = original; }
+      });
+    };
+
+    window.saveCustomTheme = async () => {
+      const t = translations[currentLang];
+      const themeObj = { presetId: 'custom' };
+      
+      if (isOwner) {
+        themeObj.color = document.getElementById('customColor').value;
+        themeObj.bgImage = document.getElementById('customBg').value.trim() || null;
+        themeObj.animation = document.getElementById('customAnim').value;
+      } else {
+        let hasAny = false;
+        if (unlockedFeatures.customColor) { themeObj.color = document.getElementById('customColor').value; hasAny = true; }
+        if (unlockedFeatures.customBg) { themeObj.bgImage = document.getElementById('customBg').value.trim() || null; hasAny = true; }
+        if (unlockedFeatures.customAnim) { themeObj.animation = document.getElementById('customAnim').value; hasAny = true; }
+        if (!hasAny) {
+          return showSiteAlert(currentLang === 'ar' ? 'تنبيه' : 'Notice', currentLang === 'ar' ? 'لازم تشتري صلاحية واحدة على الأقل!' : 'Buy at least one feature first!');
+        }
+      }
 
       try {
-          const newCoins = userCoins - price;
-          const currentOwned = userInventory[itemId] || 0;
-          
-          const updates = {};
-          updates[`users_data/${currentUser}/coins`] = newCoins;
-          updates[`users_data/${currentUser}/inventory/${itemId}`] = currentOwned + 1;
-          
-          await window.update(window.ref(window.db), updates);
-          showToast(t.buySuccess);
-      } catch(e) {
-          showToast(t.error + e.message, true);
-      }
-  }
+        await update(ref(db, `users_data/${currentUser}`), { activeTheme: themeObj });
+        showSiteAlert(t.success, currentLang === 'ar' ? 'تم حفظ وتطبيق الثيم!' : 'Theme saved & applied!');
+      } catch(e) { showSiteAlert(t.error, e.message); }
+    };
 
-  function showToast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.innerText = msg;
-      t.className = isError ? 'toast show error' : 'toast show';
-      setTimeout(() => { t.className = 'toast'; }, 3000);
-  }
+    // Init
+    currentDiscounts = calculateHourlyDiscounts();
+    startFlashSaleTimer();
 
-  // ✅ التشغيل الأولي
-  applyLanguage();
-  if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
-</script>
-</body>
-</html>
+    applyLang();
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); }
+  </script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
+  </body>
+  </html>
