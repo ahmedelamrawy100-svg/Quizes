@@ -6,6 +6,20 @@
 <title>🤖 مساعد Quiz Hub الذكي</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
 <style>
   :root {
     --bg-color: #000; --bg-gradient: radial-gradient(circle at center, #1a1015 0%, #000 100%);
@@ -148,8 +162,12 @@
       welcome: "أهلاً بيك في Quiz Hub! أنا المساعد الذكي بتاعك. اقدر أشرحلك مميزات الموقع، المتجر، ألعاب التحدي، وأي حاجة محتاجها. اختار من القايمة اللي تحت!",
       placeholder: "اسألني عن أي حاجة في الموقع...", send: "إرسال",
       
-      btnFeatures: "✨ مميزات الموقع", btnHelp: "❓ إزاي ألعب؟",
+      btnUpdates: "🆕 التحديثات الجديدة", btnFeatures: "✨ مميزات الموقع", btnHelp: "❓ إزاي ألعب؟",
       btnForeign: "🌍 كويزات أجنبية", btnEgyptian: "🇪🇬 كويزات مصرية",
+      
+      // Updates Menu
+      btnCinematic: "🎬 الوضع السينمائي", btnVoice: "🎙️ التحدث للإجابة", 
+      btnGhost: "👻 تحدي الشبح", btnProgress: "⏳ حفظ التقدم", btnBoss: "👹 الزعيم العالمي",
       
       // Features Menu
       btnShop: "🛒 المتجر والمساعدات", btnModes: "🎮 أوضاع اللعب", 
@@ -167,15 +185,19 @@
       replyForeign: "اختار التصنيف الأجنبي اللي يعجبك:",
       replyEgyptian: "اختار التصنيف المصري اللي يعجبك:",
       
+      // Updates Replies
+      replyUpdatesMenu: "دي كل التحديثات والميزات الجديدة اللي ضفناها للموقع. اختار اللي عايز تعرفه:",
+      replyCinematic: "🎬 الوضع السينمائي (Cinematic Mode):\nبنخلي شكل الكويز زي السينما بالظبط! شريطين سود فوق وتحت، ولما تغلط الشاشة بتهتز، ولما تخلص بيطلعلك شاشة (Highlights) فيها أسرع إجابة وأطول سترايك. \nتقدر تقفله أو تشغله من زرار 🎬 اللي فوق شمال جوه الكويز.",
+      replyVoice: "🎙️ التحدث للإجابة (Voice Recognition):\nمش محتاج تدوس على الاختيارات بإيدك! في زرار مكتوب عليه (🎙️ اضغط للتحدث) تحت الاختيارات. دوس عليه وانطق الإجابة بصوتك، والموقع هيفهمها ويجاوب لوحده.",
+      replyGhost: "👻 تحدي الشبح (Ghost Mode):\nفي نهاية أي كويز، هتلاقي زرار (العب ضد شبحك). ده بيخليك تلعب ضد أفضل نتيجة أنت جبتها قبل كده! بتتسابق مع نفسك في الوقت والنقاط.",
+      replyProgress: "⏳ حفظ التقدم (Resume Progress):\nلو قفلت الكويز في النص أو النت فصل، متقلقش! لما ترجع تفتح الكويز تاني، الموقع هيقولك (عندك تقدم محفوظ، تحب تكمل؟) وتقدر تكمل من نفس السؤال اللي وقفت عنده.",
+      replyBoss: "👹 الزعيم العالمي (World Boss):\nفي الصفحة الرئيسية، فوق خالص، في زعيم عالمي (زي فالاك). كل كويز بتلعبه وبتاخد فيه نقاط، بتضرب الزعيم وتقلل دمه! اتحد مع كل اللاعبين عشان تهزموه وتاخدوا جوائز.",
+      
       // Feature Replies
       replyShop: "🛒 المتجر والمساعدات:\nتقدر تجمع كوينز من اللعب وتشتري أدوات تساعدك جوه الكويز زي:\n- ❄️ تجميد الوقت / ⏱️ إضافة وقت.\n- ✂️ حذف إجابتين (50/50).\n- 👁️ إظهار الإجابة.\n- 🎁 صناديق حظ (برونزي لحد أسطوري).\n- دروع لحماية الستريك بتاعك.\nكل ده هتلاقيه في صفحة المتجر (Shop).",
-      
       replyModes: "🎮 أوضاع اللعب:\n- ⚡ وضع السرعة (Speedrun): 5 ثواني بس لكل سؤال!\n- ⚔️ تحدي صديق: اعمل غرفة وابعت الكود لصاحبك.\n- 🎲 تحدي عشوائي: دور على خصم عشوائي.\n- 👻 وضع الشبح: العب ضد أفضل نتيجة سجلتها قبل كده.\nجربهم من جوه أي كويز!",
-      
       replyProfile: "👤 البروفايل والمخزون:\nمن صفحة بروفايلي تقدر:\n- ترفع صورة شخصية.\n- تفتح صندوقك اليومي (Loot Box).\n- تشوف الـ XP والمستوى والدقة بتاعتك.\n- تستخدم أدواتك اللي اشتريتها من المتجر.\n- تشوف الـ Badges (الإنجازات) والأرشيف بتاعك.",
-      
       replyTeams: "⚔️ التيمات وحرب التيمات:\nمن صفحة Teams تقدر تنضم لتصنيفات (رعب، أكشن...). وتعمل فريق فرعي مع أصحابك (Clan) وتتجوزا في حرب تيمات عشان تجمعوا نقاط وتتصدروا الليدربورد!",
-      
       replySocial: "💬 المجتمع:\n- الشات العام (Chat): اتكلم مع كل اللاعبين.\n- المجتمع (Community): اكتب تعليقات، اقتراحات، واطلب كويزات.\n- صندوق الرسائل (Inbox): كلم أصحابك، اقبل طلبات الصداقة، وابعت طلبات للأونر عشان تاخد رتبة.",
       
       // Quiz Replies
@@ -189,15 +211,19 @@
       replyMysteryEg: "الغموض المصري: الفيل الأزرق (الجزء الأول والتاني).",
       
       replyHelp: "عشان تلعب، ادخل على أي كويز، اختار الجزء أو الشامل، وابدأ جاوب. هتجمع XP ونقاط وترتفع في الليدربورد!",
-      replyDefault: "معلش مفهمتش قصدك. جرب تختار من الأزرار اللي تحت، أو اسألني عن 'المتجر' أو 'التيمات' أو 'أوضاع اللعب'."
+      replyDefault: "معلش مفهمتش قصدك. جرب تختار من الأزرار اللي تحت، أو اسألني عن 'السينمائي' أو 'التحدث' أو 'الزعيم'."
     },
     en: {
       back: "⬅ Back", title: "Quiz Hub Assistant", subtitle: "Online 🟢 (Full Guide)",
       welcome: "Welcome to Quiz Hub! I'm your smart assistant. I can explain the site features, shop, game modes, and more. Choose from the menu below!",
       placeholder: "Ask me anything about the site...", send: "Send",
       
-      btnFeatures: "✨ Site Features", btnHelp: "❓ How to play?",
+      btnUpdates: "🆕 New Updates", btnFeatures: "✨ Site Features", btnHelp: "❓ How to play?",
       btnForeign: "🌍 Foreign Quizzes", btnEgyptian: "🇪🇬 Egyptian Quizzes",
+      
+      // Updates Menu
+      btnCinematic: "🎬 Cinematic Mode", btnVoice: "🎙️ Voice Answer", 
+      btnGhost: "👻 Ghost Mode", btnProgress: "⏳ Resume Progress", btnBoss: "👹 World Boss",
       
       btnShop: "🛒 Shop & Assistants", btnModes: "🎮 Game Modes", 
       btnProfile: "👤 Profile & Inventory", btnTeams: "⚔️ Teams & Battles", btnSocial: "💬 Social & Inbox",
@@ -211,14 +237,17 @@
       replyForeign: "Choose a foreign category:",
       replyEgyptian: "Choose an Egyptian category:",
       
+      replyUpdatesMenu: "Here are all the new updates and features we added. Choose one to learn more:",
+      replyCinematic: "🎬 Cinematic Mode:\nWe make the quiz look like a movie theater! Letterbox bars, screen shake on wrong answers, and a cool Highlights reel at the end. \nYou can toggle it on/off using the 🎬 button top-left inside the quiz.",
+      replyVoice: "🎙️ Voice Answer:\nYou don't have to click! There's a (🎙️ Speak Answer) button below the options. Click it, say your answer out loud, and the site will pick it up.",
+      replyGhost: "👻 Ghost Mode:\nAt the end of any quiz, click 'Play Against Your Ghost'. You will race against your own best score and time!",
+      replyProgress: "⏳ Resume Progress:\nIf you close the quiz halfway, don't worry! When you come back, it will ask if you want to resume from where you left off.",
+      replyBoss: "👹 World Boss:\nOn the home page, there's a global boss. Every quiz you play deals damage to it! Team up with all players to defeat it and earn rewards.",
+      
       replyShop: "🛒 Shop & Assistants:\nCollect coins and buy tools to help you in quizzes:\n- ❄️ Freeze time / ⏱️ Add time.\n- ✂️ 50/50.\n- 👁️ Reveal answer.\n- 🎁 Loot Boxes (Bronze to Legendary).\n- Shields to protect your streak.\nFind them all in the Shop page.",
-      
       replyModes: "🎮 Game Modes:\n- ⚡ Speedrun: Only 5 seconds per question!\n- ⚔️ Challenge Friend: Create a room and share the code.\n- 🎲 Random Match: Find a random opponent.\n- 👻 Ghost Mode: Play against your own best time.\nTry them inside any quiz!",
-      
       replyProfile: "👤 Profile & Inventory:\nFrom your profile you can:\n- Upload a profile picture.\n- Open your daily Loot Box.\n- Check your XP, Level, and Accuracy.\n- Use items you bought from the shop.\n- View your Badges and Timeline.",
-      
       replyTeams: "⚔️ Teams & Battles:\nFrom the Teams page, join main categories (Horror, Action...). Create a sub-team (Clan) with friends and compete in team battles to top the leaderboard!",
-      
       replySocial: "💬 Social:\n- Global Chat: Talk to all players.\n- Community: Post comments, suggestions, and quiz requests.\n- Inbox: Message friends, accept friend requests, and send requests to the Owner for ranks.",
       
       replyHorror: "Horror quizzes: Annabelle, Conjuring, The Nun, FNAF, Train to Busan, and Scream.",
@@ -231,13 +260,16 @@
       replyMysteryEg: "Egyptian Mystery: The Blue Elephant (Parts 1 & 2).",
       
       replyHelp: "To play, enter any quiz, choose a part or comprehensive, and start answering. Earn XP and points to climb the leaderboard!",
-      replyDefault: "Sorry, I didn't understand. Try the buttons below, or ask about 'Shop', 'Teams', or 'Game Modes'."
+      replyDefault: "Sorry, I didn't understand. Try the buttons below, or ask about 'Cinematic', 'Voice', or 'Boss'."
     }
   };
 
   function renderMainMenu() {
     const t = ui[currentLang];
     chatKeyboard.innerHTML = `
+      <div class="kb-row">
+        <button class="kb-btn full-width" style="background: #ff9800; color: #000; border-color: #ff9800;" onclick="handleMenuClick('updates')">${t.btnUpdates}</button>
+      </div>
       <div class="kb-row">
         <button class="kb-btn" onclick="handleMenuClick('foreign')">${t.btnForeign}</button>
         <button class="kb-btn" onclick="handleMenuClick('egyptian')">${t.btnEgyptian}</button>
@@ -247,6 +279,26 @@
       </div>
       <div class="kb-row">
         <button class="kb-btn full-width" onclick="handleMenuClick('help')">${t.btnHelp}</button>
+      </div>
+    `;
+  }
+
+  function renderUpdatesMenu() {
+    const t = ui[currentLang];
+    chatKeyboard.innerHTML = `
+      <div class="kb-top-bar">
+        <button class="kb-back" onclick="renderMainMenu()">${t.btnBack}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('cinematic')">${t.btnCinematic}</button>
+        <button class="kb-btn" onclick="handleMenuClick('voice')">${t.btnVoice}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn" onclick="handleMenuClick('ghost')">${t.btnGhost}</button>
+        <button class="kb-btn" onclick="handleMenuClick('progress')">${t.btnProgress}</button>
+      </div>
+      <div class="kb-row">
+        <button class="kb-btn full-width" onclick="handleMenuClick('boss')">${t.btnBoss}</button>
       </div>
     `;
   }
@@ -370,10 +422,18 @@
     let reply = '';
 
     // Menus
-    if (action === 'foreign') { btnText = t.btnForeign; reply = t.replyForeign; renderForeignMenu(); }
+    if (action === 'updates') { btnText = t.btnUpdates; reply = t.replyUpdatesMenu; renderUpdatesMenu(); }
+    else if (action === 'foreign') { btnText = t.btnForeign; reply = t.replyForeign; renderForeignMenu(); }
     else if (action === 'egyptian') { btnText = t.btnEgyptian; reply = t.replyEgyptian; renderEgyptianMenu(); }
     else if (action === 'features') { btnText = t.btnFeatures; reply = t.replyWelcome; renderFeaturesMenu(); }
     
+    // Updates
+    else if (action === 'cinematic') { btnText = t.btnCinematic; reply = t.replyCinematic; }
+    else if (action === 'voice') { btnText = t.btnVoice; reply = t.replyVoice; }
+    else if (action === 'ghost') { btnText = t.btnGhost; reply = t.replyGhost; }
+    else if (action === 'progress') { btnText = t.btnProgress; reply = t.replyProgress; }
+    else if (action === 'boss') { btnText = t.btnBoss; reply = t.replyBoss; }
+
     // Features
     else if (action === 'shop') { btnText = t.btnShop; reply = t.replyShop; }
     else if (action === 'modes') { btnText = t.btnModes; reply = t.replyModes; }
@@ -419,8 +479,15 @@
       const lowerText = text.toLowerCase();
       let reply = ui[currentLang].replyDefault;
 
-      if (lowerText.includes('متجر') || lowerText.includes('shop') || lowerText.includes('مساعد') || lowerText.includes('coins') || lowerText.includes('كوينز')) reply = ui[currentLang].replyShop;
-      else if (lowerText.includes('وضع') || lowerText.includes('mode') || lowerText.includes('سبيد') || lowerText.includes('speedrun') || lowerText.includes('شبح') || lowerText.includes('ghost')) reply = ui[currentLang].replyModes;
+      // Keyword Matching
+      if (lowerText.includes('سينمائي') || lowerText.includes('cinematic') || lowerText.includes('شريط')) reply = ui[currentLang].replyCinematic;
+      else if (lowerText.includes('صوت') || lowerText.includes('تحدث') || lowerText.includes('voice') || lowerText.includes('مايك')) reply = ui[currentLang].replyVoice;
+      else if (lowerText.includes('شبح') || lowerText.includes('ghost')) reply = ui[currentLang].replyGhost;
+      else if (lowerText.includes('حفظ') || lowerText.includes('progress') || lowerText.includes('كمل')) reply = ui[currentLang].replyProgress;
+      else if (lowerText.includes('زعيم') || lowerText.includes('boss') || lowerText.includes('فالاك')) reply = ui[currentLang].replyBoss;
+      
+      else if (lowerText.includes('متجر') || lowerText.includes('shop') || lowerText.includes('مساعد') || lowerText.includes('coins') || lowerText.includes('كوينز')) reply = ui[currentLang].replyShop;
+      else if (lowerText.includes('وضع') || lowerText.includes('mode') || lowerText.includes('سبيد') || lowerText.includes('speedrun')) reply = ui[currentLang].replyModes;
       else if (lowerText.includes('بروفايل') || lowerText.includes('profile') || lowerText.includes('مخزون') || lowerText.includes('inventory') || lowerText.includes('صورة')) reply = ui[currentLang].replyProfile;
       else if (lowerText.includes('تيم') || lowerText.includes('team') || lowerText.includes('حرب') || lowerText.includes('clan')) reply = ui[currentLang].replyTeams;
       else if (lowerText.includes('شات') || lowerText.includes('chat') || lowerText.includes('مجتمع') || lowerText.includes('community')) reply = ui[currentLang].replySocial;
@@ -440,5 +507,6 @@
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
 </body>
 </html>
