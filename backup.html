@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💾 النسخ الاحتياطي - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg: #0a0a0a; --card: #151515; --gold: #ffd700; --green: #4caf50; --red: #ff0000; --text: #fff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+  
+  .backup-box { background: var(--card); border: 2px solid var(--gold); border-radius: 20px; padding: 40px; max-width: 600px; width: 100%; text-align: center; box-shadow: 0 0 40px rgba(255,215,0,0.15); }
+  .backup-icon { font-size: 80px; margin-bottom: 20px; animation: float 3s infinite ease-in-out; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+  
+  h1 { color: var(--gold); font-size: 32px; margin-bottom: 10px; }
+  p { color: #aaa; font-size: 16px; line-height: 1.6; margin-bottom: 30px; }
+  
+  .btn-download { background: linear-gradient(135deg, #4caf50, #2e7d32); color: #fff; border: none; padding: 20px 40px; border-radius: 15px; font-family: 'Cairo'; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.3s; width: 100%; display: flex; justify-content: center; align-items: center; gap: 15px; box-shadow: 0 10px 20px rgba(76,175,80,0.3); }
+  .btn-download:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(76,175,80,0.5); }
+  .btn-download:disabled { background: #333; color: #888; cursor: not-allowed; transform: none; box-shadow: none; }
+  
+  .status-text { margin-top: 20px; font-weight: bold; font-size: 16px; color: var(--green); display: none; }
+  .status-text.error { color: var(--red); }
+  
+  .warning-box { background: rgba(255,0,0,0.1); border: 1px solid var(--red); border-radius: 10px; padding: 15px; margin-top: 30px; text-align: right; font-size: 14px; color: #ff8888; line-height: 1.6; }
+  .warning-box b { color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="backup-box">
+    <div class="backup-icon">🛡️</div>
+    <h1>النسخ الاحتياطي الشامل</h1>
+    <p>هنا تقدر تنزل نسخة كاملة من قاعدة بيانات الموقع على جهازك عشان تحمي نفسك من أي مشاكل.</p>
+    
+    <button id="downloadBtn" class="btn-download" onclick="downloadBackup()">
+        📥 تحميل نسخة احتياطية (JSON)
+    </button>
+    
+    <div id="status" class="status-text"></div>
+
+    <div class="warning-box">
+        <b>⚠️ تحذير هام جداً:</b><br>
+        هذا الملف يحتوي على كل بيانات الموقع (اللاعبين، النقاط، الإعدادات). احتفظ به في مكان آمن على جهازك. 
+        <br><br>
+        <b>لا تحاول رفعه (Import) في فايربيز إلا إذا كنت متأكداً تماماً، لأن فايربيز سيقوم بمسح كل شيء حالي واستبداله بالبيانات الموجودة في الملف.</b>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", 
+        authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", 
+        databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", 
+        projectId: "quiz-hub-app-f4cd0", 
+        storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", 
+        messagingSenderId: "282772179392", 
+        appId: "1:282772179392:web:64646d757592b29ff3a025" 
+    };
+    
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.downloadBackup = async function() {
+        const btn = document.getElementById('downloadBtn');
+        const status = document.getElementById('status');
+        
+        btn.disabled = true;
+        btn.innerHTML = '⏳ جاري تجميع البيانات...';
+        status.style.display = 'none';
+
+        try {
+            // بنجيب كل الداتا من الروت الرئيسي
+            const snapshot = await get(ref(db, '/'));
+            
+            if (!snapshot.exists()) {
+                throw new Error("قاعدة البيانات فاضية!");
+            }
+
+            const data = snapshot.val();
+            const jsonString = JSON.stringify(data, null, 2);
+            
+            // بنعمل ملف وننزله
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const date = new Date().toISOString().split('T')[0];
+            const time = new Date().toLocaleTimeString('ar-EG').replace(/:/g, '-');
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QuizHub_Backup_${date}_${time}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            status.innerText = '✅ تم تحميل النسخة بنجاح! احتفظ بالملف في مكان آمن.';
+            status.className = 'status-text';
+            status.style.display = 'block';
+
+        } catch (error) {
+            console.error(error);
+            status.innerText = '❌ حدث خطأ: ' + error.message;
+            status.className = 'status-text error';
+            status.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '📥 تحميل نسخة احتياطية (JSON)';
+        }
+    };
+</script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
