@@ -18,39 +18,52 @@
   // 1. SERVICE WORKER REGISTRATION
   // ═══════════════════════════════════════════════════════════════════
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js', { scope: './' })
-        .then(reg => {
-          swRegistration = reg;
-          console.log('[PWA] ✅ SW registered:', reg.scope);
-          
-          // Cache الـ essentials
-          setTimeout(() => {
-            if (navigator.serviceWorker.controller) {
-              navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ESSENTIALS' });
-            }
-          }, 3000);
-          
-          // Check updates
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                showUpdateBanner();
-              }
-            });
-          });
-        })
-        .catch(err => console.warn('[PWA] ❌ SW registration failed:', err));
-    });
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
-    // Handle controller change
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    });
+    if (isLocalhost) {
+      console.log('[PWA] ⚠️ Service Worker disabled on localhost to avoid caching/Live Server conflicts.');
+      // إلغاء أي Service Worker قديم متسجل على اللوكال
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+          console.log('[PWA] Unregistered old SW from localhost');
+        }
+      });
+    } else {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js', { scope: './' })
+          .then(reg => {
+            swRegistration = reg;
+            console.log('[PWA] ✅ SW registered:', reg.scope);
+            
+            // Cache الـ essentials
+            setTimeout(() => {
+              if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'CACHE_ESSENTIALS' });
+              }
+            }, 3000);
+            
+            // Check updates
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdateBanner();
+                }
+              });
+            });
+          })
+          .catch(err => console.warn('[PWA] ❌ SW registration failed:', err));
+      });
+      
+      // Handle controller change
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+    }
   }
   
   // ═══════════════════════════════════════════════════════════════════
