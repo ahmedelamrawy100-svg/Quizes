@@ -1,5 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue, update, get, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+// ✅ استدعاء الزعيم العالمي
+import { sendDamageToBoss } from './world_boss.js';
+import './quiz-cinematic.js';
+// 🎯 المهام اليومية والأسبوعية
+import './features/daily-quests.js';
+// 🎟️ تذاكر الموسم (Season Pass)
+import './features/season-pass.js';
 
 const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
 const app = initializeApp(firebaseConfig); const db = getDatabase(app);
@@ -8,9 +15,6 @@ window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; wi
 
 let startTime = 0; 
 
-// ==========================================
-// 🛡️ حماية: تعريف الدالة دي بره عشان لو حصل أي مشكلة
-// ==========================================
 window.startGame = function() {
     console.error("انتظر ثانية، الكويز لسه بيحمل...");
     alert("جاري تحميل الكويز، برجاء الانتظار ثانية واحدة...");
@@ -92,7 +96,6 @@ window.initQuiz = function(config) {
         let isChallengeMode = false; let isSpeedrun = false; let myRoomCode = null; let myRole = null;
         let ghostTimes = []; let playerAnswers = [];
         
-        // ✅ Shop helper state
         let userInventory = {};
         let inventoryLoaded = false;
         let inventoryLoadPromise = null;
@@ -101,20 +104,13 @@ window.initQuiz = function(config) {
         let currentFreezeTick = null;
         const activeBoosts = { double_xp: false, double_coins: false, double_lb: false, ghost_mode: false };
         const itemMeta = {
-            freeze10: { icon: '⏱️', name: 'تجميد 10ث' },
-            freeze20: { icon: '⏱️', name: 'تجميد 20ث' },
-            add10: { icon: '➕', name: 'إضافة 10ث' },
-            add30: { icon: '➕', name: 'إضافة 30ث' },
-            stop_timer: { icon: '🛑', name: 'إيقاف العداد' },
-            fifty: { icon: '✂️', name: '50/50' },
-            skip: { icon: '⏭️', name: 'تخطي' },
-            hint_half: { icon: '💡', name: 'تلميح' },
-            reveal: { icon: '👁️', name: 'إظهار' },
-            second_chance: { icon: '🎲', name: 'فرصة تانية' },
-            double_xp: { icon: '✨', name: 'مضاعف XP' },
-            double_coins: { icon: '💰', name: 'مضاعف كوينز' },
-            double_lb: { icon: '🏆', name: 'مضاعف ليدربورد' },
-            ghost_mode: { icon: '👻', name: 'وضع الشبح' }
+            freeze10: { icon: '⏱️', name: 'تجميد 10ث' }, freeze20: { icon: '⏱️', name: 'تجميد 20ث' },
+            add10: { icon: '➕', name: 'إضافة 10ث' }, add30: { icon: '➕', name: 'إضافة 30ث' },
+            stop_timer: { icon: '🛑', name: 'إيقاف العداد' }, fifty: { icon: '✂️', name: '50/50' },
+            skip: { icon: '⏭️', name: 'تخطي' }, hint_half: { icon: '💡', name: 'تلميح' },
+            reveal: { icon: '👁️', name: 'إظهار' }, second_chance: { icon: '🎲', name: 'فرصة تانية' },
+            double_xp: { icon: '✨', name: 'مضاعف XP' }, double_coins: { icon: '💰', name: 'مضاعف كوينز' },
+            double_lb: { icon: '🏆', name: 'مضاعف ليدربورد' }, ghost_mode: { icon: '👻', name: 'وضع الشبح' }
         };
         const timeQuestionItems = ['freeze10','freeze20','add10','add30','stop_timer','fifty','skip','hint_half','reveal'];
         const boostItems = ['double_xp','double_coins','double_lb','ghost_mode'];
@@ -128,8 +124,6 @@ window.initQuiz = function(config) {
             myRole = roleFromUrl || 'player2';
             isChallengeMode = true;
             localStorage.setItem('activeRoomCode', myRoomCode);
-            
-            // 🆕 Initialize Chat
             import('./features/quiz-chat.js').then(m => m.initQuizChat(myRoomCode)).catch(e => console.log("Chat not loaded yet"));
         }
         
@@ -147,17 +141,11 @@ window.initQuiz = function(config) {
         applyLangOnLoad();
         injectHelperStyles();
 
-        // ═══════════════════════════════════════════════
-        // NEW: PWA Manifest Link (auto-inject)
-        // ═══════════════════════════════════════════════
         if (!document.querySelector('link[rel="manifest"]')) {
           const l = document.createElement('link');
           l.rel = 'manifest'; l.href = 'manifest.json'; document.head.appendChild(l);
         }
 
-        // ═══════════════════════════════════════════════
-        // NEW: Save Progress
-        // ═══════════════════════════════════════════════
         const PROGRESS_KEY = `quiz_progress_${quizKey}`;
 
         function saveProgress() {
@@ -168,7 +156,10 @@ window.initQuiz = function(config) {
             savedAt: Date.now(),
             currentSaveKey
           };
-          localStorage.setItem(PROGRESS_KEY, JSON.stringify(prog));
+          localStorage.setItem(PROGRESS_KEY, JSON.stringify(prog));          
+          if (currentUser !== 'Unknown' && window.db) {
+              window.set(window.ref(window.db, `users_data/${currentUser}/progress/${quizKey}`), prog).catch(() => {});
+          }
         }
 
         function loadProgress() {
@@ -182,11 +173,13 @@ window.initQuiz = function(config) {
           } catch { return null; }
         }
 
-        function clearProgress() { localStorage.removeItem(PROGRESS_KEY); }
+        function clearProgress() { 
+            localStorage.removeItem(PROGRESS_KEY); 
+            if (currentUser !== 'Unknown' && window.db) {
+                window.remove(window.ref(window.db, `users_data/${currentUser}/progress/${quizKey}`)).catch(() => {});
+            }
+        }
 
-        // ═══════════════════════════════════════════════
-        // NEW: Keyboard Shortcuts
-        // ═══════════════════════════════════════════════
         document.addEventListener('keydown', (e) => {
           const playScreen = document.getElementById('playScreen');
           if (!playScreen || playScreen.style.display !== 'block') return;
@@ -208,9 +201,6 @@ window.initQuiz = function(config) {
           }
         });
 
-        // ==========================================
-        // 🎙️ VOICE ONLY (With Translation)
-        // ==========================================
         let voiceRecognition = null;
         let isListening = false;
 
@@ -281,11 +271,7 @@ window.initQuiz = function(config) {
         function stopMedia() {
             if (voiceRecognition) { try { voiceRecognition.stop(); } catch(e){} }
         }
-        // ==========================================
 
-        // ============================================
-        // ✅ تحميل المخزون
-        // ============================================
         function loadInventory(force = false) {
             if (!force && inventoryLoadPromise) return inventoryLoadPromise;
             if (currentUser === 'Unknown' || !window.db) {
@@ -354,9 +340,6 @@ window.initQuiz = function(config) {
             localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
         }
 
-        // ============================
-        // ✅ Helper UI Setup
-        // ============================
         function setupHelperUI() {
             if (document.getElementById('quizHelperBtn')) return;
             const playScreen = document.getElementById('playScreen') || document.body;
@@ -724,9 +707,6 @@ window.initQuiz = function(config) {
             }); 
         }
 
-        // ==========================================
-        // 🛡️ إعادة كتابة startGame الحقيقية هنا
-        // ==========================================
         window.startGame = function(part) { 
             isSpeedrun = false; ghostTimes = []; playerAnswers = [];
             activeBoosts.double_xp = false; activeBoosts.double_coins = false; activeBoosts.double_lb = false; activeBoosts.ghost_mode = false;
@@ -763,9 +743,6 @@ window.initQuiz = function(config) {
         
         window.startSpeedrun = function() { window.startGame('all'); isSpeedrun = true; startTime = Date.now(); }
 
-        // ═══════════════════════════════════════════════
-        // NEW: Render question by type
-        // ═══════════════════════════════════════════════
         function renderQuestionByType(q, qText, container) {
           const type = q.type || 'multiple_choice';
           const activeLang = localStorage.getItem('lang') || 'ar';
@@ -891,7 +868,6 @@ window.initQuiz = function(config) {
               checkAnswer(isCorrect, btn);
             };
             container.appendChild(btn);
-            // Simple drag-and-drop
             list.addEventListener('dragover', e => {
               e.preventDefault();
               const after = [...list.querySelectorAll('.option:not(.dragging)')].find(c => e.clientY <= c.getBoundingClientRect().top + c.offsetHeight / 2);
@@ -922,11 +898,13 @@ window.initQuiz = function(config) {
             let qText = activeLang === 'ar' ? q.q_ar : q.q_en; if (!qText) qText = q.q_en || q.q_ar; 
             document.getElementById('question').innerText = qText; 
             
-            // ✅ استخدام الدالة الجديدة لعرض أنواع الأسئلة المختلفة
             const optEl = document.getElementById('options'); optEl.innerHTML = ''; 
             renderQuestionByType(q, qText, optEl);
+
+            document.dispatchEvent(new CustomEvent('nf:question-loaded', {
+                detail: { question: q, index: current, total: currentQuestions.length }
+            }));
             
-            // ✅ حفظ التقدم
             saveProgress();
             
             let scoreText = activeLang === 'en' ? `Question ${current + 1} of ${currentQuestions.length} | Score: ${score}` : `سؤال ${current + 1} من ${currentQuestions.length} | النقاط: ${score}`;
@@ -1011,6 +989,19 @@ window.initQuiz = function(config) {
             let timeTaken = 20 - timeLeft;
             playerAnswers.push(timeTaken); 
 
+            // ✅ حساب الإجابات السريعة (existing)
+            if (isCorrect && timeTaken <= 3) {
+                window.get(window.ref(window.db, 'users_data/' + currentUser + '/fast_answers')).then(snap => {
+                    let fast = snap.exists() ? snap.val() : 0;
+                    window.set(window.ref(window.db, 'users_data/' + currentUser + '/fast_answers'), fast + 1);
+                });
+            }
+
+            // 🎯 DAILY QUESTS: fast_answers tracking
+            if (isCorrect && timeTaken <= 5 && window.NFDailyQuests) {
+                try { window.NFDailyQuests.trackProgress('fast_answers', 1); } catch(e) {}
+            }
+
             if (isCorrect) { 
                 score += isSpeedrun ? 2 : 1; playSound(sndCorrect);
                 const rect = el.getBoundingClientRect(); const x = (rect.left + rect.width / 2) / window.innerWidth; const y = (rect.top + rect.height / 2) / window.innerHeight;
@@ -1036,9 +1027,12 @@ window.initQuiz = function(config) {
             if (!isChallengeMode && !isSpeedrun) { ghostTimes.push(20 - timeLeft); }
             if('speechSynthesis' in window) window.speechSynthesis.resume();
             
-            // ✅ حفظ التقدم
             saveProgress();
             renderHelperItems();
+
+            document.dispatchEvent(new CustomEvent('nf:answer-result', {
+                detail: { isCorrect, timeTaken, questionIndex: current, element: el }
+            }));
         }
 
         window.nextQuestion = function() { current++; if (current < currentQuestions.length) { loadQuestion(); } else { showFinal(); } }
@@ -1116,6 +1110,11 @@ window.initQuiz = function(config) {
                             if (myScore > opScore) resultMsg = activeLang === 'en' ? "🎉 You Won!" : "🎉 أنت الفائز!"; 
                             else if (myScore < opScore) resultMsg = activeLang === 'en' ? "😢 You Lost!" : "😢 خسرت التحدي!"; 
                             else resultMsg = activeLang === 'en' ? "🤝 Draw!" : "🤝 تعادل!"; 
+
+                            // 🎯 DAILY QUESTS: challenge_win tracking
+                            if (myScore > opScore && window.NFDailyQuests) {
+                                try { window.NFDailyQuests.trackProgress('challenge_win', 1); } catch(e) {}
+                            }
                             
                             document.getElementById('question').innerHTML = `
                                 <div style="text-align:center; padding:20px;">
@@ -1140,8 +1139,11 @@ window.initQuiz = function(config) {
             } 
             else if (isChallengeMode && !myRoomCode) { setTimeout(() => { window.location.href = 'index.html'; }, 3000); } 
             else {
-                let realHighScore = highestScore;
-                if (localStorage.getItem(currentSaveKey) > realHighScore) { realHighScore = localStorage.getItem(currentSaveKey); }
+                let realHighScore = Number(localStorage.getItem(currentSaveKey)) || highestScore || 0;
+                if (score > realHighScore) {
+                    localStorage.setItem(currentSaveKey, score);
+                    realHighScore = score;
+                }
 
                 let avgTime = 0;
                 if (playerAnswers.length > 0) {
@@ -1182,8 +1184,11 @@ window.initQuiz = function(config) {
                     boostSummaryHtml = `<div style="margin-top: 15px; padding: 12px; background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 10px;"><h4 style="color:#ffd700; margin-bottom:8px; font-size:16px;">⚡ ${activeLang === 'en' ? 'Boosts Applied' : 'التعزيزات المطبقة'}</h4>${parts.map(p=>`<p style="font-size:14px; color:#ddd; margin:4px 0;">${p}</p>`).join('')}</div>`;
                 }
 
+                const playScreen = document.getElementById('playScreen');
+                if (playScreen) playScreen.classList.remove('cinema-difficulty-easy', 'cinema-difficulty-medium', 'cinema-difficulty-hard');
+
                 document.getElementById('question').innerHTML = `<div style="text-align:center; padding:20px;">
-                    <h2 style="color:#ff0000; font-size:36px;">${activeLang === 'en' ? 'Quiz Over! 🎬' : 'انتهى الكويز! 🎬'}</h2>
+                    <h2 style="color:#ffd700; font-size:36px;">${activeLang === 'en' ? 'Congratulations! 🎉' : 'مبروك! خلصت الكويز 🎉'}</h2>
                     <p style="color:var(--text-color); font-size:22px;">${activeLang === 'en' ? 'Your Score' : 'نتيجتك'}: ${score} / ${currentQuestions.length}</p>
                     <p style="color:#ffcc00; font-size:18px; margin-top:10px; font-weight:bold;">${activeLang === 'en' ? 'High Score' : 'أعلى نتيجة'}: ${realHighScore}</p>
                     
@@ -1223,6 +1228,11 @@ window.initQuiz = function(config) {
 
                 if (window.db && currentUser !== 'Unknown') { 
                     window.set(window.ref(window.db, 'scores/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: score, total: currentQuestions.length, time: new Date().toISOString() }); 
+                    
+                    // 🎟️ تذاكر الموسم: إضافة نقاط (نضرب السكور في 2)
+                    if (window.NFSeasonPass) {
+                        window.NFSeasonPass.addSeasonXP(score * 2);
+                    }
                     
                     if (!activeBoosts.ghost_mode) {
                         window.set(window.ref(window.db, 'leaderboard/' + currentUser + '/' + currentSaveKey + '/' + Date.now()), { score: lbScore, total: currentQuestions.length, time: new Date().toISOString() }); 
@@ -1272,16 +1282,45 @@ window.initQuiz = function(config) {
                     if (isSpeedrun) {
                         const totalTime = Math.floor((Date.now() - startTime) / 1000);
                         window.push(window.ref(window.db, 'speedrun_scores'), { user: currentUser, quiz: quizKey, score: score, total: currentQuestions.length, time: totalTime, date: Date.now() });
+                        window.get(window.ref(window.db, 'users_data/' + currentUser + '/speedruns_played')).then(snap => {
+                            let sr = snap.exists() ? snap.val() : 0;
+                            window.set(window.ref(window.db, 'users_data/' + currentUser + '/speedruns_played'), sr + 1);
+                        });
                         showToastMessage(`⏱️ أنهيت السبيد ران في ${totalTime} ثانية!`);
                     }
                     
                     window.set(window.ref(window.db, 'users_data/' + currentUser + '/persona'), persona);
+
+                    // ✅ ضرب الزعيم العالمي
+                    if (!isChallengeMode && !isSpeedrun) {
+                        sendDamageToBoss(score);
+                    }
+
+                    // 🎯 DAILY QUESTS TRACKING — بعد حفظ كل حاجة
+                    if (window.NFDailyQuests) {
+                        try {
+                            window.NFDailyQuests.trackProgress('play_count', 1);
+                            window.NFDailyQuests.trackProgress('correct_count', score);
+                            window.NFDailyQuests.trackProgress('unique_quizzes', 1, { quizKey });
+                            window.NFDailyQuests.trackProgress('coins_earned', coinGain);
+                            if (score === currentQuestions.length) {
+                                window.NFDailyQuests.trackProgress('perfect_quiz', 1);
+                            }
+                            if (isSpeedrun) {
+                                window.NFDailyQuests.trackProgress('speedrun_count', 1);
+                            }
+                        } catch(e) { console.warn('Quest tracking error:', e); }
+                    }
                 }
 
                 document.body.addEventListener('click', function playVoiceOnce() {
                     speakText(activeLang === 'ar' ? `أنت ${persona.replace(/[^\u0600-\u06FF\s]/g, '')}. ${personaDesc}` : `You are ${persona}. ${personaDesc}`, activeLang);
                     document.body.removeEventListener('click', playVoiceOnce);
                 }, { once: true });
+
+                document.dispatchEvent(new CustomEvent('nf:quiz-complete', {
+                    detail: { score, total: currentQuestions.length, isSpeedrun }
+                }));
             }
         }
 
@@ -1344,16 +1383,30 @@ window.initQuiz = function(config) {
             setTimeout(runGhost, 1000);
         }
 
-        function showResumePrompt() {
-          const prog = loadProgress();
+        async function showResumePrompt() {
+          let prog = loadProgress();
+          
+          if (currentUser !== 'Unknown' && window.db) {
+              try {
+                  const dbProgSnap = await window.get(window.ref(window.db, `users_data/${currentUser}/progress/${quizKey}`));
+                  if (dbProgSnap.exists()) {
+                      const dbProg = dbProgSnap.val();
+                      if (!prog || dbProg.savedAt > prog.savedAt) {
+                          prog = dbProg;
+                          localStorage.setItem(PROGRESS_KEY, JSON.stringify(prog));
+                      }
+                  }
+              } catch(e) { console.log('Firebase fetch progress failed', e); }
+          }
+
           if (!prog) return;
           const box = document.createElement('div');
           box.className = 'resume-box';
-          box.style.cssText = 'position:fixed;bottom:20px;left:20px;right:20px;max-width:400px;margin:0 auto;background:#111;border:2px solid #ffd700;border-radius:12px;padding:15px;z-index:9999;text-align:center;';
+          box.style.cssText = 'position:fixed;bottom:20px;left:20px;right:20px;max-width:400px;margin:0 auto;background:#111;border:2px solid #ffd700;border-radius:12px;padding:15px;z-index:9999;text-align:center; box-shadow: 0 0 20px rgba(255,215,0,0.3);';
           box.innerHTML = `
             <p style="color:#ffd700;font-weight:bold;margin-bottom:10px;">💾 عندك تقدم محفوظ (سؤال ${prog.current + 1})</p>
             <button onclick="window._resumeQuiz()" style="padding:10px 20px;background:#4caf50;color:#fff;border:none;border-radius:8px;font-family:Cairo;font-weight:bold;cursor:pointer;margin:0 5px;">▶️ كمل</button>
-            <button onclick="this.parentElement.remove();localStorage.removeItem('${PROGRESS_KEY}')" style="padding:10px 20px;background:#666;color:#fff;border:none;border-radius:8px;font-family:Cairo;font-weight:bold;cursor:pointer;margin:0 5px;">🔄 جديد</button>
+            <button onclick="this.parentElement.remove();localStorage.removeItem('${PROGRESS_KEY}'); window.remove(window.ref(window.db, 'users_data/${currentUser}/progress/${quizKey}'))" style="padding:10px 20px;background:#666;color:#fff;border:none;border-radius:8px;font-family:Cairo;font-weight:bold;cursor:pointer;margin:0 5px;">🔄 جديد</button>
           `;
           document.body.appendChild(box);
         }
