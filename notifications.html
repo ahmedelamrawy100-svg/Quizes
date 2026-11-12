@@ -3,183 +3,326 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔔 الإشعارات - Quiz Hub</title>
+<title>🔔 Notifications - Plot Twist</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
 <style>
-  :root { --bg-color: #000; --text-color: #fff; --card-bg: #111; --border: #333; --accent: #ff0000; --gold: #ffd700; --danger: #f44336; }
-  body.light-mode { --bg-color: #f4f4f4; --text-color: #111; --card-bg: #fff; --border: #ccc; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-color); color: var(--text-color); font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --green:#10b981; --red:#ef4444; --blue:#00bcd4; --orange:#ff9800; }
+  body.light-mode { --bg:#f4f4f4; --card:#fff; --border:#ddd; --text:#111; --text-2:#555; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:20px; display:flex; flex-direction:column; align-items:center; }
+  .top-bar { width:100%; max-width:700px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; flex-wrap:wrap; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; text-decoration:none; transition:0.2s; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+  .btn-danger { background:rgba(239,68,68,0.1); color:var(--red); border-color:var(--red); }
+  .btn-danger:hover { background:var(--red); color:#fff; }
   
-  .top-bar { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
-  .lang-btn { background: #333; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
+  .container { width:100%; max-width:700px; }
+  .header-title { text-align:center; color:var(--gold); font-size:32px; margin-bottom:8px; font-weight:900; }
+  .header-sub { text-align:center; color:var(--text-2); font-size:14px; margin-bottom:20px; }
   
-  .container { width: 100%; max-width: 600px; }
-  .header-title { text-align: center; color: var(--accent); font-size: 32px; margin-bottom: 30px; font-weight: bold; }
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+  .stat-mini { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+  .stat-mini .v { font-size:24px; font-weight:900; color:var(--gold); }
+  .stat-mini .l { font-size:11px; color:var(--text-2); margin-top:4px; font-weight:700; }
   
-  .notif-list { display: flex; flex-direction: column; gap: 15px; }
-  .notif-item { background: var(--card-bg); border: 2px solid var(--border); border-radius: 15px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .notif-info { display: flex; align-items: center; gap: 15px; }
-  .notif-icon { font-size: 24px; }
-  .notif-text { font-weight: bold; font-size: 16px; }
-  .notif-time { font-size: 14px; color: #aaa; margin-top: 5px; }
+  .filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-btn { padding:8px 16px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-2); font-family:'Cairo'; font-weight:700; font-size:13px; cursor:pointer; transition:0.2s; }
+  .filter-btn:hover { color:var(--text); border-color:var(--gold); }
+  .filter-btn.active { background:var(--gold); color:#000; border-color:var(--gold); }
   
-  .action-btn { padding: 8px 15px; border-radius: 8px; text-decoration: none; color: #fff; font-weight: bold; font-size: 14px; border: none; cursor: pointer; font-family: 'Cairo'; }
-  .btn-gold { background: var(--gold); color: #000; }
-  .btn-danger { background: var(--danger); color: #fff; }
+  .notif-list { display:flex; flex-direction:column; gap:10px; }
+  .notif-item { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:15px; display:flex; gap:14px; align-items:flex-start; transition:0.2s; }
+  .notif-item:hover { border-color:var(--gold); transform:translateX(-3px); }
+  .notif-item.unread { border-right:4px solid var(--gold); background:rgba(255,215,0,0.04); }
+  .notif-icon { font-size:26px; flex-shrink:0; }
+  .notif-content { flex:1; min-width:0; }
+  .notif-title { font-weight:900; font-size:15px; margin-bottom:4px; }
+  .notif-body { font-size:13px; color:var(--text-2); line-height:1.5; word-wrap:break-word; }
+  .notif-time { font-size:11px; color:var(--text-2); opacity:0.7; margin-top:6px; }
+  .notif-link { display:inline-block; margin-top:8px; padding:6px 12px; background:var(--gold); color:#000; text-decoration:none; border-radius:6px; font-size:12px; font-weight:900; }
+  .notif-link:hover { background:#ffcc00; }
   
-  .no-data { text-align: center; color: #aaa; padding: 30px; background: var(--card-bg); border-radius: 15px; }
+  .empty { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .empty-icon { font-size:60px; opacity:0.4; margin-bottom:15px; }
+  
+  .loading { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .spinner { width:40px; height:40px; border:3px solid #333; border-top-color:var(--gold); border-radius:50%; margin:0 auto 15px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div class="top-bar">
-  <a href="index.html" class="back-btn" id="backBtn" data-ar="⬅ رجوع للرئيسية" data-en="⬅ Back to Home">⬅ رجوع للرئيسية</a>
-  <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
+  <a href="index.html" class="btn" id="backBtn">⬅ Back</a>
+  <div style="display:flex; gap:8px;">
+    <button class="btn" onclick="window.toggleLang()" id="langBtn">AR</button>
+    <button class="btn btn-danger" onclick="window.clearAll()" id="clearBtn">🗑️ Clear All</button>
+  </div>
 </div>
 
 <div class="container">
-  <h1 class="header-title" id="mainTitle" data-ar="🔔 مركز الإشعارات" data-en="🔔 Notification Center">🔔 مركز الإشعارات</h1>
+  <h1 class="header-title" id="pageTitle">🔔 Notification Center</h1>
+  <p class="header-sub" id="pageSub">All your notifications in one place</p>
   
-  <div class="notif-list" id="notificationsList">
-    <div class="no-data" id="loadingText" data-ar="جاري تحميل الإشعارات..." data-en="Loading notifications...">جاري تحميل الإشعارات...</div>
+  <div class="stats-row">
+    <div class="stat-mini"><div class="v" id="statTotal">0</div><div class="l" id="lblTotal">Total</div></div>
+    <div class="stat-mini"><div class="v" id="statUnread">0</div><div class="l" id="lblUnread">Unread</div></div>
+    <div class="stat-mini"><div class="v" id="statToday">0</div><div class="l" id="lblToday">Today</div></div>
+  </div>
+  
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all" onclick="window.setFilter('all', this)" id="fAll">🔔 All</button>
+    <button class="filter-btn" data-filter="unread" onclick="window.setFilter('unread', this)" id="fUnread">📩 Unread</button>
+    <button class="filter-btn" data-filter="system" onclick="window.setFilter('system', this)" id="fSystem">🔔 System</button>
+    <button class="filter-btn" data-filter="social" onclick="window.setFilter('social', this)" id="fSocial">👥 Social</button>
+    <button class="filter-btn" data-filter="admin" onclick="window.setFilter('admin', this)" id="fAdmin">⚠️ Admin</button>
+  </div>
+  
+  <div class="notif-list" id="notifList">
+    <div class="loading"><div class="spinner"></div><span id="loadingText">Loading...</span></div>
   </div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
-  const app = initializeApp(firebaseConfig); const db = getDatabase(app);
+const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  const currentUser = localStorage.getItem('loggedInUser');
-  if (!currentUser) { window.location.href = 'index.html'; }
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+if (!CU) window.location.href = 'index.html';
 
-  let currentLang = localStorage.getItem('lang') || 'ar';
-  const translations = {
-    ar: { back: "⬅ رجوع للرئيسية", title: "🔔 مركز الإشعارات", loading: "جاري تحميل الإشعارات...", friendReq: "طلب صداقة من", waiting: "في انتظار الموافقة", viewReq: "عرض الطلب", warning: "تحذير من الإدارة", reason: "السبب:", message: "رسالة من", view: "عرض", noNotifs: "لا توجد إشعارات جديدة حالياً." },
-    en: { back: "⬅ Back to Home", title: "🔔 Notification Center", loading: "Loading notifications...", friendReq: "Friend request from", waiting: "Waiting for approval", viewReq: "View Request", warning: "Warning from Admin", reason: "Reason:", message: "Message from", view: "View", noNotifs: "No new notifications." }
-  };
+let currentLang = localStorage.getItem('lang') || 'ar';
+let currentFilter = 'all';
+let allNotifications = [];
 
-  function applyLanguage() {
-      const t = translations[currentLang];
-      document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
-      document.getElementById('backBtn').innerText = t.back;
-      document.getElementById('mainTitle').innerText = t.title;
-      document.getElementById('loadingText').innerText = t.loading;
-      document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-      loadNotifications(); // إعادة تحميل الإشعارات عشان تتحدث باللغة الجديدة
+const T = {
+  en: {
+    back: '⬅ Back', title: '🔔 Notification Center', sub: 'All your notifications in one place',
+    total: 'Total', unread: 'Unread', today: 'Today',
+    fAll: '🔔 All', fUnread: '📩 Unread', fSystem: '🔔 System', fSocial: '👥 Social', fAdmin: '⚠️ Admin',
+    clearBtn: '🗑️ Clear All', loading: 'Loading...',
+    empty: 'No notifications yet', emptySub: 'You\'ll see everything important here',
+    view: 'View', clearAllConfirm: 'Are you sure you want to clear all?',
+    todayTime: 'Today', yesterdayTime: 'Yesterday', dayAgo: '2 days ago'
+  },
+  ar: {
+    back: '⬅ رجوع', title: '🔔 مركز الإشعارات', sub: 'كل إشعاراتك في مكان واحد',
+    total: 'إجمالي', unread: 'غير مقروء', today: 'اليوم',
+    fAll: '🔔 الكل', fUnread: '📩 غير مقروء', fSystem: '🔔 نظام', fSocial: '👥 اجتماعي', fAdmin: '⚠️ إدارة',
+    clearBtn: '🗑️ مسح الكل', loading: 'جاري التحميل...',
+    empty: 'مفيش إشعارات لحد دلوقتي', emptySub: 'هتلاقي هنا كل حاجة مهمة تحصل',
+    view: 'عرض', clearAllConfirm: 'متأكد إنك عايز تمسح كل الإشعارات؟',
+    todayTime: 'النهاردة', yesterdayTime: 'امبارح', dayAgo: 'من يومين'
   }
+};
+const t = () => T[currentLang];
 
-  window.toggleLanguage = function() {
-      currentLang = currentLang === 'ar' ? 'en' : 'ar';
-      localStorage.setItem('lang', currentLang);
-      applyLanguage();
-  }
+function applyLang() {
+  document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('backBtn').innerText = t().back;
+  document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('pageTitle').innerText = t().title;
+  document.getElementById('pageSub').innerText = t().sub;
+  document.getElementById('lblTotal').innerText = t().total;
+  document.getElementById('lblUnread').innerText = t().unread;
+  document.getElementById('lblToday').innerText = t().today;
+  document.getElementById('fAll').innerText = t().fAll;
+  document.getElementById('fUnread').innerText = t().fUnread;
+  document.getElementById('fSystem').innerText = t().fSystem;
+  document.getElementById('fSocial').innerText = t().fSocial;
+  document.getElementById('fAdmin').innerText = t().fAdmin;
+  document.getElementById('clearBtn').innerText = t().clearBtn;
+  document.getElementById('loadingText').innerText = t().loading;
+  renderList();
+}
 
-  const list = document.getElementById('notificationsList');
-  let totalNotifs = 0;
+window.toggleLang = () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+};
 
-  function loadNotifications() {
-      list.innerHTML = '';
-      totalNotifs = 0;
-      const t = translations[currentLang];
+window.setFilter = (filter, btn) => {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+};
 
-      // 1. طلبات الصداقة
-      onValue(ref(db, 'friend_requests'), (snapshot) => {
-          const data = snapshot.val();
-          let myRequests = {};
-          if (data) {
-              for (let key in data) {
-                  if (key.toLowerCase() === currentUser.toLowerCase()) { myRequests = data[key]; break; }
-              }
-          }
-          
-          list.innerHTML = '';
-          totalNotifs = 0;
+async function loadAll() {
+  const list = document.getElementById('notifList');
+  list.innerHTML = `<div class="loading"><div class="spinner"></div><span>${t().loading}</span></div>`;
+  
+  try {
+    const [userNotifsSnap, reqSnap, warnSnap, msgSnap] = await Promise.all([
+      get(ref(db, `user_notifications/${CU}`)),
+      get(ref(db, `friend_requests/${CU}`)),
+      get(ref(db, `warnings/${CU}`)),
+      get(ref(db, `messages/${CU}`))
+    ]);
 
-          for (let sender in myRequests) {
-              totalNotifs++;
-              const div = document.createElement('div');
-              div.className = 'notif-item';
-              div.innerHTML = `
-                  <div class="notif-info">
-                      <div class="notif-icon">👤</div>
-                      <div>
-                          <div class="notif-text">${t.friendReq} ${sender}</div>
-                          <div class="notif-time">${t.waiting}</div>
-                      </div>
-                  </div>
-                  <a href="inbox.html" class="action-btn btn-gold">${t.viewReq}</a>
-              `;
-              list.appendChild(div);
-          }
+    allNotifications = [];
 
-          // 2. التحذيرات
-          onValue(ref(db, 'warnings'), (warnSnapshot) => {
-              const warnData = warnSnapshot.val();
-              let myWarning = null;
-              if (warnData) {
-                  for (let key in warnData) {
-                      if (key.toLowerCase() === currentUser.toLowerCase()) { myWarning = warnData[key]; break; }
-                  }
-              }
-
-              if (myWarning) {
-                  totalNotifs++;
-                  const div = document.createElement('div');
-                  div.className = 'notif-item';
-                  div.style.borderColor = 'var(--danger)';
-                  div.innerHTML = `
-                      <div class="notif-info">
-                          <div class="notif-icon">⚠️</div>
-                          <div>
-                              <div class="notif-text" style="color: var(--danger);">${t.warning}</div>
-                              <div class="notif-time">${t.reason} ${myWarning.text}</div>
-                          </div>
-                      </div>
-                      <div class="action-btn btn-danger">${t.warning}</div>
-                  `;
-                  list.appendChild(div);
-              }
-
-              // 3. الرسايل
-              get(ref(db, 'messages/' + currentUser)).then((msgSnap) => {
-                  const msgData = msgSnap.val();
-                  if (msgData) {
-                      const msgs = Object.values(msgData).reverse().slice(0, 5);
-                      msgs.forEach(msg => {
-                          totalNotifs++;
-                          const div = document.createElement('div');
-                          div.className = 'notif-item';
-                          div.innerHTML = `
-                              <div class="notif-info">
-                                  <div class="notif-icon">📩</div>
-                                  <div>
-                                      <div class="notif-text">${t.message} ${msg.from}</div>
-                                      <div class="notif-time">${msg.text}</div>
-                                  </div>
-                              </div>
-                              <a href="inbox.html" class="action-btn btn-gold">${t.view}</a>
-                          `;
-                          list.appendChild(div);
-                      });
-                  }
-
-                  if (totalNotifs === 0) {
-                      list.innerHTML = `<div class="no-data">${t.noNotifs}</div>`;
-                  }
-              });
-          });
+    // 1. user_notifications (new system)
+    const userNotifs = userNotifsSnap.val() || {};
+    Object.entries(userNotifs).forEach(([id, n]) => {
+      allNotifications.push({
+        id, source: 'user_notifications',
+        type: n.type || 'info', icon: getIconForType(n.type),
+        title: n.title || '🔔 Notification',
+        body: n.message || '',
+        time: n.time || 0, read: !!n.read,
+        category: 'system'
       });
-  }
+    });
 
-  applyLanguage();
+    // 2. Friend requests
+    const reqs = reqSnap.val() || {};
+    Object.entries(reqs).forEach(([sender, val]) => {
+      allNotifications.push({
+        id: `req_${sender}`, source: 'friend_request',
+        type: 'warning', icon: '👤',
+        title: `Friend request from ${sender}`,
+        body: 'Click to see friend requests',
+        time: val?.time || Date.now(), read: false,
+        link: 'inbox.html', category: 'social'
+      });
+    });
+
+    // 3. Warnings
+    const warn = warnSnap.val();
+    if (warn && warn.text) {
+      allNotifications.push({
+        id: 'warning', source: 'warning',
+        type: 'error', icon: '⚠️',
+        title: 'Warning from Admin',
+        body: warn.text,
+        time: warn.time || 0, read: false,
+        category: 'admin'
+      });
+    }
+
+    // 4. Messages (latest 10)
+    const msgs = msgSnap.val() || {};
+    Object.entries(msgs).sort((a,b) => (b[1].time||0) - (a[1].time||0)).slice(0, 10).forEach(([id, m]) => {
+      allNotifications.push({
+        id: `msg_${id}`, source: 'message',
+        type: 'info', icon: '📩',
+        title: `Message from ${m.from || 'Unknown'}`,
+        body: m.text || '',
+        time: m.time || 0, read: true,
+        link: 'inbox.html', category: 'social'
+      });
+    });
+
+    allNotifications.sort((a, b) => (b.time || 0) - (a.time || 0));
+    
+    updateStats();
+    renderList();
+    
+  } catch(e) {
+    console.error(e);
+    list.innerHTML = `<div class="empty"><div class="empty-icon">❌</div><div>${e.message}</div></div>`;
+  }
+}
+
+function getIconForType(type) {
+  return { success: '✅', error: '❌', warning: '⚠️', info: '🔔', gold: '🌟' }[type] || '🔔';
+}
+
+function updateStats() {
+  document.getElementById('statTotal').innerText = allNotifications.length;
+  document.getElementById('statUnread').innerText = allNotifications.filter(n => !n.read).length;
+  const todayStart = new Date().setHours(0,0,0,0);
+  document.getElementById('statToday').innerText = allNotifications.filter(n => n.time >= todayStart).length;
+}
+
+function renderList() {
+  const list = document.getElementById('notifList');
+  let filtered = [...allNotifications];
+  
+  if (currentFilter === 'unread') filtered = filtered.filter(n => !n.read);
+  else if (currentFilter === 'system') filtered = filtered.filter(n => n.category === 'system');
+  else if (currentFilter === 'social') filtered = filtered.filter(n => n.category === 'social');
+  else if (currentFilter === 'admin') filtered = filtered.filter(n => n.category === 'admin');
+  
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🔔</div><div style="font-size:16px; font-weight:bold; margin-bottom:8px;">${t().empty}</div><div style="font-size:13px;">${t().emptySub}</div></div>`;
+    return;
+  }
+  
+  list.innerHTML = filtered.map(n => {
+    const timeStr = formatTime(n.time);
+    return `
+      <div class="notif-item ${!n.read ? 'unread' : ''}">
+        <div class="notif-icon">${n.icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${escapeHtml(n.title)}</div>
+          ${n.body ? `<div class="notif-body">${escapeHtml(n.body)}</div>` : ''}
+          <div class="notif-time">🕒 ${timeStr}</div>
+          ${n.link ? `<a href="${n.link}" class="notif-link">${t().view} ←</a>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function formatTime(time) {
+  if (!time) return '';
+  const now = Date.now();
+  const diff = now - time;
+  const date = new Date(time);
+  
+  if (diff < 60000) return currentLang === 'ar' ? 'دلوقتي' : 'Just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + (currentLang === 'ar' ? ' دقيقة' : 'm');
+  if (diff < 86400000) return Math.floor(diff / 3600000) + (currentLang === 'ar' ? ' ساعة' : 'h');
+  
+  const today = new Date().setHours(0,0,0,0);
+  const yesterday = today - 86400000;
+  if (time >= today) return t().todayTime + ' ' + date.toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', {hour:'2-digit',minute:'2-digit'});
+  if (time >= yesterday) return t().yesterdayTime;
+  
+  return date.toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { day:'numeric', month:'short' });
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+window.clearAll = async () => {
+  if (!confirm(t().clearAllConfirm)) return;
+  try {
+    const updates = {};
+    allNotifications.forEach(n => {
+      if (n.source === 'user_notifications') {
+        updates[`user_notifications/${CU}/${n.id}`] = null;
+      }
+    });
+    if (Object.keys(updates).length > 0) {
+      const { update } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
+      await update(ref(db), updates);
+    }
+    allNotifications = [];
+    updateStats();
+    renderList();
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
+window.onload = () => {
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+  applyLang();
+  loadAll();
+};
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
 </body>
 </html>
