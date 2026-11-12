@@ -3,91 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏰 وضع القصة - Quiz Hub</title>
+<title>🏰 Story Mode - Plot Twist</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
 <style>
-  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --green:#4caf50; }
-  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
-  .container { max-width:900px; margin:0 auto; }
-  h1 { text-align:center; color:var(--gold); font-size:32px; margin-bottom:10px; }
-  .subtitle { text-align:center; color:#aaa; margin-bottom:30px; }
-  .chapter { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
-  .chapter.locked { opacity:0.5; }
-  .chapter-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
-  .chapter-title { font-size:22px; font-weight:900; color:var(--gold); }
-  .chapter-icon { font-size:40px; }
-  .stage { background:#1a1a1a; border:1px solid #333; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-  .stage.completed { border-color:var(--green); background:rgba(76,175,80,0.1); }
-  .stage-info { flex:1; }
-  .stage-title { font-weight:bold; font-size:14px; }
-  .stage-hint { font-size:11px; color:#aaa; margin-top:3px; }
-  .stage-status { font-size:20px; }
-  .btn-play { padding:8px 20px; background:var(--green); color:#fff; border:none; border-radius:8px; font-family:Cairo; font-weight:bold; cursor:pointer; text-decoration:none; font-size:13px; }
-  .btn-play:disabled { background:#444; cursor:not-allowed; }
-  .reward-box { background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,140,0,0.1)); border:2px dashed var(--gold); border-radius:10px; padding:12px; margin-top:10px; text-align:center; color:var(--gold); font-weight:bold; }
-  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block; margin-bottom:20px; }
+  :root { --bg:#080810; --card:#111; --border:#333; --text:#fff; --text-2:#aaa; --gold:#ffd700; --green:#10b981; --red:#ef4444; --purple:#a855f7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080810 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:20px; display:flex; flex-direction:column; align-items:center; }
+  .container { max-width:1000px; width:100%; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:0.2s; }
+  .btn:hover { background:var(--gold); color:#000; }
+  
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  h1 { text-align:center; color:var(--gold); font-size:34px; margin-bottom:8px; font-weight:900; }
+  .subtitle { text-align:center; color:var(--text-2); font-size:15px; margin-bottom:30px; }
+  
+  .chapter { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; transition:0.3s; }
+  .chapter.locked { opacity:0.6; }
+  .chapter.completed { border-color:var(--green); background:rgba(16,185,129,0.03); }
+  .chapter-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; gap:15px; flex-wrap:wrap; }
+  .chapter-icon { font-size:48px; flex-shrink:0; }
+  .chapter-title { font-size:22px; font-weight:900; color:var(--gold); margin-bottom:5px; }
+  .chapter-desc { font-size:13px; color:var(--text-2); }
+  .chapter-status { font-size:13px; font-weight:900; padding:6px 14px; border-radius:10px; flex-shrink:0; }
+  .chapter-status.done { background:var(--green); color:#fff; }
+  .chapter-status.progress { background:rgba(255,215,0,0.15); color:var(--gold); border:1px solid var(--gold); }
+  .chapter-status.locked { background:rgba(255,255,255,0.05); color:var(--text-2); border:1px solid var(--border); }
+  
+  .stages { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .stage { background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; transition:0.2s; }
+  .stage.completed { border-color:var(--green); background:rgba(16,185,129,0.08); }
+  .stage.current { border-color:var(--gold); background:rgba(255,215,0,0.05); }
+  .stage.locked { opacity:0.5; }
+  .stage-status { font-size:22px; flex-shrink:0; }
+  .stage-info { flex:1; min-width:0; }
+  .stage-title { font-weight:900; font-size:15px; margin-bottom:3px; }
+  .stage-meta { font-size:12px; color:var(--text-2); }
+  .stage-target { font-size:11px; color:var(--gold); font-weight:700; margin-top:3px; }
+  .stage-btn { padding:10px 20px; border-radius:10px; border:none; font-family:'Cairo'; font-weight:900; font-size:13px; cursor:pointer; text-decoration:none; flex-shrink:0; }
+  .stage-btn.play { background:var(--gold); color:#000; }
+  .stage-btn.play:hover { background:#ffcc00; }
+  .stage-btn.replay { background:var(--green); color:#fff; }
+  .stage-btn.replay:hover { background:#059669; }
+  .stage-btn.disabled { background:#333; color:#666; cursor:not-allowed; }
+  
+  .chapter-reward { background:linear-gradient(135deg, rgba(255,215,0,0.1), rgba(168,85,247,0.05)); border:2px dashed var(--gold); border-radius:12px; padding:14px; text-align:center; }
+  .chapter-reward-title { font-size:13px; color:var(--text-2); margin-bottom:6px; font-weight:700; }
+  .chapter-reward-value { font-size:16px; font-weight:900; color:var(--gold); }
+  
+  .loading { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; margin:0 auto 15px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
+
 <div class="container">
-  <a href="index.html" class="back-btn">⬅ رجوع</a>
-  <h1>🏰 وضع القصة</h1>
-  <p class="subtitle">كمّل المراحل بالترتيب، واكسب مكافآت أسطورية</p>
-  <div id="chaptersContainer"></div>
+  <div class="top-bar">
+    <a href="index.html" class="btn">⬅ Back</a>
+  </div>
+  
+  <h1>🏰 Story Mode</h1>
+  <p class="subtitle">Complete stages in order. Earn epic rewards.</p>
+  
+  <div id="chaptersContainer">
+    <div class="loading"><div class="spinner"></div><span>Loading...</span></div>
+  </div>
 </div>
 
 <script type="module">
 import './features/story-mode.js';
-import { db, ref, get, currentUser, showToast } from './firebase-shared.js';
 
 async function renderChapters() {
-  const progress = await window.NFStory.getUserStoryProgress();
   const container = document.getElementById('chaptersContainer');
   
-  container.innerHTML = window.NFStory.STORY_CHAPTERS.map((ch, chIndex) => {
-    const chProg = progress[ch.id] || { completedStages: 0 };
-    const prevChapter = chIndex > 0 ? window.NFStory.STORY_CHAPTERS[chIndex - 1] : null;
-    const prevCompleted = !prevChapter || (progress[prevChapter.id]?.completedAt);
-    const isLocked = !prevCompleted;
-    const isCompleted = !!chProg.completedAt;
+  if (!window.NFStory) {
+    container.innerHTML = '<div class="loading">Error loading story mode</div>';
+    return;
+  }
+  
+  const chapters = await window.NFStory.getChapterAvailability();
+  
+  container.innerHTML = chapters.map((ch, chIdx) => {
+    const stages = ch.stages.map((st, i) => {
+      const completed = i < ch.progress.completedStages;
+      const isCurrent = !ch.locked && i === ch.progress.completedStages && !ch.completed;
+      const locked = ch.locked || (!completed && !isCurrent);
+      
+      let statusClass = '';
+      let statusIcon = '';
+      let btnHtml = '';
+      
+      if (completed) {
+        statusClass = 'completed';
+        statusIcon = '✅';
+        btnHtml = `<a href="${st.file}?story=${ch.id}&stage=${i}" class="stage-btn replay" onclick="localStorage.setItem('story_stage','${ch.id}|${i}')">🔄 Replay</a>`;
+      } else if (isCurrent) {
+        statusClass = 'current';
+        statusIcon = '🎯';
+        btnHtml = `<a href="${st.file}?story=${ch.id}&stage=${i}" class="stage-btn play" onclick="localStorage.setItem('story_stage','${ch.id}|${i}')">▶️ Play</a>`;
+      } else {
+        statusClass = 'locked';
+        statusIcon = '🔒';
+        btnHtml = `<button class="stage-btn disabled" disabled>🔒 Locked</button>`;
+      }
+      
+      return `
+        <div class="stage ${statusClass}">
+          <div class="stage-status">${statusIcon}</div>
+          <div class="stage-info">
+            <div class="stage-title">Stage ${i + 1}: ${st.title}</div>
+            <div class="stage-meta">${st.quizKey} — ${st.part}</div>
+            <div class="stage-target">🎯 Target: ${st.target} correct answers</div>
+          </div>
+          ${btnHtml}
+        </div>
+      `;
+    }).join('');
+    
+    let statusBadge = '';
+    if (ch.completed) statusBadge = '<span class="chapter-status done">✅ Completed</span>';
+    else if (ch.locked) statusBadge = '<span class="chapter-status locked">🔒 Locked</span>';
+    else statusBadge = `<span class="chapter-status progress">${ch.progress.completedStages}/${ch.stages.length}</span>`;
     
     return `
-      <div class="chapter ${isLocked ? 'locked' : ''}">
+      <div class="chapter ${ch.locked ? 'locked' : ''} ${ch.completed ? 'completed' : ''}">
         <div class="chapter-header">
-          <div>
-            <div class="chapter-icon">${isLocked ? '🔒' : ch.icon}</div>
-            <div class="chapter-title">${ch.name}</div>
-            <div style="font-size:13px;color:#aaa;">${ch.desc}</div>
-          </div>
-          ${isCompleted ? '<span style="color:var(--green);font-size:20px;">✅ مكتمل</span>' : `<span style="color:#aaa;">${chProg.completedStages}/${ch.stages.length}</span>`}
-        </div>
-        ${ch.stages.map((st, i) => {
-          const completed = i < chProg.completedStages;
-          const unlocked = !isLocked && i <= chProg.completedStages;
-          return `
-            <div class="stage ${completed ? 'completed' : ''}">
-              <div class="stage-status">${completed ? '✅' : (unlocked ? '🎯' : '🔒')}</div>
-              <div class="stage-info">
-                <div class="stage-title">المرحلة ${i+1}: ${st.title}</div>
-                ${st.hint ? `<div class="stage-hint">💡 ${st.hint}</div>` : ''}
-                <div class="stage-hint">الهدف: ${st.target} نقطة</div>
-              </div>
-              ${unlocked 
-                ? `<a href="${st.file}" class="btn-play" onclick="localStorage.setItem('story_stage','${ch.id}|${i}')">${completed ? '🔄 العب تاني' : '▶️ العب'}</a>`
-                : '<button class="btn-play" disabled>🔒 مقفول</button>'}
+          <div style="display:flex; gap:15px; align-items:flex-start;">
+            <div class="chapter-icon">${ch.locked ? '🔒' : ch.icon}</div>
+            <div>
+              <div class="chapter-title">${ch.name}</div>
+              <div class="chapter-desc">${ch.desc}</div>
             </div>
-          `;
-        }).join('')}
-        <div class="reward-box">🎁 مكافأة الشابتر: ${ch.reward.coins} كوينز + ${ch.reward.xp} XP + ${ch.reward.badge}</div>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="stages">${stages}</div>
+        <div class="chapter-reward">
+          <div class="chapter-reward-title">🎁 Chapter Reward</div>
+          <div class="chapter-reward-value">${ch.reward.coins} 🪙 • ${ch.reward.xp} XP • ${ch.reward.badge}</div>
+        </div>
       </div>
     `;
   }).join('');
 }
 
-setTimeout(renderChapters, 300);
+renderChapters();
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
 </body>
 </html>
