@@ -35,15 +35,15 @@ if (CU) {
   function applyTheme(theme) {
     const color = theme.color || '#ff0000';
     const bgImage = theme.bgImage ? `url('${theme.bgImage}')` : 'none';
-    // فتحنا اللون الأسود شوية عشان الكلام يبان وميبقاش سودة فحمة
-    const bgColor = theme.bgColor || '#121212'; 
+    const bgColor = theme.bgColor || '#050510'; // لون غامق افتراضي
     const presetId = theme.presetId || 'default';
     const animation = theme.animation || 'none';
 
     const overlayColor = 'rgba(0,0,0,0.2)'; 
 
+    // هنا التعديل: استخدمنا background بدل background-color عشان نمسح الـ gradient الفاتح
     styleEl.innerHTML = `
-      body { background-color: ${bgColor} !important; overflow-x: hidden !important; }
+      body { background: ${bgColor} !important; background-image: none !important; overflow-x: hidden !important; }
       #app-bg { position: fixed; inset: 0; z-index: -3; background-image: ${bgImage}; background-size: cover; background-position: center; transition: opacity 0.5s; animation: smoothZoom 20s infinite alternate ease-in-out; }
       #app-overlay { position: fixed; inset: 0; z-index: -2; background: ${overlayColor}; }
       :root, body { --accent: ${color} !important; --primary: ${color} !important; --gold: ${color} !important; }
@@ -106,7 +106,6 @@ if (CU) {
       }
     }
 
-    // شلنا الماتريكس من هنا خلاص
     if (presetId === 'leg_sakura' || animation === 'sakura') createParticles('sakura', 80);
     else if (presetId === 'leg_storm' || animation === 'rain') createParticles('rain', 200);
     else if (presetId === 'leg_fire' || animation === 'fire') createParticles('fire', 100);
@@ -122,7 +121,7 @@ if (CU) {
     realTheme = {
       color: theme.color || '#ff0000',
       bgImage: theme.bgImage || null,
-      bgColor: theme.bgColor || '#121212',
+      bgColor: theme.bgColor || '#050510',
       presetId: theme.presetId || 'default',
       animation: theme.animation || 'none'
     };
