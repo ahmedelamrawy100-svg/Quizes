@@ -2,7 +2,7 @@
    QUIZ HUB — SERVICE WORKER (PWA)
    ═══════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v4.0.1'; 
+const CACHE_VERSION = 'v4.0.2'; // تم تحديث الإصدار عشان يجبر المتصفح يمسح الكاش القديم
 const STATIC_CACHE = `quizhub-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `quizhub-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `quizhub-images-${CACHE_VERSION}`;
@@ -96,6 +96,12 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
   
   if (req.method !== 'GET') return;
+
+  // 🛑 الحل السحري لمشكلة البروفايل (profile.html?user=...)
+  // لو الرابط فيه علامة استفهام (Query Param)، سيب المتصفح يتعامل معاه من النت مباشرة ومتتدخلش
+  if (url.search) {
+    return;
+  }
   
   // Firebase API لا يتدخل فيه الـ SW
   if (url.hostname.includes('firebaseio') || url.hostname.includes('identitytoolkit')) {
