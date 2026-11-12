@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔍 Global Search - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --purple:#a855f7; --blue:#00bcd4; --green:#10b981; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px; display:flex; flex-direction:column; align-items:center; }
+  .container { max-width:900px; width:100%; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:0.2s; }
+  .btn:hover { background:var(--gold); color:#000; }
+  
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  
+  .search-hero { text-align:center; margin-bottom:24px; }
+  .search-hero h1 { font-size:32px; color:var(--gold); margin-bottom:8px; font-weight:900; }
+  .search-hero p { color:var(--text-2); font-size:14px; }
+  
+  .search-box { position:relative; margin-bottom:20px; }
+  .search-box input { width:100%; padding:16px 55px 16px 20px; border-radius:14px; border:2px solid var(--border); background:rgba(0,0,0,0.6); color:#fff; font-family:'Cairo'; font-size:17px; outline:none; transition:0.3s; }
+  .search-box input:focus { border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.2); }
+  .search-icon { position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:20px; color:var(--text-2); pointer-events:none; }
+  .search-clear { position:absolute; left:15px; top:50%; transform:translateY(-50%); background:var(--border); border:none; color:#fff; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:12px; display:none; align-items:center; justify-content:center; }
+  .search-clear.show { display:flex; }
+  
+  .tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; background:var(--card); padding:8px; border-radius:14px; border:1px solid var(--border); }
+  .tab { flex:1; min-width:100px; padding:10px 15px; border-radius:10px; background:transparent; color:var(--text-2); border:none; cursor:pointer; font-family:'Cairo'; font-weight:700; font-size:14px; transition:0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .tab:hover { background:rgba(255,255,255,0.05); color:var(--text); }
+  .tab.active { background:var(--gold); color:#000; }
+  .tab .count { font-size:11px; background:rgba(0,0,0,0.2); padding:2px 7px; border-radius:10px; font-weight:900; }
+  .tab.active .count { background:rgba(0,0,0,0.15); }
+  
+  .results { display:flex; flex-direction:column; gap:10px; }
+  .result-item { display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px 18px; text-decoration:none; color:var(--text); transition:0.2s; }
+  .result-item:hover { border-color:var(--gold); background:rgba(255,215,0,0.04); transform:translateX(-3px); }
+  .result-icon { font-size:32px; flex-shrink:0; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid var(--border); }
+  .result-info { flex:1; min-width:0; }
+  .result-title { font-size:15px; font-weight:900; color:var(--text); margin-bottom:3px; word-break:break-word; }
+  .result-sub { font-size:12px; color:var(--text-2); word-break:break-word; }
+  .result-badge { font-size:10px; padding:2px 8px; border-radius:8px; font-weight:900; flex-shrink:0; }
+  .badge-user { background:rgba(0,188,212,0.15); color:var(--blue); border:1px solid var(--blue); }
+  .badge-quiz { background:rgba(255,215,0,0.15); color:var(--gold); border:1px solid var(--gold); }
+  .badge-community { background:rgba(168,85,247,0.15); color:var(--purple); border:1px solid var(--purple); }
+  .result-arrow { color:var(--gold); font-size:18px; flex-shrink:0; }
+  
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .empty-icon { font-size:60px; opacity:0.4; margin-bottom:16px; }
+  .empty-title { font-size:18px; font-weight:900; margin-bottom:6px; }
+  .empty-sub { font-size:13px; }
+  
+  .loading { text-align:center; padding:60px 20px; }
+  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; margin:0 auto 15px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  
+  .highlight { background:rgba(255,215,0,0.3); color:var(--gold); padding:0 2px; border-radius:3px; font-weight:900; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="btn">⬅ Back</a>
+  </div>
+  
+  <div class="search-hero">
+    <h1>🔍 Global Search</h1>
+    <p>Search players, quizzes, or community quizzes — all in one place</p>
+  </div>
+  
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Type anything... (player name, quiz, movie)" autofocus>
+    <span class="search-icon">🔍</span>
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✖</button>
+  </div>
+  
+  <div class="tabs">
+    <button class="tab active" data-tab="all" onclick="switchTab('all', this)">🎯 All <span class="count" id="count-all">0</span></button>
+    <button class="tab" data-tab="users" onclick="switchTab('users', this)">👤 Players <span class="count" id="count-users">0</span></button>
+    <button class="tab" data-tab="quizzes" onclick="switchTab('quizzes', this)">🎮 Quizzes <span class="count" id="count-quizzes">0</span></button>
+    <button class="tab" data-tab="community" onclick="switchTab('community', this)">🌐 Community <span class="count" id="count-community">0</span></button>
+  </div>
+  
+  <div class="results" id="results">
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <div class="empty-title">Start typing to search</div>
+      <div class="empty-sub">You'll find everything here</div>
+    </div>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const QUIZ_CATALOG = {
+  annabelle: { file:'Annabelle Quiz.html', ar:'أنابيل', en:'Annabelle', icon:'🎃', cat:'Horror' },
+  conjuring: { file:'Conjuring Quiz.html', ar:'الكونجورينج', en:'The Conjuring', icon:'👻', cat:'Horror' },
+  TheNun: { file:'The Nun Quiz.html', ar:'الراهبة', en:'The Nun', icon:'✝️', cat:'Horror' },
+  FNAF: { file:'FNAF Quiz.html', ar:'فايف نايتس', en:'FNAF', icon:'🐻', cat:'Horror' },
+  TrainToBusan: { file:'Train to Busan Quiz.html', ar:'قطار بوسان', en:'Train to Busan', icon:'🚄', cat:'Horror' },
+  Scream: { file:'Scream Quiz.html', ar:'سكريم', en:'Scream', icon:'👻', cat:'Horror' },
+  SquidGame: { file:'Squid Game Quiz.html', ar:'لعبة الحبار', en:'Squid Game', icon:'🦑', cat:'Action' },
+  spiderman: { file:'Spider-Man Quiz.html', ar:'سبايدرمان', en:'Spider-Man', icon:'🕷️', cat:'Action' },
+  avengers: { file:'Avengers Quiz.html', ar:'المنتقمون', en:'Avengers', icon:'🛡️', cat:'Action' },
+  avatar: { file:'Avatar Quiz.html', ar:'أفاتار', en:'Avatar', icon:'🌊', cat:'Action' },
+  venom: { file:'Venom Quiz.html', ar:'فينوم', en:'Venom', icon:'🖤', cat:'Action' },
+  birdsofprey: { file:'Birds of Prey Quiz.html', ar:'الطيور الجارحة', en:'Birds of Prey', icon:'🦅', cat:'Action' },
+  mazerunner: { file:'Maze Runner Quiz.html', ar:'المتاهة', en:'Maze Runner', icon:'🏃', cat:'Action' },
+  rambo: { file:'Rambo Quiz.html', ar:'رامبو', en:'Rambo', icon:'🔫', cat:'Action' },
+  fall: { file:'Fall Quiz.html', ar:'السقوط', en:'Fall', icon:'🪜', cat:'Thriller' },
+  Wednesday: { file:'Wednesday Quiz.html', ar:'وينزداي', en:'Wednesday', icon:'🖤', cat:'Mystery' },
+  knivesout: { file:'Knives Out Quiz.html', ar:'مطارق', en:'Knives Out', icon:'🔪', cat:'Mystery' },
+  elharifa: { file:'El Harifa Quiz.html', ar:'الحريفة', en:'El Harifa', icon:'⚽', cat:'Egyptian' },
+  blueelephant: { file:'The Blue Elephant Quiz.html', ar:'الفيل الأزرق', en:'The Blue Elephant', icon:'🐘', cat:'Egyptian' },
+  foolelseen: { file:'Fol El Seen Quiz.html', ar:'فول الصين العظيم', en:'Fol El Seen', icon:'🍲', cat:'Egyptian' },
+  elshater: { file:'El Shater Quiz.html', ar:'الشاطر', en:'El Shater', icon:'⚔️', cat:'Egyptian' },
+  shalaby: { file:'Shalaby Quiz.html', ar:'شلبي', en:'Shalaby', icon:'🎭', cat:'Egyptian' },
+  weshxwesh: { file:'Wesh X Wesh Quiz.html', ar:'وش في وش', en:'Wesh X Wesh', icon:'🤼', cat:'Egyptian' },
+  sikosiko: { file:'Siko Siko Quiz.html', ar:'سيكو سيكو', en:'Siko Siko', icon:'🎮', cat:'Egyptian' },
+  elmashroax: { file:'El Mashroa X Quiz.html', ar:'المشروع إكس', en:'El Mashroa X', icon:'🔍', cat:'Egyptian' },
+  misterx: { file:'Mister X Quiz.html', ar:'مستر إكس', en:'Mister X', icon:'🕵️', cat:'Egyptian' },
+  barshama: { file:'Barshama Quiz.html', ar:'برشامة', en:'Barshama', icon:'💊', cat:'Egyptian' },
+  rockyelghalaba: { file:'Rocky El Ghalaba Quiz.html', ar:'روكي الغلابة', en:'Rocky El Ghalaba', icon:'🥊', cat:'Egyptian' },
+  beitelruby: { file:'Beit El Ruby Quiz.html', ar:'بيت الروبي', en:'Beit El Ruby', icon:'🏠', cat:'Egyptian' },
+  meratyx: { file:'Meraty X Quiz.html', ar:'مراتي إكس', en:'Meraty X', icon:'🕵️‍♀️', cat:'Egyptian' },
+  elserb: { file:'El Serb Quiz.html', ar:'السرب', en:'El Serb', icon:'🦅', cat:'Egyptian' },
+  eleskandarany: { file:'El Eskandarany Quiz.html', ar:'الإسكندراني', en:'El Eskandarany', icon:'🌊', cat:'Egyptian' },
+  shako: { file:'Shako Quiz.html', ar:'شقو', en:'Shako', icon:'💰', cat:'Egyptian' },
+  meratywzegty: { file:'Meraty W Zegty Quiz.html', ar:'مراتي وزوجتي', en:'Meraty W Zegty', icon:'💍', cat:'Egyptian' },
+  nadielregal: { file:'Nadi El Regal Quiz.html', ar:'نادي الرجال السري', en:'Nadi El Regal', icon:'🤫', cat:'Egyptian' },
+  elaref: { file:'El Aref Quiz.html', ar:'العارف', en:'El Aref', icon:'🕵️', cat:'Egyptian' },
+  elmamar: { file:'El Mamar Quiz.html', ar:'الممر', en:'El Mamar', icon:'🇪🇬', cat:'Egyptian' },
+  ahmedwaahmed: { file:'Ahmed Wa Ahmed Quiz.html', ar:'أحمد وأحمد', en:'Ahmed Wa Ahmed', icon:'👥', cat:'Egyptian' },
+  bahebak: { file:'Bahebak Quiz.html', ar:'بحبك', en:'Bahebak', icon:'❤️', cat:'Egyptian' },
+  fasel: { file:'Fasel Quiz.html', ar:'فاصل من اللحظات اللذيذة', en:'Fasel', icon:'😋', cat:'Egyptian' },
+  akhyfok: { file:'Akhy Fok El Shagara Quiz.html', ar:'أخي فوق الشجرة', en:'Akhy Fok El Shagara', icon:'🌳', cat:'Egyptian' },
+  restart: { file:'Restart Quiz.html', ar:'ريستارت', en:'Restart', icon:'🔄', cat:'Egyptian' },
+  tag: { file:'Tag Quiz.html', ar:'تاج', en:'Tag', icon:'👑', cat:'Egyptian' }
+};
+
+let allUsers = [];
+let allCommunityQuizzes = [];
+let currentTab = 'all';
+let lastQuery = '';
+
+// Normalize text for smart matching (removes diacritics, unifies alef/haa/yaa)
+function normalize(str) {
+  return String(str || '').toLowerCase().trim()
+    .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ًٌٍَُِّْ]/g, '');
+}
+
+// Fuzzy match — checks whole query AND all words
+function matches(query, target) {
+  if (!query || !target) return false;
+  const q = normalize(query);
+  const t = normalize(target);
+  if (t.includes(q)) return true;
+  const words = q.split(/\s+/).filter(Boolean);
+  return words.length > 1 && words.every(w => t.includes(w));
+}
+
+// Highlights the matched portion
+function highlight(text, query) {
+  if (!query) return escapeHtml(text);
+  const normQuery = normalize(query);
+  const normText = normalize(text);
+  const idx = normText.indexOf(normQuery);
+  if (idx === -1) return escapeHtml(text);
+  return escapeHtml(text.slice(0, idx)) + '<span class="highlight">' + escapeHtml(text.slice(idx, idx + query.length)) + '</span>' + escapeHtml(text.slice(idx + query.length));
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+async function loadData() {
+  try {
+    const [usersSnap, quizSnap] = await Promise.all([
+      get(ref(db, 'users_data')),
+      get(ref(db, 'user_quizzes'))
+    ]);
+    
+    allUsers = Object.keys(usersSnap.val() || {}).filter(u => 
+      !['owner', 'admin', 'banned'].includes(u.toLowerCase())
+    );
+    
+    const quizzes = quizSnap.val() || {};
+    allCommunityQuizzes = Object.entries(quizzes)
+      .filter(([, q]) => q.status === 'published')
+      .map(([id, q]) => ({ id, ...q }));
+    
+    // If URL has ?q=..., start with it
+    const urlQuery = new URLSearchParams(location.search).get('q');
+    if (urlQuery) {
+      document.getElementById('searchInput').value = urlQuery;
+      doSearch(urlQuery);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function doSearch(query) {
+  lastQuery = query.trim();
+  const clearBtn = document.getElementById('searchClear');
+  clearBtn.classList.toggle('show', lastQuery.length > 0);
+  
+  if (!lastQuery) {
+    document.getElementById('results').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Start typing to search</div><div class="empty-sub">You'll find everything here</div></div>`;
+    updateCounts(0, 0, 0, 0);
+    return;
+  }
+  
+  const matchedUsers = allUsers.filter(u => matches(lastQuery, u)).slice(0, 15);
+  
+  const matchedQuizzes = Object.entries(QUIZ_CATALOG)
+    .filter(([key, q]) => 
+      matches(lastQuery, q.ar) || 
+      matches(lastQuery, q.en) || 
+      matches(lastQuery, q.cat) || 
+      matches(lastQuery, key)
+    )
+    .map(([key, q]) => ({ key, ...q }));
+  
+  const matchedCommunity = allCommunityQuizzes.filter(q => 
+    matches(lastQuery, q.title) || 
+    matches(lastQuery, q.titleEn) || 
+    matches(lastQuery, q.creator)
+  ).slice(0, 15);
+  
+  updateCounts(matchedUsers.length, matchedQuizzes.length, matchedCommunity.length, 
+    matchedUsers.length + matchedQuizzes.length + matchedCommunity.length);
+  
+  renderResults(matchedUsers, matchedQuizzes, matchedCommunity);
+}
+
+function updateCounts(users, quizzes, community, all) {
+  document.getElementById('count-users').innerText = users;
+  document.getElementById('count-quizzes').innerText = quizzes;
+  document.getElementById('count-community').innerText = community;
+  document.getElementById('count-all').innerText = all;
+}
+
+function renderResults(users, quizzes, community) {
+  const resultsEl = document.getElementById('results');
+  let items = [];
+  
+  if (currentTab === 'all' || currentTab === 'users') {
+    users.slice(0, currentTab === 'all' ? 5 : 15).forEach(u => {
+      items.push(`
+        <a href="profile.html?user=${encodeURIComponent(u)}" class="result-item">
+          <div class="result-icon">👤</div>
+          <div class="result-info">
+            <div class="result-title">${highlight(u, lastQuery)}</div>
+            <div class="result-sub">Click to view profile</div>
+          </div>
+          <span class="result-badge badge-user">Player</span>
+          <span class="result-arrow">←</span>
+        </a>
+      `);
+    });
+  }
+  
+  if (currentTab === 'all' || currentTab === 'quizzes') {
+    quizzes.slice(0, currentTab === 'all' ? 5 : 20).forEach(q => {
+      items.push(`
+        <a href="${q.file}" class="result-item">
+          <div class="result-icon">${q.icon}</div>
+          <div class="result-info">
+            <div class="result-title">${highlight(q.ar, lastQuery)} — ${highlight(q.en, lastQuery)}</div>
+            <div class="result-sub">${q.cat} • Official quiz</div>
+          </div>
+          <span class="result-badge badge-quiz">Quiz</span>
+          <span class="result-arrow">←</span>
+        </a>
+      `);
+    });
+  }
+  
+  if (currentTab === 'all' || currentTab === 'community') {
+    community.slice(0, currentTab === 'all' ? 5 : 15).forEach(q => {
+      items.push(`
+        <a href="play-community-quiz.html?id=${q.id}" class="result-item">
+          <div class="result-icon">${q.icon || '🌐'}</div>
+          <div class="result-info">
+            <div class="result-title">${highlight(q.title, lastQuery)}</div>
+            <div class="result-sub">By ${escapeHtml(q.creator)} • 🎮 ${q.plays || 0} plays • ${q.avgRating ? `⭐ ${q.avgRating}` : 'No rating'}</div>
+          </div>
+          <span class="result-badge badge-community">Community</span>
+          <span class="result-arrow">←</span>
+        </a>
+      `);
+    });
+  }
+  
+  if (items.length === 0) {
+    resultsEl.innerHTML = `<div class="empty-state"><div class="empty-icon">😢</div><div class="empty-title">No results</div><div class="empty-sub">Try a different keyword</div></div>`;
+    return;
+  }
+  
+  resultsEl.innerHTML = items.join('');
+}
+
+window.switchTab = (tab, btn) => {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  doSearch(lastQuery);
+};
+
+window.clearSearch = () => {
+  document.getElementById('searchInput').value = '';
+  doSearch('');
+  document.getElementById('searchInput').focus();
+};
+
+document.getElementById('searchInput').addEventListener('input', (e) => doSearch(e.target.value));
+
+loadData();
+</script>
+</body>
+</html>
