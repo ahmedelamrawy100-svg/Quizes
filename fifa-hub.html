@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Ultimate Team - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { 
+    --bg:#050510; --card:#111; --border:#2a2a3f; --gold:#ffd700; --text:#fff; --text-2:#aaa; 
+    --accent:#ff0000; --purple:#a855f7; --green:#10b981; --blue:#3b82f6;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:20px 10px 60px; display:flex; flex-direction:column; align-items:center; }
+  
+  /* Top Bar */
+  .top-bar { width:100%; max-width:900px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px; }
+  
+  /* Tabs */
+  .tabs { width:100%; max-width:900px; display:flex; gap:10px; margin-bottom:20px; overflow-x:auto; padding-bottom:5px; }
+  .tab-btn { flex:1; padding:12px 20px; background:var(--card); border:2px solid var(--border); border-radius:12px; color:#aaa; font-family:'Cairo'; font-weight:900; font-size:16px; cursor:pointer; transition:0.3s; white-space:nowrap; }
+  .tab-btn.active { background:var(--gold); color:#000; border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.3); }
+  
+  /* Content Areas */
+  .tab-content { display:none; width:100%; max-width:900px; animation:fadeUp 0.4s ease; }
+  .tab-content.active { display:flex; flex-direction:column; align-items:center; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ================= 1. FUT CARD ================= */
+  .fut-card-container { display:flex; flex-direction:column; align-items:center; gap:20px; }
+  .fut-card { 
+    width: 320px; height: 460px; border-radius: 25px; position: relative; 
+    display: flex; flex-direction: column; align-items: center; padding: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8); overflow: hidden;
+    background: linear-gradient(135deg, #fceabb, #f8b500); color: #000;
+  }
+  .fut-card.silver { background: linear-gradient(135deg, #e0e0e0, #9e9e9e); }
+  .fut-card.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+  
+  .card-top { display:flex; width:100%; justify-content:space-between; align-items:flex-start; }
+  .card-rating { display:flex; flex-direction:column; align-items:center; line-height:1; }
+  .card-ovr { font-size: 54px; font-weight: 900; }
+  .card-pos { font-size: 18px; font-weight: bold; margin-top: 5px; }
+  
+  .card-avatar { width: 120px; height: 120px; border-radius: 50%; background: #fff; border: 4px solid #000; display: flex; justify-content: center; align-items: center; font-size: 60px; overflow: hidden; margin-top: 10px; }
+  .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .card-name { font-size: 28px; font-weight: 900; margin-top: 15px; text-transform: uppercase; border-bottom: 2px solid rgba(0,0,0,0.2); padding-bottom: 10px; width: 100%; text-align: center; }
+  
+  .card-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px; width: 100%; margin-top: 15px; padding: 0 20px; }
+  .stat-item { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; }
+  .stat-item span:first-child { color: rgba(0,0,0,0.6); }
+  .stat-item span:last-child { font-weight: 900; }
+  
+  .card-badge { position: absolute; bottom: 15px; font-size: 30px; }
+
+  /* ================= 2. SQUAD & CHEMISTRY ================= */
+  .pitch-container { width: 100%; height: 600px; background: #1a5c2a; border: 4px solid #0f3d1b; border-radius: 15px; position: relative; background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.05) 50px, rgba(255,255,255,0.05) 100px); overflow: hidden; }
+  .pitch-lines { position: absolute; inset: 0; border: 2px solid rgba(255,255,255,0.3); margin: 20px; }
+  .pitch-circle { position: absolute; top: 50%; left: 50%; width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; transform: translate(-50%, -50%); }
+  
+  .chemistry-score { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 15px; font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 10px; border: 2px solid var(--gold); }
+  
+  .player-node { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); cursor: pointer; transition: 0.3s; }
+  .player-node:hover { transform: translate(-50%, -50%) scale(1.1); z-index: 10; }
+  .player-card-mini { width: 70px; height: 90px; background: var(--gold); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+  .player-card-mini .rating { font-size: 18px; font-weight: 900; }
+  .player-card-mini .avatar { width: 35px; height: 35px; border-radius: 50%; background: #fff; margin: 5px 0; overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 18px;}
+  .player-card-mini .name { font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.5); color: #fff; width: 100%; text-align: center; padding: 2px 0; }
+  .chem-indicator { margin-top: 5px; font-size: 16px; font-weight: 900; }
+
+  /* ================= 3. DIVISION RIVALS ================= */
+  .rivals-box { width: 100%; background: var(--card); border: 2px solid var(--border); border-radius: 20px; padding: 30px; text-align: center; }
+  .division-badge { font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
+  .division-title { font-size: 32px; color: var(--gold); font-weight: 900; margin-bottom: 10px; }
+  .rivals-points { font-size: 18px; color: #aaa; margin-bottom: 30px; }
+  .rivals-points b { color: #fff; font-size: 24px; }
+  .match-btn { background: linear-gradient(135deg, #ff0000, #8b0000); color: #fff; border: 2px solid #fff; padding: 15px 50px; border-radius: 30px; font-family: 'Cairo'; font-size: 20px; font-weight: 900; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 25px rgba(255,0,0,0.5); }
+  .match-btn:hover { transform: scale(1.05); box-shadow: 0 8px 35px rgba(255,0,0,0.8); }
+
+  /* ================= 4. DRAFT MODE ================= */
+  .draft-container { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .draft-slots { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .draft-slot { width: 80px; height: 110px; border: 2px dashed #555; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); color: #555; font-size: 12px; text-align: center; padding: 5px; }
+  .draft-slot.filled { border-style: solid; border-color: var(--gold); background: rgba(255,215,0,0.1); color: #fff; }
+  .draft-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%; }
+  .draft-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+  .draft-card:hover { border-color: var(--gold); transform: translateY(-3px); }
+  .draft-card.selected { opacity: 0.5; border-color: #555; pointer-events: none; }
+
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn">⬅ رجوع</a>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('card')">🎴 كارت اللاعب</button>
+  <button class="tab-btn" onclick="switchTab('squad')">⚽ التشكيلة والكيمياء</button>
+  <button class="tab-btn" onclick="switchTab('rivals')">🏆 التقسيمات (Rivals)</button>
+  <button class="tab-btn" onclick="switchTab('draft')">🎲 الدرافت (Draft)</button>
+</div>
+
+<!-- 1. FUT CARD -->
+<div id="tab-card" class="tab-content active">
+  <div class="fut-card-container">
+    <div class="fut-card" id="myFutCard">
+      <!-- JS will fill this -->
+      <div style="text-align:center; padding:50px; font-weight:bold;">جاري حساب إحصائياتك...</div>
+    </div>
+    <p style="color:#aaa; font-size:14px; max-width:400px; text-align:center; line-height:1.6;">الكارت بيتحدث تلقائياً بناءً على سرعتك، دقتك، عدد الكويزات اللي لعبتها، والستريك بتاعك. كل ما تلعب أكتر، الكارت بيقوى!</p>
+  </div>
+</div>
+
+<!-- 2. SQUAD -->
+<div id="tab-squad" class="tab-content">
+  <div class="pitch-container" id="pitch">
+    <div class="pitch-lines"></div>
+    <div class="pitch-circle"></div>
+    <div class="chemistry-score" id="chemScore">🧪 الكيمياء: 0</div>
+    <!-- JS will add players -->
+  </div>
+  <p style="color:#aaa; font-size:14px; margin-top:15px; text-align:center;">الكيمياء بتزيد لما يكون أعضاء تيمك من نفس المملكة (Kingdom) أو معاهم نفس البادجات.</p>
+</div>
+
+<!-- 3. RIVALS -->
+<div id="tab-rivals" class="tab-content">
+  <div class="rivals-box">
+    <div class="division-badge" id="divBadge">🥉</div>
+    <div class="division-title" id="divTitle">القسم 10 (Bronze)</div>
+    <div class="rivals-points">نقاط التصنيف: <b id="rivalsPoints">0</b> / 1000</div>
+    <button class="match-btn" onclick="startRankedMatch()">⚔️ ابحث عن خصم</button>
+    <p style="color:#555; font-size:12px; margin-top:20px;">النظام بيدور على خصم في نفس قسمك. لو كسبت بتاخد نقاط، لو خسرت بتنقص.</p>
+  </div>
+</div>
+
+<!-- 4. DRAFT -->
+<div id="tab-draft" class="tab-content">
+  <div class="draft-container">
+    <h2 style="color:var(--gold); font-size:20px; margin-bottom:10px;">اختر 5 كويزات لتكوين تشكيلتك</h2>
+    <div class="draft-slots" id="draftSlots">
+      <div class="draft-slot">فارغ</div>
+      <div class="draft-slot">فارغ</div>
+      <div class="draft-slot">فارغ</div>
+      <div class="draft-slot">فارغ</div>
+      <div class="draft-slot">فارغ</div>
+    </div>
+    <button id="startDraftBtn" class="match-btn" style="display:none; margin-top:10px;" onclick="startDraft()">🚀 ابدأ تحدي الدرافت</button>
+    
+    <div style="width:100%; border-top:1px dashed #333; margin:20px 0;"></div>
+    
+    <h3 style="color:#aaa; font-size:16px; margin-bottom:15px;">اختر من الكويزات المتاحة:</h3>
+    <div class="draft-pool" id="draftPool">
+      <!-- JS will fill this -->
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { db, ref, get, onValue, currentUser, isLoggedIn, showToast } from './firebase-shared.js';
+
+const QUIZZES = [
+  { id: 'annabelle', name: '🎃 أنابيل', file: 'Annabelle Quiz.html' },
+  { id: 'conjuring', name: '👻 الكونجورينج', file: 'Conjuring Quiz.html' },
+  { id: 'TheNun', name: '✝️ الراهبة', file: 'The Nun Quiz.html' },
+  { id: 'FNAF', name: '🐻 فايف نايتس', file: 'FNAF Quiz.html' },
+  { id: 'SquidGame', name: '🦑 لعبة الحبار', file: 'Squid Game Quiz.html' },
+  { id: 'spiderman', name: '🕷️ سبايدرمان', file: 'Spider-Man Quiz.html' },
+  { id: 'avengers', name: '🛡️ المنتقمون', file: 'Avengers Quiz.html' },
+  { id: 'avatar', name: '🌊 أفاتار', file: 'Avatar Quiz.html' },
+  { id: 'venom', name: '🖤 فينوم', file: 'Venom Quiz.html' },
+  { id: 'Wednesday', name: '🖤 وينزداي', file: 'Wednesday Quiz.html' },
+  { id: 'elharifa', name: '⚽ الحريفة', file: 'El Harifa Quiz.html' },
+  { id: 'barshama', name: '💊 برشامة', file: 'Barshama Quiz.html' },
+  { id: 'beitelruby', name: '🏠 بيت الروبي', file: 'Beit El Ruby Quiz.html' },
+  { id: 'ahmedwaahmed', name: '👥 أحمد وأحمد', file: 'Ahmed Wa Ahmed Quiz.html' },
+  { id: 'elserb', name: '🦅 السرب', file: 'El Serb Quiz.html' },
+  { id: 'shako', name: '💰 شقو', file: 'Shako Quiz.html' }
+];
+
+let userStats = { xp: 0, streak: 0, quizzesPlayed: 0, correctCount: 0, totalQuestions: 0, avgTime: 20 };
+let playerKingdom = null;
+let playerBadges = {};
+
+window.switchTab = (tab) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    
+    if(tab === 'card') document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    if(tab === 'squad') document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    if(tab === 'rivals') document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    if(tab === 'draft') document.querySelectorAll('.tab-btn')[3].classList.add('active');
+    
+    document.getElementById('tab-' + tab).classList.add('active');
+};
+
+async function loadStats() {
+    if (!isLoggedIn()) {
+        document.getElementById('myFutCard').innerHTML = '<div style="text-align:center; padding:50px;">سجل دخول الأول</div>';
+        return;
+    }
+
+    try {
+        const [userSnap, scoresSnap, badgesSnap] = await Promise.all([
+            get(ref(db, `users_data/${currentUser}`)),
+            get(ref(db, `scores/${currentUser}`)),
+            get(ref(db, `badges/${currentUser}`))
+        ]);
+
+        const data = userSnap.val() || {};
+        const scores = scoresSnap.val() || {};
+        playerBadges = badgesSnap.val() || {};
+        playerKingdom = data.kingdom || null;
+        
+        userStats.xp = data.xp || 0;
+        userStats.streak = data.streak || 0;
+        
+        let totalQ = 0, correctQ = 0, quizCount = 0;
+        let totalTime = 0, timeCount = 0;
+
+        for (let q in scores) {
+            quizCount++;
+            for (let a in scores[q]) {
+                const attempt = scores[q][a];
+                totalQ += (attempt.total || 0);
+                correctQ += (attempt.score || 0);
+                if (attempt.duration) { totalTime += attempt.duration; timeCount++; }
+            }
+        }
+        
+        userStats.quizzesPlayed = quizCount;
+        userStats.correctCount = correctQ;
+        userStats.totalQuestions = totalQ;
+        userStats.avgTime = timeCount > 0 ? (totalTime / timeCount) : 20;
+
+        renderCard();
+        renderSquad();
+
+    } catch(e) { console.error(e); }
+}
+
+function renderCard() {
+    // حساب الإحصائيات (من 99)
+    const accuracy = userStats.totalQuestions > 0 ? (userStats.correctCount / userStats.totalQuestions) * 100 : 0;
+    
+    let pace = Math.max(40, Math.round(100 - (userStats.avgTime * 2))); // كل ما الوقت قل، السرعة تزيد
+    let shooting = Math.max(30, Math.round(accuracy)); // الدقة
+    let passing = Math.max(30, Math.min(99, 40 + (userStats.quizzesPlayed * 2))); // المعرفة (عدد الكويزات)
+    let physical = Math.max(40, Math.min(99, 40 + (userStats.streak * 5))); // الاستمرارية
+
+    let ovr = Math.round((pace + shooting + passing + physical) / 4);
+    
+    let cardClass = 'bronze';
+    let badge = '🥉';
+    if (ovr >= 75) { cardClass = 'silver'; badge = '🥈'; }
+    if (ovr >= 85) { cardClass = 'gold'; badge = '🥇'; } // الكارت الذهبي
+    
+    const displayName = currentUser.charAt(0).toUpperCase() + currentUser.slice(1);
+
+    document.getElementById('myFutCard').className = `fut-card ${cardClass}`;
+    document.getElementById('myFutCard').innerHTML = `
+        <div class="card-top">
+            <div class="card-rating">
+                <div class="card-ovr">${ovr}</div>
+                <div class="card-pos">CM</div>
+            </div>
+            <div class="card-avatar">${displayName.charAt(0)}</div>
+        </div>
+        <div class="card-name">${displayName}</div>
+        <div class="card-stats">
+            <div class="stat-item"><span>PAC</span><span>${pace}</span></div>
+            <div class="stat-item"><span>SHO</span><span>${shooting}</span></div>
+            <div class="stat-item"><span>PAS</span><span>${passing}</span></div>
+            <div class="stat-item"><span>PHY</span><span>${physical}</span></div>
+        </div>
+        <div class="card-badge">${badge}</div>
+    `;
+}
+
+async function renderSquad() {
+    const pitch = document.getElementById('pitch');
+    pitch.querySelectorAll('.player-node').forEach(n => n.remove());
+    
+    // هنجيب التيم بتاع اللاعب (Clan)
+    const userSnap = await get(ref(db, `users_data/${currentUser}/joined_clans`));
+    const clans = userSnap.val() || {};
+    const clanId = Object.keys(clans)[0];
+
+    let members = [currentUser];
+
+    if (clanId) {
+        // جلب أعضاء التيم
+        const allUsersSnap = await get(ref(db, 'users_data'));
+        const allUsers = allUsersSnap.val() || {};
+        members = Object.keys(allUsers).filter(u => allUsers[u].joined_clans && allUsers[u].joined_clans[clanId]);
+    }
+
+    // ملء المراكز
+    const positions = [
+        { top: '85%', left: '50%' }, // حارس
+        { top: '65%', left: '20%' }, { top: '65%', left: '50%' }, { top: '65%', left: '80%' }, // دفاع
+        { top: '45%', left: '35%' }, { top: '45%', left: '65%' }, // وسط
+        { top: '25%', left: '50%' } // هجوم
+    ];
+
+    let chemistry = 0;
+    let memberCount = Math.min(members.length, 7);
+
+    for(let i=0; i<memberCount; i++) {
+        const member = members[i];
+        const pos = positions[i];
+        
+        const node = document.createElement('div');
+        node.className = 'player-node';
+        node.style.top = pos.top;
+        node.style.left = pos.left;
+        
+        // كيمياء مبدئية
+        let memberChem = 2; 
+        if (memberKingdom) memberChem += 2;
+        
+        node.innerHTML = `
+            <div class="player-card-mini">
+                <div class="rating">${80 + (i*2)}</div>
+                <div class="avatar">${member.charAt(0).toUpperCase()}</div>
+                <div class="name">${member}</div>
+            </div>
+            <div class="chem-indicator" style="color:${memberChem > 2 ? '#4caf50' : '#ff9800'};">${memberChem}/5</div>
+        `;
+        pitch.appendChild(node);
+        chemistry += memberChem;
+    }
+
+    const totalChem = memberCount > 0 ? Math.round((chemistry / (memberCount * 5)) * 100) : 0;
+    document.getElementById('chemScore').innerHTML = `🧪 الكيمياء: ${totalChem}%`;
+    document.getElementById('chemScore').style.color = totalChem >= 70 ? '#4caf50' : '#ff9800';
+}
+
+// Division Rivals (محاكاة)
+let rivalsPoints = parseInt(localStorage.getItem('rivalsPoints') || '0');
+document.getElementById('rivalsPoints').innerText = rivalsPoints;
+updateDivision();
+
+function updateDivision() {
+    let title = "القسم 10 (Bronze)";
+    let badge = "🥉";
+    
+    if (rivalsPoints >= 800) { title = "القسم 1 (Elite)"; badge = "👑"; }
+    else if (rivalsPoints >= 600) { title = "القسم 3 (Gold)"; badge = "🥇"; }
+    else if (rivalsPoints >= 400) { title = "القسم 5 (Silver)"; badge = "🥈"; }
+    else if (rivalsPoints >= 200) { title = "القسم 8 (Bronze)"; badge = "🥉"; }
+    
+    document.getElementById('divTitle').innerText = title;
+    document.getElementById('divBadge').innerText = badge;
+}
+
+window.startRankedMatch = () => {
+    // فيفا ستايل: بندور على خصم عشوائي
+    document.querySelector('.match-btn').innerText = "⏳ جاري البحث...";
+    setTimeout(() => {
+        // هندخل اللاعب في تحدي عشوائي (بنفس نظام التحدي القديم)
+        window.location.href = 'turn-battle.html'; // أو أي صفحة تحدي عندك
+    }, 2000);
+};
+
+// Draft Mode Logic
+let draftSelected = [];
+
+function renderDraftPool() {
+    const pool = document.getElementById('draftPool');
+    pool.innerHTML = '';
+    const shuffled = [...QUIZZES].sort(() => 0.5 - Math.random()).slice(0, 10); // 10 كويزات عشوائية
+    
+    shuffled.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'draft-card';
+        card.innerHTML = `<div style="font-size:24px; margin-bottom:5px;">${q.name.split(' ')[0]}</div><div style="font-size:14px; font-weight:bold;">${q.name.substring(q.name.indexOf(' ')+1)}</div>`;
+        card.onclick = () => selectDraftCard(q, card);
+        pool.appendChild(card);
+    });
+}
+
+function selectDraftCard(quiz, cardEl) {
+    if (draftSelected.length >= 5) return;
+    draftSelected.push(quiz);
+    cardEl.classList.add('selected');
+    updateDraftSlots();
+}
+
+function updateDraftSlots() {
+    const slots = document.getElementById('draftSlots').children;
+    for (let i = 0; i < 5; i++) {
+        if (draftSelected[i]) {
+            slots[i].className = 'draft-slot filled';
+            slots[i].innerText = draftSelected[i].name;
+        } else {
+            slots[i].className = 'draft-slot';
+            slots[i].innerText = 'فارغ';
+        }
+    }
+    document.getElementById('startDraftBtn').style.display = draftSelected.length === 5 ? 'block' : 'none';
+}
+
+window.startDraft = () => {
+    if (draftSelected.length < 5) return;
+    localStorage.setItem('draft_mode_quizzes', JSON.stringify(draftSelected));
+    window.location.href = draftSelected[0].file + '?draft=1';
+};
+
+// Init
+if (isLoggedIn()) {
+    loadStats();
+    renderDraftPool();
+} else {
+    document.getElementById('myFutCard').innerHTML = '<div style="text-align:center; padding:50px;">سجل دخول الأول</div>';
+}
+</script>
+</body>
+</html>
