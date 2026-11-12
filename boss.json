@@ -1,0 +1,12 @@
+{
+  "world_boss": {
+    "current": {
+      "name": "فالاك (الراهبة)",
+      "maxHp": 100000,
+      "currentHp": 100000,
+      "active": true,
+      "endTime": 1799999999999
+    },
+    "damage": {}
+  }
+}
