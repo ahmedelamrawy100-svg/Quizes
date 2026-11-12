@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📴 أوفلاين - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root {
+    --bg: #05070f;
+    --text: #f3f4f6;
+    --text-dim: #8a91a8;
+    --gold: #ffd700;
+    --red: #ef4444;
+    --green: #10b981;
+    --cyan: #06b6d4;
+    --border: rgba(255, 255, 255, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: radial-gradient(circle at 50% 30%, #1a0a2e 0%, #05070f 60%, #000 100%);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .container {
+    max-width: 500px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  .emoji {
+    font-size: 100px;
+    margin-bottom: 25px;
+    display: block;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, var(--gold), #ff8c00, var(--gold));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: goldShift 4s linear infinite;
+  }
+  @keyframes goldShift {
+    to { background-position: 200% center; }
+  }
+  p {
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 25px;
+    line-height: 1.7;
+  }
+  .info-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: right;
+  }
+  .info-box h3 {
+    color: var(--gold);
+    font-size: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .info-box li {
+    font-size: 14px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-box li::before {
+    content: '✓';
+    color: var(--green);
+    font-weight: 900;
+    font-size: 16px;
+  }
+  button {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    touch-action: manipulation;
+  }
+  button:active {
+    transform: scale(0.96);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--green), #059669);
+    color: #fff;
+    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+  }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid var(--red);
+    border-radius: 20px;
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 25px;
+  }
+  .status.online {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+  .stars {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .stars span {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    animation: twinkle 2s infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <span class="emoji">📴</span>
+  <h1 id="title">أنت أوفلاين</h1>
+  
+  <div class="status" id="status">
+    <span class="pulse"></span>
+    <span id="statusText">لا يوجد اتصال بالإنترنت</span>
+  </div>
+  
+  <p id="desc">
+    مفيش مشكلة! الكويزات اللي اتخزنت على جهازك شغالة عادي.
+    أول ما النت يرجع، كل حاجة هتتزامن تلقائي.
+  </p>
+  
+  <div class="info-box">
+    <h3>✅ اللي شغال أوفلاين:</h3>
+    <ul>
+      <li>كل الكويزات اللي لعبتها من قبل</li>
+      <li>خريطة الممالك (البيانات المحفوظة)</li>
+      <li>بروفايلك الشخصي</li>
+      <li>المتجر والمساعدات</li>
+    </ul>
+  </div>
+  
+  <button class="btn-primary" onclick="checkOnline()">
+    🔄 حاول تاني
+  </button>
+  <button class="btn-secondary" onclick="window.location.href='./index.html'">
+    🏠 الرئيسية
+  </button>
+</div>
+
+<script>
+  function generateStars() {
+    const stars = document.getElementById('stars');
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement('span');
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 2 + 's';
+      star.style.width = star.style.height = (Math.random() * 2 + 1) + 'px';
+      stars.appendChild(star);
+    }
+  }
+  
+  function updateOnlineStatus() {
+    const isOnline = navigator.onLine;
+    const status = document.getElementById('status');
+    const statusText = document.getElementById('statusText');
+    
+    if (isOnline) {
+      status.classList.add('online');
+      statusText.textContent = 'متصل! جاري التحويل...';
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } else {
+      status.classList.remove('online');
+      statusText.textContent = 'لا يوجد اتصال';
+    }
+  }
+  
+  function checkOnline() {
+    if (navigator.onLine) {
+      window.location.reload();
+    } else {
+      const btn = event.target;
+      btn.textContent = '❌ لسه أوفلاين...';
+      setTimeout(() => {
+        btn.textContent = '🔄 حاول تاني';
+      }, 1500);
+    }
+  }
+  
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  
+  generateStars();
+  updateOnlineStatus();
+</script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
