@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>▶️ العب الكويز / Play Quiz - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --red:#ef4444; --green:#10b981; --blue:#3b82f6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px 14px 80px; display:flex; flex-direction:column; align-items:center; }
+  .container { max-width:800px; width:100%; }
+
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; flex-wrap:wrap; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+  .btn-primary { background:var(--gold); color:#000; border-color:var(--gold); }
+  .btn-success { background:var(--green); color:#fff; border-color:var(--green); }
+  .btn-edit { background:#a855f7; color:#fff; border-color:#a855f7; }
+
+  .quiz-header { background:var(--card); border:2px solid var(--gold); border-radius:16px; margin-bottom:20px; overflow:hidden; text-align:center; padding-bottom:20px;}
+  .quiz-cover { width:180px; aspect-ratio:3/4; object-fit:cover; display:block; margin:20px auto 0; border-radius:12px; border:2px solid var(--border); }
+  .quiz-header-inner { padding:20px; }
+  .quiz-icon { font-size:56px; margin-bottom:8px; }
+  .quiz-title { font-size:26px; font-weight:900; color:var(--gold); margin-bottom:6px; }
+  .quiz-creator { font-size:13px; color:var(--text-2); margin-bottom:4px; }
+  .quiz-creator b { color:var(--gold); }
+  .quiz-cat { display:inline-block; padding:4px 14px; border-radius:20px; background:rgba(255,215,0,0.15); color:var(--gold); font-size:12px; font-weight:900; margin-top:8px; }
+  .quiz-rating-summary { display:inline-flex; align-items:center; gap:6px; background:rgba(255,215,0,0.1); padding:4px 12px; border-radius:20px; font-size:13px; color:var(--gold); margin-right:8px; font-weight:900; }
+
+  .progress { background:#2a2a3f; height:8px; border-radius:4px; margin-bottom:16px; overflow:hidden; }
+  .progress-bar { background:linear-gradient(90deg,#ffd700,#ff6b6b); height:100%; width:0%; transition:width 0.5s; border-radius:4px; }
+
+  .timer { text-align:center; font-size:22px; color:var(--gold); font-weight:900; margin-bottom:16px; }
+  .timer.warning { color:var(--red); animation:pulse 0.5s infinite; }
+  @keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.1); } }
+
+  .question-box { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+  .q-number { color:var(--text-2); font-size:12px; font-weight:700; margin-bottom:8px; }
+  .q-text { font-size:20px; font-weight:900; line-height:1.5; color:var(--text); margin-bottom:12px; }
+  .q-image { max-width:100%; border-radius:12px; margin-bottom:12px; display:block; max-height:280px; margin-left:auto; margin-right:auto; }
+
+  .option { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:2px solid var(--border); border-radius:12px; padding:16px; margin-bottom:10px; cursor:pointer; transition:0.2s; font-size:16px; }
+  .option:hover:not(.disabled) { border-color:var(--gold); background:rgba(255,215,0,0.05); transform:translateX(-4px); }
+  .option-letter { width:36px; height:36px; border-radius:8px; background:var(--border); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--text-2); flex-shrink:0; font-size:16px; }
+  .option.correct { border-color:var(--green); background:rgba(16,185,129,0.15); }
+  .option.correct .option-letter { background:var(--green); color:#fff; }
+  .option.wrong { border-color:var(--red); background:rgba(239,68,68,0.15); }
+  .option.wrong .option-letter { background:var(--red); color:#fff; }
+  .option.disabled { cursor:not-allowed; opacity:0.7; }
+
+  .next-btn { width:100%; padding:16px; border-radius:12px; border:none; background:var(--gold); color:#000; font-family:'Cairo'; font-weight:900; font-size:16px; cursor:pointer; transition:0.2s; display:none; }
+  .next-btn:hover { background:#ffcc00; transform:translateY(-2px); }
+
+  .result-box { background:var(--card); border:2px solid var(--gold); border-radius:16px; padding:30px; text-align:center; }
+  .result-title { font-size:32px; font-weight:900; color:var(--gold); margin-bottom:12px; }
+  .result-score { font-size:48px; font-weight:900; color:var(--green); margin-bottom:8px; }
+  .result-sub { color:var(--text-2); font-size:15px; margin-bottom:20px; }
+
+  /* Rating */
+  .rating-box { background:rgba(255,215,0,0.08); border:2px dashed var(--gold); border-radius:16px; padding:20px; margin-top:20px; text-align:center; }
+  .rating-title { color:var(--gold); font-size:16px; font-weight:900; margin-bottom:12px; }
+  .rating-stars { display:flex; justify-content:center; gap:8px; margin-bottom:12px; }
+  .star { font-size:38px; cursor:pointer; color:#444; transition:0.2s; user-select:none; }
+  .star:hover, .star.active { color:var(--gold); transform:scale(1.15); }
+  .rating-textarea { width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); background:rgba(0,0,0,0.4); color:var(--text); font-family:'Cairo'; font-size:13px; min-height:70px; resize:vertical; outline:none; margin-bottom:10px; }
+  .rating-textarea:focus { border-color:var(--gold); }
+  .rating-submit { width:100%; padding:12px; border-radius:10px; border:none; background:var(--gold); color:#000; font-family:'Cairo'; font-weight:900; font-size:15px; cursor:pointer; transition:0.2s; }
+  .rating-submit:hover { background:#ffcc00; }
+  .rating-login-msg { padding:16px; background:rgba(0,0,0,0.3); border-radius:10px; color:var(--text-2); font-size:13px; }
+  .rating-login-msg a { color:var(--gold); }
+
+  /* Reviews */
+  .reviews-section { margin-top:24px; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; }
+  .reviews-title { color:var(--gold); font-size:18px; font-weight:900; margin-bottom:16px; display:flex; align-items:center; gap:8px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+  .review-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; }
+  .review-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .review-user { font-weight:900; color:var(--gold); font-size:14px; }
+  .review-stars { color:var(--gold); font-size:14px; }
+  .review-text { color:var(--text); font-size:13px; line-height:1.5; }
+  .review-date { color:var(--text-2); font-size:11px; margin-top:6px; }
+  .no-reviews { text-align:center; padding:30px; color:var(--text-2); font-size:14px; }
+
+  .share-btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; justify-content:center; }
+  .share-btn { padding:10px 18px; border-radius:10px; border:none; color:#fff; font-family:'Cairo'; font-weight:900; font-size:13px; cursor:pointer; text-decoration:none; }
+  .share-wa { background:#25D366; }
+  .share-tg { background:#0088cc; }
+  .share-fb { background:#1877F2; }
+
+  #toast-container { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+  .toast { background:var(--green); color:#fff; padding:12px 22px; border-radius:10px; font-weight:700; font-size:14px; box-shadow:0 8px 30px rgba(0,0,0,0.4); animation:toastIn 0.3s; font-family:'Cairo'; max-width:400px; text-align:center; }
+  .toast.error { background:var(--red); }
+  .toast.gold { background:var(--gold); color:#000; }
+  @keyframes toastIn { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+  .loading { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .spinner { width:44px; height:44px; border:3px solid #333; border-top-color:var(--gold); border-radius:50%; margin:0 auto 16px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .floating-edit { position:fixed; bottom:20px; left:20px; background:linear-gradient(135deg,#a855f7,#7e22ce); color:#fff; border:none; padding:14px 22px; border-radius:50px; font-family:'Cairo'; font-weight:900; font-size:14px; cursor:pointer; box-shadow:0 8px 25px rgba(168,85,247,0.5); display:flex; align-items:center; gap:8px; z-index:9999; transition:0.2s; }
+  .floating-edit:hover { transform:translateY(-3px) scale(1.03); box-shadow:0 12px 35px rgba(168,85,247,0.7); }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="community-quizzes.html" class="btn" id="btnAllQuizzes">⬅ كل الكويزات</a>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="btnLang" onclick="toggleLang()" style="background:var(--blue);color:#fff;border-color:var(--blue);">EN</button>
+      <a href="index.html" class="btn" id="btnHome">🏠 الرئيسية</a>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="loading"><div class="spinner"></div><span id="lblLoading">جاري تحميل الكويز...</span></div>
+  </div>
+</div>
+
+<script type="module">
+import './features/quiz-builder.js';
+import { db, ref, push } from './firebase-shared.js';
+
+const NF = window.NFQuizBuilder;
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+const isAdmin = CU === 'ahmed';
+const params = new URLSearchParams(location.search);
+const quizId = params.get('id');
+
+let currentLang = localStorage.getItem('lang') || 'ar';
+
+const T = {
+  ar: {
+    all: '⬅ كل الكويزات', home: '🏠 الرئيسية', loading: 'جاري تحميل الكويز...', noId: '❌ مفيش كويز محدد', notFound: '❌ الكويز مش موجود', notPub: '🔒 الكويز مش منشور',
+    editBtn: '✏️ تعديل الكويز', by: 'من إبداع', q: 'سؤال', of: 'من', next: 'السؤال التالي ←', result: '🎉 شوف النتيجة',
+    great: '🏆 أداء أسطوري!', good: '🎉 ممتاز!', ok: '👍 حلو!', try: '💪 حاول تاني', correct: 'صح',
+    rate: '⭐ قيّم الكويز', loginRate: 'سجل دخول عشان تقيّم', login: 'دخول', cantRate: 'مينفعش تقيّم كويزك', editRate: '✏️ عدّل تقييمك',
+    placeholder: 'اكتب رأيك في الكويز (اختياري)...', submitRate: '📤 نشر التقييم', updateRate: '💾 تحديث التقييم',
+    reviews: '💬 المراجعات', noReviews: 'لسه مفيش تقييمات — كن الأول!', playAgain: '🔄 العب تاني', otherQuizzes: '🌐 كويزات تانية', share: '📱 شارك',
+    errStars: 'اختار النجوم الأول', rateSuccess: '✅ شكراً على التقييم!', notRateOwn: 'مينفعش تقيّم كويزك — بس شوف التقييمات تحت 👇'
+  },
+  en: {
+    all: '⬅ All Quizzes', home: '🏠 Home', loading: 'Loading quiz...', noId: '❌ No quiz specified', notFound: '❌ Quiz not found', notPub: '🔒 Quiz not published',
+    editBtn: '✏️ Edit Quiz', by: 'By', q: 'Question', of: 'of', next: 'Next Question →', result: '🎉 See Result',
+    great: '🏆 Legendary!', good: '🎉 Excellent!', ok: '👍 Good!', try: '💪 Try again', correct: 'Correct',
+    rate: '⭐ Rate Quiz', loginRate: 'Login to rate', login: 'Login', cantRate: 'Cannot rate your own quiz', editRate: '✏️ Edit Rating',
+    placeholder: 'Write your review (optional)...', submitRate: '📤 Submit Rating', updateRate: '💾 Update Rating',
+    reviews: '💬 Reviews', noReviews: 'No reviews yet — be the first!', playAgain: '🔄 Play Again', otherQuizzes: '🌐 Other Quizzes', share: '📱 Share',
+    errStars: 'Select stars first', rateSuccess: '✅ Thanks for rating!', notRateOwn: 'Cannot rate your own quiz — see reviews below 👇'
+  }
+};
+
+const t = () => T[currentLang];
+
+window.toggleLang = () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('btnAllQuizzes').innerText = t().all;
+  document.getElementById('btnHome').innerText = t().home;
+  document.getElementById('lblLoading').innerText = t().loading;
+  if (quiz) showResult(); // Re-render if finished
+  else if (quizId) loadQuiz(); // Reload
+};
+
+let quiz = null;
+let current = 0;
+let score = 0;
+let timerInterval = null;
+let timeLeft = 20;
+let answered = false;
+let questions = [];
+let canEdit = false;
+let selectedStars = 0;
+
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t_el = document.createElement('div');
+  t_el.className = 'toast ' + (type !== 'success' ? type : '');
+  t_el.textContent = msg;
+  c.appendChild(t_el);
+  setTimeout(() => t_el.remove(), 3500);
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+async function loadQuiz() {
+  if (!quizId) {
+    document.getElementById('content').innerHTML = `<div class="loading">${t().noId}</div>`;
+    return;
+  }
+  quiz = await NF.getQuiz(quizId);
+  if (!quiz) {
+    document.getElementById('content').innerHTML = `<div class="loading">${t().notFound}</div>`;
+    return;
+  }
+  if (quiz.status !== 'published' && quiz.creator !== CU && !isAdmin) {
+    document.getElementById('content').innerHTML = `<div class="loading">${t().notPub}</div>`;
+    return;
+  }
+  
+  canEdit = (quiz.creator === CU || isAdmin);
+  questions = (quiz.questions || []).sort(() => Math.random() - 0.5);
+  startQuiz();
+}
+
+function startQuiz() {
+  current = 0;
+  score = 0;
+  NF.incrementPlays(quizId);
+
+  const cat = NF.QUIZ_CATEGORIES[quiz.category] || NF.QUIZ_CATEGORIES.general;
+  const ownerBtn = canEdit ? `<button class="floating-edit" onclick="window._editThisQuiz()">${t().editBtn}</button>` : '';
+
+  document.getElementById('content').innerHTML = `
+    <div class="quiz-header">
+      <div class="quiz-header-inner">
+        ${quiz.coverImage ? `<img class="quiz-cover" src="${quiz.coverImage}" alt="">` : ''}
+        <div class="quiz-icon">${quiz.icon}</div>
+        <div class="quiz-title">${escapeHtml(quiz.title)}</div>
+        <div class="quiz-creator">${t().by} <b>${escapeHtml(quiz.creator)}</b></div>
+        ${quiz.avgRating ? `<div class="quiz-rating-summary">⭐ ${quiz.avgRating} (${quiz.ratingCount})</div>` : ''}
+        <div class="quiz-cat">${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name}</div>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="timer" id="timer">⏱️ 20</div>
+    <div id="quizArea"></div>
+    ${ownerBtn}
+  `;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  timeLeft = 20;
+  const q = questions[current];
+
+  document.getElementById('progressBar').style.width = `${(current / questions.length) * 100}%`;
+  const timerEl = document.getElementById('timer');
+  timerEl.className = 'timer';
+  timerEl.textContent = '⏱️ 20';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="question-box">
+      <div class="q-number">${t().q} ${current + 1} ${t().of} ${questions.length}</div>
+      <div class="q-text">${escapeHtml(q.q_ar)}</div>
+      ${q.image ? `<img class="q-image" src="${q.image}" alt="">` : ''}
+    </div>
+    <div id="optionsArea"></div>
+    <button class="next-btn" id="nextBtn" onclick="window._nextQuestion()">
+      ${current < questions.length - 1 ? t().next : t().result}
+    </button>
+  `;
+
+  const optsArea = document.getElementById('optionsArea');
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  q.options_ar.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `
+      <div class="option-letter">${currentLang === 'ar' ? ['أ','ب','ج','د','هـ','و'][i] : letters[i]}</div>
+      <div style="flex:1;">${escapeHtml(opt)}</div>
+    `;
+    div.onclick = () => checkAnswer(i, div);
+    optsArea.appendChild(div);
+  });
+
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `⏱️ ${timeLeft}`;
+    if (timeLeft <= 5) timerEl.classList.add('warning');
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) checkAnswer(-1, null);
+    }
+  }, 1000);
+}
+
+function checkAnswer(idx, el) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const q = questions[current];
+  const allOpts = document.querySelectorAll('.option');
+  allOpts.forEach((o, i) => {
+    o.classList.add('disabled');
+    if (i === q.answer) o.classList.add('correct');
+  });
+
+  if (idx === q.answer) {
+    score++;
+    if (window.confetti) window.confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
+  } else if (idx >= 0 && el) {
+    el.classList.add('wrong');
+  }
+
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+window._nextQuestion = () => {
+  current++;
+  if (current < questions.length) loadQuestion();
+  else showResult();
+};
+
+window._editThisQuiz = () => {
+  window.location.href = `quiz-builder.html?edit=${quizId}`;
+};
+
+async function showResult() {
+  clearInterval(timerInterval);
+  const pct = Math.round((score / questions.length) * 100);
+  const msg = pct >= 90 ? t().great : pct >= 70 ? t().good : pct >= 50 ? t().ok : t().try;
+
+  if (pct >= 70 && window.confetti) window.confetti({ particleCount: 200, spread: 100 });
+
+  const reviews = await NF.getReviews(quizId);
+  const myReview = CU ? reviews.find(r => r.user === CU) : null;
+  const isMyQuiz = (quiz.creator === CU);
+  
+  let ratingBox = '';
+  if (!CU) {
+    ratingBox = `<div class="rating-box"><div class="rating-title">${t().rate}</div><div class="rating-login-msg">${t().loginRate} — <a href="index.html">${t().login}</a></div></div>`;
+  } else if (isMyQuiz) {
+    ratingBox = `<div class="rating-box"><div class="rating-title">${t().rate}</div><div class="rating-login-msg">${t().notRateOwn}</div></div>`;
+  } else {
+    ratingBox = `
+      <div class="rating-box">
+        <div class="rating-title">${myReview ? t().editRate : t().rate}</div>
+        <div class="rating-stars" id="ratingStars">
+          ${[1,2,3,4,5].map(i => `<span class="star ${myReview && i <= myReview.rating ? 'active' : ''}" data-star="${i}">★</span>`).join('')}
+        </div>
+        <textarea class="rating-textarea" id="ratingText" placeholder="${t().placeholder}" maxlength="300">${myReview ? escapeHtml(myReview.text || '') : ''}</textarea>
+        <button class="rating-submit" onclick="window._submitReview()">${myReview ? t().updateRate : t().submitRate}</button>
+      </div>
+    `;
+  }
+
+  const reviewsHtml = reviews.length > 0 ? reviews.map(r => `
+    <div class="review-item">
+      <div class="review-header">
+        <span class="review-user">👤 ${escapeHtml(r.user)}</span>
+        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+      </div>
+      ${r.text ? `<div class="review-text">${escapeHtml(r.text)}</div>` : ''}
+      <div class="review-date">${new Date(r.time).toLocaleDateString(currentLang === 'ar' ? 'ar-EG' : 'en-US')}</div>
+    </div>
+  `).join('') : `<div class="no-reviews">${t().noReviews}</div>`;
+
+  document.getElementById('content').innerHTML = `
+    <div class="result-box">
+      <div class="result-title">${msg}</div>
+      <div class="result-score">${score} / ${questions.length}</div>
+      <div class="result-sub">${pct}% ${t().correct}</div>
+
+      ${ratingBox}
+
+      <div class="share-btns">
+        <button class="btn btn-primary" onclick="location.href='play-community-quiz.html?id=${quizId}'">${t().playAgain}</button>
+        <button class="btn" onclick="location.href='community-quizzes.html'">${t().otherQuizzes}</button>
+        ${canEdit ? `<button class="btn btn-edit" onclick="window._editThisQuiz()">${t().editBtn}</button>` : ''}
+        <a class="share-btn share-wa" href="https://api.whatsapp.com/send?text=${encodeURIComponent(`I scored ${score}/${questions.length} on "${quiz.title}" on Plot Twist! ${location.href}`)}" target="_blank">${t().share}</a>
+      </div>
+    </div>
+
+    <div class="reviews-section">
+      <div class="reviews-title">${t().reviews} (${reviews.length})</div>
+      ${reviewsHtml}
+    </div>
+  `;
+
+  const stars = document.querySelectorAll('#ratingStars .star');
+  stars.forEach(star => {
+    star.onclick = () => {
+      selectedStars = Number(star.dataset.star);
+      stars.forEach((s, i) => s.classList.toggle('active', i < selectedStars));
+    };
+  });
+
+  if (CU) {
+    try {
+      await push(ref(db, `scores/${CU}/community_${quizId}`), {
+        score, total: questions.length, time: new Date().toISOString(), source: 'community'
+      });
+    } catch (e) { console.warn(e); }
+  }
+}
+
+window._submitReview = async () => {
+  const text = document.getElementById('ratingText').value.trim();
+  if (selectedStars === 0) return toast(t().errStars, 'error');
+  const r = await NF.addReview(quizId, selectedStars, text, currentLang);
+  if (r.error) return toast(r.error, 'error');
+  toast(t().rateSuccess, 'success');
+  setTimeout(() => showResult(), 800);
+};
+
+document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+loadQuiz();
+</script>
+
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
