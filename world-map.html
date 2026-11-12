@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏰 خريطة الممالك - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root {
+    --bg-base: #0b0914;
+    --bg-gradient: radial-gradient(circle at 50% 0%, #2a1b41 0%, #110b1c 50%, #0b0914 100%);
+    --panel: rgba(26, 21, 43, 0.6);
+    --panel-hover: rgba(40, 33, 66, 0.8);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 215, 0, 0.4);
+    --text: #f8f9fa;
+    --text-dim: #a0a5b5;
+    --gold: #ffd700;
+    --cyan: #00e5ff;
+    --red: #ff3366;
+    --green: #00e676;
+  }
+  
+  body.light-mode {
+    --bg-base: #f0f2f5;
+    --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #e0e5ec 100%);
+    --panel: rgba(255, 255, 255, 0.8);
+    --panel-hover: rgba(255, 255, 255, 1);
+    --border: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.2);
+    --text: #111;
+    --text-dim: #555;
+    --gold: #b8860b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg-gradient);
+    background-color: var(--bg-base);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    overflow: hidden;
+    transition: 0.3s;
+  }
+
+  /* Loading */
+  #loadingScreen {
+    position: fixed; inset: 0; z-index: 99999;
+    background: var(--bg-base);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;
+  }
+  .loader-crown { font-size: 80px; animation: float 2s infinite ease-in-out; filter: drop-shadow(0 0 20px var(--gold)); }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+  .loader-text { color: var(--text-dim); font-weight: 700; letter-spacing: 2px; }
+  .loader-bar { width: 200px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .loader-bar-fill { height: 100%; width: 50%; background: var(--gold); animation: loadSlide 1.5s infinite; }
+  @keyframes loadSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+
+  /* App Layout */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  /* Topbar */
+  .topbar {
+    grid-column: 1 / -1;
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 10px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-icon {
+    width: 45px; height: 45px; background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px;
+    box-shadow: 0 0 15px rgba(255, 65, 108, 0.4);
+  }
+  .brand-title { font-size: 22px; font-weight: 900; color: var(--gold); line-height: 1.2; }
+  .brand-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+  
+  .top-actions { display: flex; gap: 8px; }
+  .btn {
+    padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05); color: var(--text);
+    font-family: 'Cairo'; font-weight: 700; font-size: 13px;
+    cursor: pointer; transition: 0.3s; text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--gold); transform: translateY(-2px); }
+
+  /* Map Area */
+  .map-area {
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .map-controls {
+    padding: 12px 15px;
+    display: flex; gap: 10px; align-items: center;
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+  }
+  
+  /* Search Bar Fix */
+  .search-wrap { flex: 1; position: relative; }
+  .search-wrap input {
+    width: 100%; padding: 10px 15px 10px 40px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.2); color: var(--text);
+    font-family: 'Cairo'; font-size: 14px;
+    outline: none; transition: 0.3s;
+  }
+  [dir="ltr"] .search-wrap input { padding: 10px 40px 10px 15px; }
+  .search-wrap input:focus { border-color: var(--gold); background: rgba(0, 0, 0, 0.4); }
+  
+  .search-icon {
+    position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
+    font-size: 14px; color: var(--text-dim); pointer-events: none;
+  }
+  [dir="ltr"] .search-icon { right: auto; left: 12px; }
+  
+  .search-clear {
+    position: absolute; top: 50%; left: 10px; transform: translateY(-50%);
+    background: var(--border); border: none; color: var(--text);
+    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    display: none; align-items: center; justify-content: center; font-size: 10px;
+  }
+  [dir="ltr"] .search-clear { left: auto; right: 10px; }
+  .search-clear.show { display: flex; }
+
+  /* SVG Area */
+  .map-svg-wrap {
+    flex: 1; position: relative; min-height: 0; overflow: hidden;
+    background: radial-gradient(ellipse at center, rgba(20, 15, 35, 0.8) 0%, rgba(5, 3, 10, 1) 100%);
+  }
+  body.light-mode .map-svg-wrap { background: radial-gradient(ellipse at center, #e2e8f0 0%, #cbd5e1 100%); }
+  #mapSVG { width: 100%; height: 100%; display: block; }
+
+  /* Kingdom Styling */
+  .kingdom-group { cursor: pointer; }
+  .kingdom-group:hover .kingdom-shape { stroke-width: 4; filter: drop-shadow(0 0 15px var(--k-color)) brightness(1.2); }
+  .kingdom-group:hover .kingdom-icon { transform: scale(1.15) translateY(-5px); }
+  .kingdom-group:hover .kingdom-name { fill: #fff; text-shadow: 0 0 10px #fff; }
+
+  .kingdom-glow { fill: var(--k-color); opacity: 0.15; filter: blur(25px); transition: opacity 0.3s; }
+  .kingdom-group:hover .kingdom-glow { opacity: 0.4; }
+  
+  .kingdom-shape {
+    fill: rgba(15, 12, 25, 0.9);
+    stroke: var(--k-color); stroke-width: 2.5; 
+    transition: all 0.3s;
+  }
+  body.light-mode .kingdom-shape { fill: rgba(255, 255, 255, 0.9); }
+  
+  .kingdom-icon { font-size: 45px; transition: transform 0.3s; text-anchor: middle; dominant-baseline: middle; }
+  .kingdom-name { font-size: 16px; font-weight: 900; text-anchor: middle; fill: #fff; filter: drop-shadow(0 2px 4px #000); }
+  body.light-mode .kingdom-name { fill: #111; filter: none; }
+  .kingdom-stats { font-size: 12px; font-weight: bold; text-anchor: middle; fill: var(--text-dim); }
+  
+  .kingdom-my-crown { font-size: 24px; animation: crownFloat 2s infinite; }
+  @keyframes crownFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  /* Roads Fix */
+  .kingdom-road { 
+    fill: none; 
+    stroke: rgba(255, 255, 255, 0.15); 
+    stroke-width: 3; 
+    stroke-dasharray: 8 8; 
+    animation: roadDash 20s linear infinite; 
+  }
+  body.light-mode .kingdom-road { stroke: rgba(0, 0, 0, 0.15); }
+  @keyframes roadDash { to { stroke-dashoffset: -200; } }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--panel);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .sidebar-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px;
+  }
+  .stat-mini {
+    background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 5px; text-align: center; transition: 0.3s;
+  }
+  .stat-mini:hover { border-color: var(--gold); }
+  .stat-mini .sv { font-size: 20px; font-weight: 900; color: var(--gold); line-height: 1; }
+  .stat-mini .sl { font-size: 10px; color: var(--text-dim); margin-top: 4px; font-weight: bold; }
+
+  .sidebar-header {
+    padding: 12px 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.1);
+  }
+  .sidebar-title { font-size: 14px; font-weight: 900; color: var(--text); }
+  .sidebar-count { font-size: 12px; background: rgba(255, 215, 0, 0.15); color: var(--gold); padding: 2px 8px; border-radius: 10px; }
+
+  .filter-tabs { display: flex; gap: 8px; padding: 10px 15px; border-bottom: 1px solid var(--border); }
+  .filter-tab {
+    flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-dim); font-family: 'Cairo'; font-weight: 700; font-size: 12px; cursor: pointer; transition: 0.2s;
+  }
+  .filter-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+  .kingdom-list {
+    flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .kingdom-list::-webkit-scrollbar { width: 5px; }
+  .kingdom-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 5px; }
+
+  .kingdom-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border);
+    border-radius: 10px; cursor: pointer; transition: 0.3s;
+  }
+  .kingdom-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--k-color); transform: translateX(-3px); }
+  .kingdom-item.selected { border-color: var(--gold); background: rgba(255, 215, 0, 0.08); }
+  
+  .ki-icon {
+    width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 20px;
+    background: rgba(0,0,0,0.4); border: 1px solid var(--k-color); box-shadow: inset 0 0 10px var(--k-color);
+  }
+  .ki-info { flex: 1; min-width: 0; }
+  .ki-name { font-size: 13px; font-weight: bold; color: var(--k-color); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ki-detail { font-size: 10px; color: var(--text-dim); }
+  .ki-count {
+    font-size: 12px; font-weight: 900; color: #fff; background: var(--k-color);
+    padding: 2px 8px; border-radius: 6px;
+  }
+
+  /* Weekly War Card */
+  .weekly-war-card {
+    background: linear-gradient(135deg, rgba(30, 20, 40, 0.9), rgba(15, 10, 20, 0.9));
+    border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 12px 12px 0;
+    position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .weekly-war-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, #ff416c, #ff4b2b);
+  }
+  .ww-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .ww-title { font-size: 13px; font-weight: 900; color: #fff; }
+  .ww-timer { font-size: 11px; font-weight: bold; color: #ff4b2b; background: rgba(255, 75, 43, 0.1); padding: 2px 8px; border-radius: 6px; }
+  
+  .ww-matchup { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+  .ww-side {
+    background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px; text-align: center; position: relative;
+  }
+  .ww-side.winner { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+  .ww-icon { font-size: 20px; margin-bottom: 4px; }
+  .ww-name { font-size: 10px; font-weight: bold; color: var(--text-dim); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ww-score { font-size: 16px; font-weight: 900; color: #fff; }
+  .ww-vs { font-size: 10px; font-weight: 900; color: #ff4b2b; background: #000; padding: 4px; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; }
+
+  /* Modals */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
+    z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+    width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8); animation: modalIn 0.3s;
+  }
+  @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .modal-icon { font-size: 40px; }
+  .modal-title { font-size: 20px; font-weight: 900; margin-top: 5px; background: linear-gradient(90deg, var(--m-color), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .modal-desc { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .modal-close { background: var(--red); border: none; color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: 900; font-size: 14px; }
+  
+  /* Kingdom Chat Fix */
+  #kcBtn {
+    position: fixed; bottom: 20px; left: 20px; z-index: 10000;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, #00e5ff, #007bff);
+    color: #fff; border: 2px solid #fff; font-size: 26px;
+    box-shadow: 0 5px 20px rgba(0, 229, 255, 0.4);
+    transition: 0.3s; display: none; justify-content: center; align-items: center; cursor: pointer;
+  }
+  #kcBtn:hover { transform: scale(1.1); box-shadow: 0 8px 25px rgba(0, 229, 255, 0.6); }
+  
+  #kcPanel {
+    position: fixed; bottom: 90px; left: 20px; z-index: 10001;
+    width: 320px; max-width: calc(100vw - 40px); height: 450px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: opacity 0.3s, transform 0.3s;
+    opacity: 0; pointer-events: none; transform: translateY(20px);
+  }
+  #kcPanel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .kc-header { background: rgba(0, 229, 255, 0.9); color: #000; padding: 12px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+  .kc-close { background: none; border: none; color: #000; font-size: 18px; cursor: pointer; font-weight: bold; }
+  .kc-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,0.2); }
+  .kc-input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
+  .kc-input-area input { flex: 1; padding: 10px 12px; border-radius: 20px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: var(--text); font-family: 'Cairo'; outline: none; }
+  .kc-input-area button { padding: 0 15px; border-radius: 20px; border: none; background: var(--cyan); color: #000; font-weight: bold; cursor: pointer; }
+
+  #toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--panel); border: 2px solid var(--gold); padding: 12px 24px; border-radius: 10px;
+    font-weight: bold; z-index: 99999; transition: 0.3s; opacity: 0; text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+  }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+    .sidebar { max-height: 300px; }
+    #kcBtn { bottom: 15px; left: 15px; width: 50px; height: 50px; font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Kingdom Chat UI -->
+<button id="kcBtn">💬<span id="kcBadge" style="position:absolute; top:-5px; right:-5px; background:var(--red); color:#fff; border-radius:50%; width:20px; height:20px; font-size:11px; display:none; justify-content:center; align-items:center; border:2px solid #fff;">0</span></button>
+
+<div id="kcPanel">
+  <div class="kc-header">
+    <span id="kcTitle">💬 شات المملكة</span>
+    <button class="kc-close" onclick="window._closeKC()">✖</button>
+  </div>
+  <div class="kc-messages" id="kcMessages">
+    <div style="text-align:center; color:var(--text-dim); font-size:13px; margin-top:20px;">جاري التحميل...</div>
+  </div>
+  <div class="kc-input-area">
+    <input type="text" id="kcInput" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') window._sendKCMsg()">
+    <button id="kcSendBtn" onclick="window._sendKCMsg()">📤</button>
+  </div>
+</div>
+
+<div id="loadingScreen">
+  <div class="loader-crown">🏰</div>
+  <div class="loader-text" id="loaderText">جاري فتح أبواب الممالك...</div>
+  <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<div id="toast">رسالة</div>
+<div id="tooltip" style="position:fixed; background:var(--panel); border:1px solid var(--gold); padding:10px; border-radius:8px; pointer-events:none; z-index:10000; display:none; font-size:12px; box-shadow:0 5px 15px rgba(0,0,0,0.5);"></div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🏰</div>
+      <div>
+        <div class="brand-title" id="title">خريطة الممالك</div>
+        <div class="brand-sub" id="subtitle">KINGDOMS OF PLOT TWIST</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a href="index.html" class="btn" id="backBtn">⬅ رجوع</a>
+      <button class="btn" onclick="window.toggleLanguage()" id="langBtn">EN</button>
+      <button class="btn" onclick="window.toggleTheme()" id="themeBtn">🌙</button>
+    </div>
+  </header>
+
+  <div class="map-area">
+    <div class="map-controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="ابحث عن مملكة..." oninput="window.onSearch(this.value)">
+        <button class="search-clear" id="searchClear" onclick="window.clearSearch()">✖</button>
+      </div>
+      <button class="btn" onclick="window.resetView()" id="resetBtn">🎯 إعادة ضبط</button>
+    </div>
+    <div class="map-svg-wrap">
+      <svg id="mapSVG" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="weekly-war-card" id="weeklyWarCard" style="display:none;">
+      <div class="ww-header">
+        <span class="ww-title" id="wwTitleLbl">⚔️ حرب الأسبوع</span>
+        <span class="ww-timer" id="wwTimer">--</span>
+      </div>
+      <div class="ww-matchup">
+        <div class="ww-side" id="wwSide1">
+          <div class="ww-icon" id="wwIcon1">?</div>
+          <div class="ww-name" id="wwName1">-</div>
+          <div class="ww-score" id="wwScore1">0</div>
+        </div>
+        <div class="ww-vs">VS</div>
+        <div class="ww-side" id="wwSide2">
+          <div class="ww-icon" id="wwIcon2">?</div>
+          <div class="ww-name" id="wwName2">-</div>
+          <div class="ww-score" id="wwScore2">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-stats">
+      <div class="stat-mini">
+        <div class="sv" id="statKingdoms">0</div>
+        <div class="sl" id="statKingdomsLbl">مملكة</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sv" id="statPlayers">0</div>
+        <div class="sl" id="statPlayersLbl">محارب</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sv" id="statTop">-</div>
+        <div class="sl" id="statTopLbl">الأقوى</div>
+      </div>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all" onclick="window.setFilter('all')">🏰 الكل</button>
+      <button class="filter-tab" data-filter="my" onclick="window.setFilter('my')">⭐ مملكتي</button>
+    </div>
+
+    <div class="sidebar-header">
+      <span class="sidebar-title" id="sidebarTitle">🏆 ترتيب الممالك</span>
+      <span class="sidebar-count" id="sidebarCount">0</span>
+    </div>
+    <div class="kingdom-list" id="kingdomList"></div>
+  </aside>
+</div>
+
+<div class="modal-backdrop" id="kingdomModal" onclick="window.closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()" id="kingdomModalBox">
+    <div class="modal-header">
+      <div>
+        <div class="modal-icon" id="modalIcon">🏰</div>
+        <div class="modal-title" id="modalName">-</div>
+        <div class="modal-desc" id="modalDesc"></div>
+      </div>
+      <button class="modal-close" onclick="window.closeModal()">✖</button>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, onValue, runTransaction, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+let db = null;
+try {
+  const CFG = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = getApps().length ? getApp() : initializeApp(CFG);
+  db = getDatabase(app);
+} catch (e) { console.error('[kingdoms] Firebase init failed:', e); }
+
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+
+const KINGDOMS = [
+  { id: 'horror', name_ar: 'غابة الرعب', name_en: 'Forest of Horror', icon: '🎃', color: '#ff4757', color_dark: '#2d0000', categories: ['annabelle', 'conjuring', 'TheNun', 'FNAF', 'TrainToBusan', 'Scream'], path: 'M 155,155 C 175,110 235,85 295,95 C 355,105 395,145 395,205 C 395,265 365,305 315,315 C 255,325 195,315 155,275 C 115,235 125,180 155,155 Z', centerX: 255, centerY: 205, desc_ar: 'أرض الأشباح والوحوش', desc_en: 'Land of ghosts' },
+  { id: 'action', name_ar: 'قلعة المحاربين', name_en: 'Fortress of Warriors', icon: '⚔️', color: '#ffa502', color_dark: '#3d1500', categories: ['squidgame', 'spiderman', 'avengers', 'avatar', 'venom', 'birdsofprey', 'mazerunner', 'rambo'], path: 'M 490,130 L 530,80 L 610,70 L 690,90 L 720,160 L 710,250 L 630,300 L 550,290 L 490,230 Z', centerX: 605, centerY: 185, desc_ar: 'معقل الأبطال الخارقين', desc_en: 'Stronghold of heroes' },
+  { id: 'mystery', name_ar: 'برج الغموض', name_en: 'Tower of Mystery', icon: '🕵️', color: '#a55eea', color_dark: '#2d0033', categories: ['wednesday', 'knivesout'], path: 'M 900,120 C 925,85 990,85 1010,120 C 1035,155 1065,220 1070,275 C 1075,305 1035,315 1000,305 C 945,290 895,265 875,225 C 855,185 875,155 900,120 Z', centerX: 970, centerY: 200, desc_ar: 'برج شاهق يحتوي أسراراً', desc_en: 'Towering spire of secrets' },
+  { id: 'thriller', name_ar: 'جسر التشويق', name_en: 'Bridge of Thrill', icon: '🎬', color: '#1e90ff', color_dark: '#001a33', categories: ['fall'], path: 'M 130,440 C 180,415 220,425 280,425 C 330,435 380,455 390,505 C 400,550 355,580 300,590 C 240,600 180,580 140,540 C 110,505 110,465 130,440 Z', centerX: 260, centerY: 505, desc_ar: 'جسر معلق فوق الهاوية', desc_en: 'Bridge over the abyss' },
+  { id: 'egyptian', name_ar: 'صحراء الفراعنة', name_en: 'Desert of Pharaohs', icon: '🐪', color: '#eccc68', color_dark: '#3d3000', categories: ['elharifa', 'blueelephant', 'elshater', 'shalaby', 'beitelruby', 'ahmedwaahmed', 'fasel', 'barshama', 'sikosiko', 'weshxwesh', 'misterx', 'rockyelghalaba', 'meratyx', 'elserb', 'eleskandarany', 'shako', 'meratywzegty', 'nadielregal', 'elaref', 'elmamar', 'foolelseen', 'akhyfok', 'restart', 'tag'], path: 'M 520,595 L 560,435 L 600,405 L 640,405 L 680,435 L 710,585 C 700,615 620,625 560,615 C 530,610 510,605 520,595 Z', centerX: 610, centerY: 505, desc_ar: 'أرض الأهرامات والكنوز', desc_en: 'Land of pyramids' },
+  { id: 'legendary', name_ar: 'جزيرة الأساطير', name_en: 'Island of Legends', icon: '💎', color: '#2ed573', color_dark: '#00330a', categories: [], path: 'M 880,440 C 930,415 1000,415 1040,455 C 1085,495 1085,555 1040,595 C 1000,625 930,625 880,605 C 830,585 810,525 830,475 C 840,455 860,445 880,440 Z', centerX: 950, centerY: 515, desc_ar: 'جزيرة نائية مليئة بالكنوز', desc_en: 'Remote island of treasures' },
+  { id: 'owner', name_ar: 'قلعة الملوك', name_en: 'Castle of Kings', icon: '👑', color: '#ff6b81', color_dark: '#330000', categories: [], path: 'M 430,790 L 450,730 L 490,750 L 530,710 L 570,750 L 610,710 L 650,750 L 690,730 L 710,790 C 710,830 670,860 610,860 C 550,860 470,850 430,830 Z', centerX: 570, centerY: 790, desc_ar: 'القلعة الملكية', desc_en: 'The royal castle' }
+];
+
+const T = {
+  ar: { title: 'خريطة الممالك', subtitle: 'KINGDOMS OF PLOT TWIST', back: '⬅ رجوع', lang: 'EN', reset: '🎯 إعادة ضبط', statKingdoms: 'مملكة', statPlayers: 'محارب', statTop: 'الأقوى', sidebarTitle: '🏆 ترتيب الممالك', loading: 'جاري فتح أبواب الممالك...', searchPh: 'ابحث عن مملكة...', noSearch: 'لا توجد نتائج', noSearchHint: 'جرب اسم مملكة تاني', warriors: 'محارب', pts: 'نقطة', kingTitle: '👑 الملك', kingNone: 'لا يوجد ملك بعد', kingStats: 'مجموع النقاط', kingDetail: 'الملك هو صاحب أعلى نقاط في المملكة', rankingTitle: '⚔️ ترتيب المحاربين', noWarriors: 'لا يوجد محاربين في المملكة دي بعد', you: 'أنت', clickHint: 'اضغط لعرض التفاصيل', topPlayer: 'الملك', noPlayers: 'لا يوجد محاربين', joinBtn: '⚔️ انضم للمملكة', myKingdom: '🏰 مملكتي', changeKingdom: '🔄 تغيير المملكة', leaveKingdom: '🚪 مغادرة المملكة', alreadyMember: '✅ أنت محارب هنا', joinWarning: '⚠️ لما تنضم لمملكة، هتفضل فيها 7 أيام. مش هتقدر تنضم لمملكة تانية قبل كده.', joinSuccess: '🎉 مبروك! انت دلوقتي محارب في ', leaveSuccess: '👋 خرجت من المملكة', cooldownActive: '⏳ مش قادر تغيّر المملكة — فاضل ', days: 'يوم', hours: 'ساعة', notLoggedIn: '⚠️ سجل دخول الأول', switchCooldown: 'مقفول لحد', confirmJoin: 'هل أنت متأكد إنك عايز تنضم لـ ', confirmLeave: 'هل أنت متأكد إنك عايز تسيب المملكة؟', wwTitle: '⚔️ حرب الأسبوع', wwNext: '🔮 الأسبوع القادم', wwReward: '🏆 الفايز: 500 كوينز + 300 XP لكل محارب', wwEnded: '⏳ انتهت' },
+  en: { title: 'Kingdom Map', subtitle: 'KINGDOMS OF PLOT TWIST', back: '⬅ Back', lang: 'AR', reset: '🎯 Reset', statKingdoms: 'Kingdoms', statPlayers: 'Warriors', statTop: 'Strongest', sidebarTitle: '🏆 Kingdom Ranking', loading: 'Opening gates...', searchPh: 'Search for a kingdom...', noSearch: 'No results', noSearchHint: 'Try a different kingdom', warriors: 'warriors', pts: 'pts', kingTitle: '👑 King', kingNone: 'No king yet', kingStats: 'Total Points', kingDetail: 'The king is the top scorer', rankingTitle: '⚔️ Warrior Ranking', noWarriors: 'No warriors yet', you: 'You', clickHint: 'Click to view details', topPlayer: 'King', noPlayers: 'No warriors', joinBtn: '⚔️ Join Kingdom', myKingdom: '🏰 My Kingdom', changeKingdom: '🔄 Change Kingdom', leaveKingdom: '🚪 Leave Kingdom', alreadyMember: '✅ You are a warrior here', joinWarning: '⚠️ After joining, you\'re locked for 7 days.', joinSuccess: '🎉 Welcome! You\'re now a warrior in ', leaveSuccess: '👋 You left the kingdom', cooldownActive: '⏳ Can\'t change kingdom — ', days: 'days', hours: 'hours', notLoggedIn: '⚠️ Please log in first', switchCooldown: 'Locked until', confirmJoin: 'Are you sure you want to join ', confirmLeave: 'Are you sure you want to leave?', wwTitle: '⚔️ Weekly War', wwNext: '🔮 Next Week', wwReward: '🏆 Winner: 500 Coins + 300 XP for each warrior', wwEnded: '⏳ Ended' }
+};
+
+let lang = localStorage.getItem('lang') || 'ar';
+let allUserData = {}, allScoresData = {}, kingdomStats = {}, selectedKingdom = null, searchMatches = new Set(), svgRoot = null, myKingdom = null, myKingdomData = null, currentFilter = 'all', currentWar = null, nextWar = null, warTimerInterval = null;
+
+function $(id) { return document.getElementById(id); }
+function showToast(msg, type = 'success') { const el = $('toast'); if (!el) return; el.innerText = msg; el.style.borderColor = type === 'error' ? 'var(--red)' : 'var(--gold)'; el.style.transform = 'translateX(-50%) translateY(0)'; el.style.opacity = '1'; clearTimeout(window._toastTimer); window._toastTimer = setTimeout(() => { el.style.transform = 'translateX(-50%) translateY(100px)'; el.style.opacity = '0'; }, 3000); }
+function formatNum(n) { if (!n || n < 0) return '0'; if (n >= 1e6) return (n/1e6).toFixed(1) + 'M'; if (n >= 1e3) return (n/1e3).toFixed(1) + 'K'; return String(n); }
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function getKingdom(id) { return KINGDOMS.find(k => k.id === id); }
+const COOLDOWN_MS = 7 * 24 * 3600 * 1000;
+function formatCooldown(ms) { if (ms <= 0) return '0'; const days = Math.floor(ms / (24 * 3600 * 1000)); const hours = Math.floor((ms % (24 * 3600 * 1000)) / (3600 * 1000)); if (days > 0) return `${days} ${T[lang].days}`; return `${hours} ${T[lang].hours}`; }
+function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function buildSVG() {
+  const svg = document.getElementById('mapSVG'); svg.innerHTML = ''; const ns = 'http://www.w3.org/2000/svg';
+  const defs = document.createElementNS(ns, 'defs'); svg.appendChild(defs);
+  KINGDOMS.forEach(k => {
+    const grad = document.createElementNS(ns, 'radialGradient'); grad.setAttribute('id', `grad-${k.id}`); grad.setAttribute('cx', '50%'); grad.setAttribute('cy', '30%'); grad.setAttribute('r', '70%');
+    const stop1 = document.createElementNS(ns, 'stop'); stop1.setAttribute('offset', '0%'); stop1.setAttribute('stop-color', k.color); stop1.setAttribute('stop-opacity', '0.2');
+    const stop2 = document.createElementNS(ns, 'stop'); stop2.setAttribute('offset', '100%'); stop2.setAttribute('stop-color', k.color_dark); stop2.setAttribute('stop-opacity', '0.9');
+    grad.appendChild(stop1); grad.appendChild(stop2); defs.appendChild(grad);
+  });
+
+  const starsLayer = document.createElementNS(ns, 'g');
+  for (let i = 0; i < 60; i++) {
+    const star = document.createElementNS(ns, 'circle'); star.setAttribute('cx', Math.random() * 1200); star.setAttribute('cy', Math.random() * 900); star.setAttribute('r', Math.random() * 1.5 + 0.5); star.setAttribute('fill', '#fff'); star.style.opacity = Math.random() * 0.5 + 0.1;
+    starsLayer.appendChild(star);
+  }
+  svg.appendChild(starsLayer);
+
+  const roads = [['horror', 'action'], ['action', 'mystery'], ['horror', 'thriller'], ['action', 'egyptian'], ['mystery', 'legendary'], ['thriller', 'egyptian'], ['egyptian', 'legendary'], ['thriller', 'owner'], ['egyptian', 'owner'], ['legendary', 'owner']];
+  const roadsGroup = document.createElementNS(ns, 'g');
+  roads.forEach(([a, b]) => {
+    const ka = getKingdom(a), kb = getKingdom(b); if (!ka || !kb) return;
+    const road = document.createElementNS(ns, 'path'); road.setAttribute('class', 'kingdom-road'); road.setAttribute('d', `M ${ka.centerX},${ka.centerY} Q ${(ka.centerX + kb.centerX)/2},${(ka.centerY + kb.centerY)/2 - 60} ${kb.centerX},${kb.centerY}`);
+    roadsGroup.appendChild(road);
+  });
+  svg.appendChild(roadsGroup);
+
+  const kingdomsLayer = document.createElementNS(ns, 'g');
+  KINGDOMS.forEach(k => {
+    const group = document.createElementNS(ns, 'g'); group.setAttribute('class', 'kingdom-group'); group.setAttribute('data-id', k.id); group.style.setProperty('--k-color', k.color);
+    const glow = document.createElementNS(ns, 'path'); glow.setAttribute('class', 'kingdom-glow'); glow.setAttribute('d', k.path); group.appendChild(glow);
+    const shape = document.createElementNS(ns, 'path'); shape.setAttribute('class', 'kingdom-shape'); shape.setAttribute('d', k.path); shape.setAttribute('fill', `url(#grad-${k.id})`); group.appendChild(shape);
+    const icon = document.createElementNS(ns, 'text'); icon.setAttribute('class', 'kingdom-icon'); icon.setAttribute('x', k.centerX); icon.setAttribute('y', k.centerY - 15); icon.textContent = k.icon; group.appendChild(icon);
+    const name = document.createElementNS(ns, 'text'); name.setAttribute('class', 'kingdom-name'); name.setAttribute('x', k.centerX); name.setAttribute('y', k.centerY + 25); name.textContent = lang === 'ar' ? k.name_ar : k.name_en; group.appendChild(name);
+    const stats = document.createElementNS(ns, 'text'); stats.setAttribute('class', 'kingdom-stats'); stats.setAttribute('id', `stats-${k.id}`); stats.setAttribute('x', k.centerX); stats.setAttribute('y', k.centerY + 45); stats.textContent = '...'; group.appendChild(stats);
+    
+    const myCrown = document.createElementNS(ns, 'text'); myCrown.setAttribute('class', 'kingdom-my-crown'); myCrown.setAttribute('id', `mycrown-${k.id}`); myCrown.setAttribute('x', k.centerX); myCrown.setAttribute('y', k.centerY - 55); myCrown.textContent = '⭐'; myCrown.style.opacity = '0'; group.appendChild(myCrown);
+
+    group.addEventListener('mouseenter', (e) => onHover(e, k)); group.addEventListener('mousemove', onMouseMove); group.addEventListener('mouseleave', onLeave); group.addEventListener('click', () => onClick(k));
+    kingdomsLayer.appendChild(group);
+  });
+  svg.appendChild(kingdomsLayer); svgRoot = svg;
+}
+
+function updateMyCrown() { if (!svgRoot) return; KINGDOMS.forEach(k => { const el = document.getElementById(`mycrown-${k.id}`); if (el) el.style.opacity = (myKingdom === k.id) ? '1' : '0'; }); }
+function onHover(event, kingdom) {
+  const tip = $('tooltip'); const stats = kingdomStats[kingdom.id] || { players: [], totalPoints: 0 }; const top = stats.players[0]; const isMy = kingdom.id === myKingdom;
+  tip.innerHTML = `<div style="font-weight:900; color:var(--gold); margin-bottom:5px;">${kingdom.icon} ${escapeHtml(lang === 'ar' ? kingdom.name_ar : kingdom.name_en)} ${isMy ? '⭐' : ''}</div>
+    ${top ? `<div style="color:#ccc; display:flex; justify-content:space-between; gap:10px;"><span>👑 ${T[lang].topPlayer}</span><b>${escapeHtml(top.username)}</b></div>` : `<div style="color:#94a3b8;">${T[lang].kingNone}</div>`}
+    <div style="color:#ccc; display:flex; justify-content:space-between; gap:10px;"><span>⚔️ ${T[lang].warriors}</span><b>${stats.players.length}</b></div>
+    <div style="color:#ccc; display:flex; justify-content:space-between; gap:10px;"><span>🏆 ${T[lang].kingStats}</span><b>${formatNum(stats.totalPoints)}</b></div>`;
+  tip.style.display = 'block'; onMouseMove(event);
+}
+function onMouseMove(event) { const tip = $('tooltip'); if (tip.style.display !== 'block') return; let x = event.clientX + 15, y = event.clientY + 15; const rect = tip.getBoundingClientRect(); if (x + rect.width > window.innerWidth - 10) x = event.clientX - rect.width - 15; if (y + rect.height > window.innerHeight - 10) y = event.clientY - rect.height - 15; tip.style.left = x + 'px'; tip.style.top = y + 'px'; }
+function onLeave() { $('tooltip').style.display = 'none'; }
+function onClick(kingdom) { selectedKingdom = kingdom.id; updateSelection(); openModal(kingdom); }
+function updateSelection() { if (!svgRoot) return; svgRoot.querySelectorAll('.kingdom-group').forEach(g => g.classList.toggle('kingdom-selected', g.getAttribute('data-id') === selectedKingdom)); }
+
+function aggregateStats() {
+  kingdomStats = {}; KINGDOMS.forEach(k => { kingdomStats[k.id] = { players: [], totalPoints: 0 }; });
+  Object.keys(allUserData).forEach(username => {
+    const u = allUserData[username] || {}; const joinedKingdom = u.kingdom; if (!joinedKingdom || !kingdomStats[joinedKingdom]) return;
+    const userScores = allScoresData[username] || {}; const kingdom = getKingdom(joinedKingdom); if (!kingdom) return;
+    let points = 0;
+    if (kingdom.categories.length > 0) {
+      for (const quizKey in userScores) { const qLower = quizKey.toLowerCase(); if (kingdom.categories.some(c => qLower.includes(c.toLowerCase()))) { for (const attemptKey in userScores[quizKey]) { const a = userScores[quizKey][attemptKey]; if (a && typeof a.score === 'number') points += a.score; } } }
+    }
+    kingdomStats[joinedKingdom].players.push({ username, score: points, isMe: username.toLowerCase() === CU, joinedAt: u.kingdomJoinedAt || 0 });
+    kingdomStats[joinedKingdom].totalPoints += points;
+  });
+  Object.values(kingdomStats).forEach(k => k.players.sort((a, b) => b.score - a.score));
+  if (allUserData[CU]?.kingdom) { myKingdom = allUserData[CU].kingdom; myKingdomData = { joinedAt: allUserData[CU].kingdomJoinedAt || 0, canChangeAt: allUserData[CU].kingdomCanChangeAt || 0 }; } else { myKingdom = null; myKingdomData = null; }
+  updateMapStats(); updateStatsBar(); updateMyCrown(); renderSidebar(); renderWeeklyWar();
+}
+
+function updateMapStats() { if (!svgRoot) return; KINGDOMS.forEach(k => { const stats = kingdomStats[k.id]; if (!stats) return; const el = document.getElementById(`stats-${k.id}`); if (el) el.textContent = stats.players.length > 0 ? `⚔️ ${stats.players.length} • 🏆 ${formatNum(stats.totalPoints)}` : (lang === 'ar' ? 'مملكة جديدة' : 'New kingdom'); }); }
+function updateStatsBar() {
+  let totalPlayers = 0, topKingdom = null, topPoints = 0;
+  Object.entries(kingdomStats).forEach(([id, s]) => { totalPlayers += s.players.length; if (s.totalPoints > topPoints) { topPoints = s.totalPoints; topKingdom = id; } });
+  $('statKingdoms').innerText = KINGDOMS.length; $('statPlayers').innerText = totalPlayers; $('statTop').innerText = topKingdom ? getKingdom(topKingdom).icon : '-';
+}
+
+function renderSidebar() {
+  const list = $('kingdomList'); if (!list) return; const t = T[lang]; let display = [];
+  if (searchMatches.size > 0) display = KINGDOMS.filter(k => searchMatches.has(k.id));
+  else if (currentFilter === 'my' && myKingdom) display = KINGDOMS.filter(k => k.id === myKingdom);
+  else display = [...KINGDOMS].sort((a, b) => (kingdomStats[b.id]?.totalPoints || 0) - (kingdomStats[a.id]?.totalPoints || 0));
+  if (currentFilter === 'my' && !myKingdom) display = [...KINGDOMS];
+  $('sidebarCount').innerText = display.length;
+  if (display.length === 0) { list.innerHTML = `<div style="text-align:center; color:var(--text-dim); padding:20px;"><div style="font-size:30px;">🔍</div><div>${t.noSearch}</div></div>`; return; }
+  list.innerHTML = display.map((k, i) => {
+    const stats = kingdomStats[k.id] || { players: [], totalPoints: 0 }; const playersCount = stats.players.length; const isSelected = k.id === selectedKingdom; const isMy = k.id === myKingdom; const name = lang === 'ar' ? k.name_ar : k.name_en;
+    const isTop = i === 0 && playersCount > 0 && searchMatches.size === 0; const medal = isTop ? '👑 ' : ''; const myMark = isMy ? '⭐ ' : '';
+    return `<div class="kingdom-item ${isSelected ? 'selected' : ''}" style="--k-color:${k.color};" onclick="window.onKingdomItemClick('${k.id}')">
+      <div class="ki-icon">${k.icon}</div>
+      <div class="ki-info"><div class="ki-name">${medal}${myMark}${escapeHtml(name)}</div><div class="ki-detail">${playersCount > 0 ? `👑 ${escapeHtml(stats.players[0]?.username || '-')}` : t.noPlayers}</div></div>
+      <div class="ki-count">${playersCount}</div>
+    </div>`;
+  }).join('');
+}
+window.onKingdomItemClick = (id) => { const k = getKingdom(id); if (!k) return; selectedKingdom = id; updateSelection(); renderSidebar(); openModal(k); };
+window.setFilter = (filter) => { currentFilter = filter; document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active')); const btn = document.querySelector(`.filter-tab[data-filter="${filter}"]`); if (btn) btn.classList.add('active'); renderSidebar(); };
+
+function openModal(kingdom) {
+  const t = T[lang]; const stats = kingdomStats[kingdom.id] || { players: [], totalPoints: 0 }; const name = lang === 'ar' ? kingdom.name_ar : kingdom.name_en; const desc = lang === 'ar' ? kingdom.desc_ar : kingdom.desc_en; const isMy = kingdom.id === myKingdom;
+  const modalBox = $('kingdomModalBox'); modalBox.style.setProperty('--m-color', kingdom.color);
+  $('modalIcon').innerText = kingdom.icon; $('modalName').innerText = name; $('modalName').style.background = `linear-gradient(90deg, ${kingdom.color}, #fff)`; $('modalName').style.webkitBackgroundClip = 'text'; $('modalName').style.backgroundClip = 'text'; $('modalName').style.color = 'transparent';
+  $('modalDesc').innerText = desc;
+  const top = stats.players[0]; const avg = stats.players.length > 0 ? Math.round(stats.totalPoints / stats.players.length) : 0;
+  let kingHtml = top ? `<div style="display:flex; align-items:center; gap:10px; background:rgba(255,215,0,0.1); border:1px solid var(--gold); padding:10px; border-radius:10px; margin-bottom:15px;"><div style="font-size:30px;">👑</div><div><div style="font-weight:bold; color:var(--gold);">${escapeHtml(top.username)}</div><div style="font-size:12px; color:var(--text-dim);">${formatNum(top.score)} ${t.pts} • ${t.topPlayer}</div></div></div>` 
+  : `<div style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:10px; border-radius:10px; margin-bottom:15px;"><div style="font-size:30px; opacity:0.5;">👑</div><div><div style="font-weight:bold; color:var(--text-dim);">${t.kingNone}</div><div style="font-size:12px; color:var(--text-dim);">${t.kingDetail}</div></div></div>`;
+  const playersHtml = stats.players.length > 0 ? stats.players.slice(0, 30).map((p, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px; margin-bottom:5px; ${p.isMe ? 'border-color:var(--gold); background:rgba(255,215,0,0.05);' : ''}"><div style="display:flex; align-items:center; gap:8px; font-size:13px;"><span style="background:${kingdom.color}; color:#000; font-weight:bold; padding:2px 6px; border-radius:4px;">#${i+1}</span><span>⚔️ ${escapeHtml(p.username)}</span>${p.isMe ? `<span style="color:var(--gold); font-size:10px;">(${t.you})</span>` : ''}</div><div style="color:var(--gold); font-weight:bold; font-size:13px;">${formatNum(p.score)} ${t.pts}</div></div>`).join('') : `<div style="text-align:center; padding:20px; color:var(--text-dim);">${t.noWarriors}</div>`;
+  
+  let actionButton = '';
+  if (!CU) { actionButton = `<button style="width:100%; padding:10px; background:#333; color:#666; border:none; border-radius:8px; margin-bottom:15px; cursor:not-allowed;">⚠️ ${t.notLoggedIn}</button>`; }
+  else if (isMy) {
+    const canChangeAt = myKingdomData?.canChangeAt || 0; const cooldownLeft = canChangeAt - Date.now(); const canChange = cooldownLeft <= 0;
+    if (canChange) { actionButton = `<div style="background:rgba(255,215,0,0.1); border:1px solid var(--gold); padding:12px; border-radius:10px; text-align:center; margin-bottom:15px;"><div style="color:var(--gold); font-weight:bold; font-size:13px; margin-bottom:8px;">${t.alreadyMember}</div><button style="width:100%; padding:10px; background:var(--red); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="window.leaveKingdomConfirm()">🚪 ${t.leaveKingdom}</button></div>`; }
+    else { actionButton = `<div style="background:rgba(255,215,0,0.1); border:1px solid var(--gold); padding:12px; border-radius:10px; text-align:center; margin-bottom:15px;"><div style="color:var(--gold); font-weight:bold; font-size:13px; margin-bottom:8px;">${t.alreadyMember}</div><div style="color:#ff9800; font-size:12px; background:rgba(255,152,0,0.15); padding:8px; border-radius:6px;">${t.switchCooldown}: ${formatCooldown(cooldownLeft)}</div></div>`; }
+  } else if (myKingdom) {
+    const canChangeAt = myKingdomData?.canChangeAt || 0; const cooldownLeft = canChangeAt - Date.now(); const canChange = cooldownLeft <= 0;
+    if (canChange) { actionButton = `<div style="color:#ff9800; font-size:11px; margin-bottom:10px; text-align:center;">⚠️ أنت في مملكة أخرى.</div><button style="width:100%; padding:10px; background:${kingdom.color}; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:15px;" onclick="window.joinKingdomConfirm('${kingdom.id}')">🔄 ${t.changeKingdom}</button>`; }
+    else { actionButton = `<div style="color:#ff9800; font-size:11px; text-align:center; padding:10px; background:rgba(255,152,0,0.1); border-radius:8px; margin-bottom:10px;">${t.cooldownActive}${formatCooldown(cooldownLeft)}</div><button style="width:100%; padding:10px; background:#333; color:#666; border:none; border-radius:8px; font-weight:bold; cursor:not-allowed; margin-bottom:15px;">⚔️ ${t.joinBtn}</button>`; }
+  } else {
+    actionButton = `<div style="color:#ff9800; font-size:11px; margin-bottom:10px; text-align:center;">${t.joinWarning}</div><button style="width:100%; padding:10px; background:${kingdom.color}; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:15px;" onclick="window.joinKingdomConfirm('${kingdom.id}')">⚔️ ${t.joinBtn}</button>`;
+  }
+
+  $('modalContent').innerHTML = `
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+      <div style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;"><div style="font-size:18px; font-weight:bold; color:${kingdom.color};">${stats.players.length}</div><div style="font-size:11px; color:var(--text-dim);">${t.warriors}</div></div>
+      <div style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;"><div style="font-size:18px; font-weight:bold; color:${kingdom.color};">${formatNum(stats.totalPoints)}</div><div style="font-size:11px; color:var(--text-dim);">${t.kingStats}</div></div>
+      <div style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;"><div style="font-size:18px; font-weight:bold; color:${kingdom.color};">${formatNum(avg)}</div><div style="font-size:11px; color:var(--text-dim);">${t.pts}</div></div>
+    </div>
+    ${kingHtml} ${actionButton}
+    <div style="font-size:14px; font-weight:bold; color:var(--gold); margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px;">${t.rankingTitle}</div>
+    ${playersHtml}
+  `;
+  $('kingdomModal').classList.add('open');
+}
+window.closeModal = (event) => { if (event && event.target && event.target.id && !event.target.id.includes('kingdomModal')) return; $('kingdomModal').classList.remove('open'); selectedKingdom = null; updateSelection(); renderSidebar(); };
+
+window.joinKingdomConfirm = (kingdomId) => { if (!CU) return showToast(T[lang].notLoggedIn, 'error'); const k = getKingdom(kingdomId); if (!k) return; const name = lang === 'ar' ? k.name_ar : k.name_en; if (!confirm(T[lang].confirmJoin + name + '؟')) return; joinKingdom(kingdomId); };
+async function joinKingdom(kingdomId) {
+  if (!db) return showToast('Firebase error', 'error'); if (!CU) return showToast(T[lang].notLoggedIn, 'error'); const kingdom = getKingdom(kingdomId); if (!kingdom) return;
+  try { const now = Date.now(); const canChangeAt = now + COOLDOWN_MS; await update(ref(db, `users_data/${CU}`), { kingdom: kingdomId, kingdomJoinedAt: now, kingdomCanChangeAt: canChangeAt }); showToast(T[lang].joinSuccess + (lang === 'ar' ? kingdom.name_ar : kingdom.name_en), 'success'); setTimeout(() => closeModal(), 500); } catch (e) { showToast('❌ ' + e.message, 'error'); }
+}
+window.leaveKingdomConfirm = () => { if (!confirm(T[lang].confirmLeave)) return; leaveKingdom(); };
+async function leaveKingdom() { if (!db || !CU) return; try { await update(ref(db, `users_data/${CU}`), { kingdom: null, kingdomJoinedAt: null, kingdomCanChangeAt: null }); showToast(T[lang].leaveSuccess, 'success'); setTimeout(() => closeModal(), 500); } catch (e) { showToast('❌ ' + e.message, 'error'); } }
+
+window.onSearch = (query) => {
+  const q = (query || '').toLowerCase().trim(); const clearBtn = $('searchClear'); if (clearBtn) clearBtn.classList.toggle('show', q.length > 0); searchMatches.clear();
+  if (!q) { renderSidebar(); return; }
+  KINGDOMS.forEach(k => { if (k.name_ar.toLowerCase().includes(q) || k.name_en.toLowerCase().includes(q) || k.id.includes(q)) searchMatches.add(k.id); });
+  renderSidebar();
+};
+window.clearSearch = () => { $('searchInput').value = ''; searchMatches.clear(); $('searchClear').classList.remove('show'); renderSidebar(); };
+window.resetView = () => { selectedKingdom = null; updateSelection(); closeModal(); clearSearch(); showToast(lang === 'ar' ? '✅ تم إعادة الضبط' : '✅ Reset complete', 'success'); };
+
+function getWeekId(date = new Date()) { const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())); const dayNum = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - dayNum); const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`; }
+function getWeekBounds(date = new Date()) { const d = new Date(date); const day = d.getUTCDay() || 7; const monday = new Date(d); monday.setUTCDate(d.getUTCDate() - day + 1); monday.setUTCHours(0, 0, 0, 0); const nextMonday = new Date(monday); nextMonday.setUTCDate(monday.getUTCDate() + 7); return { startAt: monday.getTime(), endAt: nextMonday.getTime() }; }
+
+function calculateWarPoints(war) {
+  if (!war) return { points1: 0, points2: 0 }; let points1 = 0, points2 = 0; const start = war.startAt; const end = war.endAt;
+  for (const username in allUserData) {
+    const u = allUserData[username]; if (u.kingdom !== war.kingdom1 && u.kingdom !== war.kingdom2) continue;
+    const userScores = allScoresData[username]; if (!userScores) continue; let userPoints = 0;
+    for (const quizKey in userScores) { for (const attemptKey in userScores[quizKey]) { const attempt = userScores[quizKey][attemptKey]; if (attempt && attempt.time) { const t = new Date(attempt.time).getTime(); if (t >= start && t < end) userPoints += attempt.score || 0; } } }
+    if (u.kingdom === war.kingdom1) points1 += userPoints; else points2 += userPoints;
+  }
+  war._points1 = points1; war._points2 = points2; return { points1, points2 };
+}
+
+async function distributeWeeklyRewards(war) {
+  if (!war) return; const points = calculateWarPoints(war); if (points.points1 === points.points2) return;
+  const winnerKingdom = points.points1 > points.points2 ? war.kingdom1 : war.kingdom2;
+  const usersSnap = await get(ref(db, 'users_data')); const users = usersSnap.val() || {}; const updates = {}; let count = 0;
+  for (const username in users) { if (users[username].kingdom === winnerKingdom) { updates[`users_data/${username}/coins`] = (users[username].coins || 0) + 500; updates[`users_data/${username}/xp`] = (users[username].xp || 0) + 300; updates[`badges/${username}/🏆 محارب الأسبوع`] = true; count++; } }
+  if (count > 0) await update(ref(db), updates);
+}
+
+async function ensureWeeklyWar() {
+  if (!db) return; const currentWeekId = getWeekId(); const bounds = getWeekBounds();
+  try {
+    const snap = await get(ref(db, 'weekly_wars/current')); const current = snap.val();
+    if (!current) {
+      const allIds = KINGDOMS.map(k => k.id); const shuffled = shuffle(allIds); const newCurrent = { weekId: currentWeekId, kingdom1: shuffled[0], kingdom2: shuffled[1], startAt: bounds.startAt, endAt: bounds.endAt, status: 'active', rewardsDistributed: false, createdAt: Date.now() };
+      const remaining = allIds.filter(id => id !== shuffled[0] && id !== shuffled[1]); const shuffledNext = shuffle(remaining); const newNext = { kingdom1: shuffledNext[0], kingdom2: shuffledNext[1] };
+      await set(ref(db, 'weekly_wars/current'), newCurrent); await set(ref(db, 'weekly_wars/next'), newNext); return;
+    }
+    if (current.weekId === currentWeekId) return;
+    const lockRef = ref(db, `weekly_wars/rotation_locks/${current.weekId}`); const lockResult = await runTransaction(lockRef, (val) => { if (val) return; return Date.now(); }); if (!lockResult.committed) return;
+    if (!current.rewardsDistributed) await distributeWeeklyRewards(current);
+    const finalPoints = calculateWarPoints(current); const winner = finalPoints.points1 > finalPoints.points2 ? current.kingdom1 : finalPoints.points2 > finalPoints.points1 ? current.kingdom2 : 'tie';
+    await set(ref(db, `weekly_wars/history/${current.weekId}`), { ...current, points1: finalPoints.points1, points2: finalPoints.points2, winner, endedAt: Date.now() });
+    const nextSnap = await get(ref(db, 'weekly_wars/next')); let next = nextSnap.val();
+    if (!next || !next.kingdom1) { const allIds = KINGDOMS.map(k => k.id); const shuffled = shuffle(allIds); next = { kingdom1: shuffled[0], kingdom2: shuffled[1] }; }
+    const newCurrent = { weekId: currentWeekId, kingdom1: next.kingdom1, kingdom2: next.kingdom2, startAt: bounds.startAt, endAt: bounds.endAt, status: 'active', rewardsDistributed: false, createdAt: Date.now() };
+    const allIds = KINGDOMS.map(k => k.id); const remaining = allIds.filter(id => id !== newCurrent.kingdom1 && id !== newCurrent.kingdom2); const shuffledNext = shuffle(remaining); const newNext = { kingdom1: shuffledNext[0], kingdom2: shuffledNext[1] };
+    await set(ref(db, 'weekly_wars/current'), newCurrent); await set(ref(db, 'weekly_wars/next'), newNext);
+  } catch (e) { console.error('[war] Rotation error:', e); }
+}
+
+function renderWeeklyWar() {
+  const card = document.getElementById('weeklyWarCard'); if (!card) return;
+  if (!currentWar) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const k1 = getKingdom(currentWar.kingdom1); const k2 = getKingdom(currentWar.kingdom2);
+  const points1 = currentWar._points1 || 0; const points2 = currentWar._points2 || 0;
+  document.getElementById('wwIcon1').textContent = k1?.icon || '?'; document.getElementById('wwIcon2').textContent = k2?.icon || '?';
+  document.getElementById('wwName1').textContent = k1 ? (lang === 'ar' ? k1.name_ar : k1.name_en) : '?'; document.getElementById('wwName2').textContent = k2 ? (lang === 'ar' ? k2.name_ar : k2.name_en) : '?';
+  document.getElementById('wwScore1').textContent = formatNum(points1); document.getElementById('wwScore2').textContent = formatNum(points2);
+  document.getElementById('wwSide1').classList.toggle('winner', points1 > points2); document.getElementById('wwSide2').classList.toggle('winner', points2 > points1);
+}
+
+function updateWarTimer() {
+  if (!currentWar) return; const el = document.getElementById('wwTimer'); if (!el) return;
+  const left = Math.max(0, currentWar.endAt - Date.now()); const days = Math.floor(left / 86400000); const hours = Math.floor((left % 86400000) / 3600000);
+  if (days > 0) el.textContent = `⏳ ${days}ي ${hours}س`; else if (left <= 0) el.textContent = T[lang].wwEnded; else { const m = Math.floor((left % 3600000) / 60000); el.textContent = `⏳ ${String(hours).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
+}
+
+function initWeeklyWarListeners() {
+  if (!db) return;
+  onValue(ref(db, 'weekly_wars/current'), (snap) => { currentWar = snap.val(); if (currentWar) calculateWarPoints(currentWar); renderWeeklyWar(); }, (err) => console.warn('[war current]', err));
+  onValue(ref(db, 'weekly_wars/next'), (snap) => { nextWar = snap.val(); renderWeeklyWar(); }, (err) => console.warn('[war next]', err));
+}
+
+async function initWeeklyWar() { await ensureWeeklyWar(); initWeeklyWarListeners(); if (warTimerInterval) clearInterval(warTimerInterval); warTimerInterval = setInterval(updateWarTimer, 1000); updateWarTimer(); setInterval(() => { ensureWeeklyWar(); }, 5 * 60 * 1000); }
+
+function applyLanguage() {
+  const t = T[lang]; document.documentElement.lang = lang; document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  $('title').innerText = t.title; $('subtitle').innerText = t.subtitle; $('backBtn').innerText = t.back; $('langBtn').innerText = t.lang; $('resetBtn').innerText = t.reset; $('sidebarTitle').innerText = t.sidebarTitle; $('statKingdomsLbl').innerText = t.statKingdoms; $('statPlayersLbl').innerText = t.statPlayers; $('statTopLbl').innerText = t.statTop; $('searchInput').placeholder = t.searchPh; $('loaderText').innerText = t.loading;
+  if ($('wwTitleLbl')) $('wwTitleLbl').innerText = t.wwTitle;
+  const filterAll = document.querySelector('.filter-tab[data-filter="all"]'); const filterMy = document.querySelector('.filter-tab[data-filter="my"]'); if (filterAll) filterAll.innerText = lang === 'ar' ? '🏰 الكل' : '🏰 All'; if (filterMy) filterMy.innerText = lang === 'ar' ? '⭐ مملكتي' : '⭐ Mine';
+  if (svgRoot) { svgRoot.querySelectorAll('.kingdom-group').forEach(g => { const k = getKingdom(g.getAttribute('data-id')); if (k) { const nameEl = g.querySelector('.kingdom-name'); if (nameEl) nameEl.textContent = lang === 'ar' ? k.name_ar : k.name_en; } }); }
+  updateMapStats(); renderSidebar(); renderWeeklyWar(); updateWarTimer();
+}
+
+window.toggleLanguage = () => { lang = lang === 'ar' ? 'en' : 'ar'; localStorage.setItem('lang', lang); applyLanguage(); if (selectedKingdom) { const k = getKingdom(selectedKingdom); if (k) openModal(k); } };
+window.toggleTheme = () => { const isLight = document.body.classList.toggle('light-mode'); $('themeBtn').innerText = isLight ? '☀️' : '🌙'; localStorage.setItem('theme', isLight ? 'light' : 'dark'); };
+
+function initFirebase() {
+  if (!db) return;
+  onValue(ref(db, 'users_data'), snap => { allUserData = snap.val() || {}; aggregateStats(); }, err => console.warn('[users_data]', err));
+  onValue(ref(db, 'scores'), snap => { allScoresData = snap.val() || {}; aggregateStats(); }, err => console.warn('[scores]', err));
+}
+
+(async function boot() {
+  try {
+    if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); $('themeBtn').innerText = '☀️'; }
+    applyLanguage(); buildSVG(); aggregateStats(); initFirebase(); initWeeklyWar();
+    setTimeout(() => { $('loadingScreen').style.display = 'none'; }, 500);
+  } catch (e) { console.error('[kingdoms] ❌ Boot failed:', e); $('loaderText').innerText = '❌ ' + e.message; }
+
+  // Kingdom Chat System
+  let kcUnsubscribe = null, kcUnread = 0, kcIsOpen = false;
+  window._closeKC = () => { kcIsOpen = false; $('kcPanel').classList.remove('open'); kcUnread = 0; $('kcBadge').style.display = 'none'; };
+  
+  document.getElementById('kcBtn').onclick = () => {
+    kcIsOpen = !kcIsOpen; const panel = $('kcPanel');
+    if (kcIsOpen) { panel.classList.add('open'); kcUnread = 0; $('kcBadge').style.display = 'none'; const box = $('kcMessages'); if (box) box.scrollTop = box.scrollHeight; }
+    else panel.classList.remove('open');
+  };
+
+  window._sendKCMsg = async () => {
+    const input = $('kcInput'); const text = input.value.trim(); if (!text || !myKingdom) return; const kingdom = getKingdom(myKingdom); if (!kingdom) return;
+    try { await push(ref(db, `kingdom_chats/${myKingdom}`), { sender: CU, text: text, time: Date.now() }); input.value = ''; } catch (e) { showToast('فشل إرسال الرسالة', 'error'); }
+  };
+
+  function initKingdomChat() {
+    const btn = $('kcBtn'); const box = $('kcMessages'); const inputArea = document.querySelector('.kc-input-area');
+    if (!CU) { btn.style.display = 'none'; return; }
+    
+    // هنا السحر كله: بمراقبة لو اللاعب انضم لمملكة ولا لأ
+    onValue(ref(db, `users_data/${CU}/kingdom`), (snap) => {
+      const currentKingdomId = snap.val();
+      
+      if (!currentKingdomId) { 
+        // لو مش في مملكة، نخفي الزرار
+        btn.style.display = 'none'; 
+        if (kcUnsubscribe) kcUnsubscribe(); 
+        return; 
+      }
+      
+      // لو انضم لمملكة، نطلع الزرار فوراً
+      btn.style.display = 'flex'; 
+      myKingdom = currentKingdomId; 
+      const kingdom = getKingdom(myKingdom);
+      
+      const titleName = lang === 'ar' ? kingdom.name_ar : kingdom.name_en;
+      $('kcTitle').innerHTML = `${kingdom.icon} شات ${titleName}`; 
+      $('kcInput').placeholder = `اكتب لـ ${titleName}...`; 
+      inputArea.style.display = 'flex';
+      
+      if (kcUnsubscribe) kcUnsubscribe();
+      
+      // نستمع لرسايل الشات بتاع المملكة دي
+      kcUnsubscribe = onValue(ref(db, `kingdom_chats/${currentKingdomId}`), (msgSnap) => {
+        const data = msgSnap.val() || {}; 
+        const msgs = Object.entries(data).sort((a, b) => (a[1].time || 0) - (b[1].time || 0));
+        
+        if (msgs.length === 0) { 
+          box.innerHTML = `<div style="text-align:center; color:var(--text-dim); font-size:13px; margin-top:20px;">لا توجد رسائل. كن الأول!</div>`; 
+          return; 
+        }
+        
+        box.innerHTML = msgs.map(([id, m]) => {
+          const isMine = (m.sender || '').toLowerCase() === CU; 
+          const time = m.time ? new Date(m.time).toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+          let isKing = false; 
+          if (kingdomStats[currentKingdomId]?.players[0]?.username === m.sender) isKing = true; 
+          const crown = isKing ? '👑 ' : '';
+          
+          return `<div style="padding:8px 10px; border-radius:10px; font-size:13px; max-width:85%; line-height:1.4; word-wrap:break-word; align-self:${isMine ? 'flex-start' : 'flex-end'}; background:${isMine ? '#ff0000' : '#222'}; color:#fff; border-bottom-${isMine ? 'right' : 'left'}-radius:2px;">
+            ${!isMine ? `<div style="font-size:10px; font-weight:bold; color:#ffd700; margin-bottom:2px;">${crown}${escapeHtml(m.sender)}</div>` : ''}
+            <div>${escapeHtml(m.text)}</div>
+            <div style="font-size:9px; opacity:0.6; margin-top:3px; text-align:left;">${time}</div>
+          </div>`;
+        }).join('');
+        
+        if (kcIsOpen) box.scrollTop = box.scrollHeight;
+        else { kcUnread++; $('kcBadge').style.display = 'flex'; $('kcBadge').innerText = kcUnread > 9 ? '9+' : kcUnread; }
+      });
+    });
+  }
+  initKingdomChat();
+})();
+</script>
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
