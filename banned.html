@@ -3,8 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⛔ محظور - Quiz Hub</title>
+<title>⛔ محظور - Plot Twist</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
 <style>
   body { background: #000; color: #fff; font-family: 'Cairo', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
   .box { background: #111; border: 2px solid #ff0000; border-radius: 15px; padding: 40px; max-width: 400px; width: 90%; box-shadow: 0 0 30px rgba(255,0,0,0.3); }
@@ -23,4 +37,5 @@
 </body>
 <script type="module" src="theme-engine.js"></script>
 <script type="module" src="notifications.js"></script>
+<script src="pwa-manager.js" defer></script>
 </html>
