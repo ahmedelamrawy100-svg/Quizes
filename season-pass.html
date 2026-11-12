@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎟️ Season Pass - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bg:#050510; --card:#111; --border:#2a2a3f; --gold:#ffd700; --text:#fff; --text-2:#aaa; --accent:#ff0000; --purple:#a855f7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:20px 10px 60px; display:flex; flex-direction:column; align-items:center; }
+  
+  .top-bar { width:100%; max-width:1000px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px; }
+  .lang-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; cursor:pointer; font-family:'Cairo'; font-weight:bold; font-size:14px; }
+  
+  .header-box { width:100%; max-width:1000px; background:linear-gradient(135deg, rgba(168,85,247,.2), rgba(255,215,0,.1)); border:2px solid var(--purple); border-radius:20px; padding:25px; text-align:center; margin-bottom:20px; position:relative; overflow:hidden; }
+  .header-box h1 { color:var(--gold); font-size:28px; margin-bottom:10px; text-shadow:0 0 15px rgba(255,215,0,0.5); }
+  .header-box p { color:var(--text-2); font-size:14px; }
+  
+  .vip-btn { background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; border:none; padding:12px 30px; border-radius:25px; font-family:'Cairo'; font-weight:900; font-size:16px; cursor:pointer; margin-top:15px; transition:0.3s; box-shadow:0 5px 20px rgba(255,215,0,0.4); }
+  .vip-btn:hover { transform:scale(1.05); }
+  .vip-active { background:rgba(255,255,255,0.1); color:var(--gold); border:2px solid var(--gold); cursor:default; box-shadow:none; }
+  
+  .progress-container { width:100%; max-width:1000px; background:var(--card); border:1px solid var(--border); border-radius:15px; padding:20px; margin-bottom:30px; }
+  .progress-info { display:flex; justify-content:space-between; margin-bottom:10px; font-size:14px; font-weight:bold; }
+  .progress-bar-bg { width:100%; height:20px; background:#000; border-radius:10px; overflow:hidden; border:1px solid #333; }
+  .progress-bar-fill { height:100%; background:linear-gradient(90deg, var(--purple), var(--gold)); border-radius:10px; transition:width 0.5s ease; box-shadow:0 0 15px rgba(168,85,247,0.5); }
+
+  .tiers-grid { width:100%; max-width:1000px; display:flex; flex-direction:column; gap:15px; }
+  .tier-row { display:flex; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:15px; padding:15px; gap:15px; transition:0.3s; }
+  .tier-row.unlocked { border-color:var(--gold); background:rgba(255,215,0,0.05); }
+  
+  .tier-level { width:60px; height:60px; border-radius:50%; background:#222; display:flex; justify-content:center; align-items:center; font-weight:900; font-size:20px; border:3px solid #444; flex-shrink:0; }
+  .tier-row.unlocked .tier-level { border-color:var(--gold); color:var(--gold); box-shadow:0 0 15px rgba(255,215,0,0.3); }
+  
+  .reward-box { flex:1; background:rgba(0,0,0,0.4); border:1px solid #333; border-radius:12px; padding:12px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:5px; position:relative; }
+  .reward-box .icon { font-size:28px; }
+  .reward-box .name { font-size:12px; font-weight:bold; color:#ddd; }
+  .reward-box .claim-btn { background:var(--gold); color:#000; border:none; padding:5px 15px; border-radius:10px; font-family:'Cairo'; font-weight:900; font-size:11px; cursor:pointer; margin-top:5px; transition:0.2s; width:100%; }
+  .reward-box .claim-btn:hover { background:#ffcc00; }
+  .reward-box .claim-btn.claimed { background:#333; color:#888; cursor:default; }
+  .reward-box .claim-btn.locked { background:#222; color:#666; cursor:not-allowed; }
+  
+  .premium-box { border-color:rgba(255,215,0,0.4); }
+  .premium-box::before { content:'👑 VIP'; position:absolute; top:-10px; right:10px; background:var(--gold); color:#000; font-size:10px; font-weight:900; padding:2px 8px; border-radius:10px; }
+
+  .no-season { text-align:center; padding:50px; color:var(--text-2); font-size:18px; }
+
+  @media (max-width:768px) {
+    .tier-row { flex-wrap:wrap; justify-content:center; }
+    .reward-box { width:45%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+</div>
+
+<div id="seasonContent" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+  <div class="no-season" id="loadingText">جاري تحميل الموسم...</div>
+</div>
+
+<script type="module">
+import { currentUser, isLoggedIn } from './firebase-shared.js';
+import './features/season-pass.js';
+
+let currentLang = localStorage.getItem('lang') || 'ar';
+let currentSeason = null;
+let userProgress = { xp: 0, isVip: false, claimedFree: {}, claimedPremium: {} };
+
+const T = {
+    ar: {
+        back: '⬅ رجوع',
+        loading: 'جاري تحميل الموسم...',
+        noLogin: 'سجل دخول الأول عشان تشوف الموسم.',
+        noSeason: 'لا يوجد موسم نشط حالياً. استنى الإدارة!',
+        heroSub: 'اجمع النقاط من الكويزات والمهام وافتح الهدايا!',
+        vipActive: '👑 أنت VIP',
+        vipBuy: '👑 ترقية لـ VIP',
+        tierLevel: 'المستوى',
+        claim: 'استلام',
+        claimed: 'تم الاستلام ✓',
+        locked: 'مقفول 🔒',
+        vipOnly: 'VIP فقط 👑',
+        coins: 'كوينز',
+        xp: 'XP',
+        item: 'مساعد',
+        theme: 'ثيم',
+        gift: 'هدية'
+    },
+    en: {
+        back: '⬅ Back',
+        loading: 'Loading Season...',
+        noLogin: 'Log in first to see the season.',
+        noSeason: 'No active season currently. Wait for admin!',
+        heroSub: 'Collect points from quizzes & quests to unlock rewards!',
+        vipActive: '👑 You are VIP',
+        vipBuy: '👑 Upgrade to VIP',
+        tierLevel: 'Level',
+        claim: 'Claim',
+        claimed: 'Claimed ✓',
+        locked: 'Locked 🔒',
+        vipOnly: 'VIP Only 👑',
+        coins: 'Coins',
+        xp: 'XP',
+        item: 'Item',
+        theme: 'Theme',
+        gift: 'Gift'
+    }
+};
+const t = () => T[currentLang];
+
+window.toggleLang = () => {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('lang', currentLang);
+    applyLang();
+};
+
+function applyLang() {
+    document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+    document.getElementById('backBtn').innerText = t().back;
+    document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+    
+    if (currentSeason) {
+        renderHeader();
+        renderTiers();
+    } else {
+        document.getElementById('loadingText').innerText = t().loading;
+    }
+}
+
+function init() {
+    if (!isLoggedIn()) {
+        document.getElementById('seasonContent').innerHTML = `<div class="no-season">${t().noLogin}</div>`;
+        return;
+    }
+
+    window.NFSeasonPass.listenCurrentSeason(season => {
+        if (!season) {
+            document.getElementById('seasonContent').innerHTML = `<div class="no-season">${t().noSeason}</div>`;
+            return;
+        }
+        currentSeason = season;
+        renderHeader();
+        
+        window.NFSeasonPass.listenUserProgress(season.id, prog => {
+            userProgress = prog;
+            renderHeader();
+            renderTiers();
+        });
+    });
+}
+
+function getRewardHTML(reward) {
+    if (reward.type === 'coins') return { icon: '🪙', name: `${reward.amount} ${t().coins}` };
+    if (reward.type === 'xp') return { icon: '✨', name: `${reward.amount} ${t().xp}` };
+    if (reward.type === 'item') return { icon: '🎁', name: t().item };
+    if (reward.type === 'theme') return { icon: '🎨', name: t().theme };
+    return { icon: '🎁', name: t().gift };
+}
+
+function renderHeader() {
+    if (!currentSeason) return;
+    const content = document.getElementById('seasonContent');
+    
+    let headerHTML = `
+    <div class="header-box">
+        <h1>🎟️ ${currentSeason.name}</h1>
+        <p>${t().heroSub}</p>
+    `;
+
+    if (userProgress.isVip) {
+        headerHTML += `<button class="vip-btn vip-active">${t().vipActive}</button>`;
+    } else {
+        headerHTML += `<button class="vip-btn" onclick="buyVip()">${t().vipBuy} (${currentSeason.vipPrice} 🪙)</button>`;
+    }
+    headerHTML += `</div>`;
+
+    // 🟢 إصلاح الـ undefined
+    const currentXP = userProgress.xp || 0;
+    
+    let currentTier = 1;
+    for (let i = 1; i <= 30; i++) {
+        if (currentXP >= currentSeason.tiers[i].xpNeeded) {
+            currentTier = i + 1;
+        }
+    }
+    if (currentTier > 30) currentTier = 30;
+    
+    let prevXP = currentTier > 1 ? currentSeason.tiers[currentTier - 1].xpNeeded : 0;
+    let targetXP = currentSeason.tiers[currentTier] ? currentSeason.tiers[currentTier].xpNeeded : prevXP;
+    let progressPercent = targetXP > prevXP ? ((currentXP - prevXP) / (targetXP - prevXP)) * 100 : 100;
+    if(progressPercent > 100) progressPercent = 100;
+    if(progressPercent < 0) progressPercent = 0;
+
+    headerHTML += `
+    <div class="progress-container">
+        <div class="progress-info">
+            <span>${t().tierLevel} ${currentTier}</span>
+            <span>${currentXP} / ${targetXP} XP</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:${progressPercent}%"></div>
+        </div>
+    </div>
+    <div class="tiers-grid" id="tiersGrid"></div>
+    `;
+
+    content.innerHTML = headerHTML;
+}
+
+function renderTiers() {
+    if (!currentSeason) return;
+    const grid = document.getElementById('tiersGrid');
+    if(!grid) return;
+    
+    let html = '';
+    const currentXP = userProgress.xp || 0;
+
+    for (let i = 1; i <= 30; i++) {
+        const tier = currentSeason.tiers[i];
+        const unlocked = currentXP >= tier.xpNeeded;
+        
+        const freeReward = getRewardHTML(tier.free);
+        const premiumReward = getRewardHTML(tier.premium);
+
+        const freeClaimed = userProgress.claimedFree && userProgress.claimedFree[i];
+        const premClaimed = userProgress.claimedPremium && userProgress.claimedPremium[i];
+
+        let freeBtn = freeClaimed 
+            ? `<button class="claim-btn claimed">${t().claimed}</button>`
+            : (unlocked ? `<button class="claim-btn" onclick="claim(${i}, false)">${t().claim}</button>` : `<button class="claim-btn locked">${t().locked}</button>`);
+
+        let premBtn;
+        if (!userProgress.isVip) {
+            premBtn = `<button class="claim-btn locked">${t().vipOnly}</button>`;
+        } else if (premClaimed) {
+            premBtn = `<button class="claim-btn claimed">${t().claimed}</button>`;
+        } else if (unlocked) {
+            premBtn = `<button class="claim-btn" onclick="claim(${i}, true)">${t().claim}</button>`;
+        } else {
+            premBtn = `<button class="claim-btn locked">${t().locked}</button>`;
+        }
+
+        html += `
+        <div class="tier-row ${unlocked ? 'unlocked' : ''}">
+            <div class="tier-level">${i}</div>
+            
+            <div class="reward-box">
+                <div class="icon">${freeReward.icon}</div>
+                <div class="name">${freeReward.name}</div>
+                ${freeBtn}
+            </div>
+
+            <div class="reward-box premium-box">
+                <div class="icon">${premiumReward.icon}</div>
+                <div class="name">${premiumReward.name}</div>
+                ${premBtn}
+            </div>
+        </div>
+        `;
+    }
+    
+    grid.innerHTML = html;
+}
+
+window.claim = async (tierId, isPremium) => {
+    const res = await window.NFSeasonPass.claimSeasonReward(tierId, isPremium);
+    if (res.error) {
+        alert(res.error);
+        return;
+    }
+    if (window.confetti) window.confetti({ particleCount: 80, spread: 60 });
+};
+
+window.buyVip = async () => {
+    if (!confirm(`هل أنت متأكد من شراء الـ VIP بـ ${currentSeason.vipPrice} كوينز؟`)) return;
+    const res = await window.NFSeasonPass.buyVipPass();
+    if (res.error) {
+        alert(res.error);
+        return;
+    }
+    alert('🎉 مبروك! أنت الآن VIP، استلم جوايزك المميزة.');
+    if (window.confetti) window.confetti({ particleCount: 150, spread: 100 });
+};
+
+applyLang();
+init();
+</script>
+</body>
+</html>
