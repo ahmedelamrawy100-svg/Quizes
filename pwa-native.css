@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════════════
+   PWA NATIVE FEEL — حركات وتفاعلات زي التطبيقات الأصلية
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* منع تحديد النص في الأزرار والعناصر التفاعلية */
+button, .btn, .tab-btn, .icon-btn, a.nav-brand, .card-title,
+.menu-item, .quiz-card, .option, .action-btn {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* منع overscroll bounce */
+html, body {
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+}
+
+/* تفعيل touch manipulation للأزرار */
+button, a, .option, .quiz-card {
+  touch-action: manipulation;
+}
+
+/* دعم Safe Area (للهواتف بـ notch) */
+body {
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+/* تحسين الـ scrolling في الموبايل */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Active state animation للأزرار */
+button:active, .btn:active, .option:active, .quiz-card:active,
+.tab-btn:active, .action-btn:active {
+  transform: scale(0.97) !important;
+  transition: transform 0.1s ease !important;
+}
+
+/* منع Zoom التلقائي في iOS */
+@media screen and (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Standalone mode — إخفاء عناصر الويب */
+@media (display-mode: standalone) {
+  .browser-only { display: none !important; }
+  
+  /* إضافة مساحة للـ status bar */
+  body {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+  
+  /* إخفاء شريط التمرير في الموبايل */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+/* Pull-to-refresh custom look */
+@media (display-mode: standalone) {
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff0000, #ffd700);
+    z-index: 99999;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+  }
+  
+  body.refreshing::before {
+    transform: scaleX(1);
+    animation: refreshProgress 1.5s ease;
+  }
+}
+
+@keyframes refreshProgress {
+  0% { transform: scaleX(0); }
+  50% { transform: scaleX(0.7); }
+  100% { transform: scaleX(1); }
+}
+
+/* تحسين النقرات في الموبايل */
+@media (hover: none) and (pointer: coarse) {
+  .quiz-card:hover { transform: none; }
+  .btn:hover { transform: none; }
+  
+  /* Show active state more prominently */
+  .btn:active, .quiz-card:active {
+    transform: scale(0.96) !important;
+    filter: brightness(0.9);
+  }
+}
+
+/* Smooth page transitions */
+body {
+  animation: pageEnter 0.3s ease;
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Loading skeleton for slower networks */
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.05) 0%, 
+    rgba(255,255,255,0.1) 50%, 
+    rgba(255,255,255,0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Ripple effect on buttons */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  opacity: 0;
+  transform: scale(1);
+  pointer-events: none;
+}
+
+.ripple:active::after {
+  animation: rippleEffect 0.6s ease-out;
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(30);
+    opacity: 0;
+  }
+}
+
+/* Bottom safe area for fixed buttons */
+@media (display-mode: standalone) {
+  .pwa-fixed-bottom {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (display-mode: standalone) and (orientation: landscape) {
+  body {
+    padding-left: max(env(safe-area-inset-left), 12px);
+    padding-right: max(env(safe-area-inset-right), 12px);
+  }
+}
+
+/* Dark mode support (follows system) */
+@media (prefers-color-scheme: dark) {
+  body:not(.light-mode) {
+    color-scheme: dark;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
