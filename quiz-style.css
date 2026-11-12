@@ -358,3 +358,33 @@ body.horror-mode * {
     from { opacity: 0.5; }
     to { opacity: 1; }
 }
+#question {
+    color: #ffffff !important;
+    background: rgba(0,0,0,0.8) !important;
+    text-shadow: 2px 2px 4px #000 !important;
+    padding: 15px !important;
+    border-radius: 10px !important;
+}
+/* ✅ إصلاح لون السؤال والاختيارات في الوضع السينمائي */
+body.cinematic-mode #question, 
+body.cinematic-mode .question,
+.cinematic-active #question {
+    color: #ffffff !important; /* لون أبيض */
+    background: rgba(0, 0, 0, 0.85) !important; /* خلفية سودة عشان يبان */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5) !important; /* إضاءة خفيفة */
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid #555 !important;
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    margin: 20px 0 !important;
+}
+
+/* لو الاختيارات كمان بتختفي في السينما */
+body.cinematic-mode #options div,
+.cinematic-active #options div {
+    color: #000 !important;
+    background: #fff !important;
+    font-weight: bold !important;
+    border: 2px solid #333 !important;
+}
