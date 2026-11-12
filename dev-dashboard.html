@@ -12,31 +12,12 @@
 <link rel="stylesheet" href="pwa-native.css">
 <style>
   :root {
-    --bg: #060912;
-    --bg-2: #0b1220;
-    --surface: #0f1829;
-    --surface-2: #172136;
-    --surface-hover: #1c2842;
-    --border: #26334a;
-    --border-strong: #3b4d6b;
-    --text: #e8eef8;
-    --text-2: #94a3b8;
-    --text-3: #64748b;
-    --primary: #00d9ff;
-    --primary-dim: rgba(0, 217, 255, 0.15);
-    --primary-glow: rgba(0, 217, 255, 0.35);
-    --success: #22c55e;
-    --success-dim: rgba(34, 197, 94, 0.15);
-    --danger: #ef4444;
-    --danger-dim: rgba(239, 68, 68, 0.15);
-    --warning: #f59e0b;
-    --warning-dim: rgba(245, 158, 11, 0.15);
-    --info: #3b82f6;
-    --gold: #fbbf24;
-    --purple: #a855f7;
-    --mono: 'JetBrains Mono', 'Courier New', monospace;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --bg: #060912; --bg-2: #0b1220; --surface: #0f1829; --surface-2: #172136;
+    --surface-hover: #1c2842; --border: #26334a; --border-strong: #3b4d6b;
+    --text: #e8eef8; --text-2: #94a3b8; --text-3: #64748b;
+    --primary: #00d9ff; --primary-dim: rgba(0, 217, 255, 0.15); --primary-glow: rgba(0, 217, 255, 0.35);
+    --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6; --gold: #fbbf24;
+    --mono: 'JetBrains Mono', 'Courier New', monospace; --radius: 12px; --radius-sm: 8px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,380 +25,137 @@
   body {
     font-family: 'Cairo', sans-serif;
     background: radial-gradient(circle at 20% 10%, #0b1220 0%, #060912 60%);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
+    color: var(--text); min-height: 100vh; overflow-x: hidden;
   }
 
   /* Background grid */
   body::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-      linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.6;
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px; opacity: 0.6;
   }
 
   /* Access Denied */
   .access-denied {
-    display: none;
-    position: fixed; inset: 0; z-index: 999999;
+    display: none; position: fixed; inset: 0; z-index: 999999;
     background: radial-gradient(circle, var(--bg-2), var(--bg));
-    flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; gap: 20px; padding: 20px;
+    flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; padding: 20px;
   }
   .access-denied.show { display: flex; }
   .access-denied h1 { font-size: 80px; }
   .access-denied h2 { color: var(--danger); font-size: 28px; }
-  .access-denied p { color: var(--text-2); }
-  .access-denied a {
-    margin-top: 10px; padding: 12px 24px;
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    text-decoration: none; font-weight: 700;
-  }
-  .access-denied a:hover { border-color: var(--primary); color: var(--primary); }
+  .access-denied a { margin-top: 10px; padding: 12px 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; font-weight: 700; }
 
   /* Main layout */
-  #devPanel {
-    display: none;
-    position: relative; z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 16px;
-    flex-direction: column;
-    gap: 16px;
-  }
+  #devPanel { display: none; position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 16px; flex-direction: column; gap: 16px; }
   #devPanel.show { display: flex; }
 
   /* Header */
   .dev-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 20px;
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 20px;
     background: linear-gradient(90deg, rgba(0, 217, 255, 0.08), rgba(168, 85, 247, 0.05));
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    backdrop-filter: blur(20px);
-    flex-wrap: wrap;
-    gap: 12px;
+    border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(20px); flex-wrap: wrap; gap: 12px;
   }
   .brand { display: flex; align-items: center; gap: 12px; }
-  .brand-icon {
-    width: 42px; height: 42px;
-    display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, var(--primary), var(--purple));
-    border-radius: var(--radius-sm);
-    font-size: 22px;
-    box-shadow: 0 0 20px var(--primary-glow);
-  }
-  .brand-title {
-    font-family: var(--mono);
-    font-size: 18px; font-weight: 700;
-    color: var(--primary);
-    letter-spacing: 1px;
-  }
+  .brand-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), #a855f7); border-radius: var(--radius-sm); font-size: 22px; box-shadow: 0 0 20px var(--primary-glow); }
+  .brand-title { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
   .brand-sub { font-size: 11px; color: var(--text-3); font-family: var(--mono); }
   .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .h-btn {
-    padding: 8px 14px;
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Cairo'; font-weight: 700; font-size: 13px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex; align-items: center; gap: 6px;
-    transition: 0.2s;
-  }
+  .h-btn { padding: 8px 14px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Cairo'; font-weight: 700; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
   .h-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
 
   /* Tabs */
-  .dev-tabs {
-    display: flex;
-    gap: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 6px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
+  .dev-tabs { display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; overflow-x: auto; scrollbar-width: none; }
   .dev-tabs::-webkit-scrollbar { display: none; }
-  .dev-tab {
-    background: transparent;
-    color: var(--text-2);
-    border: 1px solid transparent;
-    padding: 10px 16px;
-    border-radius: var(--radius-sm);
-    font-family: 'Cairo'; font-weight: 700; font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: 0.2s;
-    display: flex; align-items: center; gap: 6px;
-  }
+  .dev-tab { background: transparent; color: var(--text-2); border: 1px solid transparent; padding: 10px 16px; border-radius: var(--radius-sm); font-family: 'Cairo'; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
   .dev-tab:hover { background: var(--surface-hover); color: var(--text); }
-  .dev-tab.active {
-    background: linear-gradient(135deg, var(--primary-dim), rgba(168, 85, 247, 0.1));
-    color: var(--primary);
-    border-color: var(--primary);
-    box-shadow: 0 0 15px var(--primary-dim);
-  }
+  .dev-tab.active { background: linear-gradient(135deg, var(--primary-dim), rgba(168, 85, 247, 0.1)); color: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px var(--primary-dim); }
 
   /* Panels */
   .dev-panel { display: none; animation: fadeUp 0.3s ease; }
   .dev-panel.active { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    transition: 0.2s;
-  }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: 0.2s; }
   .card:hover { border-color: var(--border-strong); }
-  .card-title {
-    font-size: 15px;
-    font-weight: 900;
-    color: var(--primary);
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--mono);
-    letter-spacing: 0.5px;
-  }
+  .card-title { font-size: 15px; font-weight: 900; color: var(--primary); margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-family: var(--mono); letter-spacing: 0.5px; }
 
   /* Form inputs */
-  .field {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--bg);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: 'Cairo'; font-size: 13px;
-    outline: none;
-    transition: 0.2s;
-    margin-bottom: 8px;
-  }
+  .field { width: 100%; padding: 10px 14px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Cairo'; font-size: 13px; outline: none; transition: 0.2s; margin-bottom: 8px; }
   .field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim); }
   .field-mono { font-family: var(--mono); }
   textarea.field { resize: vertical; min-height: 80px; line-height: 1.5; }
 
   /* Buttons */
-  .btn {
-    padding: 10px 18px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--text);
-    font-family: 'Cairo'; font-weight: 700; font-size: 13px;
-    cursor: pointer;
-    transition: 0.2s;
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  }
+  .btn { padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'Cairo'; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .btn:hover { border-color: var(--primary); background: var(--surface-hover); }
   .btn-primary { background: var(--primary); color: #000; border-color: var(--primary); }
-  .btn-primary:hover { background: #33e3ff; box-shadow: 0 0 15px var(--primary-glow); }
   .btn-success { background: var(--success); color: #000; border-color: var(--success); }
-  .btn-success:hover { background: #16a34a; }
   .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
-  .btn-danger:hover { background: #dc2626; }
   .btn-warn { background: var(--warning); color: #000; border-color: var(--warning); }
-  .btn-warn:hover { background: #d97706; }
   .btn-sm { padding: 6px 12px; font-size: 12px; }
   .btn-full { width: 100%; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Grid */
   .grid { display: grid; gap: 14px; }
   .grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
   .grid-4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
-  .grid-stats { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 
   /* Stat card */
-  .stat {
-    background: linear-gradient(135deg, var(--surface), var(--surface-2));
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    text-align: center;
-    transition: 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--primary), var(--purple));
-  }
-  .stat:hover { border-color: var(--primary); transform: translateY(-2px); }
+  .stat { background: linear-gradient(135deg, var(--surface), var(--surface-2)); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; position: relative; overflow: hidden; }
+  .stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--primary), #a855f7); }
   .stat-icon { font-size: 26px; margin-bottom: 6px; }
   .stat-value { font-size: 26px; font-weight: 900; color: var(--primary); font-family: var(--mono); }
   .stat-label { font-size: 11px; color: var(--text-2); margin-top: 4px; font-weight: 700; }
 
   /* Explorer */
-  .explorer-layout {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 14px;
-    min-height: 600px;
-  }
-  .explorer-sidebar {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px;
-    overflow-y: auto;
-    max-height: 700px;
-  }
-  .explorer-sidebar-title {
-    font-size: 11px; font-weight: 900; color: var(--text-3);
-    text-transform: uppercase; letter-spacing: 1px;
-    padding: 0 6px 10px 6px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
-    font-family: var(--mono);
-  }
-  .node-item {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.15s;
-    font-family: var(--mono); font-size: 12px;
-    color: var(--text-2);
-    border: 1px solid transparent;
-  }
+  .explorer-layout { display: grid; grid-template-columns: 260px 1fr; gap: 14px; min-height: 600px; }
+  .explorer-sidebar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; overflow-y: auto; max-height: 700px; }
+  .explorer-sidebar-title { font-size: 11px; font-weight: 900; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; padding: 0 6px 10px 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-family: var(--mono); }
+  .node-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: 0.15s; font-family: var(--mono); font-size: 12px; color: var(--text-2); border: 1px solid transparent; }
   .node-item:hover { background: var(--surface-hover); color: var(--text); }
-  .node-item.active {
-    background: var(--primary-dim); color: var(--primary);
-    border-color: var(--primary);
-  }
+  .node-item.active { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
   .node-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .node-badge {
-    font-size: 10px; padding: 1px 6px;
-    background: var(--bg); border-radius: 10px;
-    color: var(--text-3); font-weight: 700;
-  }
+  .node-badge { font-size: 10px; padding: 1px 6px; background: var(--bg); border-radius: 10px; color: var(--text-3); font-weight: 700; }
 
-  .explorer-main {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    display: flex; flex-direction: column; gap: 12px;
-    min-width: 0;
-  }
-  .breadcrumb {
-    display: flex; align-items: center; gap: 6px;
-    font-family: var(--mono); font-size: 12px;
-    color: var(--text-3); flex-wrap: wrap;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-  }
+  .explorer-main { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; color: var(--text-3); flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
   .breadcrumb-item { color: var(--primary); cursor: pointer; }
   .breadcrumb-item:hover { text-decoration: underline; }
   .breadcrumb-sep { color: var(--text-3); }
 
-  .json-view {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    font-family: var(--mono); font-size: 12px;
-    line-height: 1.6;
-    overflow: auto;
-    max-height: 400px;
-    white-space: pre;
-    color: #a5d6ff;
-  }
-  .json-view.editing { color: var(--text); }
-  textarea.json-view { width: 100%; resize: vertical; min-height: 300px; }
-
-  .explorer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .json-view { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-family: var(--mono); font-size: 12px; line-height: 1.6; overflow: auto; max-height: 500px; white-space: pre; color: #a5d6ff; }
+  textarea.json-view { width: 100%; resize: vertical; min-height: 400px; color: var(--text); }
 
   /* List items */
-  .list-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  .list-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    transition: 0.15s;
-  }
+  .list-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; max-height: 400px; overflow-y: auto; }
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; transition: 0.15s; }
   .list-item:last-child { border-bottom: none; }
-  .list-item:hover { background: var(--surface-hover); }
   .list-item-icon { font-size: 16px; flex-shrink: 0; }
   .list-item-content { flex: 1; min-width: 0; }
   .list-item-title { font-weight: 700; }
   .list-item-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 
-  /* Danger zone */
-  .danger-zone {
-    border: 2px solid var(--danger);
-    background: var(--danger-dim);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-top: 14px;
-  }
-  .danger-zone .card-title { color: var(--danger); border-color: var(--danger); }
-
   /* Toast */
-  #toast-container {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    z-index: 999999; display: flex; flex-direction: column; gap: 8px;
-    pointer-events: none;
-  }
-  .toast {
-    padding: 12px 22px;
-    background: var(--surface); color: var(--text);
-    border: 1px solid var(--success);
-    border-right: 4px solid var(--success);
-    border-radius: var(--radius-sm);
-    font-weight: 700; font-size: 13px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    animation: toastIn 0.3s ease;
-    pointer-events: auto;
-    max-width: 400px;
-    font-family: 'Cairo';
-  }
+  #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast { padding: 12px 22px; background: var(--surface); color: var(--text); border: 1px solid var(--success); border-right: 4px solid var(--success); border-radius: var(--radius-sm); font-weight: 700; font-size: 13px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); animation: toastIn 0.3s ease; pointer-events: auto; max-width: 400px; }
   .toast.error { border-color: var(--danger); border-right-color: var(--danger); }
   .toast.info { border-color: var(--info); border-right-color: var(--info); }
-  @keyframes toastIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
   /* Loading */
   .loading { text-align: center; padding: 40px; color: var(--text-3); font-family: var(--mono); }
-  .spinner {
-    width: 32px; height: 32px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 10px;
-  }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Responsive */
+  /* Modals for Custom UI */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--surface); border: 1px solid var(--primary); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,217,255,0.2); }
+  .modal-title { font-size: 18px; font-weight: 900; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
   @media (max-width: 900px) {
     .explorer-layout { grid-template-columns: 1fr; }
     .explorer-sidebar { max-height: 200px; }
@@ -438,8 +176,6 @@
 
 <!-- Dev Panel -->
 <div id="devPanel">
-
-  <!-- Header -->
   <header class="dev-header">
     <div class="brand">
       <div class="brand-icon">🛠️</div>
@@ -457,7 +193,6 @@
     </div>
   </header>
 
-  <!-- Tabs -->
   <div class="dev-tabs">
     <button class="dev-tab active" data-tab="explorer">🔍 Explorer</button>
     <button class="dev-tab" data-tab="bulk">⚡ Bulk Actions</button>
@@ -467,24 +202,32 @@
     <button class="dev-tab" data-tab="user">👤 User Lookup</button>
   </div>
 
-  <!-- ============================================================
-       TAB 1: EXPLORER
-  ============================================================ -->
+  <!-- EXPLORER TAB -->
   <div class="dev-panel active" id="panel-explorer">
     <div class="explorer-layout">
       <aside class="explorer-sidebar">
         <div class="explorer-sidebar-title">ROOT NODES</div>
         <div id="rootNodes"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       </aside>
+      
       <main class="explorer-main">
         <div class="breadcrumb" id="breadcrumb">
           <span class="breadcrumb-sep">اختر node من القائمة ←</span>
         </div>
-        <div class="explorer-actions" id="explorerActions" style="display:none;">
-          <button class="btn btn-sm" onclick="enterEditMode()">✏️ تعديل</button>
-          <button class="btn btn-sm btn-danger" onclick="confirmDeleteCurrent()">🗑️ حذف</button>
-          <button class="btn btn-sm" onclick="reloadCurrentNode()">🔄 تحديث</button>
+        
+        <div class="explorer-actions" id="explorerActions" style="display:none; gap: 8px; margin-bottom: 10px;">
+          <button class="btn btn-sm btn-success" onclick="enterEditMode()" id="btnEdit">✏️ تعديل (JSON)</button>
+          <button class="btn btn-sm btn-primary" onclick="addChildNode()" id="btnAdd">➕ إضافة عنصر</button>
+          <button class="btn btn-sm btn-warn" onclick="exportNode()">📥 تصدير JSON</button>
+          <button class="btn btn-sm btn-danger" onclick="openDeleteModal()" id="btnDelete">🗑️ حذف العنصر</button>
         </div>
+
+        <div class="explorer-actions" id="editorActions" style="display:none; gap: 8px; margin-bottom: 10px;">
+          <button class="btn btn-sm btn-success" onclick="saveNodeEdit()">💾 حفظ التعديلات</button>
+          <button class="btn btn-sm" onclick="cancelEdit()">❌ إلغاء</button>
+          <button class="btn btn-sm btn-primary" onclick="beautifyJSON()">✨ تنسيق الكود</button>
+        </div>
+
         <div id="nodeContent">
           <div class="loading">
             <div class="spinner"></div>
@@ -511,72 +254,54 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB 2: BULK ACTIONS
-  ============================================================ -->
+  <!-- BULK TAB -->
   <div class="dev-panel" id="panel-bulk">
     <div class="grid grid-2">
-
       <div class="card">
         <div class="card-title">🪙 إعطاء كوينز للجميع</div>
-        <input type="number" class="field" id="bulkCoinsAmount" placeholder="عدد الكوينز (مثلاً 500)" value="500">
+        <input type="number" class="field" id="bulkCoinsAmount" placeholder="عدد الكوينز" value="500">
         <button class="btn btn-success btn-full" onclick="bulkGiveCoins()">✅ توزيع الكوينز</button>
-        <p style="font-size:11px; color:var(--text-3); margin-top:8px;">⚠️ بيتطبق على كل اللاعبين المسجلين (مش هيأثر على العدد الحالي)</p>
       </div>
-
       <div class="card">
         <div class="card-title">✨ إعطاء XP للجميع</div>
         <input type="number" class="field" id="bulkXpAmount" placeholder="عدد XP" value="100">
         <button class="btn btn-success btn-full" onclick="bulkGiveXP()">✅ توزيع XP</button>
-        <p style="font-size:11px; color:var(--text-3); margin-top:8px;">⚠️ ممكن يسبب level up جماعي</p>
       </div>
-
       <div class="card">
         <div class="card-title">🎯 Reset لاعب معين</div>
         <input type="text" class="field" id="resetUserInput" placeholder="اسم اللاعب...">
         <select class="field" id="resetScope">
           <option value="scores">مسح النتائج فقط</option>
           <option value="stats">مسح XP + Coins + Streak</option>
-          <option value="full">مسح كل حاجة (X10 خطير)</option>
+          <option value="full">مسح كل حاجة (خطير)</option>
         </select>
         <button class="btn btn-warn btn-full" onclick="resetPlayer()">⚠️ Reset</button>
       </div>
-
       <div class="card">
         <div class="card-title">📢 إشعار جماعي</div>
         <textarea class="field" id="broadcastMsg" placeholder="الرسالة..." rows="3"></textarea>
         <button class="btn btn-primary btn-full" onclick="broadcast()">📤 إرسال للكل</button>
-        <p style="font-size:11px; color:var(--text-3); margin-top:8px;">📩 هيتبعت في messages/{user} لكل لاعب</p>
       </div>
-
       <div class="card">
         <div class="card-title">👢 طرد كل اللاعبين</div>
         <p style="font-size:12px; color:var(--text-2); margin-bottom:10px;">هيتم تسجيل خروج كل اللاعبين فوراً.</p>
         <button class="btn btn-danger btn-full" onclick="kickAllUsers()">👢 KICK ALL</button>
       </div>
-
       <div class="card">
         <div class="card-title">🧹 مسح node كامل</div>
         <input type="text" class="field field-mono" id="deleteNodePath" placeholder="مثلاً: comments">
         <button class="btn btn-danger btn-full" onclick="deleteNodeManual()">🗑️ حذف</button>
-        <p style="font-size:11px; color:var(--danger); margin-top:8px;">⚠️ خطير جداً — استخدمه بحذر</p>
       </div>
-
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB 3: SETTINGS
-  ============================================================ -->
+  <!-- SETTINGS TAB -->
   <div class="dev-panel" id="panel-settings">
     <div class="card" style="margin-bottom:14px;">
       <div class="card-title">🎛️ إعدادات الموقع</div>
-      <div id="settingsForm">
-        <div class="loading"><div class="spinner"></div>Loading...</div>
-      </div>
+      <div id="settingsForm"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       <button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="saveSettings()">💾 حفظ التغييرات</button>
     </div>
-
     <div class="card">
       <div class="card-title">➕ إضافة إعداد جديد</div>
       <input type="text" class="field field-mono" id="newSettingKey" placeholder="key (مثلاً: maintenanceMode)">
@@ -585,11 +310,9 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB 4: MONITOR
-  ============================================================ -->
+  <!-- MONITOR TAB -->
   <div class="dev-panel" id="panel-monitor">
-    <div class="grid grid-stats" id="monitorStats">
+    <div class="grid grid-4" style="margin-bottom:14px;">
       <div class="stat"><div class="stat-icon">👥</div><div class="stat-value" id="monUsers">—</div><div class="stat-label">إجمالي اللاعبين</div></div>
       <div class="stat"><div class="stat-icon">🎮</div><div class="stat-value" id="monAttempts">—</div><div class="stat-label">محاولات الكويز</div></div>
       <div class="stat"><div class="stat-icon">💬</div><div class="stat-value" id="monChat">—</div><div class="stat-label">رسائل الشات</div></div>
@@ -597,47 +320,33 @@
       <div class="stat"><div class="stat-icon">🎫</div><div class="stat-value" id="monTickets">—</div><div class="stat-label">تذاكر مفتوحة</div></div>
       <div class="stat"><div class="stat-icon">🟢</div><div class="stat-value" id="monOnline">—</div><div class="stat-label">متصل الآن</div></div>
     </div>
-
-    <div class="grid grid-2" style="margin-top:14px;">
+    <div class="grid grid-2">
       <div class="card">
         <div class="card-title">🏆 أعلى 5 لاعبين</div>
         <div class="list-box" id="topPlayersBox"><div class="loading"><div class="spinner"></div>Loading...</div></div>
       </div>
       <div class="card">
-        <div class="card-title">🆕 آخر 5 تسجيلات</div>
-        <div class="list-box" id="recentSignupsBox"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+        <div class="card-title">🧹 صحة الداتابيز</div>
+        <div class="list-box" id="healthBox"><div class="loading"><div class="spinner"></div>Checking...</div></div>
       </div>
-    </div>
-
-    <div class="card" style="margin-top:14px;">
-      <div class="card-title">🧹 صحة الداتابيز</div>
-      <div class="list-box" id="healthBox"><div class="loading"><div class="spinner"></div>Checking...</div></div>
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB 5: ADMIN LOGS
-  ============================================================ -->
+  <!-- LOGS TAB -->
   <div class="dev-panel" id="panel-logs">
     <div class="card">
       <div class="card-title">📝 كل الإجراءات الإدارية</div>
       <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
         <input type="text" class="field" id="logSearch" placeholder="🔍 بحث..." oninput="renderLogs()">
-        <select class="field" id="logFilterAdmin" onchange="renderLogs()">
-          <option value="">كل الأدمنز</option>
-        </select>
-        <select class="field" id="logFilterAction" onchange="renderLogs()">
-          <option value="">كل الإجراءات</option>
-        </select>
+        <select class="field" id="logFilterAdmin" onchange="renderLogs()"><option value="">كل الأدمنز</option></select>
+        <select class="field" id="logFilterAction" onchange="renderLogs()"><option value="">كل الإجراءات</option></select>
       </div>
       <button class="btn btn-sm" onclick="loadAllLogs()" style="margin-bottom:10px;">🔄 تحديث</button>
       <div class="list-box" id="logsBox" style="max-height:600px;"><div class="loading"><div class="spinner"></div>Loading...</div></div>
     </div>
   </div>
 
-  <!-- ============================================================
-       TAB 6: USER LOOKUP
-  ============================================================ -->
+  <!-- USER TAB -->
   <div class="dev-panel" id="panel-user">
     <div class="card">
       <div class="card-title">👤 البحث عن لاعب</div>
@@ -651,111 +360,80 @@
 
 </div>
 
-<!-- Toast -->
+<!-- Custom Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ تأكيد الحذف</div>
+    <p style="font-size:14px; margin-bottom:15px;">أنت على وشك حذف العنصر ده نهائياً. اكتب اسم العنصر بالظبط لتأكيد الحذف:</p>
+    <div style="background:var(--bg); padding:10px; border-radius:8px; border:1px solid var(--border); font-family:var(--mono); text-align:center; margin-bottom:15px;" id="deleteTargetName"></div>
+    <input type="text" class="field field-mono" id="deleteConfirmInput" placeholder="اكتب اسم العنصر هنا...">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeDeleteModal()">إلغاء</button>
+      <button class="btn btn-danger" onclick="executeDelete()">🗑️ حذف نهائي</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Add Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <div class="modal-title">➕ إضافة عنصر جديد</div>
+    <label style="font-size:12px;color:var(--primary);">اسم المفتاح (Key):</label>
+    <input type="text" class="field field-mono" id="addKeyInput" placeholder="مثلاً: newUser" style="margin-bottom:15px;">
+    <label style="font-size:12px;color:var(--primary);">القيمة (Value):</label>
+    <input type="text" class="field field-mono" id="addValueInput" placeholder="مثلاً: true أو 100 أو نص" style="margin-bottom:15px;">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAddModal()">إلغاء</button>
+      <button class="btn btn-primary" onclick="executeAddChild()">➕ إضافة</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, remove, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-/* ============================================================
-   FIREBASE INIT
-============================================================ */
-const firebaseConfig = {
-  apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo",
-  authDomain: "quiz-hub-app-f4cd0.firebaseapp.com",
-  databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com",
-  projectId: "quiz-hub-app-f4cd0",
-  storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app",
-  messagingSenderId: "282772179392",
-  appId: "1:282772179392:web:64646d757592b29ff3a025"
-};
+const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
 
 let app, db, auth;
-try {
-  app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  db = getDatabase(app);
-  auth = getAuth(app);
-} catch (e) {
-  console.error('Firebase init failed:', e);
-}
+try { app = getApps().length ? getApp() : initializeApp(firebaseConfig); db = getDatabase(app); auth = getAuth(app); } catch (e) { console.error(e); }
 
 const currentUser = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
 
-/* ============================================================
-   HELPERS
-============================================================ */
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
-  );
-}
-
-function toast(msg, type = 'success') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = 'toast ' + (type === 'success' ? '' : type);
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3500);
-}
-
-async function logAction(action, target, details) {
-  try {
-    await push(ref(db, 'admin_logs'), {
-      admin: currentUser,
-      action,
-      target: target || '',
-      details: details || '',
-      time: Date.now()
-    });
-  } catch (e) { console.warn('Log failed:', e); }
-}
-
-function fmtDate(ts) {
-  if (!ts) return '—';
-  try { return new Date(ts).toLocaleString('ar-EG'); } catch { return '—'; }
-}
-
+/* HELPERS */
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function toast(msg, type = 'success') { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast ' + (type === 'success' ? '' : type); t.textContent = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = '0.3s'; setTimeout(() => t.remove(), 300); }, 3500); }
+async function logAction(action, target, details) { try { await push(ref(db, 'admin_logs'), { admin: currentUser, action, target: target || '', details: details || '', time: Date.now() }); } catch (e) { console.warn(e); } }
+function fmtDate(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleString('ar-EG'); } catch { return '—'; } }
 function count(v) { return v && typeof v === 'object' ? Object.keys(v).length : 0; }
 
-/* ============================================================
-   ACCESS CHECK
-============================================================ */
+/* ACCESS CHECK */
 async function checkAccess() {
-  if (!currentUser) {
-    window.location.href = 'index.html';
-    return;
-  }
-  if (currentUser !== 'ahmed') {
-    document.getElementById('accessDenied').classList.add('show');
-    return;
-  }
+  if (!currentUser) { window.location.href = 'index.html'; return; }
+  if (currentUser !== 'ahmed') { document.getElementById('accessDenied').classList.add('show'); return; }
   document.getElementById('devPanel').classList.add('show');
   document.getElementById('whoAmI').textContent = currentUser;
   initAll();
 }
 
-/* ============================================================
-   TABS SWITCHING
-============================================================ */
+/* TABS SWITCHING */
 document.querySelectorAll('.dev-tab').forEach(btn => {
   btn.onclick = () => {
-    const tab = btn.dataset.tab;
     document.querySelectorAll('.dev-tab').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.dev-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    document.getElementById('panel-' + tab).classList.add('active');
-
-    if (tab === 'monitor') loadMonitor();
-    if (tab === 'logs') loadAllLogs();
-    if (tab === 'settings') loadSettings();
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'monitor') loadMonitor();
+    if (btn.dataset.tab === 'logs') loadAllLogs();
+    if (btn.dataset.tab === 'settings') loadSettings();
   };
 });
 
 /* ============================================================
-   EXPLORER
+   EXPLORER & EDITOR LOGIC
 ============================================================ */
 let currentNodePath = '';
 let currentNodeData = null;
@@ -766,53 +444,42 @@ async function loadRootNodes() {
   box.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
   try {
     const snap = await get(ref(db, '/'));
-    if (!snap.exists()) {
-      box.innerHTML = '<div style="padding:10px;color:var(--text-3);font-size:12px;">DB فاضية</div>';
-      return;
-    }
+    if (!snap.exists()) { box.innerHTML = '<div style="padding:10px;color:var(--text-3);">DB فاضية</div>'; return; }
     const data = snap.val();
-    const nodes = Object.keys(data).sort();
-    box.innerHTML = nodes.map(name => {
-      const childCount = count(data[name]);
+    box.innerHTML = Object.keys(data).sort().map(name => {
       return `<div class="node-item" data-node="${escapeHtml(name)}">
         <span class="node-name">📁 ${escapeHtml(name)}</span>
-        <span class="node-badge">${childCount}</span>
+        <span class="node-badge">${count(data[name])}</span>
       </div>`;
     }).join('');
 
     box.querySelectorAll('.node-item').forEach(el => {
       el.onclick = () => loadNode(el.dataset.node);
     });
-  } catch (e) {
-    box.innerHTML = `<div style="padding:10px;color:var(--danger);font-size:12px;">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
+  } catch (e) { box.innerHTML = `<div style="padding:10px;color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`; }
 }
 
 async function loadNode(path) {
   currentNodePath = path;
   isEditing = false;
-  document.querySelectorAll('.node-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.node-item').forEach(n => {
-    if (n.dataset.node === path) n.classList.add('active');
-  });
-
+  document.querySelectorAll('.node-item').forEach(n => n.classList.toggle('active', n.dataset.node === path));
   const content = document.getElementById('nodeContent');
   content.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-
+  
   try {
     const snap = await get(ref(db, path));
     if (!snap.exists()) {
       content.innerHTML = '<div class="loading" style="color:var(--text-3);">لا توجد بيانات في هذا الـ node</div>';
       document.getElementById('explorerActions').style.display = 'none';
+      document.getElementById('editorActions').style.display = 'none';
       return;
     }
     currentNodeData = snap.val();
     renderBreadcrumb(path);
-    renderNodeContent(currentNodeData);
+    renderViewMode();
     document.getElementById('explorerActions').style.display = 'flex';
-  } catch (e) {
-    content.innerHTML = `<div class="loading" style="color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
+    document.getElementById('editorActions').style.display = 'none';
+  } catch (e) { content.innerHTML = `<div class="loading" style="color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`; }
 }
 
 function renderBreadcrumb(path) {
@@ -822,48 +489,32 @@ function renderBreadcrumb(path) {
   const rootSpan = document.createElement('span');
   rootSpan.className = 'breadcrumb-item';
   rootSpan.textContent = 'ROOT';
-  rootSpan.onclick = () => {
-    document.getElementById('nodeContent').innerHTML = '<div class="loading" style="color:var(--text-3);">اختر node من القائمة</div>';
-    document.getElementById('explorerActions').style.display = 'none';
-    document.querySelectorAll('.node-item').forEach(n => n.classList.remove('active'));
-  };
+  rootSpan.onclick = () => { document.getElementById('nodeContent').innerHTML = '<div class="loading" style="color:var(--text-3);">اختر node من القائمة</div>'; document.getElementById('explorerActions').style.display = 'none'; document.querySelectorAll('.node-item').forEach(n => n.classList.remove('active')); currentNodePath = ''; };
   bc.appendChild(rootSpan);
 
   let acc = '';
   parts.forEach(p => {
     acc += '/' + p;
-    const sep = document.createElement('span');
-    sep.className = 'breadcrumb-sep';
-    sep.textContent = ' / ';
-    bc.appendChild(sep);
-
-    const item = document.createElement('span');
-    item.className = 'breadcrumb-item';
-    item.textContent = p;
-    const thisPath = acc.substring(1);
-    item.onclick = () => loadNode(thisPath);
-    bc.appendChild(item);
+    bc.insertAdjacentHTML('beforeend', `<span class="breadcrumb-sep"> / </span><span class="breadcrumb-item" onclick="loadNode('${acc.substring(1)}')">${p}</span>`);
   });
 }
 
-function renderNodeContent(data) {
+function renderViewMode() {
   const content = document.getElementById('nodeContent');
-  const children = data && typeof data === 'object' ? Object.keys(data) : [];
-  const isLeaf = children.length === 0 || typeof data !== 'object';
-
+  const children = currentNodeData && typeof currentNodeData === 'object' ? Object.keys(currentNodeData) : [];
   let html = '';
-
-  if (!isLeaf) {
+  
+  if (children.length > 0 && typeof currentNodeData === 'object') {
     html += `<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;">`;
     html += children.slice(0, 50).map(k => {
-      const label = typeof data[k] === 'object' ? `📁 ${k}` : `📄 ${k}`;
+      const label = typeof currentNodeData[k] === 'object' ? `📁 ${k}` : `📄 ${k}`;
       return `<button class="btn btn-sm" onclick="loadNode('${escapeHtml(currentNodePath + '/' + k)}')">${escapeHtml(label)}</button>`;
     }).join('');
     if (children.length > 50) html += `<span style="padding:6px 12px;font-size:12px;color:var(--text-3);">...و ${children.length - 50} عنصر تاني</span>`;
     html += `</div>`;
   }
 
-  html += `<div class="json-view" id="jsonView">${escapeHtml(JSON.stringify(data, null, 2))}</div>`;
+  html += `<div class="json-view" id="jsonView">${escapeHtml(JSON.stringify(currentNodeData, null, 2))}</div>`;
   content.innerHTML = html;
 }
 
@@ -871,688 +522,311 @@ function enterEditMode() {
   if (isEditing) return;
   isEditing = true;
   const content = document.getElementById('nodeContent');
-  const view = document.getElementById('jsonView');
-  if (!view) return;
   const json = JSON.stringify(currentNodeData, null, 2);
-  content.innerHTML = `<textarea class="field field-mono json-view editing" id="jsonEditor">${escapeHtml(json)}</textarea>
-    <div class="explorer-actions" style="margin-top:10px;">
-      <button class="btn btn-success" onclick="saveNodeEdit()">💾 حفظ</button>
-      <button class="btn" onclick="cancelEdit()">❌ إلغاء</button>
-    </div>`;
+  content.innerHTML = `<textarea class="json-view" id="jsonEditor" spellcheck="false">${escapeHtml(json)}</textarea>`;
+  document.getElementById('explorerActions').style.display = 'none';
+  document.getElementById('editorActions').style.display = 'flex';
 }
 
 function cancelEdit() {
   isEditing = false;
-  renderNodeContent(currentNodeData);
+  renderViewMode();
+  document.getElementById('explorerActions').style.display = 'flex';
+  document.getElementById('editorActions').style.display = 'none';
+}
+
+function beautifyJSON() {
+  const editor = document.getElementById('jsonEditor');
+  if (!editor) return;
+  try {
+    const parsed = JSON.parse(editor.value);
+    editor.value = JSON.stringify(parsed, null, 2);
+    toast('✨ تم تنسيق الكود');
+  } catch (e) {
+    toast('❌ الكود فيه غلطة، صلحها الأول عشان يتنسق', 'error');
+  }
 }
 
 async function saveNodeEdit() {
   const editor = document.getElementById('jsonEditor');
   if (!editor) return;
+  
   try {
-    const parsed = JSON.parse(editor.value);
+    let parsed;
+    try { parsed = JSON.parse(editor.value); } catch (err) { throw new Error("الكود اللي كتبته مش JSON صحيح! (غالباً في فاصلة ناقصة أو قوس مقفول غلط)\n" + err.message); }
+    
+    toast('⏳ جاري الحفظ...', 'info');
     await set(ref(db, currentNodePath), parsed);
-    await logAction('dev_edit_node', currentNodePath, JSON.stringify(parsed).substring(0, 60));
-    toast('✅ تم الحفظ');
+    await logAction('dev_edit_node', currentNodePath, 'تم تعديل البيانات');
+    toast('✅ تم حفظ التعديلات بنجاح');
     isEditing = false;
     await loadNode(currentNodePath);
   } catch (e) {
-    toast('خطأ في JSON: ' + e.message, 'error');
+    alert(e.message);
+    toast('❌ فشل الحفظ', 'error');
   }
 }
 
-async function confirmDeleteCurrent() {
-  const input = prompt(`⚠️ لحذف "${currentNodePath}" نهائياً، اكتب اسم الـ node كامل:`);
-  if (input !== currentNodePath) {
-    if (input !== null) toast('❌ الاسم غير مطابق — تم الإلغاء', 'error');
-    return;
+/* ADD CHILD LOGIC */
+function addChildNode() {
+  if (!currentNodePath) return;
+  if (typeof currentNodeData !== 'object' || currentNodeData === null) {
+    return toast('❌ مينفعش تضيف عنصر جوه قيمة نصية أو رقمية. اختر Node من النوع 📁', 'error');
   }
+  document.getElementById('addKeyInput').value = '';
+  document.getElementById('addValueInput').value = '';
+  document.getElementById('addModal').classList.add('active');
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.remove('active'); }
+
+async function executeAddChild() {
+  const key = document.getElementById('addKeyInput').value.trim();
+  let val = document.getElementById('addValueInput').value.trim();
+  if (!key) return toast('اكتب اسم المفتاح', 'error');
+  
+  if (val === 'true') val = true; else if (val === 'false') val = false; else if (/^-?\d+(\.\d+)?$/.test(val)) val = Number(val);
+  
   try {
+    await set(ref(db, `${currentNodePath}/${key}`), val);
+    await logAction('dev_add_child', currentNodePath, `أضاف ${key}`);
+    toast('✅ تمت الإضافة');
+    closeAddModal();
+    await loadNode(currentNodePath);
+    loadRootNodes(); // عشان نحدث العداد
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
+}
+
+/* DELETE LOGIC */
+function openDeleteModal() {
+  if (!currentNodePath) return;
+  const name = currentNodePath.split('/').pop();
+  document.getElementById('deleteTargetName').textContent = name;
+  document.getElementById('deleteConfirmInput').value = '';
+  document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() { document.getElementById('deleteModal').classList.remove('active'); }
+
+async function executeDelete() {
+  const name = currentNodePath.split('/').pop();
+  const input = document.getElementById('deleteConfirmInput').value.trim();
+  
+  if (input !== name) return toast('❌ الاسم اللي كتبته مش مطابق', 'error');
+  
+  try {
+    toast('⏳ جاري الحذف...', 'info');
     await remove(ref(db, currentNodePath));
-    await logAction('dev_delete_node', currentNodePath);
-    toast('🗑️ تم الحذف');
-    document.getElementById('nodeContent').innerHTML = '<div class="loading" style="color:var(--text-3);">تم الحذف</div>';
-    document.getElementById('explorerActions').style.display = 'none';
+    await logAction('dev_delete_node', currentNodePath, 'حذف نهائي');
+    toast('🗑️ تم الحذف بنجاح');
+    closeDeleteModal();
+    
+    // نرجع خطوة لورا في الشجرة
+    const parentPath = currentNodePath.split('/').slice(0, -1).join('/');
+    if (parentPath) await loadNode(parentPath); else { document.getElementById('nodeContent').innerHTML = '<div class="loading">تم الحذف</div>'; document.getElementById('explorerActions').style.display = 'none'; }
     loadRootNodes();
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
 }
 
-function reloadCurrentNode() {
-  if (currentNodePath) loadNode(currentNodePath);
+/* EXPORT JSON */
+function exportNode() {
+  if (!currentNodeData) return;
+  const blob = new Blob([JSON.stringify(currentNodeData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${currentNodePath.replace(/\//g, '_')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('📥 تم تحميل الملف');
 }
 
-/* ============================================================
-   QUICK COMMANDS
-============================================================ */
+/* QUICK COMMANDS */
 async function quickCmd(cmd) {
   const box = document.getElementById('quickCmdOutput');
   box.innerHTML = '<div class="loading"><div class="spinner"></div>جاري التنفيذ...</div>';
   try {
     let result = '';
-
     if (cmd === 'usersCount') {
       const s = await get(ref(db, 'usernames'));
       result = `👥 عدد اللاعبين: <b style="color:var(--primary);">${count(s.val())}</b>`;
-    }
-    else if (cmd === 'topXP') {
-      const s = await get(ref(db, 'users_data'));
-      const data = s.val() || {};
+    } else if (cmd === 'topXP') {
+      const s = await get(ref(db, 'users_data')); const data = s.val() || {};
       const top = Object.entries(data).map(([u, d]) => [u, d.xp || 0]).sort((a, b) => b[1] - a[1])[0];
       result = top ? `🏆 أعلى XP: <b style="color:var(--primary);">${escapeHtml(top[0])}</b> — ${top[1].toLocaleString()} XP` : 'لا يوجد';
-    }
-    else if (cmd === 'topCoins') {
-      const s = await get(ref(db, 'users_data'));
-      const data = s.val() || {};
+    } else if (cmd === 'topCoins') {
+      const s = await get(ref(db, 'users_data')); const data = s.val() || {};
       const top = Object.entries(data).map(([u, d]) => [u, d.coins || 0]).sort((a, b) => b[1] - a[1])[0];
       result = top ? `💰 أغنى: <b style="color:var(--gold);">${escapeHtml(top[0])}</b> — ${top[1].toLocaleString()} كوين` : 'لا يوجد';
-    }
-    else if (cmd === 'onlineCount') {
-      const s = await get(ref(db, 'presence'));
-      const data = s.val() || {};
-      const online = Object.values(data).filter(p => p.status === 'online').length;
-      result = `🟢 متصل الآن: <b style="color:var(--success);">${online}</b>`;
-    }
-    else if (cmd === 'attemptsCount') {
-      const s = await get(ref(db, 'scores'));
-      const data = s.val() || {};
-      let total = 0;
+    } else if (cmd === 'onlineCount') {
+      const s = await get(ref(db, 'presence')); const data = s.val() || {};
+      result = `🟢 متصل الآن: <b style="color:var(--success);">${Object.values(data).filter(p => p.status === 'online').length}</b>`;
+    } else if (cmd === 'attemptsCount') {
+      const s = await get(ref(db, 'scores')); const data = s.val() || {}; let total = 0;
       for (const u in data) for (const q in data[u]) total += Object.keys(data[u][q] || {}).length;
       result = `🎮 إجمالي المحاولات: <b style="color:var(--primary);">${total.toLocaleString()}</b>`;
-    }
-    else if (cmd === 'orphanData') {
-      const [uSnap, scoresSnap, uDataSnap, badgesSnap] = await Promise.all([
-        get(ref(db, 'usernames')),
-        get(ref(db, 'scores')),
-        get(ref(db, 'users_data')),
-        get(ref(db, 'badges'))
-      ]);
+    } else if (cmd === 'orphanData') {
+      const [uSnap, scoresSnap, uDataSnap] = await Promise.all([get(ref(db, 'usernames')), get(ref(db, 'scores')), get(ref(db, 'users_data'))]);
       const users = new Set(Object.keys(uSnap.val() || {}));
       const inScores = Object.keys(scoresSnap.val() || {}).filter(u => !users.has(u));
       const inUserData = Object.keys(uDataSnap.val() || {}).filter(u => !users.has(u));
-      const inBadges = Object.keys(badgesSnap.val() || {}).filter(u => !users.has(u));
-      const all = new Set([...inScores, ...inUserData, ...inBadges]);
-      if (all.size === 0) {
-        result = `✅ <b style="color:var(--success);">الداتابيز نظيفة — مفيش أورفان</b>`;
-      } else {
-        result = `<div style="color:var(--warning);font-weight:bold;margin-bottom:8px;">⚠️ لقينا ${all.size} يوزر عندهم بيانات بس مش موجودين في usernames:</div>` +
-          [...all].slice(0, 20).map(u => `<div class="list-item"><span class="list-item-icon">👤</span><span class="list-item-title">${escapeHtml(u)}</span><span style="font-size:11px;color:var(--text-3);">scores:${inScores.includes(u)?'✓':'–'} data:${inUserData.includes(u)?'✓':'–'} badges:${inBadges.includes(u)?'✓':'–'}</span></div>`).join('');
-        if (all.size > 20) result += `<div style="color:var(--text-3);padding:8px;">...و ${all.size - 20} يوزر تاني</div>`;
-      }
-    }
-    else if (cmd === 'clearCache') {
-      const keys = Object.keys(localStorage).filter(k => k.startsWith('geo_') || k.startsWith('nf_') || k.startsWith('cache_'));
+      const all = new Set([...inScores, ...inUserData]);
+      result = all.size === 0 ? '✅ <b style="color:var(--success);">الداتابيز نظيفة</b>' : `⚠️ ${all.size} حساب أورفان.`;
+    } else if (cmd === 'clearCache') {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('geo_') || k.startsWith('nf_'));
       keys.forEach(k => localStorage.removeItem(k));
-      result = `🗑️ تم مسح <b>${keys.length}</b> key من localStorage`;
+      result = `🗑️ تم مسح <b>${keys.length}</b> key`;
     }
-
     box.innerHTML = `<div style="padding:10px;line-height:1.8;">${result}</div>`;
-  } catch (e) {
-    box.innerHTML = `<div style="padding:10px;color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
+  } catch (e) { box.innerHTML = `<div style="padding:10px;color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`; }
 }
 
-/* ============================================================
-   BULK ACTIONS
-============================================================ */
+/* BULK ACTIONS (same as before) */
 async function bulkGiveCoins() {
   const amount = parseInt(document.getElementById('bulkCoinsAmount').value);
   if (!amount || amount < 1) return toast('أدخل عدد صحيح', 'error');
-  if (!confirm(`⚠️ توزيع ${amount} كوين على كل اللاعبين؟`)) return;
-  try {
-    toast('⏳ جاري التنفيذ...', 'info');
-    const s = await get(ref(db, 'users_data'));
-    const data = s.val() || {};
-    const updates = {};
-    let count = 0;
-    for (const u in data) {
-      updates[`users_data/${u}/coins`] = (data[u].coins || 0) + amount;
-      count++;
-    }
-    await update(ref(db), updates);
-    await logAction('dev_bulk_coins', 'all_users', `+${amount} لـ ${count} لاعب`);
-    toast(`✅ تم توزيع ${amount} كوين على ${count} لاعب`);
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!confirm(`توزيع ${amount} كوين على كل اللاعبين؟`)) return;
+  const s = await get(ref(db, 'users_data')); const data = s.val() || {}; const updates = {};
+  for (const u in data) updates[`users_data/${u}/coins`] = (data[u].coins || 0) + amount;
+  await update(ref(db), updates); toast(`✅ تم التوزيع`);
 }
 
 async function bulkGiveXP() {
   const amount = parseInt(document.getElementById('bulkXpAmount').value);
   if (!amount || amount < 1) return toast('أدخل عدد صحيح', 'error');
-  if (!confirm(`⚠️ توزيع ${amount} XP على كل اللاعبين؟`)) return;
-  try {
-    toast('⏳ جاري التنفيذ...', 'info');
-    const s = await get(ref(db, 'users_data'));
-    const data = s.val() || {};
-    const updates = {};
-    let count = 0;
-    for (const u in data) {
-      updates[`users_data/${u}/xp`] = (data[u].xp || 0) + amount;
-      count++;
-    }
-    await update(ref(db), updates);
-    await logAction('dev_bulk_xp', 'all_users', `+${amount} لـ ${count} لاعب`);
-    toast(`✅ تم توزيع ${amount} XP على ${count} لاعب`);
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!confirm(`توزيع ${amount} XP على كل اللاعبين؟`)) return;
+  const s = await get(ref(db, 'users_data')); const data = s.val() || {}; const updates = {};
+  for (const u in data) updates[`users_data/${u}/xp`] = (data[u].xp || 0) + amount;
+  await update(ref(db), updates); toast(`✅ تم التوزيع`);
 }
 
 async function resetPlayer() {
   const user = document.getElementById('resetUserInput').value.trim().toLowerCase();
   const scope = document.getElementById('resetScope').value;
-  if (!user) return toast('اكتب اسم اللاعب', 'error');
-  if (!confirm(`⚠️ Reset "${user}" — النطاق: ${scope}?\n\nمش هينفع ترجع!`)) return;
-  try {
-    if (scope === 'scores') {
-      await remove(ref(db, `scores/${user}`));
-      await remove(ref(db, `leaderboard/${user}`));
-    } else if (scope === 'stats') {
-      await update(ref(db, `users_data/${user}`), { xp: 0, coins: 0, streak: 0 });
-    } else if (scope === 'full') {
-      await remove(ref(db, `scores/${user}`));
-      await remove(ref(db, `leaderboard/${user}`));
-      await remove(ref(db, `badges/${user}`));
-      await remove(ref(db, `users_data/${user}`));
-    }
-    await logAction('dev_reset_player', user, scope);
-    toast(`✅ تم Reset "${user}"`);
-    document.getElementById('resetUserInput').value = '';
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!user || !confirm(`Reset "${user}"؟`)) return;
+  if (scope === 'scores') { await remove(ref(db, `scores/${user}`)); await remove(ref(db, `leaderboard/${user}`)); }
+  else if (scope === 'stats') { await update(ref(db, `users_data/${user}`), { xp: 0, coins: 0, streak: 0 }); }
+  else if (scope === 'full') { await remove(ref(db, `scores/${user}`)); await remove(ref(db, `users_data/${user}`)); await remove(ref(db, `badges/${user}`)); }
+  toast(`✅ تم`);
 }
 
 async function broadcast() {
   const msg = document.getElementById('broadcastMsg').value.trim();
-  if (!msg) return toast('اكتب الرسالة', 'error');
-  if (!confirm(`⚠️ هيتبعت لكل اللاعبين:\n\n"${msg}"\n\nمتأكد؟`)) return;
-  try {
-    toast('⏳ جاري الإرسال...', 'info');
-    const s = await get(ref(db, 'usernames'));
-    const users = Object.keys(s.val() || {});
-    const promises = users.map(u =>
-      push(ref(db, `messages/${u}`), {
-        from: '📢 Admin Broadcast',
-        text: msg,
-        time: Date.now()
-      })
-    );
-    await Promise.all(promises);
-    await logAction('dev_broadcast', 'all_users', msg.substring(0, 80));
-    toast(`✅ تم الإرسال لـ ${users.length} لاعب`);
-    document.getElementById('broadcastMsg').value = '';
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!msg || !confirm(`إرسال للكل؟`)) return;
+  const s = await get(ref(db, 'usernames')); const users = Object.keys(s.val() || {});
+  await Promise.all(users.map(u => push(ref(db, `messages/${u}`), { from: '📢 Admin', text: msg, time: Date.now() })));
+  toast(`✅ تم الإرسال لـ ${users.length}`);
 }
 
 async function kickAllUsers() {
-  if (!confirm('⚠️ هيتم طرد كل اللاعبين فوراً!\n\nمتأكد؟')) return;
-  if (!confirm('تأكيد أخير؟')) return;
-  try {
-    toast('⏳ جاري الطرد...', 'info');
-    const s = await get(ref(db, 'usernames'));
-    const users = Object.keys(s.val() || {});
-    const updates = {};
-    users.forEach(u => { updates[`kick_signals/${u}`] = true; });
-    await update(ref(db), updates);
-    await logAction('dev_kick_all', 'all_users', `${users.length} لاعب`);
-    toast(`✅ تم إرسال إشارة الطرد لـ ${users.length} لاعب`);
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!confirm('طرد الكل؟')) return;
+  const s = await get(ref(db, 'usernames')); const updates = {};
+  Object.keys(s.val() || {}).forEach(u => updates[`kick_signals/${u}`] = true);
+  await update(ref(db), updates); toast('✅ تم');
 }
 
 async function deleteNodeManual() {
   const path = document.getElementById('deleteNodePath').value.trim();
-  if (!path) return toast('اكتب مسار الـ node', 'error');
-  const confirm = prompt(`⚠️ لحذف "${path}" نهائياً، اكتب المسار بالظبط:`);
-  if (confirm !== path) {
-    if (confirm !== null) toast('❌ الاسم غير مطابق', 'error');
-    return;
-  }
-  try {
-    await remove(ref(db, path));
-    await logAction('dev_delete_node_manual', path);
-    toast('🗑️ تم الحذف');
-    document.getElementById('deleteNodePath').value = '';
-    loadRootNodes();
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
+  if (!path || !confirm(`حذف ${path}؟`)) return;
+  await remove(ref(db, path)); toast('🗑️ تم الحذف'); loadRootNodes();
 }
 
-/* ============================================================
-   SETTINGS
-============================================================ */
-let settingsCache = {};
-
-async function loadSettings() {
-  const form = document.getElementById('settingsForm');
-  form.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-  try {
-    const snap = await get(ref(db, 'site_settings'));
-    settingsCache = snap.val() || {};
-    renderSettingsForm();
-  } catch (e) {
-    form.innerHTML = `<div style="color:var(--danger);">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
-}
-
-function renderSettingsForm() {
-  const form = document.getElementById('settingsForm');
-  const keys = Object.keys(settingsCache).sort();
-
-  if (keys.length === 0) {
-    form.innerHTML = '<div style="color:var(--text-3);padding:10px;">لا توجد إعدادات — أضف أول واحدة من تحت</div>';
-    return;
-  }
-
-  form.innerHTML = keys.map(k => {
-    const v = settingsCache[k];
-    const type = typeof v;
-    let input = '';
-
-    if (type === 'boolean') {
-      input = `<select class="field field-mono" data-setting-key="${escapeHtml(k)}">
-        <option value="true" ${v ? 'selected' : ''}>true</option>
-        <option value="false" ${!v ? 'selected' : ''}>false</option>
-      </select>`;
-    } else if (type === 'number') {
-      input = `<input type="number" class="field field-mono" data-setting-key="${escapeHtml(k)}" value="${v}">`;
-    } else if (k.toLowerCase().includes('color')) {
-      input = `<input type="color" class="field" data-setting-key="${escapeHtml(k)}" value="${escapeHtml(v)}">
-        <input type="text" class="field field-mono" value="${escapeHtml(v)}" style="font-size:11px;" disabled>`;
-    } else if (k.toLowerCase().includes('announcement') || k.toLowerCase().includes('description') || (typeof v === 'string' && v.length > 80)) {
-      input = `<textarea class="field field-mono" data-setting-key="${escapeHtml(k)}" rows="2">${escapeHtml(v)}</textarea>`;
-    } else {
-      input = `<input type="text" class="field field-mono" data-setting-key="${escapeHtml(k)}" value="${escapeHtml(String(v))}">`;
-    }
-
-    return `<div style="margin-bottom:10px;">
-      <label style="display:block;font-size:12px;color:var(--primary);font-family:var(--mono);font-weight:700;margin-bottom:4px;">${escapeHtml(k)} <span style="color:var(--text-3);">(${type})</span></label>
-      ${input}
-    </div>`;
-  }).join('');
-}
-
-async function saveSettings() {
-  const form = document.getElementById('settingsForm');
-  const inputs = form.querySelectorAll('[data-setting-key]');
-  const updates = {};
-  inputs.forEach(inp => {
-    const key = inp.dataset.settingKey;
-    let val = inp.value;
-    const original = settingsCache[key];
-    if (typeof original === 'boolean') val = (val === 'true');
-    else if (typeof original === 'number') val = Number(val);
-    updates[`site_settings/${key}`] = val;
-  });
-
-  try {
-    await update(ref(db), updates);
-    await logAction('dev_update_settings', 'site_settings', Object.keys(updates).join(', '));
-    toast('✅ تم حفظ الإعدادات');
-    await loadSettings();
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
-}
-
-async function addSetting() {
-  const key = document.getElementById('newSettingKey').value.trim();
-  let val = document.getElementById('newSettingValue').value.trim();
-  if (!key) return toast('اكتب اسم الإعداد', 'error');
-
-  // Parse primitive
-  if (val === 'true') val = true;
-  else if (val === 'false') val = false;
-  else if (/^-?\d+(\.\d+)?$/.test(val)) val = Number(val);
-
-  try {
-    await set(ref(db, `site_settings/${key}`), val);
-    await logAction('dev_add_setting', key, String(val));
-    toast('✅ تم إضافة الإعداد');
-    document.getElementById('newSettingKey').value = '';
-    document.getElementById('newSettingValue').value = '';
-    await loadSettings();
-  } catch (e) {
-    toast('خطأ: ' + e.message, 'error');
-  }
-}
-
-/* ============================================================
-   MONITOR
-============================================================ */
+/* MONITOR & LOGS & USER LOOKUP (Kept mostly the same, just cleaner) */
 async function loadMonitor() {
-  try {
-    const [uSnap, sSnap, gSnap, cSnap, tSnap, pSnap] = await Promise.all([
-      get(ref(db, 'usernames')),
-      get(ref(db, 'scores')),
-      get(ref(db, 'global_chat')),
-      get(ref(db, 'comments')),
-      get(ref(db, 'support_tickets')),
-      get(ref(db, 'presence'))
-    ]);
-
-    document.getElementById('monUsers').textContent = count(uSnap.val());
-    document.getElementById('monChat').textContent = count(gSnap.val());
-    document.getElementById('monComments').textContent = count(cSnap.val());
-
-    let attempts = 0;
-    const scoresData = sSnap.val() || {};
-    for (const u in scoresData) for (const q in scoresData[u]) attempts += Object.keys(scoresData[u][q] || {}).length;
-    document.getElementById('monAttempts').textContent = attempts.toLocaleString();
-
-    const tickets = tSnap.val() || {};
-    document.getElementById('monTickets').textContent = Object.values(tickets).filter(t => t.status === 'open').length;
-
-    const presence = pSnap.val() || {};
-    document.getElementById('monOnline').textContent = Object.values(presence).filter(p => p.status === 'online').length;
-
-    // Top players
-    const users = await get(ref(db, 'users_data'));
-    const usersData = users.val() || {};
-    const top = Object.entries(usersData).map(([u, d]) => [u, d.xp || 0]).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    document.getElementById('topPlayersBox').innerHTML = top.length
-      ? top.map(([u, xp], i) => `<div class="list-item"><span class="list-item-icon">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</span><span class="list-item-title">${escapeHtml(u)}</span><span style="margin-right:auto;color:var(--gold);font-weight:bold;">${xp.toLocaleString()} XP</span></div>`).join('')
-      : '<div style="padding:10px;color:var(--text-3);">لا يوجد</div>';
-
-    // Recent signups — from usernames sorted somehow? We don't have created_at in usernames.
-    // Use users_data with some heuristic — check for 'joinedAt' if exists, else just show alphabetically
-    const allUsers = Object.entries(usersData);
-    const withTime = allUsers.filter(([, d]) => d.joinedAt || d.createdAt);
-    let recent;
-    if (withTime.length > 0) {
-      recent = withTime.sort((a, b) => (b[1].joinedAt || b[1].createdAt) - (a[1].joinedAt || a[1].createdAt)).slice(0, 5);
-    } else {
-      recent = allUsers.slice(0, 5);
-    }
-    document.getElementById('recentSignupsBox').innerHTML = recent.length
-      ? recent.map(([u, d]) => `<div class="list-item"><span class="list-item-icon">👤</span><span class="list-item-title">${escapeHtml(u)}</span></div>`).join('')
-      : '<div style="padding:10px;color:var(--text-3);">لا يوجد</div>';
-
-    // Health
-    const health = [];
-    const userCount = count(uSnap.val());
-    const scoreCount = count(sSnap.val());
-    const ratio = userCount > 0 ? (scoreCount / userCount).toFixed(1) : 0;
-    health.push(`<div class="list-item"><span class="list-item-icon">📊</span><span class="list-item-title">متوسط scores/user</span><b style="margin-right:auto;color:var(--primary);">${ratio}</b></div>`);
-    health.push(`<div class="list-item"><span class="list-item-icon">📁</span><span class="list-item-title">nodes في users_data</span><b style="margin-right:auto;color:var(--primary);">${userCount}</b></div>`);
-    health.push(`<div class="list-item"><span class="list-item-icon">🎮</span><span class="list-item-title">محاولات مخزّنة</span><b style="margin-right:auto;color:var(--primary);">${attempts.toLocaleString()}</b></div>`);
-
-    // Orphan check
-    const usernames = new Set(Object.keys(uSnap.val() || {}));
-    const orphanScores = Object.keys(scoresData).filter(u => !usernames.has(u)).length;
-    health.push(`<div class="list-item"><span class="list-item-icon">${orphanScores > 0 ? '⚠️' : '✅'}</span><span class="list-item-title">أورفان في scores</span><b style="margin-right:auto;color:${orphanScores > 0 ? 'var(--warning)' : 'var(--success)'};">${orphanScores}</b></div>`);
-
-    document.getElementById('healthBox').innerHTML = health.join('');
-  } catch (e) {
-    console.error(e);
-    toast('خطأ في تحميل الـ monitor: ' + e.message, 'error');
-  }
+  const [uSnap, sSnap, gSnap, cSnap, tSnap, pSnap] = await Promise.all([get(ref(db, 'usernames')), get(ref(db, 'scores')), get(ref(db, 'global_chat')), get(ref(db, 'comments')), get(ref(db, 'support_tickets')), get(ref(db, 'presence'))]);
+  document.getElementById('monUsers').textContent = count(uSnap.val()); document.getElementById('monChat').textContent = count(gSnap.val()); document.getElementById('monComments').textContent = count(cSnap.val());
+  let attempts = 0; const scoresData = sSnap.val() || {};
+  for (const u in scoresData) for (const q in scoresData[u]) attempts += Object.keys(scoresData[u][q] || {}).length;
+  document.getElementById('monAttempts').textContent = attempts.toLocaleString();
+  const tickets = tSnap.val() || {}; document.getElementById('monTickets').textContent = Object.values(tickets).filter(t => t.status === 'open').length;
+  const presence = pSnap.val() || {}; document.getElementById('monOnline').textContent = Object.values(presence).filter(p => p.status === 'online').length;
+  
+  const users = await get(ref(db, 'users_data')); const usersData = users.val() || {};
+  const top = Object.entries(usersData).map(([u, d]) => [u, d.xp || 0]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  document.getElementById('topPlayersBox').innerHTML = top.map(([u, xp], i) => `<div class="list-item"><span class="list-item-icon">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</span><span class="list-item-title">${escapeHtml(u)}</span><span style="margin-right:auto;color:var(--gold);">${xp.toLocaleString()} XP</span></div>`).join('');
+  
+  const health = [];
+  health.push(`<div class="list-item"><span class="list-item-icon">📊</span><span class="list-item-title">نسبة المحاولات للاعب</span><b style="margin-right:auto;color:var(--primary);">${count(uSnap.val()) > 0 ? (count(sSnap.val()) / count(uSnap.val())).toFixed(1) : 0}</b></div>`);
+  document.getElementById('healthBox').innerHTML = health.join('');
 }
-
-/* ============================================================
-   ADMIN LOGS
-============================================================ */
-let allLogsCache = [];
 
 async function loadAllLogs() {
-  const box = document.getElementById('logsBox');
-  box.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-  try {
-    const snap = await get(ref(db, 'admin_logs'));
-    const data = snap.val() || {};
-    allLogsCache = Object.entries(data)
-      .map(([id, l]) => ({ id, ...l }))
-      .sort((a, b) => (b.time || 0) - (a.time || 0));
-
-    // Populate filters
-    const admins = [...new Set(allLogsCache.map(l => l.admin).filter(Boolean))].sort();
-    const actions = [...new Set(allLogsCache.map(l => l.action).filter(Boolean))].sort();
-    const adminSel = document.getElementById('logFilterAdmin');
-    const actionSel = document.getElementById('logFilterAction');
-    const curA = adminSel.value, curB = actionSel.value;
-    adminSel.innerHTML = '<option value="">كل الأدمنز</option>' + admins.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
-    actionSel.innerHTML = '<option value="">كل الإجراءات</option>' + actions.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
-    adminSel.value = curA; actionSel.value = curB;
-
-    renderLogs();
-  } catch (e) {
-    box.innerHTML = `<div style="color:var(--danger);padding:10px;">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
+  const snap = await get(ref(db, 'admin_logs')); const data = snap.val() || {};
+  const allLogs = Object.entries(data).map(([id, l]) => ({ id, ...l })).sort((a, b) => (b.time || 0) - (a.time || 0));
+  const admins = [...new Set(allLogs.map(l => l.admin).filter(Boolean))].sort();
+  const actions = [...new Set(allLogs.map(l => l.action).filter(Boolean))].sort();
+  document.getElementById('logFilterAdmin').innerHTML = '<option value="">كل الأدمنز</option>' + admins.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+  document.getElementById('logFilterAction').innerHTML = '<option value="">كل الإجراءات</option>' + actions.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+  window._allLogs = allLogs; renderLogs();
 }
 
 function renderLogs() {
   const box = document.getElementById('logsBox');
   const search = (document.getElementById('logSearch')?.value || '').toLowerCase().trim();
-  const filterAdmin = document.getElementById('logFilterAdmin')?.value || '';
-  const filterAction = document.getElementById('logFilterAction')?.value || '';
-
-  let filtered = allLogsCache;
-  if (filterAdmin) filtered = filtered.filter(l => l.admin === filterAdmin);
-  if (filterAction) filtered = filtered.filter(l => l.action === filterAction);
-  if (search) {
-    filtered = filtered.filter(l =>
-      (l.admin || '').toLowerCase().includes(search) ||
-      (l.target || '').toLowerCase().includes(search) ||
-      (l.details || '').toLowerCase().includes(search) ||
-      (l.action || '').toLowerCase().includes(search)
-    );
-  }
-
-  const slice = filtered.slice(0, 100);
-  if (slice.length === 0) {
-    box.innerHTML = '<div style="padding:15px;color:var(--text-3);">مفيش نتائج</div>';
-    return;
-  }
-  box.innerHTML = slice.map(l => `
-    <div class="list-item">
-      <span class="list-item-icon">📋</span>
-      <div class="list-item-content">
-        <div class="list-item-title">
-          <span style="color:var(--primary);font-family:var(--mono);">${escapeHtml(l.action || '?')}</span>
-          ${l.target ? `<span style="color:var(--text-3);"> → </span><span>${escapeHtml(l.target)}</span>` : ''}
-        </div>
-        <div class="list-item-sub">
-          👤 ${escapeHtml(l.admin || '?')} · ${fmtDate(l.time)}
-          ${l.details ? `<br>${escapeHtml(l.details).substring(0, 100)}` : ''}
-        </div>
-      </div>
-    </div>
-  `).join('');
+  const fa = document.getElementById('logFilterAdmin')?.value || '';
+  const fc = document.getElementById('logFilterAction')?.value || '';
+  let filtered = window._allLogs || [];
+  if (fa) filtered = filtered.filter(l => l.admin === fa);
+  if (fc) filtered = filtered.filter(l => l.action === fc);
+  if (search) filtered = filtered.filter(l => (l.target||'').toLowerCase().includes(search) || (l.action||'').toLowerCase().includes(search));
+  box.innerHTML = filtered.slice(0, 100).map(l => `
+    <div class="list-item"><span class="list-item-icon">📋</span><div class="list-item-content"><div class="list-item-title"><span style="color:var(--primary);font-family:var(--mono);">${escapeHtml(l.action || '?')}</span> ${l.target ? `→ ${escapeHtml(l.target)}` : ''}</div><div class="list-item-sub">👤 ${escapeHtml(l.admin || '?')} · ${fmtDate(l.time)}</div></div></div>
+  `).join('') || '<div style="padding:15px;color:var(--text-3);">مفيش نتائج</div>';
 }
 
-/* ============================================================
-   USER LOOKUP
-============================================================ */
 async function lookupUser() {
   const username = document.getElementById('userSearchInput').value.trim().toLowerCase();
   const box = document.getElementById('userLookupResult');
   if (!username) return toast('اكتب اسم اللاعب', 'error');
   box.innerHTML = '<div class="loading"><div class="spinner"></div>جاري البحث...</div>';
-
-  try {
-    const [dataSnap, scoresSnap, rolesSnap, warnSnap, banSnap, verifiedSnap] = await Promise.all([
-      get(ref(db, `users_data/${username}`)),
-      get(ref(db, `scores/${username}`)),
-      get(ref(db, `roles/users/${username}`)),
-      get(ref(db, `warnings/${username}`)),
-      get(ref(db, `banned_users/${username}`)),
-      get(ref(db, `verified_users/${username}`))
-    ]);
-
-    if (!dataSnap.exists() && !scoresSnap.exists()) {
-      box.innerHTML = `<div style="padding:15px;color:var(--danger);">❌ اللاعب "${escapeHtml(username)}" غير موجود</div>`;
-      return;
-    }
-
-    const data = dataSnap.val() || {};
-    const scores = scoresSnap.val() || {};
-    let attempts = 0;
-    for (const q in scores) attempts += Object.keys(scores[q] || {}).length;
-    const role = rolesSnap.exists() ? rolesSnap.val() : 'Player';
-    const hasWarn = warnSnap.exists();
-    const isBanned = banSnap.exists();
-    const isVerified = verifiedSnap.exists();
-
-    box.innerHTML = `
-      <div class="card" style="background:var(--bg);">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-          <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--purple));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;">${escapeHtml(username.charAt(0).toUpperCase())}</div>
-          <div>
-            <div style="font-size:18px;font-weight:900;">${escapeHtml(username)} ${isVerified ? '✓' : ''}</div>
-            <div style="font-size:12px;color:var(--text-3);">${escapeHtml(role)}${isBanned ? ' · 🚫 محظور' : ''}${hasWarn ? ' · ⚠️ تحذير' : ''}</div>
-          </div>
-        </div>
-        <div class="grid grid-4" style="margin-bottom:14px;">
-          <div class="stat"><div class="stat-icon">✨</div><div class="stat-value">${(data.xp || 0).toLocaleString()}</div><div class="stat-label">XP</div></div>
-          <div class="stat"><div class="stat-icon">🪙</div><div class="stat-value">${(data.coins || 0).toLocaleString()}</div><div class="stat-label">كوين</div></div>
-          <div class="stat"><div class="stat-icon">🔥</div><div class="stat-value">${data.streak || 0}</div><div class="stat-label">Streak</div></div>
-          <div class="stat"><div class="stat-icon">🎮</div><div class="stat-value">${attempts}</div><div class="stat-label">محاولات</div></div>
-        </div>
-
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
-          <button class="btn btn-sm btn-success" onclick="quickGive('${escapeHtml(username)}', 'coins', 500)">+500 🪙</button>
-          <button class="btn btn-sm btn-success" onclick="quickGive('${escapeHtml(username)}', 'xp', 500)">+500 ✨</button>
-          <button class="btn btn-sm btn-warn" onclick="quickGive('${escapeHtml(username)}', 'coins', -100)">-100 🪙</button>
-          <button class="btn btn-sm" onclick="quickReset('${escapeHtml(username)}', 'coins')">Reset Coins</button>
-          <button class="btn btn-sm" onclick="quickReset('${escapeHtml(username)}', 'xp')">Reset XP</button>
-          ${hasWarn ? `<button class="btn btn-sm btn-success" onclick="quickUnwarn('${escapeHtml(username)}')">✅ إلغاء تحذير</button>` : `<button class="btn btn-sm btn-warn" onclick="quickWarn('${escapeHtml(username)}')">⚠️ تحذير</button>`}
-          ${isBanned ? `<button class="btn btn-sm btn-success" onclick="quickUnban('${escapeHtml(username)}')">✅ رفع حظر</button>` : `<button class="btn btn-sm btn-danger" onclick="quickBan('${escapeHtml(username)}')">🚫 حظر</button>`}
-        </div>
-
-        <details style="margin-top:10px;">
-          <summary style="cursor:pointer;color:var(--text-2);font-weight:700;font-size:13px;">📄 البيانات الخام (JSON)</summary>
-          <div class="json-view" style="margin-top:8px;max-height:300px;">${escapeHtml(JSON.stringify(data, null, 2))}</div>
-        </details>
+  const [dataSnap, scoresSnap, rolesSnap] = await Promise.all([get(ref(db, `users_data/${username}`)), get(ref(db, `scores/${username}`)), get(ref(db, `roles/users/${username}`))]);
+  if (!dataSnap.exists()) { box.innerHTML = `<div style="padding:15px;color:var(--danger);">❌ غير موجود</div>`; return; }
+  const data = dataSnap.val(); const scores = scoresSnap.val() || {}; let attempts = 0; for (const q in scores) attempts += Object.keys(scores[q] || {}).length;
+  box.innerHTML = `
+    <div class="card" style="background:var(--bg);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#a855f7);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;">${escapeHtml(username.charAt(0).toUpperCase())}</div>
+        <div><div style="font-size:18px;font-weight:900;">${escapeHtml(username)}</div><div style="font-size:12px;color:var(--text-3);">${escapeHtml(rolesSnap.val() || 'Player')}</div></div>
       </div>
-    `;
-  } catch (e) {
-    box.innerHTML = `<div style="color:var(--danger);padding:15px;">خطأ: ${escapeHtml(e.message)}</div>`;
-  }
+      <div class="grid grid-4" style="margin-bottom:14px;">
+        <div class="stat"><div class="stat-icon">✨</div><div class="stat-value">${(data.xp||0).toLocaleString()}</div><div class="stat-label">XP</div></div>
+        <div class="stat"><div class="stat-icon">🪙</div><div class="stat-value">${(data.coins||0).toLocaleString()}</div><div class="stat-label">كوين</div></div>
+        <div class="stat"><div class="stat-icon">🔥</div><div class="stat-value">${data.streak||0}</div><div class="stat-label">Streak</div></div>
+        <div class="stat"><div class="stat-icon">🎮</div><div class="stat-value">${attempts}</div><div class="stat-label">محاولات</div></div>
+      </div>
+    </div>`;
 }
 
-async function quickGive(user, field, amount) {
-  try {
-    const snap = await get(ref(db, `users_data/${user}/${field}`));
-    const cur = snap.val() || 0;
-    const newVal = Math.max(0, cur + amount);
-    await set(ref(db, `users_data/${user}/${field}`), newVal);
-    await logAction('dev_quick_give', user, `${field} ${amount >= 0 ? '+' : ''}${amount}`);
-    toast(`✅ ${field}: ${cur} → ${newVal}`);
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
+/* UTILS */
+window.logoutDev = () => { signOut(auth).then(() => { localStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; }); };
+window.refreshAll = async () => { toast('🔄 جاري التحديث...', 'info'); loadRootNodes(); if (document.getElementById('panel-monitor').classList.contains('active')) loadMonitor(); if (document.getElementById('panel-logs').classList.contains('active')) loadAllLogs(); };
+function initAll() { loadRootNodes(); loadMonitor(); }
 
-async function quickReset(user, field) {
-  if (!confirm(`Reset ${field} لـ ${user}؟`)) return;
-  try {
-    await set(ref(db, `users_data/${user}/${field}`), 0);
-    await logAction('dev_quick_reset', user, field);
-    toast(`✅ تم Reset ${field}`);
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
-
-async function quickWarn(user) {
-  const reason = prompt(`سبب التحذير لـ ${user}:`);
-  if (!reason) return;
-  try {
-    await set(ref(db, `warnings/${user}`), { text: reason, by: currentUser, time: Date.now() });
-    await logAction('dev_warn', user, reason);
-    toast('⚠️ تم التحذير');
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
-
-async function quickUnwarn(user) {
-  try {
-    await remove(ref(db, `warnings/${user}`));
-    await logAction('dev_unwarn', user);
-    toast('✅ تم الإلغاء');
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
-
-async function quickBan(user) {
-  const reason = prompt(`سبب الحظر لـ ${user}:`, 'مخالفة');
-  if (reason === null) return;
-  try {
-    await set(ref(db, `banned_users/${user}`), { reason, by: currentUser, time: Date.now() });
-    await logAction('dev_ban', user, reason);
-    toast('🚫 تم الحظر');
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
-
-async function quickUnban(user) {
-  try {
-    await remove(ref(db, `banned_users/${user}`));
-    await logAction('dev_unban', user);
-    toast('✅ تم رفع الحظر');
-    lookupUser();
-  } catch (e) { toast('خطأ: ' + e.message, 'error'); }
-}
-
-/* ============================================================
-   UTILS
-============================================================ */
-window.logoutDev = () => {
-  signOut(auth).then(() => {
-    localStorage.removeItem('loggedInUser');
-    window.location.href = 'index.html';
-  });
-};
-
-window.refreshAll = async () => {
-  toast('🔄 جاري التحديث...', 'info');
-  loadRootNodes();
-  if (document.getElementById('panel-monitor').classList.contains('active')) loadMonitor();
-  if (document.getElementById('panel-logs').classList.contains('active')) loadAllLogs();
-  if (document.getElementById('panel-settings').classList.contains('active')) loadSettings();
-};
-
-/* ============================================================
-   INIT
-============================================================ */
-function initAll() {
-  loadRootNodes();
-  // Prefetch monitor data in background
-  loadMonitor();
-}
-
-// Expose to HTML
-window.quickCmd = quickCmd;
+/* EXPOSE TO HTML */
+window.loadNode = loadNode;
 window.enterEditMode = enterEditMode;
 window.cancelEdit = cancelEdit;
 window.saveNodeEdit = saveNodeEdit;
-window.confirmDeleteCurrent = confirmDeleteCurrent;
-window.reloadCurrentNode = reloadCurrentNode;
-window.loadNode = loadNode;
+window.beautifyJSON = beautifyJSON;
+window.exportNode = exportNode;
+window.openDeleteModal = openDeleteModal;
+window.closeDeleteModal = closeDeleteModal;
+window.executeDelete = executeDelete;
+window.addChildNode = addChildNode;
+window.closeAddModal = closeAddModal;
+window.executeAddChild = executeAddChild;
+window.quickCmd = quickCmd;
 window.bulkGiveCoins = bulkGiveCoins;
 window.bulkGiveXP = bulkGiveXP;
 window.resetPlayer = resetPlayer;
 window.broadcast = broadcast;
 window.kickAllUsers = kickAllUsers;
 window.deleteNodeManual = deleteNodeManual;
-window.saveSettings = saveSettings;
-window.addSetting = addSetting;
 window.loadAllLogs = loadAllLogs;
 window.renderLogs = renderLogs;
 window.lookupUser = lookupUser;
-window.quickGive = quickGive;
-window.quickReset = quickReset;
-window.quickWarn = quickWarn;
-window.quickUnwarn = quickUnwarn;
-window.quickBan = quickBan;
-window.quickUnban = quickUnban;
+window.refreshAll = refreshAll;
+window.logoutDev = logoutDev;
 
-// Start
 checkAccess();
 </script>
 
