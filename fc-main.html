@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC 27 - Main Menu</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#050505">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root {
+    --bg: #050505;
+    --neon: #00ff88;
+    --neon-glow: rgba(0, 255, 136, 0.4);
+    --gold: #ffd700;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff;
+    --text-dim: #888888;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 1. Cinematic Background */
+  .bg-container {
+    position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, #111a15 0%, #050505 100%);
+  }
+  .bg-orb {
+    position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6;
+    animation: floatOrb 20s infinite alternate ease-in-out;
+  }
+  .orb-1 { width: 500px; height: 500px; background: #00ff88; top: -10%; left: -10%; }
+  .orb-2 { width: 600px; height: 600px; background: #0033ff; bottom: -20%; right: -10%; animation-delay: -5s; opacity: 0.3;}
+  .orb-3 { width: 400px; height: 400px; background: #ffd700; top: 40%; left: 60%; animation-delay: -10s; opacity: 0.2;}
+  
+  @keyframes floatOrb {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(150px, 150px) scale(1.2); }
+  }
+
+  /* 2. Loader */
+  #loader {
+    position: fixed; inset: 0; background: #000; z-index: 99999;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    transition: opacity 0.8s ease;
+  }
+  .loader-logo {
+    font-family: 'Teko', sans-serif; font-size: 90px; font-weight: 700; color: var(--neon);
+    text-shadow: 0 0 40px var(--neon); animation: pulseLogo 1.5s infinite alternate;
+  }
+  .loader-bar-bg { width: 250px; height: 6px; background: #222; margin-top: 20px; border-radius: 3px; overflow: hidden; }
+  .loader-bar-fill { height: 100%; background: var(--neon); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 15px var(--neon); }
+  @keyframes pulseLogo { from { opacity: 0.8; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+
+  /* 3. Main App */
+  #app { display: none; width: 100%; height: 100%; flex-direction: column; opacity: 0; transition: opacity 0.5s ease; }
+  
+  /* Top Navbar */
+  .top-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 40px; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 15px; }
+  .nav-logo { font-family: 'Teko', sans-serif; font-size: 40px; font-weight: 700; color: var(--neon); letter-spacing: 2px; text-shadow: 0 0 15px var(--neon-glow); line-height: 1; }
+  .nav-user { display: flex; align-items: center; gap: 20px; font-weight: bold; }
+  .nav-coins { color: var(--gold); background: rgba(255,215,0,0.1); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(255,215,0,0.3); font-family: 'Teko', sans-serif; font-size: 22px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
+  
+  .avatar-small { width: 45px; height: 45px; background: var(--neon); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; color: #000; font-size: 20px; border: 2px solid #fff; box-shadow: 0 0 15px var(--neon-glow); }
+
+  /* Layout */
+  .main-layout {
+    display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden;
+    padding: 0 40px 40px 40px; gap: 40px;
+  }
+
+  /* Sidebar Menu */
+  .sidebar {
+    display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 10px;
+  }
+  .sidebar::-webkit-scrollbar { width: 0; }
+  
+  .menu-btn {
+    background: var(--surface); border: 1px solid var(--border); border-right: 5px solid transparent;
+    padding: 18px 25px; border-radius: 12px; color: var(--text-dim); font-family: 'Teko', sans-serif;
+    font-size: 28px; font-weight: 600; letter-spacing: 1px; cursor: pointer; text-align: right;
+    transition: all 0.2s ease; position: relative; overflow: hidden;
+  }
+  .menu-btn:hover, .menu-btn.active {
+    background: var(--surface-hover); border-color: var(--border);
+    border-right-color: var(--neon); color: var(--text); padding-right: 35px;
+    transform: translateX(-5px);
+  }
+  .menu-btn.active { box-shadow: -15px 0 25px -10px var(--neon); background: linear-gradient(90deg, rgba(0,255,136,0.1), transparent); }
+  .menu-btn::before {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 0%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,136,0.05)); transition: 0.3s;
+  }
+  .menu-btn:hover::before { width: 100%; }
+
+  /* Content Area */
+  .content-area {
+    position: relative; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px;
+  }
+  
+  /* Hero Card (Like FIFA Menu) */
+  .hero-card {
+    width: 100%; height: 100%; background: linear-gradient(135deg, rgba(20,20,30,0.8), rgba(5,5,10,0.9));
+    border: 1px solid var(--border); border-radius: 20px; padding: 50px; display: flex; flex-direction: column; justify-content: center;
+    position: relative; overflow: hidden; box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+  }
+  
+  /* Animated Grid Lines in Background */
+  .hero-card::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px; z-index: -1; transform: perspective(500px) rotateX(60deg) scale(2); transform-origin: bottom; opacity: 0.5;
+  }
+
+  .hero-title { font-family: 'Teko', sans-serif; font-size: 60px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 10px; text-shadow: 0 5px 20px rgba(0,0,0,0.5);}
+  .hero-title span { color: var(--neon); }
+  .hero-desc { font-size: 18px; color: var(--text-dim); max-width: 500px; line-height: 1.6; margin-bottom: 40px; }
+  
+  /* Player Card 3D (Left Side of Hero) */
+  .hero-content { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+  
+  .card-wrapper { perspective: 1000px; margin-left: 50px; }
+  .fut-card {
+    width: 300px; height: 430px; border-radius: 25px; position: relative;
+    display: flex; flex-direction: column; align-items: center; padding: 25px;
+    background: linear-gradient(135deg, #e6c27a 0%, #bf953f 50%, #b38728 100%);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.6);
+    transform-style: preserve-3d; transition: transform 0.1s ease;
+    color: #222; overflow: hidden; border: 2px solid #fff;
+  }
+  .fut-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.5) 25%, transparent 30%);
+    background-size: 200% 200%; background-position: 100% 100%; pointer-events: none;
+  }
+  .fut-card:hover::after { animation: shine 1.5s; }
+  @keyframes shine { 0% { background-position: 100% 100%; } 100% { background-position: -100% -100%; } }
+
+  .c-top { width: 100%; display: flex; justify-content: space-between; transform: translateZ(30px); }
+  .c-rating { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .c-ovr { font-family: 'Teko', sans-serif; font-size: 65px; font-weight: 700; color: #222; }
+  .c-pos { font-family: 'Teko', sans-serif; font-size: 22px; font-weight: 600; }
+  .c-avatar { width: 110px; height: 110px; background: #fff; border-radius: 50%; border: 4px solid #222; margin-top: 10px; transform: translateZ(40px); display: flex; justify-content: center; align-items: center; font-size: 45px; font-weight: 900; }
+  .c-name { font-family: 'Teko', sans-serif; font-size: 36px; font-weight: 700; text-transform: uppercase; margin-top: 15px; border-bottom: 2px solid rgba(0,0,0,0.2); padding-bottom: 5px; transform: translateZ(35px); text-align: center; width: 100%;}
+  .c-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 40px; width: 100%; margin-top: 20px; transform: translateZ(20px); }
+  .c-stat { display: flex; justify-content: space-between; font-family: 'Teko', sans-serif; font-size: 24px; font-weight: 600; }
+  .c-stat span:first-child { color: #555; }
+  .c-stat span:last-child { font-weight: 700; }
+
+  /* Loading Overlay for Page Transitions */
+  #transitionOverlay {
+    position: fixed; inset: 0; background: #000; z-index: 99998; display: none; opacity: 0; transition: opacity 0.3s;
+    justify-content: center; align-items: center; flex-direction: column;
+  }
+  .t-spinner { width: 50px; height: 50px; border: 4px solid #333; border-top-color: var(--neon); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;}
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-container">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+</div>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="loader-logo">FC 27</div>
+  <div class="loader-bar-bg"><div class="loader-bar-fill" id="loadBar"></div></div>
+</div>
+
+<!-- Transition Overlay -->
+<div id="transitionOverlay">
+  <div class="t-spinner"></div>
+  <div style="font-family:Teko; color:var(--neon); font-size:20px; letter-spacing:2px;">LOADING...</div>
+</div>
+
+<!-- App -->
+<div id="app">
+  
+  <div class="top-nav">
+    <div class="nav-brand">
+      <div class="nav-logo">FC 27</div>
+    </div>
+    <div class="nav-user">
+      <div class="nav-coins" id="navCoins">🪙 <span>0</span></div>
+      <div class="avatar-small" id="navAvatar">A</div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="menu-btn active" onclick="navTo('ultimate', this)">ULTIMATE TEAM</div>
+      <div class="menu-btn" onclick="navTo('career', this)">CAREER MODE</div>
+      <div class="menu-btn" onclick="navTo('kickoff', this)">KICK OFF</div>
+      <div class="menu-btn" onclick="navTo('volta', this)">VOLTA</div>
+      <div class="menu-btn" onclick="navTo('store', this)">STORE</div>
+      <div class="menu-btn" style="color:#ff3333; margin-top: 20px; border-right-color: transparent;" onclick="exitGame()">EXIT</div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <div class="hero-card">
+        <div class="hero-content">
+          <div>
+            <div class="hero-title">ULTIMATE <span>TEAM</span></div>
+            <div class="hero-desc">قم ببناء فريق أحلامك، اجمع أفضل اللاعبين، وسيطر على العالم في FC 27. هل أنت مستعد للتحدي؟</div>
+          </div>
+          
+          <!-- 3D Card -->
+          <div class="card-wrapper">
+            <div class="fut-card" id="heroCard">
+              <div class="c-top">
+                <div class="c-rating">
+                  <div class="c-ovr" id="cardOvr">99</div>
+                  <div class="c-pos">CAM</div>
+                </div>
+                <div class="c-avatar" id="cardAvatar">A</div>
+              </div>
+              <div class="c-name" id="cardName">AHMED</div>
+              <div class="c-stats">
+                <div class="c-stat"><span>PAC</span><span>95</span></div>
+                <div class="c-stat"><span>SHO</span><span>98</span></div>
+                <div class="c-stat"><span>PAS</span><span>99</span></div>
+                <div class="c-stat"><span>PHY</span><span>90</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const currentUser = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+
+// ==== Web Audio (Game Sounds) ====
+let audioCtx;
+function playSound(freq) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// ==== Init ====
+document.addEventListener('DOMContentLoaded', () => {
+    let progress = 0;
+    const bar = document.getElementById('loadBar');
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+        bar.style.width = progress + '%';
+        
+        if (progress === 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    setTimeout(() => document.getElementById('app').style.opacity = '1', 50);
+                    loadData();
+                }, 800);
+            }, 300);
+        }
+    }, 150);
+});
+
+// ==== Firebase Data ====
+async function loadData() {
+    if (!currentUser) return;
+    
+    document.getElementById('navAvatar').innerText = currentUser.charAt(0).toUpperCase();
+    document.getElementById('cardAvatar').innerText = currentUser.charAt(0).toUpperCase();
+    document.getElementById('cardName').innerText = currentUser.toUpperCase();
+
+    try {
+        const snap = await get(ref(db, 'users_data/' + currentUser));
+        const data = snap.val() || {};
+        
+        document.querySelector('#navCoins span').innerText = (data.coins || 0).toLocaleString();
+        
+        // تحديث إحصائيات الكارت (بناءً على الـ XP)
+        const xp = data.xp || 0;
+        let ovr = Math.min(99, 75 + Math.floor(xp / 5000));
+        
+        document.getElementById('cardOvr').innerText = ovr;
+        
+    } catch(e) { console.warn(e); }
+}
+
+// ==== Navigation & Transitions ====
+window.navTo = (page, el) => {
+    playSound(600);
+    
+    // تغيير الزرار النشط
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+    if(el) el.classList.add('active');
+
+    // تأثير الانتقال
+    const overlay = document.getElementById('transitionOverlay');
+    overlay.style.display = 'flex';
+    setTimeout(() => overlay.style.opacity = '1', 10);
+
+    // بعد ثانية نروح للصفحة (هنا بنحاكي الانتقال)
+    setTimeout(() => {
+        if (page === 'ultimate') {
+            window.location.href = 'fc-ultimate.html'; // صفحة الـ Ultimate Team اللي عملناها قبل كده
+        } else {
+            // لو الصفحة لسه مش موجودة، نظهر تنبيه
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+            alert(`🚀 قسم ${page.toUpperCase()} قيد الإنشاء في المرحلة القادمة!`);
+        }
+    }, 1000);
+};
+
+window.exitGame = () => {
+    playSound(400);
+    window.location.href = 'index.html';
+};
+
+// ==== 3D Tilt Effect (For the Card) ====
+const card = document.getElementById('heroCard');
+const wrapper = document.querySelector('.card-wrapper');
+
+wrapper.addEventListener('mousemove', (e) => {
+    const rect = wrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = ((y - centerY) / centerY) * -15;
+    const rotateY = ((x - centerX) / centerX) * 15;
+    
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+wrapper.addEventListener('mouseleave', () => {
+    card.style.transform = `rotateX(0) rotateY(0)`;
+    card.style.transition = 'transform 0.5s ease';
+    setTimeout(() => card.style.transition = 'transform 0.1s ease', 500);
+});
+wrapper.addEventListener('mouseenter', () => {
+    card.style.transition = 'transform 0.1s ease';
+});
+
+// تشغيل الأصوات لما تقف على الزراير
+document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => playSound(800));
+});
+</script>
+</body>
+</html>
