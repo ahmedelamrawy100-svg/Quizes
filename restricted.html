@@ -231,6 +231,13 @@
   .dev-list-item:last-child { border-bottom: none; }
   .dev-list-item .action { color: var(--primary); font-weight: bold; font-family: monospace; }
 
+  /* Modals for Custom UI */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
+  .modal-overlay.active { display: flex; }
+  .modal-box { background: var(--surface); border: 1px solid var(--primary); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,217,255,0.2); color: #fff; }
+  .modal-title { font-size: 18px; font-weight: 900; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
   /* Access Denied */
   .access-denied {
     display: none; position: fixed; inset: 0; background: #000; z-index: 999999;
@@ -258,11 +265,11 @@
 <div class="access-denied" id="accessDenied">
   <h1>⛔</h1>
   <h2 style="color: var(--red);">وصول مرفوض</h2>
-  <p>هذه المنطقة مخصصة للأونر فقط.</p>
+  <p>هذه المنطقة مخصصة للإدارة فقط.</p>
   <a href="index.html">⬅ العودة للرئيسية</a>
 </div>
 
-<!-- المحتوى الرئيسي (يظهر فقط للأونر) -->
+<!-- المحتوى الرئيسي (يظهر لصلاحيات معينة) -->
 <div id="mainContent" style="display: none; width: 100%; flex-direction: column; align-items: center;">
   
   <div class="top-bar">
@@ -328,8 +335,8 @@
       <div class="card-desc">إنشاء أكواد خصم وهدايا مخصصة (Promo Codes).</div>
     </a>
 
-    <!-- 9. لوحة المطور (Dev Dashboard) -->
-    <div class="card c-dev" onclick="document.getElementById('devOverlay').style.display='flex'">
+    <!-- 9. لوحة المطور (مخفية عن غير الأونر) -->
+    <div class="card c-dev" id="devCard" onclick="openDevDashboard()" style="display: none;">
       <div class="card-icon">🛠️</div>
       <div class="card-title">لوحة المطور</div>
       <div class="card-desc">أدوات متقدمة (Explorer / Bulk / Logs).</div>
@@ -448,34 +455,124 @@
   </div>
 </div>
 
-<!-- ==========================================
-     SCRIPTS
-========================================== -->
+<!-- Custom Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ تأكيد الحذف</div>
+    <p style="font-size:14px; margin-bottom:15px;">أنت على وشك حذف العنصر ده نهائياً. اكتب اسم العنصر بالظبط لتأكيد الحذف:</p>
+    <div style="background:var(--bg); padding:10px; border-radius:8px; border:1px solid var(--border); font-family:var(--mono); text-align:center; margin-bottom:15px;" id="deleteTargetName"></div>
+    <input type="text" class="field field-mono" id="deleteConfirmInput" placeholder="اكتب اسم العنصر هنا...">
+    <div class="modal-actions">
+      <button class="dev-btn" onclick="window.closeDeleteModal()">إلغاء</button>
+      <button class="dev-btn danger" onclick="window.executeDelete()">🗑️ حذف نهائي</button>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Add Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <div class="modal-title">➕ إضافة عنصر جديد</div>
+    <label style="font-size:12px;color:var(--primary);">اسم المفتاح (Key):</label>
+    <input type="text" class="field field-mono" id="addKeyInput" placeholder="مثلاً: newUser" style="margin-bottom:15px;">
+    <label style="font-size:12px;color:var(--primary);">القيمة (Value):</label>
+    <input type="text" class="field field-mono" id="addValueInput" placeholder="مثلاً: true أو 100 أو نص" style="margin-bottom:15px;">
+    <div class="modal-actions">
+      <button class="dev-btn" onclick="window.closeAddModal()">إلغاء</button>
+      <button class="dev-btn" style="background: var(--primary); color: #000;" onclick="window.executeAddChild()">➕ إضافة</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
-import { db, ref, get, set, update, remove, push, currentUser } from './firebase-shared.js';
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// 1. التحقق من الصلاحيات
-const isOwner = (localStorage.getItem('loggedInUser') || '').toLowerCase() === 'ahmed';
+// إعدادات الفايربيز
+const firebaseConfig = { 
+    apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", 
+    authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", 
+    databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", 
+    projectId: "quiz-hub-app-f4cd0", 
+    storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", 
+    messagingSenderId: "282772179392", 
+    appId: "1:282772179392:web:64646d757592b29ff3a025" 
+};
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-if (!isOwner) {
-    document.getElementById('accessDenied').style.display = 'flex';
-} else {
-    document.getElementById('mainContent').style.display = 'flex';
-    window._devExplorerLoaded = false;
-    window._devSettingsLoaded = false;
-    window._devLogsLoaded = false;
+// ==========================================
+// 1. نظام الصلاحيات (Access Control)
+// ==========================================
+const currentUser = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+let isOwner = false;
+
+async function checkAccess() {
+    if (!currentUser) { window.location.href = 'index.html'; return; }
+
+    // الأونر (أحمد) ليه صلاحية مطلقة
+    if (currentUser === 'ahmed') {
+        isOwner = true;
+        showContent();
+        return;
+    }
+
+    // فحص الرتب للباقي
+    try {
+        const [roleSnap, adminSnap] = await Promise.all([
+            get(ref(db, `roles/users/${currentUser}`)),
+            get(ref(db, `roles/admins/${currentUser}`))
+        ]);
+        
+        let userRole = roleSnap.exists() ? roleSnap.val().toLowerCase() : '';
+        let isAdmin = adminSnap.exists();
+
+        // الرتب المسموح لها بالدخول
+        const allowedRoles = ['admin', 'partner', 'manager', 'tester', 'builder', 'owner'];
+
+        if (isAdmin || allowedRoles.includes(userRole)) {
+            isOwner = false;
+            showContent();
+        } else {
+            document.getElementById('accessDenied').style.display = 'flex';
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('accessDenied').style.display = 'flex';
+    }
 }
 
+function showContent() {
+    document.getElementById('mainContent').style.display = 'flex';
+    if (isOwner) {
+        // لوحة المطور تظهر للأونر فقط
+        document.getElementById('devCard').style.display = 'block';
+        // تهيئة لوحة المطور
+        window._devExplorerLoaded = false;
+    }
+}
+
+// تشغيل الفحص
+checkAccess();
+
 // ==========================================
-// DEV DASHBOARD LOGIC
+// 2. كود لوحة المطور (Dev Tools) - يعمل للأونر فقط
 // ==========================================
+window.openDevDashboard = () => {
+    if (!isOwner) return;
+    document.getElementById('devOverlay').style.display = 'flex';
+    if (!window._devExplorerLoaded) {
+        window.devLoadRootNodes();
+        window._devExplorerLoaded = true;
+    }
+};
+
 window.devSwitchTab = (tab, btn) => {
     document.querySelectorAll('#devOverlay .dev-tab').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('#devOverlay .dev-panel').forEach(p => p.style.display = 'none');
     btn.classList.add('active');
     document.getElementById('devtab-' + tab).style.display = tab === 'explorer' ? 'flex' : 'block';
     
-    if (tab === 'explorer' && !window._devExplorerLoaded) { window.devLoadRootNodes(); window._devExplorerLoaded = true; }
     if (tab === 'settings' && !window._devSettingsLoaded) { window.devLoadSettings(); window._devSettingsLoaded = true; }
     if (tab === 'monitor') window.devLoadMonitor();
     if (tab === 'logs' && !window._devLogsLoaded) { window.devLoadLogs(); window._devLogsLoaded = true; }
@@ -495,7 +592,7 @@ window.devLoadRootNodes = async () => {
             const cnt = data[k] && typeof data[k] === 'object' ? Object.keys(data[k]).length : '•';
             return `<div class="dev-node-item" data-path="${k}" onclick="window.devLoadNode('${k}')"><span>📁 ${k}</span><span class="dev-node-badge">${cnt}</span></div>`;
         }).join('');
-    } catch (e) { box.innerHTML = `<div style="color:var(--red);">${e.message}</div>`; }
+    } catch (e) { box.innerHTML = `<div style="color:#ff3333;">${e.message}</div>`; }
 };
 
 window.devLoadNode = async (path) => {
@@ -509,7 +606,7 @@ window.devLoadNode = async (path) => {
         devCurrentData = snap.val();
         document.getElementById('devBreadcrumb').innerHTML = `<span style="color:var(--primary);">ROOT</span> / ${path}`;
         content.innerHTML = `<pre style="margin:0;">${JSON.stringify(devCurrentData, null, 2)}</pre>`;
-    } catch (e) { content.innerHTML = `<span style="color:var(--red);">${e.message}</span>`; }
+    } catch (e) { content.innerHTML = `<span style="color:#ff3333;">${e.message}</span>`; }
 };
 
 window.devEnterEdit = () => {
@@ -627,7 +724,7 @@ window.devLookupUser = async () => {
     const box = document.getElementById('devUserResult');
     box.innerHTML = 'Loading...';
     const [dS, scS] = await Promise.all([get(ref(db, `users_data/${user}`)), get(ref(db, `scores/${user}`))]);
-    if (!dS.exists()) { box.innerHTML = '<span style="color:var(--red);">❌ غير موجود</span>'; return; }
+    if (!dS.exists()) { box.innerHTML = '<span style="color:#ff3333;">❌ غير موجود</span>'; return; }
     const d = dS.val();
     const sc = scS.val() || {};
     let att = 0; for(let q in sc) att += Object.keys(sc[q]||{}).length;
@@ -654,6 +751,10 @@ window.devQuickGive = async (user, field, amt) => {
     window.devLookupUser();
     alert('✅');
 };
+
+// دالة مودال الحذف والإضافة (لو حبيت تستخدمها في التطوير)
+window.closeDeleteModal = () => document.getElementById('deleteModal').classList.remove('active');
+window.closeAddModal = () => document.getElementById('addModal').classList.remove('active');
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
