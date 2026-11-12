@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎁 صانع الهدايا - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --purple:#a855f7; --green:#4caf50; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px; }
+  
+  .access-denied { display:none; position:fixed; inset:0; background:#000; z-index:9999; justify-content:center; align-items:center; flex-direction:column; gap:20px; text-align:center; padding:20px; }
+  .access-denied h1 { color:#ff0000; font-size:60px; }
+  .access-denied a { color:var(--gold); text-decoration:underline; font-weight:bold; }
+  
+  .container { width:100%; max-width:800px; display:flex; flex-direction:column; gap:20px; }
+  
+  .top-bar { display:flex; justify-content:space-between; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:15px; padding:15px 20px; }
+  .top-bar h1 { color:var(--purple); font-size:22px; display:flex; align-items:center; gap:10px; margin:0; }
+  .back-btn { background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px; }
+  
+  .form-box { background:var(--card); border:2px solid var(--purple); border-radius:15px; padding:25px; box-shadow:0 0 30px rgba(168,85,247,0.15); }
+  .form-title { color:var(--purple); font-size:18px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px; font-weight:bold; }
+  
+  .input-group { margin-bottom:15px; }
+  .input-group label { display:block; margin-bottom:8px; color:#aaa; font-size:14px; font-weight:bold; }
+  .form-control { width:100%; padding:12px 15px; border-radius:10px; border:1px solid var(--border); background:#000; color:#fff; font-family:'Cairo'; font-size:16px; outline:none; transition:0.3s; }
+  .form-control:focus { border-color:var(--purple); }
+  
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+  
+  .btn-generate { background:linear-gradient(135deg, #a855f7, #7e22ce); color:#fff; border:none; padding:14px 20px; border-radius:10px; font-family:'Cairo'; font-weight:900; cursor:pointer; font-size:16px; width:100%; margin-top:10px; transition:0.3s; }
+  .btn-generate:hover { transform:translateY(-2px); box-shadow:0 5px 20px rgba(168,85,247,0.4); }
+  
+  .codes-list { background:var(--card); border:1px solid var(--border); border-radius:15px; padding:20px; }
+  .promo-item { display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); border:1px solid var(--border); padding:12px 15px; border-radius:10px; margin-bottom:10px; }
+  .promo-item h4 { color:var(--gold); font-size:18px; letter-spacing:2px; }
+  .promo-item p { color:#aaa; font-size:13px; margin-top:5px; }
+  .promo-item button { background:#ff0000; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-family:'Cairo'; font-weight:bold; cursor:pointer; transition:0.2s; }
+  .promo-item button:hover { background:#cc0000; transform:scale(1.05); }
+</style>
+</head>
+<body>
+
+<div class="access-denied" id="accessDenied">
+  <h1>⛔</h1>
+  <h2>وصول مرفوض</h2>
+  <p>هذه الصفحة مخصصة للأونر (ahmed) فقط.</p>
+  <a href="index.html">⬅ العودة للرئيسية</a>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
+  <div class="top-bar">
+    <h1>🎁 صانع الهدايا (Promo Codes)</h1>
+    <a href="restricted.html" class="back-btn">⬅ رجوع</a>
+  </div>
+
+  <div class="form-box">
+    <div class="form-title">إنشاء هدية جديدة</div>
+    <form id="promoForm">
+      <div class="input-group">
+        <label>الكود (Promo Code)</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="promoCode" class="form-control" placeholder="مثال: VIP2026" style="text-transform:uppercase;">
+          <button type="button" onclick="generateRandomCode()" style="background:#333; border:1px solid #555; color:#fff; border-radius:10px; padding:0 15px; cursor:pointer; font-family:'Cairo'; font-weight:bold;">عشوائي 🎲</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>نوع الهدية</label>
+        <select id="rewardType" class="form-control" onchange="toggleRewardInputs()">
+          <option value="coins">🪙 كوينز</option>
+          <option value="xp">✨ نقاط خبرة (XP)</option>
+          <option value="item">🧰 مساعد (أداة)</option>
+          <option value="theme">🎨 ثيم (Theme)</option>
+          <option value="title">🎖️ لقب مخصص</option>
+        </select>
+      </div>
+
+      <div id="inputCoins" class="input-group dynamic-input">
+        <label>عدد الكوينز</label>
+        <input type="number" id="amountCoins" class="form-control" value="100" min="1">
+      </div>
+
+      <div id="inputXP" class="input-group dynamic-input" style="display:none;">
+        <label>عدد الـ XP</label>
+        <input type="number" id="amountXP" class="form-control" value="100" min="1">
+      </div>
+
+      <div id="inputItem" class="dynamic-input" style="display:none;">
+        <div class="row">
+          <div class="input-group">
+            <label>المساعد</label>
+            <select id="itemId" class="form-control"></select>
+          </div>
+          <div class="input-group">
+            <label>الكمية</label>
+            <input type="number" id="itemQty" class="form-control" value="1" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div id="inputTheme" class="input-group dynamic-input" style="display:none;">
+        <label>الثيم</label>
+        <select id="themeId" class="form-control"></select>
+      </div>
+
+      <div id="inputTitle" class="input-group dynamic-input" style="display:none;">
+        <label>اسم اللقب</label>
+        <input type="text" id="titleText" class="form-control" placeholder="مثال: ملك القراصنة">
+      </div>
+
+      <div class="row">
+        <div class="input-group">
+          <label>أقصى عدد استخدامات</label>
+          <input type="number" id="maxUses" class="form-control" value="10" min="1">
+        </div>
+        <div class="input-group">
+          <label>تاريخ الانتهاء (اختياري)</label>
+          <input type="date" id="expiryDate" class="form-control">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-generate">🚀 حفظ الكود وإنشاء الهدية</button>
+    </form>
+  </div>
+
+  <div class="codes-list">
+    <div class="form-title" style="color:var(--gold); border-color:#555;">📋 الأكواد النشطة</div>
+    <div id="codesContainer">
+      <p style="color:#aaa; text-align:center;">جاري التحميل...</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  const currentUser = localStorage.getItem('loggedInUser') || '';
+
+  if (currentUser.toLowerCase() !== 'ahmed') {
+      document.getElementById('accessDenied').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'none';
+  } else {
+      document.getElementById('mainContent').style.display = 'flex';
+  }
+
+  // البيانات
+  const ITEMS = [
+    { id: 'freeze10', name: '⏱️ تجميد 10ث' }, { id: 'freeze20', name: '⏱️ تجميد 20ث' },
+    { id: 'add10', name: '➕ إضافة 10ث' }, { id: 'add30', name: '➕ إضافة 30ث' },
+    { id: 'stop_timer', name: '🛑 إيقاف العداد' }, { id: 'fifty', name: '✂️ 50/50' },
+    { id: 'skip', name: '⏭️ تخطي' }, { id: 'hint_half', name: '💡 تلميح' },
+    { id: 'reveal', name: '👁️ إظهار' }, { id: 'second_chance', name: '🎲 فرصة تانية' },
+    { id: 'double_xp', name: '✨ مضاعف XP' }, { id: 'double_coins', name: '💰 مضاعف كوينز' },
+    { id: 'shield', name: '🛡️ درع' }, { id: 'double_lb', name: '🏆 مضاعف ليدربورد' },
+    { id: 'fix_streak', name: '🔥 إصلاح ستريك' }, { id: 'box_bronze', name: '📦 صندوق برونزي' },
+    { id: 'box_silver', name: '🎁 صندوق فضي' }, { id: 'box_gold', name: '🏆 صندوق ذهبي' },
+    { id: 'box_diamond', name: '💎 صندوق ألماسي' }, { id: 'box_legendary', name: '👑 صندوق أسطوري' },
+    { id: 'team_boost', name: '⚔️ دعم التيم' }, { id: 'ghost_mode', name: '👻 وضع الشبح' },
+    { id: 'starter_bundle', name: '🎁 حزمة المبتدئين' }, { id: 'survival_kit', name: '🎒 حقيبة النجاة' },
+    { id: 'speed_demon', name: '💨 شيطان السرعة' }, { id: 'ultimate_pack', name: '👑 الحزمة المطلقة' }
+  ];
+
+  const THEMES = [
+    { id: 'vibrant_synth', name: '🎹 موجة اصطناعية' }, { id: 'vibrant_aurora', name: '🌌 شفق قطبي' },
+    { id: 'vibrant_cosmic', name: '🎨 ألوان كونية' }, { id: 'space_nebula', name: '🌌 سديم أزرق' },
+    { id: 'nature_sunset', name: '🌅 غروب دافئ' }, { id: 'nature_forest', name: '🌲 غابة خضراء' },
+    { id: 'cyber_neon', name: '🌆 مدينة النيون' }, { id: 'cyber_tokyo', name: '🗼 شوارع طوكيو' },
+    { id: 'tech_neon', name: '💡 إضاءة نيون' }, { id: 'fan_magic', name: '🌿 غابة سحرية' },
+    { id: 'abs_liquid', name: '💧 ألوان سائلة' }, { id: 'vibrant_retro', name: '🕹️ ريترو 80s' },
+    { id: 'pastel_dream', name: '☁️ حلم مبهج' }, { id: 'golden_hour', name: '☀️ الساعة الذهبية' },
+    { id: 'ocean_blue', name: '🌊 أعماق زرقاء' },
+    { id: 'neon', name: '💠 بروفايل نيون' }, { id: 'gold', name: '👑 بروفايل ذهبي' },
+    { id: 'ocean', name: '🌊 بروفايل محيط' }, { id: 'forest', name: '🌲 بروفايل غابة' },
+    { id: 'sunset', name: '🌅 بروفايل غروب' }, { id: 'blood', name: '🩸 بروفايل دم' },
+    { id: 'galaxy', name: '🌌 بروفايل مجرة' }, { id: 'legendary', name: '💎 بروفايل أسطوري' }
+  ];
+
+  // تعبئة القوائم
+  const itemSelect = document.getElementById('itemId');
+  ITEMS.forEach(i => itemSelect.innerHTML += `<option value="${i.id}">${i.name}</option>`);
+  
+  const themeSelect = document.getElementById('themeId');
+  THEMES.forEach(t => themeSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`);
+
+  window.toggleRewardInputs = () => {
+      const type = document.getElementById('rewardType').value;
+      document.querySelectorAll('.dynamic-input').forEach(el => el.style.display = 'none');
+      if (type === 'coins') document.getElementById('inputCoins').style.display = 'block';
+      if (type === 'xp') document.getElementById('inputXP').style.display = 'block';
+      if (type === 'item') document.getElementById('inputItem').style.display = 'block';
+      if (type === 'theme') document.getElementById('inputTheme').style.display = 'block';
+      if (type === 'title') document.getElementById('inputTitle').style.display = 'block';
+  };
+
+  window.generateRandomCode = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+      document.getElementById('promoCode').value = code;
+  };
+
+  document.getElementById('promoForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('promoCode').value.trim().toUpperCase();
+      const type = document.getElementById('rewardType').value;
+      const maxUses = parseInt(document.getElementById('maxUses').value) || 1;
+      const expiry = document.getElementById('expiryDate').value;
+
+      if (!code) return alert('اكتب كود أو دوس عشوائي');
+
+      const promoData = {
+          rewardType: type,
+          maxUses: maxUses,
+          usedCount: 0,
+          expiresAt: expiry ? new Date(expiry).getTime() : (Date.now() + 30 * 86400000),
+          active: true,
+          createdAt: Date.now(),
+          createdBy: currentUser
+      };
+
+      if (type === 'coins') promoData.reward = parseInt(document.getElementById('amountCoins').value) || 100;
+      if (type === 'xp') promoData.reward = parseInt(document.getElementById('amountXP').value) || 100;
+      if (type === 'item') {
+          promoData.itemId = document.getElementById('itemId').value;
+          promoData.quantity = parseInt(document.getElementById('itemQty').value) || 1;
+      }
+      if (type === 'theme') {
+          promoData.themeId = document.getElementById('themeId').value;
+      }
+      if (type === 'title') {
+          const titleVal = document.getElementById('titleText').value.trim();
+          if (!titleVal) return alert('اكتب اسم اللقب');
+          promoData.titleText = titleVal;
+      }
+
+      try {
+          await set(ref(db, 'promo_codes/' + code), promoData);
+          alert('✅ تم إنشاء الكود بنجاح: ' + code);
+          document.getElementById('promoForm').reset();
+          document.getElementById('promoCode').value = '';
+          loadCodes();
+      } catch(err) {
+          alert('خطأ: ' + err.message);
+      }
+  };
+
+  function loadCodes() {
+      onValue(ref(db, 'promo_codes'), snap => {
+          const data = snap.val() || {};
+          const list = document.getElementById('codesContainer');
+          list.innerHTML = '';
+          
+          const entries = Object.entries(data).reverse();
+          if (entries.length === 0) {
+              list.innerHTML = '<p style="color:#aaa; text-align:center;">لا يوجد أكواد نشطة حالياً.</p>';
+              return;
+          }
+
+          entries.forEach(([code, info]) => {
+              let typeText = info.rewardType;
+              let extra = '';
+              if (info.rewardType === 'coins') { typeText = '🪙 كوينز'; extra = `(${info.reward})`; }
+              else if (info.rewardType === 'xp') { typeText = '✨ XP'; extra = `(${info.reward})`; }
+              else if (info.rewardType === 'item') { typeText = '🧰 مساعد'; extra = `(${info.itemId} ×${info.quantity})`; }
+              else if (info.rewardType === 'theme') { typeText = '🎨 ثيم'; extra = `(${info.themeId})`; }
+              else if (info.rewardType === 'title') { typeText = '🎖️ لقب'; extra = `(${info.titleText})`; }
+
+              const card = document.createElement('div');
+              card.className = 'promo-item';
+              card.innerHTML = `
+                  <div>
+                      <h4>${code}</h4>
+                      <p>${typeText} ${extra} | الاستخدام: ${info.usedCount || 0}/${info.maxUses}</p>
+                  </div>
+                  <button onclick="deleteCode('${code}')">حذف 🗑️</button>
+              `;
+              list.appendChild(card);
+          });
+      });
+  }
+
+  window.deleteCode = async (code) => {
+      if (confirm('تأكيد حذف الكود ' + code + '؟')) {
+          await remove(ref(db, 'promo_codes/' + code));
+      }
+  };
+
+  loadCodes();
+</script>
+</body>
+</html>
