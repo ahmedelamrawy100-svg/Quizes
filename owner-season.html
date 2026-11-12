@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>👑 صانع الموسم - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg:#080810; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --purple:#a855f7; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px; }
+  .access-denied { display:none; position:fixed; inset:0; background:#000; z-index:9999; justify-content:center; align-items:center; flex-direction:column; gap:20px; text-align:center; padding:20px; }
+  .access-denied h1 { color:#ff0000; font-size:60px; }
+  .access-denied a { color:var(--gold); text-decoration:underline; font-weight:bold; }
+  .container { width:100%; max-width:800px; display:flex; flex-direction:column; gap:20px; }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:15px; padding:15px 20px; }
+  .top-bar h1 { color:var(--gold); font-size:22px; display:flex; align-items:center; gap:10px; margin:0; }
+  .back-btn { background:#222; color:#fff; border:1px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-size:14px; }
+  .form-box { background:var(--card); border:2px solid var(--gold); border-radius:15px; padding:25px; box-shadow:0 0 30px rgba(255,215,0,0.1); }
+  .form-title { color:var(--gold); font-size:18px; margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px; font-weight:bold; }
+  .input-group { margin-bottom:15px; }
+  .input-group label { display:block; margin-bottom:8px; color:#aaa; font-size:14px; font-weight:bold; }
+  .form-control { width:100%; padding:12px 15px; border-radius:10px; border:1px solid var(--border); background:#000; color:#fff; font-family:'Cairo'; font-size:16px; outline:none; }
+  .form-control:focus { border-color:var(--gold); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+  .btn-generate { background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; border:none; padding:14px 20px; border-radius:10px; font-family:'Cairo'; font-weight:900; cursor:pointer; font-size:16px; width:100%; margin-top:10px; transition:0.3s; }
+  .btn-generate:hover { transform:translateY(-2px); box-shadow:0 5px 20px rgba(255,215,0,0.4); }
+</style>
+</head>
+<body>
+
+<div class="access-denied" id="accessDenied">
+  <h1>⛔</h1>
+  <h2>وصول مرفوض</h2>
+  <p>هذه الصفحة مخصصة للأونر (ahmed) فقط.</p>
+  <a href="index.html">⬅ العودة للرئيسية</a>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
+  <div class="top-bar">
+    <h1>👑 صانع الموسم (Season Pass)</h1>
+    <a href="restricted.html" class="back-btn">⬅ رجوع</a>
+  </div>
+
+  <div class="form-box">
+    <div class="form-title">إنشاء موسم جديد (سيتم مسح الموسم القديم)</div>
+    <form id="seasonForm">
+      <div class="row">
+        <div class="input-group">
+          <label>اسم الموسم</label>
+          <input type="text" id="seasonName" class="form-control" placeholder="مثال: موسم الرعب 🎃" required>
+        </div>
+        <div class="input-group">
+          <label>مدة الموسم (بالأيام)</label>
+          <input type="number" id="seasonDays" class="form-control" value="30" min="1" required>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="input-group">
+          <label>سعر الـ VIP (كوينز)</label>
+          <input type="number" id="vipPrice" class="form-control" value="1500" min="0" required>
+        </div>
+        <div class="input-group">
+          <label>الـ XP المطلوب لكل مستوى</label>
+          <input type="number" id="xpPerTier" class="form-control" value="100" min="10" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-generate">🚀 توليد الموسم وتفعيله</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  
+  const currentUser = localStorage.getItem('loggedInUser') || '';
+
+  if (currentUser.toLowerCase() !== 'ahmed') {
+      document.getElementById('accessDenied').style.display = 'flex';
+      document.getElementById('mainContent').style.display = 'none';
+  } else {
+      document.getElementById('mainContent').style.display = 'flex';
+  }
+
+  document.getElementById('seasonForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('seasonName').value.trim();
+      const days = parseInt(document.getElementById('seasonDays').value) || 30;
+      const vipPrice = parseInt(document.getElementById('vipPrice').value) || 1500;
+      const xpPerTier = parseInt(document.getElementById('xpPerTier').value) || 100;
+      const tierCount = 30; // 30 مستوى
+
+      if (!confirm('هل أنت متأكد؟ سيتم مسح الموسم القديم بالكامل!')) return;
+
+      const seasonId = 'season_' + Date.now();
+      const endTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+      
+      const tiers = {};
+
+      for (let i = 1; i <= tierCount; i++) {
+          // توزيع الجوايز بشكل تصاعدي
+          let freeReward, premiumReward;
+          
+          if (i % 10 === 0) {
+              // كل 10 مستويات (جايزة كبيرة)
+              freeReward = { type: 'item', itemId: 'box_gold', qty: 1 };
+              premiumReward = { type: 'theme', themeId: 'vibrant_synth' }; // ثيم
+          } else if (i % 5 === 0) {
+              // كل 5 مستويات (جايزة متوسطة)
+              freeReward = { type: 'coins', amount: 200 + (i * 10) };
+              premiumReward = { type: 'item', itemId: 'box_legendary', qty: 1 };
+          } else {
+              // جوايز عادية
+              freeReward = { type: 'coins', amount: 50 + (i * 5) };
+              premiumReward = { type: 'xp', amount: 100 + (i * 10) };
+          }
+
+          tiers[i] = {
+              xpNeeded: i * xpPerTier,
+              free: freeReward,
+              premium: premiumReward
+          };
+      }
+
+      const seasonData = {
+          id: seasonId,
+          name: name,
+          startTime: Date.now(),
+          endTime: endTime,
+          vipPrice: vipPrice,
+          tiers: tiers,
+          active: true
+      };
+
+      try {
+          await set(ref(db, 'season_pass/current'), seasonData);
+          alert('✅ تم إنشاء الموسم بنجاح!');
+          document.getElementById('seasonForm').reset();
+      } catch(err) {
+          alert('خطأ: ' + err.message);
+      }
+  };
+</script>
+</body>
+</html>
