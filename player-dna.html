@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 الحمض النووي للاعب - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
+<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root { --bg: #050510; --card: #111; --border: #333; --text: #fff; --accent: #00bcd4; --gold: #ffd700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: radial-gradient(circle at center, #1a0a2e 0%, #050510 100%); color: var(--text); font-family: 'Cairo', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  
+  .top-bar { width: 100%; max-width: 800px; display: flex; justify-content: space-between; margin-bottom: 20px; }
+  .back-btn { background: #222; color: #fff; border: 2px solid #555; padding: 8px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+
+  .dna-container { width: 100%; max-width: 800px; background: rgba(20,20,35,0.8); backdrop-filter: blur(15px); border: 2px solid var(--border); border-radius: 20px; padding: 30px; box-shadow: 0 0 40px rgba(0,188,212,0.15); position: relative; overflow: hidden; text-align: center; }
+  .dna-container::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg, transparent, rgba(0,188,212,0.1), transparent 30%); animation: rotate 10s linear infinite; z-index: -1; }
+  @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+  .dna-header h1 { font-size: 36px; font-weight: 900; background: linear-gradient(90deg, #00bcd4, #ffd700); -webkit-background-clip: text; color: transparent; margin-bottom: 5px; }
+  .dna-header p { color: #aaa; font-size: 16px; margin-bottom: 20px; }
+
+  .title-box { display: inline-block; background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2)); border: 2px solid var(--gold); padding: 10px 30px; border-radius: 30px; margin-bottom: 30px; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+  .title-box h2 { color: var(--gold); font-size: 24px; font-weight: 900; }
+  .title-box p { color: #ddd; font-size: 13px; margin-top: 5px; }
+
+  .chart-container { width: 100%; max-width: 500px; margin: 0 auto 30px auto; position: relative; }
+  
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
+  .stat-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 15px 10px; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+  .stat-box h3 { color: #aaa; font-size: 13px; margin-bottom: 5px; }
+  .stat-box p { color: var(--accent); font-size: 20px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .loading { font-size: 20px; color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="profile.html" class="back-btn">⬅ رجوع للبروفايل</a>
+</div>
+
+<div class="dna-container">
+  <div id="loadingScreen" class="loading">⏳ جاري تحليل الحمض النووي الخاص بك...</div>
+  
+  <div id="dnaContent" style="display: none;">
+    <div class="dna-header">
+      <h1>🧬 الحمض النووي للاعب</h1>
+      <p id="userNameText">جاري التحميل...</p>
+    </div>
+
+    <div class="title-box">
+      <h2 id="personaTitle">جاري التحليل...</h2>
+      <p id="personaDesc">...</p>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="dnaChart"></canvas>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><h3>السرعة</h3><p id="statSpeed">0%</p></div>
+      <div class="stat-box"><h3>الدقة</h3><p id="statAccuracy">0%</p></div>
+      <div class="stat-box"><h3>الاستمرارية</h3><p id="statStreak">0</p></div>
+      <div class="stat-box"><h3>المعرفة</h3><p id="statKnowledge">0</p></div>
+      <div class="stat-box"><h3>الثروة</h3><p id="statWealth">0</p></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const currentUser = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+
+    async function analyzeDNA() {
+        if (!currentUser) {
+            document.getElementById('loadingScreen').innerText = "❌ لازم تسجل دخول الأول!";
+            return;
+        }
+
+        try {
+            const userSnap = await get(ref(db, `users_data/${currentUser}`));
+            const scoresSnap = await get(ref(db, `scores/${currentUser}`));
+            
+            const data = userSnap.exists() ? userSnap.val() : {};
+            const scores = scoresSnap.exists() ? scoresSnap.val() : {};
+
+            let totalQuizzes = 0, totalCorrect = 0, totalQuestions = 0;
+            
+            // تنظيف البيانات: التأكد من إن الأرقام دي أرقام فعلاً مش تواريخ
+            for (let quiz in scores) {
+                for (let attempt in scores[quiz]) {
+                    let attemptData = scores[quiz][attempt];
+                    if (typeof attemptData === 'object' && attemptData !== null) {
+                        totalQuizzes++;
+                        // لو الـ score رقم كبير أوي (تواريخ)، بنتجاهله
+                        let scoreVal = Number(attemptData.score) || 0;
+                        let totalVal = Number(attemptData.total) || 0;
+                        
+                        if(scoreVal < 100000) totalCorrect += scoreVal;
+                        if(totalVal < 100000) totalQuestions += totalVal;
+                    }
+                }
+            }
+
+            const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+            const speed = Math.min(100, Math.round((totalQuizzes * 2) + (accuracy * 0.5)));
+            const streak = data.streak || 0;
+            const knowledge = totalCorrect;
+            const wealth = data.coins || 0;
+
+            // إظهار البيانات مع تنسيق الأرقام
+            document.getElementById('userNameText').innerText = `تحليل شخصية: ${currentUser}`;
+            document.getElementById('statSpeed').innerText = speed + '%';
+            document.getElementById('statAccuracy').innerText = accuracy + '%';
+            document.getElementById('statStreak').innerText = streak + ' يوم';
+            document.getElementById('statKnowledge').innerText = knowledge.toLocaleString() + ' صح';
+            document.getElementById('statWealth').innerText = wealth.toLocaleString() + ' 🪙';
+
+            // تحديد اللقب
+            let persona = "المبتدئ", desc = "لسه في بداية طريقك، العب أكتر عشان نكتشف شخصيتك!";
+            const maxStat = Math.max(speed, accuracy, streak, knowledge, wealth);
+            
+            if (maxStat === accuracy && accuracy > 50) { persona = "🎯 القناص"; desc = "دقتك عالية جداً، بتجاوب صح مهما كان السؤال صعب."; }
+            else if (maxStat === wealth && wealth > 1000) { persona = "💰 جامع الكنوز"; desc = "الكوينز بتحبك، ومحفظتك دايمًا مليانة."; }
+            else if (maxStat === streak && streak > 3) { persona = "🔥 المستمر"; desc = "إدمانك للعب وتحديك لنفسك كل يوم هو سر قوتك."; }
+            else if (maxStat === speed && speed > 70) { persona = "⚡ السريع"; desc = "بتفكر بسرعة البرق وبتنهي الكويزات في لمح البصر."; }
+            else if (maxStat === knowledge && knowledge > 100) { persona = "🧠 المفكر الاستراتيجي"; desc = "معلوماتك واسعة جداً، ومفيش سؤال بيفوتك."; }
+
+            document.getElementById('personaTitle').innerText = persona;
+            document.getElementById('personaDesc').innerText = desc;
+
+            // رسم الرادار (عشان يبقى شكله مليان ومحترم من الأول)
+            const chartSpeed = Math.max(20, speed); 
+            const chartAccuracy = Math.max(20, accuracy);
+            const chartStreak = Math.max(20, Math.min(100, streak * 10));
+            const chartKnowledge = Math.max(20, Math.min(100, knowledge * 2));
+            const chartWealth = Math.max(20, Math.min(100, wealth / 1000));
+
+            renderChart(chartSpeed, chartAccuracy, chartStreak, chartKnowledge, chartWealth);
+
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('dnaContent').style.display = 'block';
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('loadingScreen').innerText = "❌ حصل خطأ في التحليل.";
+        }
+    }
+
+    function renderChart(speed, accuracy, streak, knowledge, wealth) {
+        const ctx = document.getElementById('dnaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['السرعة ⚡', 'الدقة 🎯', 'الاستمرارية 🔥', 'المعرفة 🧠', 'الثروة 💰'],
+                datasets: [{
+                    label: 'مستوى اللاعب',
+                    data: [speed, accuracy, streak, knowledge, wealth],
+                    backgroundColor: 'rgba(0, 188, 212, 0.3)',
+                    borderColor: 'rgba(0, 188, 212, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#ffd700',
+                    pointBorderColor: '#fff',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#fff', font: { family: 'Cairo', size: 14, weight: 'bold' } },
+                        ticks: { display: false, min: 0, max: 100 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    setTimeout(analyzeDNA, 500);
+</script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
