@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕵️ Escape Room - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --red:#ef4444; --green:#10b981; --blue:#00bcd4; --purple:#a855f7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px; display:flex; flex-direction:column; align-items:center; }
+  .container { max-width:750px; width:100%; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:0.2s; }
+  .btn:hover { background:var(--gold); color:#000; }
+  .btn-hint { background:rgba(0,188,212,0.1); border-color:var(--blue); color:var(--blue); }
+  .btn-hint:hover { background:var(--blue); color:#fff; }
+  .btn-danger { background:rgba(239,68,68,0.1); border-color:var(--red); color:var(--red); }
+  .btn-danger:hover { background:var(--red); color:#fff; }
+  
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .progress-info { display:flex; gap:10px; align-items:center; }
+  .progress-pill { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:8px 16px; font-size:13px; font-weight:700; color:var(--gold); }
+  
+  .puzzle-card { background:var(--card); border:2px solid var(--gold); border-radius:18px; padding:30px; box-shadow:0 0 40px rgba(255,215,0,0.15); }
+  .puzzle-num { display:inline-block; background:var(--gold); color:#000; padding:5px 15px; border-radius:20px; font-size:12px; font-weight:900; margin-bottom:15px; }
+  .puzzle-title { font-size:26px; color:var(--gold); margin-bottom:15px; font-weight:900; }
+  .puzzle-desc { color:var(--text-2); font-size:15px; margin-bottom:20px; line-height:1.6; }
+  .puzzle-question { font-size:18px; font-weight:900; margin-bottom:20px; line-height:1.6; padding:15px; background:rgba(0,0,0,0.3); border-radius:12px; border-right:4px solid var(--gold); }
+  
+  .code-input { width:100%; padding:16px; border-radius:12px; border:2px solid var(--border); background:rgba(0,0,0,0.4); color:var(--gold); font-size:22px; text-align:center; letter-spacing:5px; font-family:monospace; outline:none; text-transform:uppercase; margin-bottom:15px; transition:0.3s; }
+  .code-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,215,0,0.2); }
+  
+  .hint-box { background:rgba(0,188,212,0.1); border:1px solid var(--blue); border-radius:10px; padding:12px 16px; margin-bottom:15px; color:var(--blue); font-size:14px; font-weight:700; display:none; }
+  .hint-box.show { display:block; animation:fadeIn 0.3s; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+  
+  .feedback { padding:14px; border-radius:12px; margin-top:15px; font-weight:900; text-align:center; display:none; font-size:15px; }
+  .feedback.show { display:block; }
+  .feedback.success { background:rgba(16,185,129,0.15); color:var(--green); border:1px solid var(--green); }
+  .feedback.error { background:rgba(239,68,68,0.15); color:var(--red); border:1px solid var(--red); }
+  
+  .final-screen { text-align:center; padding:50px 20px; background:var(--card); border:2px solid var(--green); border-radius:20px; box-shadow:0 0 50px rgba(16,185,129,0.3); }
+  .final-icon { font-size:80px; margin-bottom:20px; }
+  .final-title { font-size:32px; color:var(--green); font-weight:900; margin-bottom:15px; }
+  .final-sub { color:var(--text-2); font-size:16px; margin-bottom:25px; line-height:1.6; }
+  .reward-badge { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg, var(--gold), #ff8c00); color:#000; padding:15px 30px; border-radius:15px; font-weight:900; font-size:18px; margin-bottom:25px; box-shadow:0 5px 20px rgba(255,215,0,0.4); }
+  
+  .loading { text-align:center; padding:60px 20px; color:var(--text-2); }
+  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; margin:0 auto 15px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="btn">⬅ Back</a>
+    <div class="progress-info" id="progressInfo" style="display:none;">
+      <span class="progress-pill" id="progressPill">🔓 Puzzle 1 / 3</span>
+    </div>
+  </div>
+  
+  <div id="content">
+    <div class="loading"><div class="spinner"></div><span>Loading...</span></div>
+  </div>
+</div>
+
+<script type="module">
+import { db, ref, get, set, update, currentUser } from './firebase-shared.js';
+
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+const today = new Date().toISOString().split('T')[0];
+
+const PUZZLES = [
+  {
+    q: 'أنا عندي مدن لكن مفيش بيوت، عندي جبال لكن مفيش حجارة، عندي مياه لكن مفيش سمك. مين أنا؟',
+    en: 'I have cities but no houses, mountains but no stones, water but no fish. Who am I?',
+    hint: '💡 حاجة بتشوفها على الحيطة أو في الموبايل',
+    answers: ['الخريطة', 'خريطة', 'خريطه', 'map', 'the map', 'a map'],
+    reward: 100
+  },
+  {
+    q: 'كل ما تاخد منه أكتر، كل ما يكبر. إيه هو؟',
+    en: 'The more you take, the more you leave behind. What is it?',
+    hint: '💡 حاجة بتحصل لما تمشي',
+    answers: ['الحفرة', 'حفرة', 'حفره', 'hole', 'the hole', 'a hole', 'footsteps', 'steps', 'خطوات'],
+    reward: 150
+  },
+  {
+    q: 'بيتكلم كل اللغات بس ملوش لسان. إيه هو؟',
+    en: 'It speaks all languages but has no tongue. What is it?',
+    hint: '💡 لما تصرخ في وادي أو مكان فاضي، بيرجعلك إيه؟',
+    answers: ['الصدى', 'صدى', 'echo', 'the echo', 'an echo'],
+    reward: 200
+  },
+  {
+    q: 'بيطير من غير أجنحة، وبيعيط من غير عينين. إيه هو؟',
+    en: 'It flies without wings and cries without eyes. What is it?',
+    hint: '💡 في السما وبيبقى لونه أبيض أو رمادي',
+    answers: ['السحاب', 'سحاب', 'السحابة', 'سحابة', 'cloud', 'clouds', 'the cloud'],
+    reward: 150
+  },
+  {
+    q: 'لو كسرته مبيتكسرش أبداً. إيه هو؟',
+    en: 'If you break it, it never breaks. What is it?',
+    hint: '💡 حاجة بتقولها لحد وبتخليه ملتزم',
+    answers: ['الوعد', 'وعد', 'الوعود', 'promise', 'a promise', 'the promise'],
+    reward: 250
+  },
+  {
+    q: 'بيشوف كل حاجة بس ملوش عينين. إيه هو؟',
+    en: 'It sees everything but has no eyes. What is it?',
+    hint: '💡 حاجة بتشوف وشك كل يوم الصبح',
+    answers: ['المرايا', 'مرايا', 'المرايا', 'mirror', 'mirrors', 'the mirror', 'a mirror'],
+    reward: 150
+  },
+  {
+    q: 'بيمشي معاك في كل مكان بس مش بياكل ولا بيشرب. إيه هو؟',
+    en: 'It follows you everywhere but never eats or drinks. What is it?',
+    hint: '💡 في الشمس أو في الضوء العالي، بتلاقيه تحت رجلك',
+    answers: ['الظل', 'ظل', 'الظل بتاعك', 'shadow', 'the shadow', 'your shadow'],
+    reward: 100
+  },
+  {
+    q: 'كل ما تقرب منه، كل ما يبعد. إيه هو؟',
+    en: 'The closer you get, the farther it gets. What is it?',
+    hint: '💡 حاجة بتشوفها في السما في النهار أو في المسافة',
+    answers: ['الأفق', 'افق', 'الافق', 'horizon', 'the horizon'],
+    reward: 300
+  }
+];
+
+function getTodayPuzzles() {
+  const dayNum = parseInt(today.replace(/-/g, '')) % 10000;
+  const shuffled = [...PUZZLES].sort((a, b) => {
+    const hash = (p, i) => (dayNum * (i + 1) + p.q.length) % 9999;
+    return hash(a, 0) - hash(b, 0);
+  });
+  return shuffled.slice(0, 3);
+}
+
+function normalize(str) {
+  return String(str || '').toLowerCase().trim()
+    .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ًٌٍَُِّْ]/g, '');
+}
+
+function matchesAnswer(input, acceptedAnswers) {
+  const norm = normalize(input);
+  if (!norm) return false;
+  return acceptedAnswers.some(a => normalize(a) === norm);
+}
+
+async function init() {
+  const content = document.getElementById('content');
+  
+  if (!CU) {
+    content.innerHTML = `<div class="puzzle-card" style="text-align:center;"><div class="puzzle-title">🔒 Login Required</div><p class="puzzle-desc">Please log in first to play</p><a href="index.html" class="btn">🏠 Home</a></div>`;
+    return;
+  }
+  
+  try {
+    const solvedSnap = await get(ref(db, `escape_room_solved/${CU}/${today}`));
+    if (solvedSnap.exists()) {
+      const data = solvedSnap.val();
+      showFinalScreen(data);
+      return;
+    }
+  } catch(e) { console.error(e); }
+  
+  let currentPuzzle = 0;
+  let totalReward = 0;
+  try {
+    const progSnap = await get(ref(db, `escape_room_progress/${CU}/${today}`));
+    if (progSnap.exists()) {
+      currentPuzzle = progSnap.val().currentPuzzle || 0;
+      totalReward = progSnap.val().totalReward || 0;
+    }
+  } catch(e) {}
+  
+  const puzzles = getTodayPuzzles();
+  renderPuzzle(currentPuzzle, puzzles, totalReward);
+}
+
+async function renderPuzzle(idx, puzzles, totalReward) {
+  const content = document.getElementById('content');
+  document.getElementById('progressInfo').style.display = 'flex';
+  document.getElementById('progressPill').innerText = `🔓 Puzzle ${idx + 1} / ${puzzles.length}`;
+  
+  if (idx >= puzzles.length) {
+    return showFinalScreen({ totalReward });
+  }
+  
+  const puzzle = puzzles[idx];
+  
+  content.innerHTML = `
+    <div class="puzzle-card">
+      <span class="puzzle-num">PUZZLE ${idx + 1} / ${puzzles.length}</span>
+      <div class="puzzle-title">🚪 Door ${idx + 1}</div>
+      <div class="puzzle-desc">Solve the riddle to unlock the next door</div>
+      <div class="puzzle-question">${puzzle.q}</div>
+      <input type="text" id="codeInput" class="code-input" placeholder="WRITE ANSWER" autocomplete="off">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-hint" onclick="document.getElementById('hintBox').classList.add('show')" style="flex:1; justify-content:center;">💡 Hint</button>
+        <button class="btn" onclick="window.submitAnswer()" style="flex:2; justify-content:center; background:var(--gold); color:#000; border-color:var(--gold); font-weight:900;">🔓 Unlock</button>
+      </div>
+      <div class="hint-box" id="hintBox">${puzzle.hint}</div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  `;
+  
+  document.getElementById('codeInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') window.submitAnswer();
+  });
+  document.getElementById('codeInput').focus();
+  
+  try {
+    await set(ref(db, `escape_room_progress/${CU}/${today}`), {
+      currentPuzzle: idx, totalReward
+    });
+  } catch(e) {}
+  
+  window.submitAnswer = async () => {
+    const input = document.getElementById('codeInput').value.trim();
+    const feedback = document.getElementById('feedback');
+    
+    if (!input) {
+      feedback.className = 'feedback show error';
+      feedback.innerText = '⚠️ Write your answer first!';
+      return;
+    }
+    
+    if (matchesAnswer(input, puzzle.answers)) {
+      feedback.className = 'feedback show success';
+      feedback.innerText = `✅ Correct! +${puzzle.reward} coins`;
+      if (window.confetti) confetti({ particleCount: 100, spread: 80 });
+      
+      const coinsSnap = await get(ref(db, `users_data/${CU}/coins`));
+      const curCoins = coinsSnap.val() || 0;
+      await update(ref(db, `users_data/${CU}`), { coins: curCoins + puzzle.reward });
+      
+      const newTotal = totalReward + puzzle.reward;
+      
+      setTimeout(async () => {
+        const nextIdx = idx + 1;
+        if (nextIdx >= puzzles.length) {
+          await set(ref(db, `escape_room_solved/${CU}/${today}`), { totalReward: newTotal, completedAt: Date.now() });
+          await update(ref(db, `users_data/${CU}`), { xp: ((await get(ref(db, `users_data/${CU}/xp`))).val() || 0) + 200 });
+          await set(ref(db, `escape_room_progress/${CU}/${today}`), null);
+          showFinalScreen({ totalReward: newTotal });
+        } else {
+          renderPuzzle(nextIdx, puzzles, newTotal);
+        }
+      }, 1500);
+    } else {
+      feedback.className = 'feedback show error';
+      feedback.innerText = '❌ Wrong answer, try again!';
+      document.getElementById('codeInput').value = '';
+    }
+  };
+}
+
+function showFinalScreen(data) {
+  document.getElementById('progressInfo').style.display = 'none';
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="final-screen">
+      <div class="final-icon">🎉</div>
+      <div class="final-title">You escaped!</div>
+      <div class="final-sub">You solved all 3 puzzles today!<br>Come back tomorrow for a new challenge.</div>
+      <!-- ✅ إصلاح اتجاه الكلام عشان الـ + تطلع في الأول -->
+      <div class="reward-badge" dir="ltr">🪙 +${data.totalReward || 0} Coins</div>
+      <br>
+      <a href="index.html" class="btn" style="margin-top:10px;">🏠 Home</a>
+    </div>
+  `;
+  if (window.confetti) confetti({ particleCount: 250, spread: 120 });
+}
+
+init();
+</script>
+<script type="module" src="notifications.js"></script>
+</body>
+</html>
