@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 المهام اليومية - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+  :root {
+    --bg: #080810;
+    --bg-2: #0f0f1a;
+    --card: #12121e;
+    --card-2: #1a1a28;
+    --border: #2a2a3f;
+    --gold: #ffd700;
+    --gold-dark: #b8860b;
+    --text: #fff;
+    --text-2: #aaa;
+    --text-3: #666;
+    --accent: #ff0000;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --purple: #a855f7;
+    --easy: #10b981;
+    --medium: #f59e0b;
+    --hard: #ef4444;
+  }
+  body.light-mode {
+    --bg: #f5f7fa;
+    --bg-2: #eaeef3;
+    --card: #ffffff;
+    --card-2: #f0f2f5;
+    --border: #dde3eb;
+    --text: #1a1a2e;
+    --text-2: #555;
+    --text-3: #888;
+    --gold: #b8860b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(circle at 50% 0%, #1a0a2e 0%, var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+    padding: 16px 14px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light-mode {
+    background: radial-gradient(circle at 50% 0%, #dde3eb 0%, var(--bg) 60%);
+  }
+
+  /* ================= TOP BAR ================= */
+  .top-bar {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .back-btn, .lang-btn, .theme-btn, .refresh-btn {
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid var(--border);
+    padding: 9px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Cairo';
+    cursor: pointer;
+    transition: 0.25s;
+    font-size: 14px;
+  }
+  .back-btn:hover, .lang-btn:hover, .theme-btn:hover, .refresh-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ================= HERO ================= */
+  .hero {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(135deg, rgba(255,215,0,.14), rgba(255,140,0,.04));
+    border: 2px solid var(--gold);
+    border-radius: 22px;
+    padding: 26px 22px;
+    text-align: center;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(255,215,0,.15);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg, transparent, rgba(255,215,0,.08), transparent 30%);
+    animation: rotate 8s linear infinite;
+    z-index: 0;
+  }
+  @keyframes rotate { to { transform: rotate(360deg); } }
+  .hero > * { position: relative; z-index: 1; }
+  .hero h1 {
+    color: var(--gold);
+    font-size: 30px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 20px rgba(255,215,0,.5);
+  }
+  .hero p { color: var(--text-2); font-size: 14px; }
+  .streak-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #ff4500, #ff8c00);
+    border-radius: 50px;
+    font-weight: 900;
+    font-size: 16px;
+    box-shadow: 0 5px 25px rgba(255,69,0,.5);
+    color: #fff;
+  }
+  .streak-fire { font-size: 22px; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+  /* ================= TIMERS ================= */
+  .timers-row {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .timer-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+  .timer-box .label { font-size: 11px; color: var(--text-2); font-weight: 700; }
+  .timer-box .time { font-size: 18px; font-weight: 900; }
+  .timer-box.daily .time { color: var(--gold); }
+  .timer-box.weekly .time { color: var(--purple); }
+
+  /* ================= STATS ROW ================= */
+  .stats-row {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 6px;
+    text-align: center;
+    transition: 0.25s;
+  }
+  .stat-box:hover { transform: translateY(-3px); border-color: var(--gold); }
+  .stat-box .icon { font-size: 22px; margin-bottom: 4px; }
+  .stat-box .val { font-size: 18px; font-weight: 900; color: var(--gold); }
+  .stat-box .lbl { font-size: 10px; color: var(--text-2); font-weight: 700; margin-top: 2px; }
+
+  /* ================= BONUS BANNER ================= */
+  .bonus-banner {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(5,150,105,.05));
+    border: 2px solid var(--success);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: none;
+    text-align: center;
+    animation: bonusPulse 2s infinite;
+  }
+  @keyframes bonusPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(16,185,129,.3); }
+    50% { box-shadow: 0 0 40px rgba(16,185,129,.6); }
+  }
+  .bonus-banner.show { display: block; }
+  .bonus-banner h3 { color: var(--success); font-size: 18px; margin-bottom: 5px; }
+  .bonus-banner p { color: var(--text-2); font-size: 13px; }
+
+  /* ================= SECTION TITLE ================= */
+  .section-title {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .section-title .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title h2 {
+    color: var(--gold);
+    font-size: 19px;
+    font-weight: 900;
+  }
+  .section-title .count-badge {
+    background: rgba(255,215,0,.15);
+    color: var(--gold);
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 900;
+  }
+  .section-title .progress-mini {
+    flex: 1;
+    max-width: 220px;
+    height: 8px;
+    background: var(--card-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .section-title .progress-mini-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #ff8c00);
+    border-radius: 4px;
+    transition: width 0.5s;
+  }
+
+  /* ================= QUEST CARDS ================= */
+  .quests-grid {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .quest-card {
+    background: linear-gradient(135deg, var(--card), var(--bg-2));
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 18px;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .quest-card:hover { border-color: var(--gold); transform: translateX(-3px); }
+  .quest-card.complete {
+    border-color: var(--success);
+    background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(16,185,129,.02));
+  }
+  .quest-card.claimed {
+    border-color: var(--border);
+    opacity: 0.6;
+  }
+  .quest-card.claimed::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    color: var(--success);
+    font-size: 26px;
+    font-weight: 900;
+  }
+
+  .quest-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .quest-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: rgba(255,215,0,.1);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .quest-info { flex: 1; min-width: 0; }
+  .quest-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .diff-badge {
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .diff-easy { color: var(--easy); background: rgba(16,185,129,.15); }
+  .diff-medium { color: var(--medium); background: rgba(245,158,11,.15); }
+  .diff-hard { color: var(--hard); background: rgba(239,68,68,.15); }
+  .quest-type-tag { font-size: 10px; color: var(--text-3); font-weight: 700; }
+
+  .quest-title { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+  .quest-reward { font-size: 12px; color: var(--gold); font-weight: bold; }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-2);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .progress-count { color: var(--gold); font-size: 13px; font-weight: 900; }
+  .progress-bar {
+    width: 100%;
+    height: 10px;
+    background: var(--card-2);
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #ff8c00);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(255,215,0,.4);
+  }
+  .quest-card.complete .progress-fill {
+    background: linear-gradient(90deg, var(--success), #059669);
+    box-shadow: 0 0 10px rgba(16,185,129,.5);
+  }
+
+  .claim-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Cairo';
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .claim-btn.ready {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    box-shadow: 0 5px 20px rgba(16,185,129,.4);
+    animation: glowClaim 1.5s infinite;
+  }
+  .claim-btn.ready:hover { transform: translateY(-2px) scale(1.02); }
+  .claim-btn.locked {
+    background: var(--card-2);
+    color: var(--text-3);
+    cursor: not-allowed;
+  }
+  .claim-btn.claimed {
+    background: rgba(16,185,129,.15);
+    color: var(--success);
+    cursor: default;
+  }
+  @keyframes glowClaim {
+    0%,100% { box-shadow: 0 5px 20px rgba(16,185,129,.4); }
+    50% { box-shadow: 0 5px 35px rgba(16,185,129,.8); }
+  }
+
+  /* ================= STREAK MILESTONES ================= */
+  .milestones-wrap {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 18px 20px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .milestones-title {
+    color: var(--gold);
+    font-size: 15px;
+    font-weight: 900;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .milestones-track {
+    position: relative;
+    width: 100%;
+    padding: 0 10px;
+  }
+  /* الخط الخلفي */
+  .milestones-line-bg {
+    position: absolute;
+    top: 24px;
+    left: 40px;
+    right: 40px;
+    height: 4px;
+    background: var(--card-2);
+    border-radius: 2px;
+    z-index: 0;
+  }
+  /* الخط الملون (التقدم) */
+  .milestones-line-fill {
+    position: absolute;
+    top: 24px;
+    right: 40px; /* RTL */
+    height: 4px;
+    background: linear-gradient(90deg, var(--success), var(--gold));
+    border-radius: 2px;
+    z-index: 0;
+    transition: width 1s ease-in-out;
+    box-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+  [dir="ltr"] .milestones-line-fill {
+    right: auto;
+    left: 40px;
+  }
+  
+  .milestones-nodes {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .milestone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+  .milestone-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--card-2);
+    border: 3px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: 0.3s;
+    color: var(--text-3);
+  }
+  .milestone.reached .milestone-circle {
+    background: linear-gradient(135deg, #ff4500, #ff8c00);
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255,69,0,.6);
+    color: #fff;
+  }
+  .milestone.next-target .milestone-circle {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(255,215,0,.4);
+    animation: pulse 1.5s infinite;
+  }
+  .milestone-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--text-3);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .milestone.reached .milestone-label,
+  .milestone.next-target .milestone-label { 
+    color: var(--text); 
+  }
+  .milestone-reward {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--gold);
+    background: rgba(255,215,0,.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .milestone:not(.reached):not(.next-target) .milestone-reward {
+    opacity: 0.5;
+    color: var(--text-3);
+    background: transparent;
+  }
+
+  /* ================= EMPTY / LOADING ================= */
+  .state-box {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card);
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 50px 20px;
+    text-align: center;
+    color: var(--text-2);
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+  .state-box .state-icon { font-size: 54px; margin-bottom: 12px; opacity: 0.6; }
+  .state-box h3 { color: var(--text); font-size: 17px; margin-bottom: 8px; }
+  .state-box a {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 10px 24px;
+    background: var(--gold);
+    color: #000;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 900;
+  }
+  .state-box a:hover { background: #ffcc00; transform: translateY(-2px); }
+
+  /* ================= TIPS ================= */
+  .tips-box {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(135deg, rgba(168,85,247,.08), rgba(168,85,247,.02));
+    border: 1px solid rgba(168,85,247,.3);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+  }
+  .tips-box h4 {
+    color: var(--purple);
+    font-size: 14px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tips-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .tips-box li {
+    font-size: 12px;
+    color: var(--text-2);
+    padding-right: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+  .tips-box li::before {
+    content: '💡';
+    position: absolute;
+    right: 0;
+  }
+
+  /* ================= TOAST ================= */
+  #nf-toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .nf-toast {
+    background: var(--success);
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    animation: toastIn 0.3s;
+    font-family: 'Cairo';
+    max-width: 400px;
+    text-align: center;
+  }
+  .nf-toast.gold { background: var(--gold); color: #000; }
+  .nf-toast.error { background: var(--danger); }
+  .nf-toast.info { background: #3b82f6; }
+  @keyframes toastIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ================= MOBILE ================= */
+  @media (max-width: 640px) {
+    body { padding: 12px 10px 60px; }
+    .hero h1 { font-size: 22px; }
+    .hero p { font-size: 12px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .timers-row { grid-template-columns: 1fr; }
+    .quest-card { padding: 12px 14px; }
+    .quest-icon { width: 42px; height: 42px; font-size: 20px; }
+    .quest-title { font-size: 13px; }
+    .quest-reward { font-size: 11px; }
+    .section-title { flex-direction: column; align-items: flex-start; }
+    .section-title .progress-mini { max-width: 100%; width: 100%; }
+    
+    .milestones-line-bg, .milestones-line-fill { left: 20px; right: 20px; }
+    .milestone-circle { width: 42px; height: 42px; font-size: 18px; }
+    .milestone-label { font-size: 9px; }
+    .milestone-reward { font-size: 8px; padding: 1px 4px; }
+    
+    .streak-box { font-size: 14px; padding: 8px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== TOP BAR ========== -->
+<div class="top-bar">
+  <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="refresh-btn" onclick="refreshAll()" id="refreshBtn" title="تحديث">🔄</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="ثيم">🌙</button>
+    <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+  </div>
+</div>
+
+<!-- ========== HERO ========== -->
+<div class="hero">
+  <h1 id="heroTitle">🎯 المهام اليومية</h1>
+  <p id="heroDesc">كمّل مهامك واكسب كوينز و XP + ستريك يزيد كل يوم</p>
+  <div class="streak-box">
+    <span class="streak-fire">🔥</span>
+    <span id="streakLabel">ستريك: <span id="streakCount">0</span> أيام</span>
+  </div>
+</div>
+
+<!-- ========== TIMERS ========== -->
+<div class="timers-row">
+  <div class="timer-box daily">
+    <div class="label" id="dailyResetLabel">⏳ مهام اليوم الجديدة بعد:</div>
+    <div class="time" id="dailyResetTimer">--:--:--</div>
+  </div>
+  <div class="timer-box weekly">
+    <div class="label" id="weeklyResetLabel">🗓️ مهام الأسبوع الجديدة بعد:</div>
+    <div class="time" id="weeklyResetTimer">--:--:--</div>
+  </div>
+</div>
+
+<!-- ========== STATS ========== -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="icon">🎯</div>
+    <div class="val" id="statClaimedToday">0</div>
+    <div class="lbl" id="statClaimedTodayLbl">تم استلامها اليوم</div>
+  </div>
+  <div class="stat-box">
+    <div class="icon">🪙</div>
+    <div class="val" id="statTotalCoins">0</div>
+    <div class="lbl" id="statTotalCoinsLbl">كوين متاح</div>
+  </div>
+  <div class="stat-box">
+    <div class="icon">✨</div>
+    <div class="val" id="statTotalXP">0</div>
+    <div class="lbl" id="statTotalXPLbl">XP متاح</div>
+  </div>
+  <div class="stat-box">
+    <div class="icon">🔥</div>
+    <div class="val" id="statStreakBest">0</div>
+    <div class="lbl" id="statStreakBestLbl">أفضل ستريك</div>
+  </div>
+</div>
+
+<!-- ========== BONUS BANNER ========== -->
+<div class="bonus-banner" id="bonusBanner">
+  <h3 id="bonusTitle">🎉 مبروك! كمّلت كل مهام اليوم</h3>
+  <p id="bonusDesc">خدت البونص، استنى مهام بكرة عشان تزود الستريك!</p>
+</div>
+
+<!-- ========== DAILY QUESTS ========== -->
+<div class="section-title">
+  <div class="title-wrap">
+    <h2 id="dailyTitle">📋 مهام اليوم</h2>
+    <span class="count-badge" id="dailyCount">0/3</span>
+  </div>
+  <div class="progress-mini">
+    <div class="progress-mini-fill" id="dailyProgressMini" style="width:0%"></div>
+  </div>
+</div>
+<div class="quests-grid" id="dailyGrid">
+  <div class="state-box">
+    <div class="state-icon">⏳</div>
+    <h3>جاري تحميل المهام...</h3>
+  </div>
+</div>
+
+<!-- ========== WEEKLY QUESTS ========== -->
+<div class="section-title">
+  <div class="title-wrap">
+    <h2 id="weeklyTitle">🗓️ مهام الأسبوع</h2>
+    <span class="count-badge" id="weeklyCount">0/3</span>
+  </div>
+  <div class="progress-mini">
+    <div class="progress-mini-fill" id="weeklyProgressMini" style="width:0%"></div>
+  </div>
+</div>
+<div class="quests-grid" id="weeklyGrid">
+  <div class="state-box">
+    <div class="state-icon">⏳</div>
+    <h3>جاري تحميل المهام...</h3>
+  </div>
+</div>
+
+<!-- ========== STREAK MILESTONES ========== -->
+<div class="milestones-wrap">
+  <div class="milestones-title">
+    <span>🔥</span>
+    <span id="milestonesTitle">محطات الستريك</span>
+    <span style="margin-right:auto; color:var(--text-2); font-size:11px; font-weight:normal;" id="milestonesHint">كمّل مهامك كل يوم عشان تفتح الجايزة</span>
+  </div>
+  <div class="milestones-track" id="milestonesTrack">
+    <!-- JS will render this -->
+  </div>
+</div>
+
+<!-- ========== TIPS ========== -->
+<div class="tips-box">
+  <h4 id="tipsTitle">💡 نصائح سريعة</h4>
+  <ul id="tipsList"></ul>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script type="module">
+import { currentUser, isLoggedIn } from './firebase-shared.js';
+import './features/daily-quests.js';
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentLang = localStorage.getItem('lang') || 'ar';
+let currentDaily = {};
+let currentWeekly = {};
+let currentStreak = 0;
+let currentBestStreak = 0;
+
+// Milestones (Max 30 days)
+const MILESTONES = [
+  { days: 1,   icon: '🌱', label: 'يوم',    labelEn: '1 Day',   reward: '50 🪙',   rewardEn: '50 🪙' },
+  { days: 3,   icon: '🔥', label: '3 أيام',  labelEn: '3 Days',  reward: '100 🪙',  rewardEn: '100 🪙' },
+  { days: 7,   icon: '🔥🔥', label: 'أسبوع',  labelEn: '1 Week',  reward: '200 🪙',  rewardEn: '200 🪙' },
+  { days: 14,  icon: '💥', label: 'أسبوعين', labelEn: '2 Weeks', reward: '350 🪙',  rewardEn: '350 🪙' },
+  { days: 30,  icon: '👑', label: 'شهر',    labelEn: '1 Month', reward: '500 🪙',  rewardEn: '500 🪙' }
+];
+
+// ═══════════════════════════════════════════
+// TRANSLATIONS
+// ═══════════════════════════════════════════
+const T = {
+  ar: {
+    back: '⬅ رجوع', heroTitle: '🎯 المهام اليومية',
+    heroDesc: 'كمّل مهامك واكسب كوينز و XP + ستريك يزيد كل يوم',
+    streakLabel: 'ستريك: ', days: 'أيام',
+    dailyResetLabel: '⏳ مهام اليوم الجديدة بعد:',
+    weeklyResetLabel: '🗓️ مهام الأسبوع الجديدة بعد:',
+    statClaimedToday: 'تم استلامها اليوم',
+    statTotalCoins: 'كوين متاح',
+    statTotalXP: 'XP متاح',
+    statStreakBest: 'أفضل ستريك',
+    bonusTitle: '🎉 مبروك! كمّلت كل مهام اليوم',
+    bonusDesc: 'خدت البونص، استنى مهام بكرة عشان تزود الستريك!',
+    dailyTitle: '📋 مهام اليوم',
+    weeklyTitle: '🗓️ مهام الأسبوع',
+    claim: '🎁 استلم الجايزة', locked: 'مقفولة', claimed: '✓ تم الاستلام',
+    progress: 'التقدم', complete: '✅ مكتملة!',
+    coins: 'كوين', xp: 'XP', weeklyTag: '🗓️ Weekly', dailyTag: '📅 Daily',
+    easy: 'سهل', medium: 'متوسط', hard: 'صعب',
+    noLogin: '⚠️ سجل دخول عشان تشوف مهامك',
+    noLoginLink: '🏠 رجوع للرئيسية',
+    loading: 'جاري التحميل...',
+    milestonesTitle: 'محطات الستريك',
+    milestonesHint: 'كمّل مهامك كل يوم عشان تفتح الجايزة',
+    tipsTitle: '💡 نصائح سريعة',
+    tips: [
+      'المهام اليومية تتغير كل يوم الساعة 12 بالليل',
+      'المهام الأسبوعية أصعب بس جايزتها أكبر',
+      'كل ما الستريك يزيد، البونص اليومي يكبر',
+      'استخدم المساعدات عشان تخلص المهام الأصعب',
+      'كمّل الـ 3 مهام كل يوم عشان تحافظ على الستريك'
+    ],
+    refreshDone: '✅ تم التحديث'
+  },
+  en: {
+    back: '⬅ Back', heroTitle: '🎯 Daily Quests',
+    heroDesc: 'Complete your quests to earn coins, XP + streak grows daily',
+    streakLabel: 'Streak: ', days: 'days',
+    dailyResetLabel: '⏳ New daily quests in:',
+    weeklyResetLabel: '🗓️ New weekly quests in:',
+    statClaimedToday: 'Claimed today',
+    statTotalCoins: 'Coins available',
+    statTotalXP: 'XP available',
+    statStreakBest: 'Best streak',
+    bonusTitle: '🎉 Congrats! All quests completed',
+    bonusDesc: 'You got the bonus! Wait for tomorrow to grow your streak',
+    dailyTitle: '📋 Today\'s Quests',
+    weeklyTitle: '🗓️ Weekly Quests',
+    claim: '🎁 Claim Reward', locked: 'Locked', claimed: '✓ Claimed',
+    progress: 'Progress', complete: '✅ Complete!',
+    coins: 'coins', xp: 'XP', weeklyTag: '🗓️ Weekly', dailyTag: '📅 Daily',
+    easy: 'Easy', medium: 'Medium', hard: 'Hard',
+    noLogin: '⚠️ Login to see your quests',
+    noLoginLink: '🏠 Back to Home',
+    loading: 'Loading...',
+    milestonesTitle: 'Streak Milestones',
+    milestonesHint: 'Complete daily quests to unlock rewards',
+    tipsTitle: '💡 Quick Tips',
+    tips: [
+      'Daily quests reset every day at midnight',
+      'Weekly quests are harder but rewards are bigger',
+      'Higher streak = bigger daily bonus',
+      'Use assistants to finish hard quests',
+      'Complete all 3 daily quests to keep your streak'
+    ],
+    refreshDone: '✅ Refreshed'
+  }
+};
+const t = () => T[currentLang];
+
+// ═══════════════════════════════════════════
+// LANGUAGE
+// ═══════════════════════════════════════════
+function applyLang() {
+  const tr = t();
+  document.body.dir = currentLang === 'en' ? 'ltr' : 'rtl';
+  document.getElementById('backBtn').innerText = tr.back;
+  document.getElementById('langBtn').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('themeBtn').innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+  document.getElementById('heroTitle').innerText = tr.heroTitle;
+  document.getElementById('heroDesc').innerText = tr.heroDesc;
+  document.getElementById('streakLabel').innerHTML = tr.streakLabel + '<span id="streakCount">' + currentStreak + '</span> ' + tr.days;
+  document.getElementById('dailyResetLabel').innerText = tr.dailyResetLabel;
+  document.getElementById('weeklyResetLabel').innerText = tr.weeklyResetLabel;
+  document.getElementById('statClaimedTodayLbl').innerText = tr.statClaimedToday;
+  document.getElementById('statTotalCoinsLbl').innerText = tr.statTotalCoins;
+  document.getElementById('statTotalXPLbl').innerText = tr.statTotalXP;
+  document.getElementById('statStreakBestLbl').innerText = tr.statStreakBest;
+  document.getElementById('bonusTitle').innerText = tr.bonusTitle;
+  document.getElementById('bonusDesc').innerText = tr.bonusDesc;
+  document.getElementById('dailyTitle').innerText = tr.dailyTitle;
+  document.getElementById('weeklyTitle').innerText = tr.weeklyTitle;
+  document.getElementById('milestonesTitle').innerText = tr.milestonesTitle;
+  document.getElementById('milestonesHint').innerText = tr.milestonesHint;
+  document.getElementById('tipsTitle').innerText = tr.tipsTitle;
+  document.getElementById('tipsList').innerHTML = tr.tips.map(tip => `<li>${tip}</li>`).join('');
+  
+  renderDaily();
+  renderWeekly();
+  renderMilestones();
+}
+
+window.toggleLang = () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+};
+
+// ═══════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════
+window.toggleTheme = () => {
+  const isLight = document.body.classList.toggle('light-mode');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeBtn').innerText = isLight ? '☀️' : '🌙';
+};
+
+// ═══════════════════════════════════════════
+// RENDER DAILY
+// ═══════════════════════════════════════════
+function renderDaily() {
+  const grid = document.getElementById('dailyGrid');
+  const entries = Object.entries(currentDaily);
+
+  if (!isLoggedIn()) {
+    grid.innerHTML = `<div class="state-box">
+      <div class="state-icon">🔒</div>
+      <h3>${t().noLogin}</h3>
+      <a href="index.html">${t().noLoginLink}</a>
+    </div>`;
+    document.getElementById('dailyCount').innerText = '0/0';
+    document.getElementById('dailyProgressMini').style.width = '0%';
+    return;
+  }
+
+  if (entries.length === 0) {
+    grid.innerHTML = `<div class="state-box">
+      <div class="state-icon">⏳</div>
+      <h3>${t().loading}</h3>
+    </div>`;
+    return;
+  }
+
+  let doneCount = 0;
+  entries.forEach(([, q]) => { if (q.claimed) doneCount++; });
+  document.getElementById('dailyCount').innerText = `${doneCount}/${entries.length}`;
+  document.getElementById('dailyProgressMini').style.width = `${(doneCount / entries.length) * 100}%`;
+
+  // Bonus banner
+  const bonusBanner = document.getElementById('bonusBanner');
+  if (doneCount === entries.length && entries.length > 0) {
+    bonusBanner.classList.add('show');
+  } else {
+    bonusBanner.classList.remove('show');
+  }
+
+  // Sorted quests
+  const sorted = window.NFDailyQuests.sortQuestsByDifficulty(currentDaily);
+  grid.innerHTML = sorted.map(q => renderQuestCard(q, 'daily')).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER WEEKLY
+// ═══════════════════════════════════════════
+function renderWeekly() {
+  const grid = document.getElementById('weeklyGrid');
+  const entries = Object.entries(currentWeekly);
+
+  if (!isLoggedIn()) {
+    grid.innerHTML = `<div class="state-box">
+      <div class="state-icon">🔒</div>
+      <h3>${t().noLogin}</h3>
+      <a href="index.html">${t().noLoginLink}</a>
+    </div>`;
+    document.getElementById('weeklyCount').innerText = '0/0';
+    document.getElementById('weeklyProgressMini').style.width = '0%';
+    return;
+  }
+
+  if (entries.length === 0) {
+    grid.innerHTML = `<div class="state-box">
+      <div class="state-icon">⏳</div>
+      <h3>${t().loading}</h3>
+    </div>`;
+    return;
+  }
+
+  let doneCount = 0;
+  entries.forEach(([, q]) => { if (q.claimed) doneCount++; });
+  document.getElementById('weeklyCount').innerText = `${doneCount}/${entries.length}`;
+  document.getElementById('weeklyProgressMini').style.width = `${(doneCount / entries.length) * 100}%`;
+
+  const sorted = window.NFDailyQuests.sortQuestsByDifficulty(currentWeekly);
+  grid.innerHTML = sorted.map(q => renderQuestCard(q, 'weekly')).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER QUEST CARD
+// ═══════════════════════════════════════════
+function renderQuestCard(q, type) {
+  const defs = type === 'daily' ? window.NFDailyQuests.DAILY_QUESTS : window.NFDailyQuests.WEEKLY_QUESTS;
+  const def = defs.find(d => d.id === q.id);
+  if (!def) return '';
+
+  const pct = Math.min(100, Math.round((q.progress / q.target) * 100));
+  const isComplete = q.progress >= q.target;
+  const isClaimed = q.claimed;
+  const title = currentLang === 'ar' ? def.title : def.titleEn;
+  const diffLabel = t()[def.difficulty] || def.difficulty;
+  const diffClass = `diff-${def.difficulty}`;
+  const tag = type === 'daily' ? t().dailyTag : t().weeklyTag;
+
+  let btnClass, btnText, disabled;
+  if (isClaimed) {
+    btnClass = 'claimed'; btnText = t().claimed; disabled = true;
+  } else if (isComplete) {
+    btnClass = 'ready'; btnText = t().claim; disabled = false;
+  } else {
+    btnClass = 'locked'; btnText = t().locked; disabled = true;
+  }
+
+  const claimFn = type === 'daily' ? '_claimDaily' : '_claimWeekly';
+
+  return `<div class="quest-card ${isComplete ? 'complete' : ''} ${isClaimed ? 'claimed' : ''}">
+    <div class="quest-header">
+      <div class="quest-icon">${def.icon}</div>
+      <div class="quest-info">
+        <div class="quest-meta">
+          <span class="diff-badge ${diffClass}">${diffLabel}</span>
+          <span class="quest-type-tag">${tag}</span>
+        </div>
+        <div class="quest-title">${title}</div>
+        <div class="quest-reward">🪙 ${def.reward.coins} ${t().coins} • ✨ ${def.reward.xp} ${t().xp}</div>
+      </div>
+    </div>
+    <div class="progress-row">
+      <span>${isComplete ? t().complete : t().progress}</span>
+      <span class="progress-count">${q.progress} / ${q.target}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <button class="claim-btn ${btnClass}" ${disabled ? 'disabled' : ''} onclick="window.${claimFn}('${q.id}')">${btnText}</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// CLAIM HANDLERS
+// ═══════════════════════════════════════════
+window._claimDaily = async (questId) => {
+  const res = await window.NFDailyQuests.claimQuestReward(questId);
+  if (res.error) {
+    if (res.error === 'already_claimed') return;
+    if (res.error === 'not_complete') return;
+    return;
+  }
+  playClaimSound();
+  if (window.confetti) window.confetti({ particleCount: 100, spread: 80, origin: { y: 0.7 } });
+  await reloadDaily();
+  await reloadStats();
+};
+
+window._claimWeekly = async (questId) => {
+  const res = await window.NFDailyQuests.claimWeeklyReward(questId);
+  if (res.error) {
+    if (res.error === 'already_claimed') return;
+    if (res.error === 'not_complete') return;
+    return;
+  }
+  playClaimSound();
+  if (window.confetti) window.confetti({ particleCount: 120, spread: 90, origin: { y: 0.7 } });
+  await reloadWeekly();
+  await reloadStats();
+};
+
+function playClaimSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch(e) { /* ignore */ }
+}
+
+// ═══════════════════════════════════════════
+// MILESTONES RENDER
+// ═══════════════════════════════════════════
+function renderMilestones() {
+  const track = document.getElementById('milestonesTrack');
+  
+  // حساب نسبة تقدم الخط الملون (بناءً على الـ Index)
+  // 5 محطات: 0% , 25% , 50% , 75% , 100%
+  let fillPercent = 0;
+  if (currentStreak >= 30) fillPercent = 100;
+  else if (currentStreak >= 14) {
+    // بين 14 و 30 (بين المحطة الـ 4 والـ 5)
+    fillPercent = 75 + ((currentStreak - 14) / (30 - 14)) * 25;
+  } else if (currentStreak >= 7) {
+    // بين 7 و 14 (بين المحطة الـ 3 والـ 4)
+    fillPercent = 50 + ((currentStreak - 7) / (14 - 7)) * 25;
+  } else if (currentStreak >= 3) {
+    // بين 3 و 7 (بين المحطة الـ 2 والـ 3)
+    fillPercent = 25 + ((currentStreak - 3) / (7 - 3)) * 25;
+  } else if (currentStreak >= 1) {
+    // بين 1 و 3 (بين المحطة الـ 1 والـ 2)
+    fillPercent = 0 + ((currentStreak - 1) / (3 - 1)) * 25;
+  }
+  
+  // ضمان إن النسبة بين 0 و 100
+  fillPercent = Math.max(0, Math.min(100, fillPercent));
+
+  const milestonesHTML = MILESTONES.map((m, i) => {
+    const reached = currentStreak >= m.days;
+    // المحطة الجاية (أول محطة لسه موصلناهاش)
+    const isNext = !reached && (i === 0 || currentStreak >= MILESTONES[i - 1].days);
+    
+    return `<div class="milestone ${reached ? 'reached' : ''} ${isNext ? 'next-target' : ''}">
+      <div class="milestone-circle">
+        ${reached ? m.icon : '🔒'}
+      </div>
+      <div class="milestone-label">${currentLang === 'ar' ? m.label : m.labelEn}</div>
+      <div class="milestone-reward">${currentLang === 'ar' ? m.reward : m.rewardEn}</div>
+    </div>`;
+  }).join('');
+
+  track.innerHTML = `
+    <div class="milestones-line-bg"></div>
+    <div class="milestones-line-fill" style="width: ${fillPercent}%;"></div>
+    <div class="milestones-nodes">${milestonesHTML}</div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════
+function updateStats() {
+  let claimed = 0;
+  let coins = 0;
+  let xp = 0;
+
+  Object.entries(currentDaily).forEach(([id, q]) => {
+    const def = window.NFDailyQuests.DAILY_QUESTS.find(d => d.id === id);
+    if (!def) return;
+    if (q.claimed) claimed++;
+    coins += def.reward.coins;
+    xp += def.reward.xp;
+  });
+
+  Object.entries(currentWeekly).forEach(([id, q]) => {
+    const def = window.NFDailyQuests.WEEKLY_QUESTS.find(d => d.id === id);
+    if (!def) return;
+    coins += def.reward.coins;
+    xp += def.reward.xp;
+  });
+
+  document.getElementById('statClaimedToday').innerText = claimed;
+  document.getElementById('statTotalCoins').innerText = coins;
+  document.getElementById('statTotalXP').innerText = xp;
+  document.getElementById('statStreakBest').innerText = currentBestStreak || currentStreak;
+}
+
+async function reloadStats() {
+  updateStats();
+}
+
+// ═══════════════════════════════════════════
+// TIMERS
+// ═══════════════════════════════════════════
+function updateTimers() {
+  if (!window.NFDailyQuests) return;
+  const dailyMs = window.NFDailyQuests.getTimeUntilReset();
+  const weeklyMs = window.NFDailyQuests.getTimeUntilWeekReset();
+
+  document.getElementById('dailyResetTimer').innerText = formatTime(dailyMs);
+  document.getElementById('weeklyResetTimer').innerText = formatTime(weeklyMs);
+}
+
+function formatTime(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+
+  if (days > 0) return `${days}d ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}`;
+  return `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+}
+
+// ═══════════════════════════════════════════
+// DATA LOADERS
+// ═══════════════════════════════════════════
+async function reloadDaily() {
+  if (!isLoggedIn()) return;
+  try {
+    const res = await window.NFDailyQuests.getTodayQuests();
+    if (res.error) return;
+    currentDaily = res.quests || {};
+    currentStreak = res.streak || 0;
+    if (currentStreak > currentBestStreak) currentBestStreak = currentStreak;
+    document.getElementById('streakCount').innerText = currentStreak;
+    renderDaily();
+    renderMilestones();
+    updateStats();
+  } catch(e) { console.warn('reloadDaily:', e); }
+}
+
+async function reloadWeekly() {
+  if (!isLoggedIn()) return;
+  try {
+    const res = await window.NFDailyQuests.getThisWeekQuests();
+    if (res.error) return;
+    currentWeekly = res.quests || {};
+    renderWeekly();
+    updateStats();
+  } catch(e) { console.warn('reloadWeekly:', e); }
+}
+
+async function loadAll() {
+  applyLang();
+
+  if (!isLoggedIn()) return;
+
+  try {
+    const { get, ref, db } = await import('./firebase-shared.js');
+    const snap = await get(ref(db, `users_data/${currentUser}/streak`));
+    currentBestStreak = snap.val() || 0;
+  } catch(e) {}
+
+  await reloadDaily();
+  await reloadWeekly();
+  updateTimers();
+
+  window.NFDailyQuests.listenQuests(data => {
+    if (data.quests) {
+      currentDaily = data.quests;
+      currentStreak = data.streak || 0;
+      if (currentStreak > currentBestStreak) currentBestStreak = currentStreak;
+      document.getElementById('streakCount').innerText = currentStreak;
+      renderDaily();
+      renderMilestones();
+      updateStats();
+    }
+  });
+  window.NFDailyQuests.listenWeeklyQuests(data => {
+    if (data.quests) {
+      currentWeekly = data.quests;
+      renderWeekly();
+      updateStats();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════════
+window.refreshAll = async () => {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  await loadAll();
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    const container = document.getElementById('nf-toast-container') || (() => {
+      const c = document.createElement('div');
+      c.id = 'nf-toast-container';
+      document.body.appendChild(c);
+      return c;
+    })();
+    const toast = document.createElement('div');
+    toast.className = 'nf-toast';
+    toast.textContent = t().refreshDone;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+  }, 400);
+};
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function init() {
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+
+  applyLang();
+  loadAll();
+
+  setInterval(updateTimers, 1000);
+  updateTimers();
+}
+
+init();
+</script>
+
+<!-- Existing scripts -->
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
+
+</body>
+</html>
