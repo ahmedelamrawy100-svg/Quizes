@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FC 27 - Ultimate Team</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root {
+    --bg: #050505;
+    --neon: #00ff88;
+    --neon-glow: rgba(0, 255, 136, 0.4);
+    --gold: #ffd700;
+    --gold-dark: #b8860b;
+    --surface: rgba(255, 255, 255, 0.05);
+    --surface-hover: rgba(255, 255, 255, 0.1);
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff;
+    --text-dim: #888888;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ================= 1. CINEMATIC BACKGROUND ================= */
+  .bg-container {
+    position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, #111a15 0%, #050505 100%);
+  }
+  .bg-orb {
+    position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.5;
+    animation: floatOrb 20s infinite alternate ease-in-out;
+  }
+  .orb-1 { width: 400px; height: 400px; background: #00ff88; top: -10%; left: -10%; }
+  .orb-2 { width: 500px; height: 500px; background: #0033ff; bottom: -20%; right: -10%; animation-delay: -5s; opacity: 0.3;}
+  .orb-3 { width: 300px; height: 300px; background: #ffd700; top: 40%; left: 60%; animation-delay: -10s; opacity: 0.2;}
+  
+  @keyframes floatOrb {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(100px, 100px) scale(1.2); }
+  }
+
+  /* ================= 2. LOADING SCREEN ================= */
+  #loader {
+    position: fixed; inset: 0; background: #000; z-index: 99999;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    transition: opacity 0.8s ease;
+  }
+  .loader-logo {
+    font-family: 'Teko', sans-serif; font-size: 80px; font-weight: 700; color: var(--neon);
+    text-shadow: 0 0 30px var(--neon);
+    animation: pulseLogo 1.5s infinite alternate;
+  }
+  .loader-bar-bg { width: 200px; height: 4px; background: #333; margin-top: 20px; border-radius: 2px; overflow: hidden; }
+  .loader-bar-fill { height: 100%; background: var(--neon); width: 0%; transition: width 0.3s; box-shadow: 0 0 10px var(--neon); }
+  
+  @keyframes pulseLogo { from { opacity: 0.8; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+
+  /* ================= 3. MAIN UI ================= */
+  #app { display: none; width: 100%; height: 100%; flex-direction: column; opacity: 0; transition: opacity 0.5s ease; }
+  
+  /* Top Navbar */
+  .top-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 30px; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    z-index: 100;
+  }
+  .nav-logo { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; color: var(--neon); letter-spacing: 2px; text-shadow: 0 0 10px var(--neon-glow); }
+  .nav-user { display: flex; align-items: center; gap: 15px; font-weight: bold; }
+  .nav-coins { color: var(--gold); background: rgba(255,215,0,0.1); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--gold-dark); font-family: 'Teko', sans-serif; font-size: 20px; letter-spacing: 1px; }
+
+  /* Layout */
+  .main-layout {
+    display: grid; grid-template-columns: 300px 1fr; flex: 1; overflow: hidden;
+    padding: 0 30px 30px 30px; gap: 30px;
+  }
+
+  /* Sidebar Menu */
+  .sidebar {
+    display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 10px;
+  }
+  .sidebar::-webkit-scrollbar { width: 0; }
+  
+  .menu-btn {
+    background: var(--surface); border: 1px solid var(--border); border-right: 4px solid transparent;
+    padding: 15px 20px; border-radius: 8px; color: var(--text-dim); font-family: 'Teko', sans-serif;
+    font-size: 24px; font-weight: 600; letter-spacing: 1px; cursor: pointer; text-align: right;
+    transition: all 0.2s ease; position: relative; overflow: hidden;
+  }
+  .menu-btn:hover, .menu-btn.active {
+    background: var(--surface-hover); border-color: var(--border);
+    border-right-color: var(--neon); color: var(--text); padding-right: 25px;
+  }
+  .menu-btn.active { box-shadow: -10px 0 20px -10px var(--neon); }
+  .menu-btn::before {
+    content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 0%;
+    background: linear-gradient(90deg, transparent, rgba(0,255,136,0.1)); transition: 0.3s;
+  }
+  .menu-btn:hover::before { width: 100%; }
+
+  /* Content Area */
+  .content-area {
+    overflow-y: auto; position: relative; display: flex; flex-direction: column;
+  }
+  .content-area::-webkit-scrollbar { width: 6px; }
+  .content-area::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  .panel { display: none; animation: fadeIn 0.4s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ================= 4. ULTIMATE TEAM & 3D CARD ================= */
+  .ut-header { font-family: 'Teko', sans-serif; font-size: 40px; color: #fff; letter-spacing: 2px; margin-bottom: 20px; }
+  
+  .ut-dashboard { display: flex; gap: 40px; align-items: flex-start; }
+  
+  /* The 3D Card */
+  .card-wrapper { perspective: 1000px; }
+  .fut-card {
+    width: 280px; height: 400px; border-radius: 20px; position: relative;
+    display: flex; flex-direction: column; align-items: center; padding: 20px;
+    background: linear-gradient(135deg, #e6c27a 0%, #bf953f 50%, #b38728 100%);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.5);
+    transform-style: preserve-3d; transition: transform 0.1s ease;
+    color: #222; overflow: hidden;
+  }
+  /* Card Shine Effect */
+  .fut-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.4) 25%, transparent 30%);
+    background-size: 200% 200%; background-position: 100% 100%; pointer-events: none;
+  }
+  .fut-card:hover::after { animation: shine 1.5s; }
+  @keyframes shine { 0% { background-position: 100% 100%; } 100% { background-position: -100% -100%; } }
+
+  .c-top { width: 100%; display: flex; justify-content: space-between; transform: translateZ(30px); }
+  .c-rating { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .c-ovr { font-family: 'Teko', sans-serif; font-size: 60px; font-weight: 700; color: #222; }
+  .c-pos { font-family: 'Teko', sans-serif; font-size: 20px; font-weight: 600; }
+  
+  .c-avatar { width: 100px; height: 100px; background: #fff; border-radius: 50%; border: 3px solid #222; margin-top: 10px; transform: translateZ(40px); display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: 900; }
+  
+  .c-name { font-family: 'Teko', sans-serif; font-size: 32px; font-weight: 700; text-transform: uppercase; margin-top: 15px; border-bottom: 2px solid rgba(0,0,0,0.1); padding-bottom: 5px; transform: translateZ(35px); text-align: center; width: 100%;}
+  
+  .c-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 30px; width: 100%; margin-top: 15px; transform: translateZ(20px); }
+  .c-stat { display: flex; justify-content: space-between; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: 600; }
+  .c-stat span:first-child { color: #555; }
+  .c-stat span:last-child { font-weight: 700; }
+
+  .card-actions { display: flex; flex-direction: column; gap: 15px; flex: 1; justify-content: center; }
+  .action-btn {
+    background: var(--surface); border: 1px solid var(--border); padding: 15px 30px;
+    border-radius: 10px; font-family: 'Teko', sans-serif; font-size: 22px; font-weight: 600;
+    color: var(--text); cursor: pointer; text-align: center; transition: 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .action-btn:hover { background: var(--surface-hover); border-color: var(--neon); transform: translateX(-5px); box-shadow: 0 0 20px var(--neon-glow); }
+  .action-btn .val { color: var(--gold); float: left; }
+
+  /* ================= 5. SQUAD BUILDER (PITCH) ================= */
+  .pitch {
+    width: 100%; height: 600px; background: #0b1e12; border: 2px solid #1f4e2d; border-radius: 15px;
+    position: relative; background-image: repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 120px);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; overflow: hidden;
+  }
+  .pitch::before { content: ''; position: absolute; inset: 15px; border: 2px solid rgba(255,255,255,0.1); border-radius: 5px; }
+  .pitch-center { width: 150px; height: 150px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; position: absolute; }
+  
+  .pitch-player {
+    position: absolute; width: 60px; height: 80px; display: flex; flex-direction: column; align-items: center;
+    transform: translate(-50%, -50%); transition: 0.3s; cursor: pointer;
+  }
+  .pitch-player:hover { transform: translate(-50%, -50%) scale(1.1); z-index: 10; }
+  .p-card { width: 100%; height: 100%; background: linear-gradient(135deg, var(--gold), #b8860b); border-radius: 8px; border: 2px solid #fff; display: flex; flex-direction: column; align-items: center; padding: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+  .p-ovr { font-family: 'Teko', sans-serif; font-size: 16px; font-weight: 700; color: #000; line-height: 1; }
+  .p-img { font-size: 20px; margin-top: 2px; }
+  .p-name { font-size: 9px; font-weight: bold; color: #fff; background: #000; width: 100%; text-align: center; margin-top: 2px; border-radius: 2px; }
+
+  /* ================= 6. TRANSFER MARKET ================= */
+  .market-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+  .market-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
+  .market-card:hover { border-color: var(--neon); background: var(--surface-hover); transform: translateY(-3px); }
+  .m-info { flex: 1; }
+  .m-name { font-weight: 900; font-size: 16px; }
+  .m-club { font-size: 12px; color: var(--text-dim); }
+  .m-price { color: var(--gold); font-family: 'Teko', sans-serif; font-size: 20px; font-weight: 700; text-align: center; }
+  .m-btn { background: var(--neon); color: #000; border: none; padding: 8px; border-radius: 8px; font-weight: 900; cursor: pointer; width: 100%; margin-top: 5px; transition: 0.2s; }
+  .m-btn:hover { background: #fff; box-shadow: 0 0 15px #fff; }
+
+</style>
+</head>
+<body>
+
+<!-- 1. Background -->
+<div class="bg-container">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+</div>
+
+<!-- 2. Loader -->
+<div id="loader">
+  <div class="loader-logo">FC 27</div>
+  <div class="loader-bar-bg"><div class="loader-bar-fill" id="loadBar"></div></div>
+</div>
+
+<!-- 3. App -->
+<div id="app">
+  
+  <div class="top-nav">
+    <div class="nav-logo">FC 27 ULTIMATE</div>
+    <div class="nav-user">
+      <div class="nav-coins" id="navCoins">🪙 0</div>
+      <span id="navUsername">Guest</span>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="menu-btn active" onclick="switchMenu('ut')">ULTIMATE TEAM</div>
+      <div class="menu-btn" onclick="switchMenu('squad')">SQUAD BUILDER</div>
+      <div class="menu-btn" onclick="switchMenu('market')">TRANSFER MARKET</div>
+      <div class="menu-btn" style="color:var(--text-dim); margin-top: 20px;" onclick="window.location.href='index.html'">EXIT TO HOME</div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      
+      <!-- Ultimate Team Panel -->
+      <div id="panel-ut" class="panel active">
+        <div class="ut-header">ULTIMATE TEAM</div>
+        <div class="ut-dashboard">
+          
+          <div class="card-wrapper">
+            <div class="fut-card" id="myFutCard">
+              <div class="c-top">
+                <div class="c-rating">
+                  <div class="c-ovr" id="cardOvr">85</div>
+                  <div class="c-pos">CAM</div>
+                </div>
+                <div class="c-avatar" id="cardAvatar">A</div>
+              </div>
+              <div class="c-name" id="cardName">AHMED</div>
+              <div class="c-stats">
+                <div class="c-stat"><span>PAC</span><span id="statPac">85</span></div>
+                <div class="c-stat"><span>SHO</span><span id="statSho">88</span></div>
+                <div class="c-stat"><span>PAS</span><span id="statPas">90</span></div>
+                <div class="c-stat"><span>PHY</span><span id="statPhy">80</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="action-btn" onclick="playSound(600)">MATCHUP <span class="val">LIVE</span></button>
+            <button class="action-btn" onclick="playSound(800)">SEASON PROGRESS <span class="val">LVL 12</span></button>
+            <button class="action-btn" onclick="playSound(400)">OBJECTIVES <span class="val">3</span></button>
+            <button class="action-btn" onclick="playSound(500)">STORE <span class="val">NEW</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Squad Builder Panel -->
+      <div id="panel-squad" class="panel">
+        <div class="ut-header">SQUAD BUILDER (4-3-3)</div>
+        <div class="pitch" id="pitch">
+          <div class="pitch-center"></div>
+          <!-- Players injected by JS -->
+        </div>
+      </div>
+
+      <!-- Market Panel -->
+      <div id="panel-market" class="panel">
+        <div class="ut-header">TRANSFER MARKET</div>
+        <div class="market-grid" id="marketGrid">
+          <!-- Cards injected by JS -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const currentUser = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+
+// ================= 1. WEB AUDIO (UI Sounds) =================
+let audioCtx;
+function playSound(freq) {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime); // Volume خفيف
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// ================= 2. LOADER & INIT =================
+document.addEventListener('DOMContentLoaded', () => {
+    let progress = 0;
+    const bar = document.getElementById('loadBar');
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 20;
+        if (progress > 100) progress = 100;
+        bar.style.width = progress + '%';
+        
+        if (progress === 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    setTimeout(() => document.getElementById('app').style.opacity = '1', 50);
+                    initApp();
+                }, 800);
+            }, 300);
+        }
+    }, 150);
+});
+
+// ================= 3. MENU NAVIGATION =================
+window.switchMenu = (menuId) => {
+    playSound(500);
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    
+    // Highlight the clicked button (excluding Exit button)
+    if(event && event.target) event.target.classList.add('active');
+    
+    document.getElementById(`panel-${menuId}`).classList.add('active');
+};
+
+// ================= 4. 3D TILT EFFECT =================
+const card = document.getElementById('myFutCard');
+const cardWrapper = document.querySelector('.card-wrapper');
+
+cardWrapper.addEventListener('mousemove', (e) => {
+    const rect = cardWrapper.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = ((y - centerY) / centerY) * -15;
+    const rotateY = ((x - centerX) / centerX) * 15;
+    
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+});
+
+cardWrapper.addEventListener('mouseleave', () => {
+    card.style.transform = `rotateX(0) rotateY(0)`;
+    card.style.transition = 'transform 0.5s ease';
+    setTimeout(() => card.style.transition = 'transform 0.1s ease', 500);
+});
+cardWrapper.addEventListener('mouseenter', () => {
+    card.style.transition = 'transform 0.1s ease';
+});
+
+// ================= 5. DATA BINDING (FIFA STATS) =================
+async function initApp() {
+    if (!currentUser) {
+        document.getElementById('navUsername').innerText = "Guest";
+        return;
+    }
+    document.getElementById('navUsername').innerText = currentUser.toUpperCase();
+    
+    try {
+        const snap = await get(ref(db, 'users_data/' + currentUser));
+        const data = snap.val() || {};
+        
+        // تحديث الكوينز
+        document.getElementById('navCoins').innerText = `🪙 ${(data.coins || 0).toLocaleString()}`;
+        
+        // تحديث إحصائيات الكارت (محاكاة بناءً على XP والدقة)
+        const xp = data.xp || 0;
+        const level = Math.floor(xp / 500) + 1;
+        
+        let ovr = Math.min(99, 70 + Math.floor(level / 2));
+        let pac = Math.min(99, 75 + Math.floor(Math.random() * 10));
+        let sho = Math.min(99, 70 + Math.floor(level / 3));
+        let pas = Math.min(99, 80 + Math.floor(level / 4));
+        let phy = Math.min(99, 65 + Math.floor(level / 5));
+        
+        document.getElementById('cardOvr').innerText = ovr;
+        document.getElementById('statPac').innerText = pac;
+        document.getElementById('statSho').innerText = sho;
+        document.getElementById('statPas').innerText = pas;
+        document.getElementById('statPhy').innerText = phy;
+        
+        document.getElementById('cardName').innerText = currentUser;
+        document.getElementById('cardAvatar').innerText = currentUser.charAt(0).toUpperCase();
+
+        // Build Squad
+        buildSquad();
+
+    } catch(e) { console.warn(e); }
+}
+
+// ================= 6. SQUAD BUILDER =================
+function buildSquad() {
+    const pitch = document.getElementById('pitch');
+    // إحداثيات 4-3-3
+    const positions = [
+        { top: '90%', left: '50%' }, // GK
+        { top: '70%', left: '15%' }, { top: '75%', left: '38%' }, { top: '75%', left: '62%' }, { top: '70%', left: '85%' }, // DEF
+        { top: '50%', left: '30%' }, { top: '55%', left: '50%' }, { top: '50%', left: '70%' }, // MID
+        { top: '20%', left: '15%' }, { top: '15%', left: '50%' }, { top: '20%', left: '85%' }  // ATT
+    ];
+
+    positions.forEach((pos, i) => {
+        const el = document.createElement('div');
+        el.className = 'pitch-player';
+        el.style.top = pos.top;
+        el.style.left = pos.left;
+        
+        el.innerHTML = `
+            <div class="p-card">
+                <div class="p-ovr">${85 - i}</div>
+                <div class="p-img">👤</div>
+                <div class="p-name">PLAYER ${i+1}</div>
+            </div>
+        `;
+        pitch.appendChild(el);
+    });
+}
+
+// ================= 7. TRANSFER MARKET =================
+const marketPlayers = [
+    { name: 'MBAPPE', rating: 91, price: 15000, club: 'PSG' },
+    { name: 'HAALAND', rating: 91, price: 14500, club: 'MCI' },
+    { name: 'DE BRUYNE', rating: 91, price: 12000, club: 'MCI' },
+    { name: 'VINICIUS', rating: 89, price: 8000, club: 'RMA' },
+    { name: 'SALAH', rating: 89, price: 7500, club: 'LIV' },
+    { name: 'SON', rating: 87, price: 5000, club: 'TOT' }
+];
+
+function initMarket() {
+    const grid = document.getElementById('marketGrid');
+    marketPlayers.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.innerHTML = `
+            <div style="font-size:30px; font-weight:900; color:var(--gold); font-family:Teko;">${p.rating}</div>
+            <div class="m-info">
+                <div class="m-name">${p.name}</div>
+                <div class="m-club">${p.club}</div>
+            </div>
+            <div>
+                <div class="m-price">${p.price} 🪙</div>
+                <button class="m-btn" onclick="playSound(700); alert('تمت الإضافة للسلة!')">BUY</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// تشغيل السوق
+initMarket();
+
+</script>
+</body>
+</html>
