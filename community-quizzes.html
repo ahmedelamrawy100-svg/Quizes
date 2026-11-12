@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌐 كويزات المجتمع / Community Quizzes - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --purple:#a855f7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px 14px 80px; }
+  .container { max-width:1200px; margin:0 auto; }
+
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+  .btn-primary { background:var(--gold); color:#000; border-color:var(--gold); }
+
+  .page-title { text-align:center; margin:10px 0 6px; font-size:32px; font-weight:900; background:linear-gradient(90deg,#ffd700,#ff6b6b,#a855f7,#ffd700); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:titleShift 4s linear infinite; }
+  @keyframes titleShift { to { background-position:200% center; } }
+  .page-sub { text-align:center; color:var(--text-2); font-size:14px; margin-bottom:24px; }
+
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .filter-btn { padding:8px 16px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-2); font-family:'Cairo'; font-weight:700; font-size:13px; cursor:pointer; transition:0.2s; }
+  .filter-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+  .filter-btn.active { background:var(--gold); color:#000; border-color:var(--gold); }
+
+  .search-bar { width:100%; padding:12px 18px; border-radius:12px; border:1px solid var(--border); background:rgba(0,0,0,0.4); color:var(--text); font-family:'Cairo'; font-size:14px; outline:none; margin-bottom:16px; }
+  .search-bar:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,215,0,0.15); }
+
+  .sort-bar { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+  .sort-bar label { color:var(--text-2); font-size:13px; font-weight:700; }
+  .sort-btn { padding:6px 14px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text-2); font-family:'Cairo'; font-weight:700; font-size:12px; cursor:pointer; }
+  .sort-btn.active { background:var(--gold); color:#000; border-color:var(--gold); }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px; }
+
+  .quiz-card { background:var(--card); border:2px solid var(--border); border-radius:16px; overflow:hidden; transition:0.25s; cursor:pointer; display:flex; flex-direction:column; position:relative; }
+  .quiz-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:0 10px 30px rgba(255,215,0,0.15); }
+  .quiz-card-cover { width:100%; height:220px; object-fit:cover; object-position:center; }
+  .quiz-card-icon-wrap { width:100%; height:120px; display:flex; align-items:center; justify-content:center; font-size:56px; background:linear-gradient(135deg, rgba(255,215,0,0.1), rgba(168,85,247,0.05)); }
+  .quiz-card-body { padding:14px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .quiz-card-title { font-size:16px; font-weight:900; color:var(--text); line-height:1.3; min-height:40px; display:flex; align-items:center; }
+  .quiz-card-creator { font-size:12px; color:var(--text-2); }
+  .quiz-card-creator b { color:var(--gold); }
+  .quiz-card-meta { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:10px; border-top:1px solid var(--border); font-size:12px; color:var(--text-2); gap:6px; flex-wrap:wrap; }
+  .quiz-card-cat { padding:2px 10px; border-radius:10px; background:rgba(255,215,0,0.15); color:var(--gold); font-size:11px; font-weight:900; }
+  .quiz-card-stars { color:var(--gold); font-weight:900; display:flex; align-items:center; gap:3px; }
+  .quiz-owner-badge { position:absolute; top:10px; left:10px; background:var(--purple); color:#fff; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:900; z-index:2; }
+
+  .empty { grid-column:1 / -1; text-align:center; padding:60px 20px; color:var(--text-2); }
+  .empty-icon { font-size:60px; opacity:0.4; margin-bottom:16px; }
+
+  .loading { text-align:center; padding:60px 20px; color:var(--text-2); grid-column:1/-1; }
+  .spinner { width:44px; height:44px; border:3px solid #333; border-top-color:var(--gold); border-radius:50%; margin:0 auto 16px; animation:spin 0.9s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="btn" id="btnHome">⬅ الرئيسية</a>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="btnLang" onclick="toggleLang()" style="background:var(--blue);color:#fff;border-color:var(--blue);">EN</button>
+      <a href="quiz-builder.html" class="btn btn-primary" id="btnBuilder">🛠️ اعمل كويزك</a>
+    </div>
+  </div>
+
+  <h1 class="page-title" id="pageTitle">🌐 كويزات المجتمع</h1>
+  <p class="page-sub" id="pageSub">كويزات من صنع اللاعبين — العب، قيّم، وشارك</p>
+
+  <div class="filters" id="categoryFilters"></div>
+
+  <input type="text" class="search-bar" id="searchBar" placeholder="🔍 دوّر على كويز...">
+
+  <div class="sort-bar">
+    <label id="lblSort">ترتيب:</label>
+    <button class="sort-btn active" id="sortNew" data-sort="newest">🆕 الأحدث</button>
+    <button class="sort-btn" id="sortPlays" data-sort="plays">🎮 الأكثر لعب</button>
+    <button class="sort-btn" id="sortRating" data-sort="rating">⭐ الأعلى تقييم</button>
+  </div>
+
+  <div class="grid" id="quizzesGrid">
+    <div class="loading"><div class="spinner"></div><span id="lblLoading">جاري التحميل...</span></div>
+  </div>
+</div>
+
+<script type="module">
+import './features/quiz-builder.js';
+
+const NF = window.NFQuizBuilder;
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+const isAdmin = CU === 'ahmed';
+let allQuizzes = [];
+let filterCat = 'all';
+let searchQuery = '';
+let sortBy = 'newest';
+
+let currentLang = localStorage.getItem('lang') || 'ar';
+
+const T = {
+  ar: {
+    home: '⬅ الرئيسية', builder: '🛠️ اعمل كويزك', title: '🌐 كويزات المجتمع', sub: 'كويزات من صنع اللاعبين — العب، قيّم، وشارك',
+    all: '🌍 الكل', sort: 'ترتيب:', newest: '🆕 الأحدث', plays: '🎮 الأكثر لعب', rating: '⭐ الأعلى تقييم',
+    by: 'من إبداع', noRating: 'لسه مفيش تقييم', noQuizzes: 'مفيش كويزات لسه', beFirst: 'كون الأول واعمل كويزك!',
+    loading: 'جاري التحميل...', owner: 'كويزك', admin: 'أدمن', search: '🔍 دوّر على كويز...'
+  },
+  en: {
+    home: '⬅ Home', builder: '🛠️ Create Quiz', title: '🌐 Community Quizzes', sub: 'Player-made quizzes — Play, rate, and share!',
+    all: '🌍 All', sort: 'Sort by:', newest: '🆕 Newest', plays: '🎮 Most Played', rating: '⭐ Top Rated',
+    by: 'By', noRating: 'No ratings yet', noQuizzes: 'No quizzes yet', beFirst: 'Be the first to create one!',
+    loading: 'Loading...', owner: 'Yours', admin: 'Admin', search: '🔍 Search for a quiz...'
+  }
+};
+
+const t = () => T[currentLang];
+
+window.toggleLang = () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+};
+
+function applyLang() {
+  document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('btnHome').innerText = t().home;
+  document.getElementById('btnBuilder').innerText = t().builder;
+  document.getElementById('pageTitle').innerText = t().title;
+  document.getElementById('pageSub').innerText = t().sub;
+  document.getElementById('lblSort').innerText = t().sort;
+  document.getElementById('sortNew').innerText = t().newest;
+  document.getElementById('sortPlays').innerText = t().plays;
+  document.getElementById('sortRating').innerText = t().rating;
+  document.getElementById('searchBar').placeholder = t().search;
+
+  renderCategoryFilters();
+  renderQuizzes();
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderCategoryFilters() {
+  const box = document.getElementById('categoryFilters');
+  const cats = [['all', { icon:'🌍', nameAr:'الكل', name:'All' }], ...Object.entries(NF.QUIZ_CATEGORIES)];
+  box.innerHTML = cats.map(([key, cat]) => `
+    <button class="filter-btn ${filterCat === key ? 'active' : ''}" data-cat="${key}">
+      ${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name}
+    </button>
+  `).join('');
+  box.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      filterCat = btn.dataset.cat;
+      renderCategoryFilters();
+      renderQuizzes();
+    };
+  });
+}
+
+function renderQuizzes() {
+  const grid = document.getElementById('quizzesGrid');
+  if (!allQuizzes.length) {
+      grid.innerHTML = `<div class="loading"><div class="spinner"></div>${t().loading}</div>`;
+      return;
+  }
+
+  let filtered = [...allQuizzes];
+
+  if (filterCat !== 'all') filtered = filtered.filter(q => q.category === filterCat);
+
+  if (searchQuery) {
+    const s = searchQuery.toLowerCase();
+    filtered = filtered.filter(q =>
+      q.title.toLowerCase().includes(s) ||
+      (q.titleEn || '').toLowerCase().includes(s) ||
+      q.creator.toLowerCase().includes(s)
+    );
+  }
+
+  if (sortBy === 'newest') filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  else if (sortBy === 'plays') filtered.sort((a, b) => (b.plays || 0) - (a.plays || 0));
+  else if (sortBy === 'rating') filtered.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🌐</div>
+        <h3>${t().noQuizzes}</h3>
+        <p style="margin-top:8px;">${t().beFirst}</p>
+        <a href="quiz-builder.html" class="btn btn-primary" style="margin-top:20px;">${t().builder}</a>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(q => {
+    const cat = NF.QUIZ_CATEGORIES[q.category] || NF.QUIZ_CATEGORIES.general;
+    const isOwner = q.creator === CU;
+    const cover = q.coverImage
+      ? `<img class="quiz-card-cover" src="${q.coverImage}" alt="">`
+      : `<div class="quiz-card-icon-wrap">${q.icon}</div>`;
+    const stars = q.avgRating ? `${'★'.repeat(Math.round(q.avgRating))}${'☆'.repeat(5 - Math.round(q.avgRating))}` : '';
+
+    return `
+      <div class="quiz-card" onclick="location.href='play-community-quiz.html?id=${q.id}'">
+        ${(isOwner || isAdmin) ? `<div class="quiz-owner-badge">👤 ${isOwner ? t().owner : t().admin}</div>` : ''}
+        ${cover}
+        <div class="quiz-card-body">
+          <div class="quiz-card-title">${escapeHtml(q.title)}</div>
+          <div class="quiz-card-creator">${t().by} <b>${escapeHtml(q.creator)}</b></div>
+          <div class="quiz-card-meta">
+            <span class="quiz-card-cat">${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name}</span>
+            <span>🎮 ${q.plays || 0}</span>
+            ${q.avgRating ? `<span class="quiz-card-stars">${stars} ${q.avgRating} (${q.ratingCount})</span>` : `<span style="color:var(--text-2);font-size:11px;">${t().noRating}</span>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function init() {
+  document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+
+  document.getElementById('searchBar').addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim();
+    renderQuizzes();
+  });
+
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sortBy = btn.dataset.sort;
+      renderQuizzes();
+    };
+  });
+
+  NF.listenCommunityQuizzes(quizzes => {
+    allQuizzes = quizzes;
+    renderQuizzes();
+  });
+
+  if (localStorage.getItem('theme') === 'light') {
+    document.body.classList.add('light-mode');
+  }
+
+  applyLang();
+}
+
+init();
+</script>
+
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
