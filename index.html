@@ -192,6 +192,85 @@
     .quiz-card h2 { font-size: 16px; }
     .main-sections { flex-direction: column; gap: 10px; }
   }
+    /* ✅ ستايل استفتاء مباشر احترافي */
+  .poll-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+  }
+
+  .poll-btn {
+      position: relative;
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: var(--text-color);
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+  }
+
+  .poll-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #00bcd4;
+      transform: translateY(-2px);
+  }
+
+  .poll-btn.voted {
+      border-color: #00bcd4;
+      background: rgba(0, 188, 212, 0.05);
+  }
+
+  .poll-btn:disabled {
+      cursor: default;
+      transform: none;
+  }
+
+  .poll-fill {
+      position: absolute;
+      top: 0;
+      right: 0; /* عشان اللغه عربيه */
+      height: 100%;
+      background: linear-gradient(90deg, rgba(0, 188, 212, 0.1), rgba(0, 188, 212, 0.3));
+      z-index: 0;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .poll-text {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      text-align: right;
+  }
+
+  .poll-percentage {
+      position: relative;
+      z-index: 1;
+      font-size: 13px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #00bcd4;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 900;
+      margin-right: 10px;
+  }
+
+  body.light-mode .poll-btn {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+  }
+  body.light-mode .poll-percentage {
+      background: rgba(0, 188, 212, 0.1);
+  }
 </style>
 </head>
 <body>
