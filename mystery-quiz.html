@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 Random Quiz - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --red:#ef4444; --green:#10b981; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px; display:flex; flex-direction:column; align-items:center; }
+  .container { max-width:800px; width:100%; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:0.2s; }
+  .btn:hover { background:var(--gold); color:#000; }
+  .progress { background:var(--border); height:8px; border-radius:4px; margin:20px 0; overflow:hidden; }
+  .progress-bar { background:linear-gradient(90deg,#ffd700,#ff6b6b); height:100%; width:0%; transition:0.4s; border-radius:4px; }
+  
+  .origin-banner { display:flex; align-items:center; gap:12px; background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,107,107,0.05)); border:2px solid var(--gold); border-radius:14px; padding:14px 18px; margin-bottom:16px; }
+  .origin-icon { font-size:32px; flex-shrink:0; }
+  .origin-info { flex:1; }
+  .origin-label { font-size:11px; color:var(--text-2); font-weight:700; margin-bottom:4px; }
+  .origin-name { font-size:16px; font-weight:900; color:var(--gold); }
+  .origin-part { font-size:12px; color:#00bcd4; font-weight:700; margin-top:2px; }
+  
+  .question-box { background:var(--card); border:2px solid var(--border); border-radius:16px; padding:24px; margin-bottom:20px; }
+  .q-num { font-size:12px; color:var(--text-2); font-weight:700; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .q-text { font-size:20px; font-weight:900; line-height:1.5; color:var(--text); }
+  
+  .option { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.03); border:2px solid var(--border); border-radius:12px; padding:16px; margin-bottom:10px; cursor:pointer; font-size:16px; transition:0.2s; }
+  .option:hover:not(.disabled) { border-color:var(--gold); background:rgba(255,215,0,0.05); transform:translateX(-4px); }
+  .option-letter { width:36px; height:36px; border-radius:8px; background:var(--border); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--text-2); flex-shrink:0; font-size:16px; }
+  .option.correct { border-color:var(--green); background:rgba(16,185,129,0.15); }
+  .option.correct .option-letter { background:var(--green); color:#fff; }
+  .option.wrong { border-color:var(--red); background:rgba(239,68,68,0.15); }
+  .option.wrong .option-letter { background:var(--red); color:#fff; }
+  .option.disabled { cursor:not-allowed; opacity:0.7; }
+  
+  .timer { text-align:center; font-size:22px; color:var(--gold); font-weight:900; margin-bottom:14px; }
+  .timer.warning { color:var(--red); animation:pulse 0.5s infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+  
+  .session-stats { display:flex; justify-content:center; gap:20px; margin-bottom:20px; flex-wrap:wrap; }
+  .ss-item { text-align:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:10px 20px; min-width:100px; }
+  .ss-val { font-size:20px; font-weight:900; color:var(--gold); }
+  .ss-lbl { font-size:10px; color:var(--text-2); margin-top:2px; font-weight:700; }
+  
+  .start-screen { text-align:center; padding:40px 20px; background:var(--card); border:2px solid var(--gold); border-radius:20px; }
+  .start-screen h2 { font-size:28px; color:var(--gold); margin-bottom:12px; }
+  .start-screen p { color:var(--text-2); font-size:15px; margin-bottom:24px; line-height:1.6; }
+  .start-btn { padding:16px 40px; background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; border:none; border-radius:12px; font-family:'Cairo'; font-weight:900; font-size:18px; cursor:pointer; box-shadow:0 5px 20px rgba(255,215,0,0.4); }
+  .start-btn:hover { transform:translateY(-2px); }
+  
+  .result-box { text-align:center; padding:30px; background:var(--card); border:2px solid var(--gold); border-radius:20px; }
+  .result-score { font-size:60px; font-weight:900; color:var(--gold); margin:10px 0; }
+  .result-msg { font-size:20px; margin-bottom:20px; }
+  
+  .answer-hint { background:rgba(255,215,0,0.1); border:1px solid var(--gold); border-radius:10px; padding:10px 14px; margin-top:12px; font-size:13px; color:var(--gold); display:none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="btn" style="margin-bottom:20px;" id="backBtn">⬅ Back</a>
+  <h1 style="text-align:center; color:var(--gold); font-size:28px; margin-bottom:8px;" id="titleTxt">🎲 Random Quiz</h1>
+  <p style="text-align:center; color:#aaa; margin-bottom:20px; font-size:14px;" id="subTxt">20 random questions from ALL site quizzes — each question shows its source quiz</p>
+  
+  <div id="startScreen" class="start-screen">
+    <h2 id="startTitle">🎯 Ready for the challenge?</h2>
+    <p id="startDesc">We'll pick 20 random questions from all quizzes.<br>Each question shows its original quiz above it 🎬</p>
+    <button class="start-btn" onclick="startMystery()" id="startBtn">🚀 Start Challenge</button>
+  </div>
+  
+  <div id="gameScreen" style="display:none;">
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    
+    <div class="session-stats">
+      <div class="ss-item"><div class="ss-val" id="statScore">0</div><div class="ss-lbl" id="lblScore">Score</div></div>
+      <div class="ss-item"><div class="ss-val" id="statStreak">0</div><div class="ss-lbl" id="lblStreak">🔥 Streak</div></div>
+      <div class="ss-item"><div class="ss-val" id="statBest">0</div><div class="ss-lbl" id="lblBest">Best Streak</div></div>
+    </div>
+    
+    <div class="timer" id="timer">⏱️ 20</div>
+    
+    <div class="origin-banner" id="originBanner">
+      <div class="origin-icon" id="originIcon">🎬</div>
+      <div class="origin-info">
+        <div class="origin-label" id="lblOrigin">From quiz:</div>
+        <div class="origin-name" id="originName">—</div>
+        <div class="origin-part" id="originPart"></div>
+      </div>
+    </div>
+    
+    <div class="question-box">
+      <div class="q-num">
+        <span id="qNumText">Question 1 of 20</span>
+      </div>
+      <div class="q-text" id="qText">...</div>
+    </div>
+    <div id="optionsArea"></div>
+    <div class="answer-hint" id="answerHint"></div>
+  </div>
+  
+  <div id="resultScreen" class="result-box" style="display:none;">
+    <h2 style="color:var(--gold); font-size:28px;" id="resTitle">🎉 Challenge Complete!</h2>
+    <div class="result-score" id="resultScore">0/20</div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="btn" onclick="location.reload()" style="margin-top:10px;" id="btnPlayAgain">🔄 Play Again</button>
+    <a href="index.html" class="btn" style="margin-top:10px;" id="btnHome">🏠 Home</a>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script type="module">
+import { db, ref, push } from './firebase-shared.js';
+
+const QUIZ_META = {
+  annabelle: { name:'Annabelle', en:'Annabelle', icon:'🎃' },
+  conjuring: { name:'The Conjuring', en:'The Conjuring', icon:'👻' },
+  TheNun: { name:'The Nun', en:'The Nun', icon:'✝️' },
+  FNAF: { name:'FNAF', en:'FNAF', icon:'🐻' },
+  SquidGame: { name:'Squid Game', en:'Squid Game', icon:'🦑' },
+  spiderman: { name:'Spider-Man', en:'Spider-Man', icon:'🕷️' },
+  avengers: { name:'Avengers', en:'Avengers', icon:'🛡️' },
+  avatar: { name:'Avatar', en:'Avatar', icon:'🌊' },
+  venom: { name:'Venom', en:'Venom', icon:'🖤' },
+  birdsofprey: { name:'Birds of Prey', en:'Birds of Prey', icon:'🦅' },
+  fall: { name:'Fall', en:'Fall', icon:'🪜' },
+  Wednesday: { name:'Wednesday', en:'Wednesday', icon:'🖤' },
+  knivesout: { name:'Knives Out', en:'Knives Out', icon:'🔪' },
+  scream: { name:'Scream', en:'Scream', icon:'👻' },
+  TrainToBusan: { name:'Train to Busan', en:'Train to Busan', icon:'🚄' },
+  elharifa: { name:'El Harifa', en:'El Harifa', icon:'⚽' },
+  blueelephant: { name:'The Blue Elephant', en:'The Blue Elephant', icon:'🐘' },
+  elshater: { name:'El Shater', en:'El Shater', icon:'⚔️' },
+  shalaby: { name:'Shalaby', en:'Shalaby', icon:'🎭' },
+  beitelruby: { name:'Beit El Ruby', en:'Beit El Ruby', icon:'🏠' },
+  ahmedwaahmed: { name:'Ahmed Wa Ahmed', en:'Ahmed Wa Ahmed', icon:'👥' },
+  fasel: { name:'Fasel', en:'Fasel', icon:'😋' },
+  barshama: { name:'Barshama', en:'Barshama', icon:'💊' },
+  sikosiko: { name:'Siko Siko', en:'Siko Siko', icon:'🎮' },
+  weshxwesh: { name:'Wesh X Wesh', en:'Wesh X Wesh', icon:'🤼' },
+  misterx: { name:'Mister X', en:'Mister X', icon:'🕵️' },
+  rockyelghalaba: { name:'Rocky El Ghalaba', en:'Rocky El Ghalaba', icon:'🥊' },
+  meratyx: { name:'Meraty X', en:'Meraty X', icon:'🕵️‍♀️' },
+  elserb: { name:'El Serb', en:'El Serb', icon:'🦅' },
+  eleskandarany: { name:'El Eskandarany', en:'El Eskandarany', icon:'🌊' },
+  shako: { name:'Shako', en:'Shako', icon:'💰' },
+  meratywzegty: { name:'Meraty W Zegty', en:'Meraty W Zegty', icon:'💍' },
+  nadielregal: { name:'Nadi El Regal', en:'Nadi El Regal', icon:'🤫' },
+  elaref: { name:'El Aref', en:'El Aref', icon:'🕵️' },
+  elmamar: { name:'El Mamar', en:'El Mamar', icon:'🇪🇬' },
+  foolelseen: { name:'Fol El Seen', en:'Fol El Seen', icon:'🍲' },
+  akhyfok: { name:'Akhy Fok El Shagara', en:'Akhy Fok El Shagara', icon:'🌳' },
+  restart: { name:'Restart', en:'Restart', icon:'🔄' },
+  tag: { name:'Tag', en:'Tag', icon:'👑' },
+  mazerunner: { name:'Maze Runner', en:'Maze Runner', icon:'🏃' },
+  rambo: { name:'Rambo', en:'Rambo', icon:'🔫' }
+};
+
+const PART_NAMES = {
+  part1: 'Part 1', part2: 'Part 2', part3: 'Part 3', part4: 'Part 4',
+  part5: 'Part 5', part6: 'Part 6', part7: 'Part 7', part8: 'Part 8',
+  comprehensive: 'Comprehensive', all: 'All Parts'
+};
+
+let questions = [], current = 0, score = 0, streak = 0, bestStreak = 0;
+let timerInterval, timeLeft = 20, answered = false;
+
+// Apply Language on load
+const currentLang = localStorage.getItem('lang') || 'ar';
+if (currentLang === 'en') {
+    document.body.dir = 'ltr';
+    document.getElementById('backBtn').innerText = '⬅ Back';
+    document.getElementById('titleTxt').innerText = '🎲 Random Quiz';
+    document.getElementById('subTxt').innerText = '20 random questions from ALL site quizzes — each question shows its source quiz';
+    document.getElementById('startTitle').innerText = '🎯 Ready for the challenge?';
+    document.getElementById('startDesc').innerHTML = "We'll pick 20 random questions from all quizzes.<br>Each question shows its original quiz above it 🎬";
+    document.getElementById('startBtn').innerText = '🚀 Start Challenge';
+    document.getElementById('lblScore').innerText = 'Score';
+    document.getElementById('lblStreak').innerText = '🔥 Streak';
+    document.getElementById('lblBest').innerText = 'Best Streak';
+    document.getElementById('lblOrigin').innerText = 'From quiz:';
+    document.getElementById('resTitle').innerText = '🎉 Challenge Complete!';
+    document.getElementById('btnPlayAgain').innerText = '🔄 Play Again';
+    document.getElementById('btnHome').innerText = '🏠 Home';
+    document.getElementById('qNumText').innerText = 'Question 1 of 20';
+}
+
+window.startMystery = () => {
+  let pool = [];
+  for (const quizKey in allQuizzesData) {
+    const quiz = allQuizzesData[quizKey];
+    const meta = QUIZ_META[quizKey] || { name: quizKey, en: quizKey, icon: '🎬' };
+    for (const part in quiz) {
+      if (Array.isArray(quiz[part])) {
+        quiz[part].forEach(q => {
+          if (q && q.q_ar && Array.isArray(q.options_ar) && q.options_ar.length > 0) {
+            pool.push({ ...q, _quizKey: quizKey, _part: part, _meta: meta });
+          }
+        });
+      }
+    }
+  }
+  
+  if (pool.length === 0) return alert(currentLang === 'en' ? 'Not enough questions!' : 'مفيش أسئلة كفاية!');
+  
+  questions = pool.sort(() => Math.random() - 0.5).slice(0, 20);
+  current = 0; score = 0; streak = 0; bestStreak = 0;
+  
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  document.getElementById('resultScreen').style.display = 'none';
+  loadQuestion();
+};
+
+function loadQuestion() {
+  if (current >= questions.length) return showResult();
+  answered = false;
+  timeLeft = 20;
+  
+  const q = questions[current];
+  const isEn = currentLang === 'en';
+  
+  document.getElementById('originIcon').innerText = q._meta.icon || '🎬';
+  document.getElementById('originName').innerText = q._meta.name || q._quizKey;
+  document.getElementById('originPart').innerText = PART_NAMES[q._part] || q._part || '';
+  
+  document.getElementById('progressBar').style.width = `${(current / questions.length) * 100}%`;
+  document.getElementById('qNumText').innerText = isEn ? `Question ${current + 1} of ${questions.length}` : `سؤال ${current + 1} من ${questions.length}`;
+  document.getElementById('timer').innerText = `⏱️ 20`;
+  document.getElementById('timer').className = 'timer';
+  
+  // ✅ الترجمة هنا
+  document.getElementById('qText').innerText = isEn ? (q.q_en || q.q_ar) : q.q_ar;
+  
+  document.getElementById('statScore').innerText = score;
+  document.getElementById('statStreak').innerText = streak;
+  document.getElementById('statBest').innerText = bestStreak;
+  document.getElementById('answerHint').style.display = 'none';
+  
+  const optsArea = document.getElementById('optionsArea');
+  optsArea.innerHTML = '';
+  
+  const letters = isEn ? ['A','B','C','D','E','F'] : ['أ','ب','ج','د','هـ','و'];
+  
+  // ✅ ترجمة الاختيارات
+  const activeOpts = isEn && q.options_en && q.options_en.length > 0 ? q.options_en : q.options_ar;
+  const shuffled = activeOpts.map((opt, i) => ({ text: opt, correct: i === q.answer })).sort(() => Math.random() - 0.5);
+  
+  shuffled.forEach((o, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<div class="option-letter">${letters[i]}</div><div style="flex:1;">${o.text}</div>`;
+    div.onclick = () => checkAnswer(o.correct, div);
+    optsArea.appendChild(div);
+  });
+  
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const timerEl = document.getElementById('timer');
+    timerEl.innerText = `⏱️ ${timeLeft}`;
+    if (timeLeft <= 5) timerEl.classList.add('warning');
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) checkAnswer(false, null);
+    }
+  }, 1000);
+}
+
+function checkAnswer(isCorrect, el) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  
+  if (isCorrect) {
+    score++;
+    streak++;
+    if (streak > bestStreak) bestStreak = streak;
+    if (el) el.classList.add('correct');
+    if (window.confetti) confetti({ particleCount: 30, spread: 60 });
+    if (timeLeft >= 15) score++; // speed bonus
+  } else {
+    streak = 0;
+    if (el) el.classList.add('wrong');
+    const q = questions[current];
+    const isEn = currentLang === 'en';
+    const activeOpts = isEn && q.options_en && q.options_en.length > 0 ? q.options_en : q.options_ar;
+    const correctText = activeOpts[q.answer];
+    document.querySelectorAll('.option').forEach(o => {
+      if (o.innerText.includes(correctText)) o.classList.add('correct');
+    });
+  }
+  
+  const q = questions[current];
+  const hintEl = document.getElementById('answerHint');
+  hintEl.innerHTML = currentLang === 'en' 
+    ? `📌 This question is from: <b style="color:#ffd700;">${q._meta.icon} ${q._meta.name}</b> — ${PART_NAMES[q._part] || ''}`
+    : `📌 السؤال ده من كويز: <b style="color:#ffd700;">${q._meta.icon} ${q._meta.name}</b> — ${PART_NAMES[q._part] || ''}`;
+  hintEl.style.display = 'block';
+  
+  document.getElementById('statScore').innerText = score;
+  document.getElementById('statStreak').innerText = streak;
+  document.getElementById('statBest').innerText = bestStreak;
+  
+  setTimeout(() => { current++; loadQuestion(); }, 1600);
+}
+
+function showResult() {
+  clearInterval(timerInterval);
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+  document.getElementById('resultScore').innerText = `${score}/${questions.length * 2}`;
+  
+  const pct = (score / (questions.length * 2)) * 100;
+  let msg = currentLang === 'en' ? '💪 Try again!' : '💪 حاول تاني!';
+  if (pct >= 90) msg = currentLang === 'en' ? '🏆 Legendary!' : '🏆 أداء أسطوري!';
+  else if (pct >= 70) msg = currentLang === 'en' ? '🎉 Excellent!' : '🎉 ممتاز!';
+  else if (pct >= 50) msg = currentLang === 'en' ? '👍 Good!' : '👍 حلو!';
+  
+  document.getElementById('resultMsg').innerText = msg;
+  
+  if (window.confetti) confetti({ particleCount: 200, spread: 100 });
+  
+  const CU = localStorage.getItem('loggedInUser');
+  if (CU) {
+    try {
+      push(ref(db, `scores/${CU}/mystery_${Date.now()}`), {
+        score, total: questions.length * 2, time: new Date().toISOString(), source: 'mystery'
+      });
+    } catch(e) {}
+  }
+}
+</script>
+</body>
+</html>
