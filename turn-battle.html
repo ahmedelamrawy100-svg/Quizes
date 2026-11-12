@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ تحدي الأدوار - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="quiz-style.css">
+<link rel="stylesheet" href="features/new-features.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  body { justify-content: flex-start; padding-top: 80px; }
+  .tb-container { width: 100%; max-width: 800px; background: rgba(15,15,15,0.98); border: 2px solid #8b0000; border-radius: 15px; padding: 25px; box-sizing: border-box; }
+  .tb-header { text-align: center; margin-bottom: 20px; }
+  .tb-header h1 { color: #ff0000; font-size: 32px; margin-bottom: 10px; }
+  .tb-header p { color: #aaa; font-size: 15px; }
+  .tb-score-board { display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 14px; margin-bottom: 20px; align-items: center; }
+  .tb-player-score { text-align: center; }
+  .tb-player-name { font-size: 14px; color: #aaa; margin-bottom: 6px; font-weight: bold; }
+  .tb-score-value { font-size: 38px; font-weight: 900; color: #ffd700; line-height: 1; }
+  .tb-vs { font-size: 22px; font-weight: 900; color: #ff0000; }
+  .tb-result { text-align: center; padding: 40px 20px; }
+  .tb-result h2 { font-size: 38px; margin-bottom: 15px; }
+  .tb-result.win h2 { color: #4caf50; }
+  .tb-result.lose h2 { color: #f44336; }
+  .tb-result.tie h2 { color: #ff9800; }
+  .tb-result p { font-size: 20px; color: #fff; margin-bottom: 20px; }
+  .tb-input-group { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+  @media (max-width: 600px) {
+    .tb-score-board { grid-template-columns: 1fr auto 1fr; gap: 8px; padding: 15px; }
+    .tb-score-value { font-size: 28px; }
+    .tb-header h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div class="top-buttons-container">
+  <a href="index.html" class="back-btn">⬅ رجوع</a>
+</div>
+
+<!-- SETUP -->
+<div id="setupScreen" class="tb-container">
+  <div class="tb-header">
+    <h1>⚔️ تحدي الأدوار</h1>
+    <p>كل لاعب بيجاوب سؤال بالتناوب. الأعلى نقاط يفوز!</p>
+  </div>
+  <div class="tb-input-group">
+    <button class="nf-btn nf-btn-primary" style="padding:16px; font-size:16px; width:100%;" onclick="createTurnRoom()">🎮 إنشاء غرفة جديدة</button>
+    <div style="text-align:center; color:#aaa; margin:8px 0;">— أو —</div>
+    <input type="text" id="joinCodeInput" class="promo-input" placeholder="XXXXXX" maxlength="6" style="width:100%;">
+    <button class="nf-btn nf-btn-info" style="padding:16px; font-size:16px; width:100%;" onclick="joinTurnRoom()">🚪 انضمام بكود</button>
+  </div>
+</div>
+
+<!-- WAITING -->
+<div id="waitingScreen" class="tb-container" style="display:none;">
+  <div class="tb-header">
+    <h1 style="color:#ffd700;">⏳ في انتظار الخصم...</h1>
+  </div>
+  <div style="text-align:center; padding:30px;">
+    <p style="color:#aaa; margin-bottom:15px; font-size:15px;">ابعت الكود ده لصاحبك:</p>
+    <div style="font-size:48px; font-weight:900; color:#fff; background:#000; padding:25px; border:3px dashed #ff0000; border-radius:12px; letter-spacing:10px; font-family:monospace;" id="displayCode">------</div>
+    <p style="color:#aaa; margin-top:20px; animation:pulse 1.5s infinite;">⏱️ جاري الانتظار...</p>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="gameScreen" class="tb-container" style="display:none;">
+  <div class="tb-score-board">
+    <div class="tb-player-score">
+      <div class="tb-player-name" id="p1Name">Player 1</div>
+      <div class="tb-score-value" id="p1Score">0</div>
+    </div>
+    <div class="tb-vs">VS</div>
+    <div class="tb-player-score">
+      <div class="tb-player-name" id="p2Name">Player 2</div>
+      <div class="tb-score-value" id="p2Score">0</div>
+    </div>
+  </div>
+
+  <div class="turn-indicator" id="turnIndicator"></div>
+
+  <div id="questionBox" style="background:rgba(0,0,0,0.4); padding:25px; border-radius:14px; margin:20px 0;"></div>
+</div>
+
+<!-- RESULT -->
+<div id="resultScreen" class="tb-container" style="display:none;">
+  <div class="tb-result" id="resultBox"></div>
+</div>
+
+<!-- تحميل الأسئلة قبل السكريبت الأساسي -->
+<script src="questions.js"></script>
+
+<script type="module">
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, get, set, update, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const FB = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
+const app = getApps().length ? getApp() : initializeApp(FB);
+const db = getDatabase(app);
+
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+if (!CU) window.location.href = 'index.html';
+
+let roomCode = null, myRole = null, roomData = null, unsub = null;
+let questions = [], timerInterval = null, timeLeft = 20, answered = false;
+
+// ═══════════ BUILD QUESTION POOL ═══════════
+function buildQuestionPool() {
+  if (typeof allQuizzesData === 'undefined') {
+    console.error('questions.js not loaded');
+    return [];
+  }
+  const pool = [];
+  Object.keys(allQuizzesData).forEach(quizKey => {
+    const quiz = allQuizzesData[quizKey];
+    if (!quiz || typeof quiz !== 'object') return;
+    for (const part in quiz) {
+      if (Array.isArray(quiz[part])) {
+        quiz[part].forEach(q => {
+          if (q && q.q_ar && Array.isArray(q.options_ar) && typeof q.answer === 'number' && q.options_ar.length >= 2) {
+            pool.push(q);
+          }
+        });
+      }
+    }
+  });
+  // Shuffle and pick 10
+  return pool.sort(() => Math.random() - 0.5).slice(0, 10);
+}
+
+// ═══════════ CREATE ROOM ═══════════
+window.createTurnRoom = async () => {
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+  roomCode = code;
+  myRole = 'player1';
+  questions = buildQuestionPool();
+  if (questions.length === 0) return alert('مفيش أسئلة متاحة، اتأكد إن questions.js محمّل صح');
+
+  await set(ref(db, `turn_rooms/${code}`), {
+    player1: CU,
+    player2: null,
+    player1Score: 0,
+    player2Score: 0,
+    currentTurn: 'player1',
+    currentQ: 0,
+    questions,
+    status: 'waiting',
+    createdAt: Date.now()
+  });
+
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('waitingScreen').style.display = 'block';
+  document.getElementById('displayCode').textContent = code;
+  listenRoom(code);
+};
+
+// ═══════════ JOIN ROOM ═══════════
+window.joinTurnRoom = async () => {
+  const code = (document.getElementById('joinCodeInput').value || '').trim().toUpperCase();
+  if (!code || code.length < 4) return alert('اكتب كود صحيح');
+  const snap = await get(ref(db, `turn_rooms/${code}`));
+  if (!snap.exists()) return alert('❌ الكود غير صحيح');
+  const room = snap.val();
+  if (room.status !== 'waiting') return alert('الغرفة بدأت بالفعل');
+  
+  // ⚠️ السطر بتاع "أنت صاحب الغرفة" اتشال خلاص عشان يشتغل زي co-op
+
+  roomCode = code;
+  myRole = 'player2';
+  questions = room.questions || [];
+  await update(ref(db, `turn_rooms/${code}`), { player2: CU, status: 'playing' });
+  
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+  listenRoom(code);
+};
+
+// ═══════════ LISTEN ROOM ═══════════
+function listenRoom(code) {
+  if (unsub) unsub();
+  unsub = onValue(ref(db, `turn_rooms/${code}`), snap => {
+    if (!snap.exists()) {
+      alert('الغرفة اتقفلت');
+      window.location.href = 'index.html';
+      return;
+    }
+    roomData = snap.val();
+    renderRoom();
+  });
+}
+
+// ═══════════ RENDER ROOM ═══════════
+function renderRoom() {
+  if (!roomData) return;
+
+  if (roomData.status === 'waiting') {
+    document.getElementById('waitingScreen').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('waitingScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'block';
+
+  document.getElementById('p1Name').textContent = roomData.player1 || 'P1';
+  document.getElementById('p2Name').textContent = roomData.player2 || 'P2';
+  document.getElementById('p1Score').textContent = roomData.player1Score || 0;
+  document.getElementById('p2Score').textContent = roomData.player2Score || 0;
+
+  const currentQ = roomData.currentQ || 0;
+  if (currentQ >= (roomData.questions?.length || 0)) {
+    return showResult();
+  }
+
+  const isMyTurn = roomData.currentTurn === myRole;
+  const turnIndicator = document.getElementById('turnIndicator');
+  const box = document.getElementById('questionBox');
+
+  if (isMyTurn) {
+    turnIndicator.className = 'turn-indicator my-turn';
+    turnIndicator.textContent = '🎯 دورك!';
+    if (!answered || box.dataset.qIndex !== String(currentQ)) {
+      showQuestion(currentQ);
+    }
+  } else {
+    turnIndicator.className = 'turn-indicator opponent-turn';
+    turnIndicator.textContent = '⏳ دور الخصم...';
+    clearInterval(timerInterval);
+    box.innerHTML = `<div class="opponent-waiting"><div class="spinner"></div><div>الخصم بيجاوب دلوقتي...</div></div>`;
+    box.dataset.qIndex = '';
+  }
+}
+
+// ═══════════ SHOW QUESTION ═══════════
+function showQuestion(idx) {
+  const q = roomData.questions[idx];
+  if (!q) return;
+  answered = false;
+  const box = document.getElementById('questionBox');
+  box.dataset.qIndex = String(idx);
+  box.innerHTML = `
+    <div class="timer" id="tbTimer" style="font-size:20px; color:#ffd700; text-align:center; margin-bottom:15px; font-weight:bold;">⏱️ 20</div>
+    <div style="font-size:20px; font-weight:bold; margin-bottom:20px; color:#fff;">${escapeHtml(q.q_ar)}</div>
+    <div id="optionsContainer"></div>
+  `;
+  const opts = document.getElementById('optionsContainer');
+  opts.innerHTML = q.options_ar.map((opt, i) =>
+    `<div class="option" onclick="window.answerTurn(${i})" style="cursor:pointer;">${escapeHtml(opt)}</div>`
+  ).join('');
+  startTimer(q.answer);
+}
+
+// ═══════════ TIMER ═══════════
+function startTimer(correctIdx) {
+  clearInterval(timerInterval);
+  timeLeft = 20;
+  updateTimerEl();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerEl();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) window.answerTurn(-1);
+    }
+  }, 1000);
+}
+
+function updateTimerEl() {
+  const el = document.getElementById('tbTimer');
+  if (el) el.textContent = `⏱️ ${timeLeft}`;
+}
+
+// ═══════════ ANSWER ═══════════
+window.answerTurn = async (idx) => {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const q = roomData.questions[roomData.currentQ];
+  const isCorrect = idx === q.answer;
+  const field = myRole === 'player1' ? 'player1Score' : 'player2Score';
+  const nextTurn = myRole === 'player1' ? 'player2' : 'player1';
+
+  await update(ref(db, `turn_rooms/${roomCode}`), {
+    [field]: (roomData[field] || 0) + (isCorrect ? 1 : 0),
+    currentQ: roomData.currentQ + 1,
+    currentTurn: nextTurn
+  });
+};
+
+// ═══════════ RESULT ═══════════
+function showResult() {
+  clearInterval(timerInterval);
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+
+  const p1 = roomData.player1Score || 0;
+  const p2 = roomData.player2Score || 0;
+  const myScore = myRole === 'player1' ? p1 : p2;
+  const oppScore = myRole === 'player1' ? p2 : p1;
+
+  let cls, title;
+  if (myScore > oppScore) { cls = 'win'; title = '🎉 فزت!'; if (window.confetti) window.confetti({ particleCount: 250, spread: 120 }); }
+  else if (myScore < oppScore) { cls = 'lose'; title = '😢 خسرت'; }
+  else { cls = 'tie'; title = '🤝 تعادل'; }
+
+  document.getElementById('resultBox').className = 'tb-result ' + cls;
+  document.getElementById('resultBox').innerHTML = `
+    <h2>${title}</h2>
+    <p>نتيجتك: ${myScore} — الخصم: ${oppScore}</p>
+    <div style="margin-top:25px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button class="nf-btn nf-btn-primary" onclick="location.href='turn-battle.html'" style="font-size:15px; padding:14px 30px;">🔄 العب تاني</button>
+      <button class="nf-btn nf-btn-ghost" onclick="location.href='index.html'" style="font-size:15px; padding:14px 30px;">🏠 الرئيسية</button>
+    </div>
+  `;
+
+  setTimeout(() => remove(ref(db, `turn_rooms/${roomCode}`)), 60000);
+}
+
+// ═══════════ UTIL ═══════════
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+</script>
+</body>
+</html>
