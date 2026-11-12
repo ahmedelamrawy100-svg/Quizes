@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛠️ صانع الكويزات / Quiz Builder - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#ff0000">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="pwa-native.css">
+<style>
+  :root { --bg:#080510; --card:#131320; --border:#2a2a3f; --text:#fff; --text-2:#aaa; --gold:#ffd700; --red:#ff4444; --green:#10b981; --blue:#3b82f6; --purple:#a855f7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 0%, #1a0a2e 0%, #080510 60%); background-attachment:fixed; color:var(--text); font-family:'Cairo',sans-serif; min-height:100vh; padding:16px 14px 80px; }
+  .container { max-width:1000px; margin:0 auto; }
+
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .btn { padding:10px 18px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; transition:0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover { background:var(--gold); color:#000; border-color:var(--gold); transform:translateY(-1px); }
+  .btn-primary { background:var(--gold); color:#000; border-color:var(--gold); }
+  .btn-primary:hover { background:#ffcc00; }
+  .btn-success { background:var(--green); color:#fff; border-color:var(--green); }
+  .btn-success:hover { background:#059669; color:#fff; }
+  .btn-danger { background:var(--red); color:#fff; border-color:var(--red); }
+  .btn-danger:hover { background:#dc2626; color:#fff; }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
+
+  .page-title { text-align:center; margin:10px 0 6px; font-size:32px; font-weight:900; background:linear-gradient(90deg,#ffd700,#ff6b6b,#a855f7,#ffd700); background-size:200% auto; -webkit-background-clip:text; background-clip:text; color:transparent; animation:titleShift 4s linear infinite; }
+  @keyframes titleShift { to { background-position:200% center; } }
+  .page-sub { text-align:center; color:var(--text-2); font-size:14px; margin-bottom:24px; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:6px; margin-bottom:20px; background:var(--card); padding:6px; border-radius:12px; border:1px solid var(--border); flex-wrap:wrap; }
+  .tab-btn { flex:1; padding:10px; border-radius:8px; border:none; background:transparent; color:var(--text-2); font-family:'Cairo'; font-weight:700; font-size:14px; cursor:pointer; transition:0.2s; min-width:120px; }
+  .tab-btn.active { background:var(--gold); color:#000; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:20px; }
+  .card-title { color:var(--gold); font-size:18px; font-weight:900; margin-bottom:16px; display:flex; align-items:center; gap:8px; padding-bottom:12px; border-bottom:1px solid var(--border); justify-content:space-between; flex-wrap:wrap; }
+  .card-title > span:first-child { display:flex; align-items:center; gap:8px; }
+
+  .field { margin-bottom:14px; }
+  .field label { display:block; color:var(--text-2); font-size:13px; font-weight:700; margin-bottom:6px; }
+  .input { width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); background:rgba(0,0,0,0.4); color:var(--text); font-family:'Cairo'; font-size:14px; outline:none; transition:0.2s; }
+  .input:focus { border-color:var(--gold); background:rgba(0,0,0,0.6); box-shadow:0 0 0 3px rgba(255,215,0,0.15); }
+  textarea.input { resize:vertical; min-height:60px; }
+
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:600px) { .grid-2 { grid-template-columns:1fr; } }
+
+  .icon-picker { display:flex; gap:6px; flex-wrap:wrap; padding:8px; background:rgba(0,0,0,0.3); border-radius:10px; max-height:140px; overflow-y:auto; }
+  .icon-btn { width:38px; height:38px; border-radius:8px; border:2px solid transparent; background:rgba(255,255,255,0.05); cursor:pointer; font-size:20px; display:flex; align-items:center; justify-content:center; transition:0.2s; }
+  .icon-btn:hover { background:rgba(255,255,255,0.15); transform:scale(1.1); }
+  .icon-btn.selected { border-color:var(--gold); background:rgba(255,215,0,0.15); transform:scale(1.1); }
+
+  .category-picker { display:flex; gap:8px; flex-wrap:wrap; }
+  .cat-btn { padding:8px 14px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-2); font-family:'Cairo'; font-weight:700; font-size:13px; cursor:pointer; transition:0.2s; }
+  .cat-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+  .cat-btn.selected { background:var(--gold); color:#000; border-color:var(--gold); }
+
+  /* Image Uploader - Portrait */
+  .image-uploader {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+    aspect-ratio: 3 / 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-uploader:hover { border-color:var(--gold); background:rgba(255,215,0,0.05); }
+  .image-uploader.has-image { padding:0; border-style:solid; overflow:hidden; }
+  .image-wrap { position:relative; width:100%; height:100%; }
+  .image-preview { width:100%; height:100%; object-fit:cover; display:block; }
+  .image-uploader-inner { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--text-2); }
+  .image-uploader-inner .icon { font-size:32px; }
+  .image-uploader-inner .text { font-size:13px; font-weight:700; }
+  .image-uploader-inner .hint { font-size:11px; opacity:0.6; }
+  .image-remove-btn { position:absolute; top:8px; left:8px; background:var(--red); color:#fff; border:none; width:28px; height:28px; border-radius:50%; cursor:pointer; font-weight:900; z-index:2; }
+  .image-loading { padding:30px; text-align:center; color:var(--text-2); }
+
+  /* Questions */
+  .question-block { background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; position:relative; transition:0.2s; }
+  .question-block.dragging { opacity:0.5; border-color:var(--gold); }
+  .question-block.drag-over { border-color:var(--gold); border-style:dashed; }
+  .q-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px; flex-wrap:wrap; }
+  .q-num { background:var(--gold); color:#000; font-weight:900; font-size:13px; padding:4px 12px; border-radius:10px; display:flex; align-items:center; gap:6px; }
+  .q-num .grip { cursor:grab; user-select:none; opacity:0.6; }
+  .q-actions { display:flex; gap:6px; }
+
+  .option-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .option-letter { width:30px; height:30px; border-radius:8px; background:var(--border); display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--text-2); flex-shrink:0; cursor:pointer; transition:0.2s; }
+  .option-row.correct .option-letter { background:var(--green); color:#fff; }
+  .option-letter:hover { background:var(--gold); color:#000; }
+  .option-input { flex:1; }
+  .correct-radio { width:20px; height:20px; cursor:pointer; accent-color:var(--green); flex-shrink:0; }
+
+  .add-question-btn { width:100%; padding:16px; border:2px dashed var(--gold); background:rgba(255,215,0,0.05); color:var(--gold); border-radius:12px; font-family:'Cairo'; font-weight:900; font-size:15px; cursor:pointer; transition:0.2s; }
+  .add-question-btn:hover { background:rgba(255,215,0,0.15); }
+
+  /* My Quizzes */
+  .my-quiz-item { display:flex; justify-content:space-between; align-items:center; padding:14px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; gap:12px; flex-wrap:wrap; transition:0.2s; }
+  .my-quiz-item:hover { border-color:var(--gold); background:rgba(255,215,0,0.03); }
+  .my-quiz-thumb { width:45px; height:60px; border-radius:8px; background:rgba(0,0,0,0.3); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:24px; }
+  .my-quiz-thumb img { width:100%; height:100%; object-fit:cover; }
+  .my-quiz-info { flex:1; min-width:150px; }
+  .my-quiz-title { font-weight:900; font-size:15px; color:var(--text); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .my-quiz-meta { font-size:12px; color:var(--text-2); margin-top:4px; }
+  .status-badge { font-size:11px; font-weight:900; padding:3px 10px; border-radius:10px; }
+  .status-published { background:rgba(16,185,129,0.15); color:var(--green); }
+  .status-draft { background:rgba(245,158,11,0.15); color:#f59e0b; }
+  .my-quiz-actions { display:flex; gap:6px; flex-wrap:wrap; }
+
+  /* Stats hero */
+  .creator-stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
+  .stat-box { background:linear-gradient(135deg, rgba(255,215,0,0.08), rgba(168,85,247,0.05)); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
+  .stat-box .v { font-size:24px; font-weight:900; color:var(--gold); }
+  .stat-box .l { font-size:11px; color:var(--text-2); margin-top:4px; font-weight:700; }
+
+  /* Toast */
+  #toast-container { position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+  .toast { background:var(--green); color:#fff; padding:12px 22px; border-radius:10px; font-weight:700; font-size:14px; box-shadow:0 8px 30px rgba(0,0,0,0.4); animation:toastIn 0.3s; font-family:'Cairo'; max-width:400px; text-align:center; }
+  .toast.error { background:var(--red); }
+  .toast.info { background:var(--blue); }
+  .toast.gold { background:var(--gold); color:#000; }
+  @keyframes toastIn { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+  /* Modal */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); backdrop-filter:blur(8px); z-index:99998; justify-content:center; align-items:center; padding:20px; }
+  .modal.active { display:flex; }
+  .modal-box { background:var(--card); border:2px solid var(--gold); border-radius:16px; padding:24px; max-width:600px; width:100%; max-height:85vh; overflow-y:auto; position:relative; }
+  .modal-title { color:var(--gold); font-size:20px; font-weight:900; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+  .modal-actions { display:flex; gap:10px; margin-top:20px; }
+  .modal-actions .btn { flex:1; justify-content:center; }
+  .modal-close { position:absolute; top:12px; left:12px; background:var(--red); color:#fff; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-weight:900; z-index:2; }
+
+  /* Preview */
+  .preview-quiz-header { text-align:center; padding:20px; background:rgba(0,0,0,0.4); border-radius:14px; margin-bottom:16px; }
+  .preview-quiz-cover { width:160px; aspect-ratio:3/4; object-fit:cover; border-radius:10px; margin:0 auto 12px; display:block; border:2px solid var(--border); }
+  .preview-quiz-icon { font-size:64px; }
+  .preview-quiz-title { font-size:22px; font-weight:900; color:var(--gold); margin-top:8px; }
+  .preview-quiz-creator { font-size:13px; color:var(--text-2); margin-top:4px; }
+  .preview-question { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px; }
+  .preview-q-text { font-weight:900; font-size:15px; margin-bottom:10px; }
+  .preview-q-image { max-width:100%; border-radius:8px; margin-bottom:10px; max-height:200px; object-fit:contain; display:block; margin-left:auto; margin-right:auto; }
+  .preview-opt { padding:8px 12px; background:rgba(0,0,0,0.3); border-radius:8px; margin-bottom:6px; font-size:13px; display:flex; gap:8px; align-items:center; }
+  .preview-opt.correct { background:rgba(16,185,129,0.2); border:1px solid var(--green); }
+  .preview-opt-letter { font-weight:900; color:var(--gold); }
+
+  /* Autosave indicator */
+  .autosave-badge { position:fixed; bottom:20px; right:20px; background:var(--card); border:1px solid var(--border); padding:8px 16px; border-radius:20px; font-size:12px; color:var(--text-2); display:none; z-index:999; box-shadow:0 4px 15px rgba(0,0,0,0.4); }
+  .autosave-badge.show { display:block; animation:fadeIn 0.3s; }
+  .autosave-badge.saving { border-color:var(--gold); color:var(--gold); }
+  .autosave-badge.saved { border-color:var(--green); color:var(--green); }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .empty { text-align:center; padding:40px 20px; color:var(--text-2); font-size:14px; }
+  .empty-icon { font-size:50px; opacity:0.5; margin-bottom:12px; }
+
+  .error-list { background:rgba(239,68,68,0.1); border:1px solid var(--red); border-radius:10px; padding:12px; margin-bottom:14px; font-size:13px; color:#ff8080; display:none; }
+  .error-list.show { display:block; }
+  .error-list ul { padding-right:20px; margin-top:6px; }
+  .error-list li { margin-bottom:4px; }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+<div class="autosave-badge" id="autosaveBadge"></div>
+
+<div class="container">
+
+  <div class="top-bar">
+    <a href="index.html" class="btn" id="btnHome">⬅ الرئيسية</a>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" id="btnLang" onclick="toggleLang()" style="background:var(--blue);color:#fff;border-color:var(--blue);">EN</button>
+      <a href="community-quizzes.html" class="btn" id="btnCommunity" style="background:var(--purple);color:#fff;border-color:var(--purple);">🌐 كويزات المجتمع</a>
+    </div>
+  </div>
+
+  <h1 class="page-title" id="pageTitle">🛠️ صانع الكويزات</h1>
+  <p class="page-sub" id="pageSub">اعمل كويزك، ضيف صور، انشر، وخلي الكل يلعبه</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="create" id="tabCreateBtn">➕ إنشاء كويز</button>
+    <button class="tab-btn" data-tab="mine" id="tabMineBtn">📋 كويزاتي</button>
+  </div>
+
+  <!-- Create/Edit Tab -->
+  <div id="tab-create">
+
+    <div class="card">
+      <div class="card-title"><span id="lblQuizData">🎨 بيانات الكويز</span></div>
+
+      <div class="field" style="text-align: center;">
+        <label id="lblCover">صورة الغلاف (Portrait - اختياري)</label>
+        <div class="image-uploader" id="coverUploader" onclick="window._pickCover()">
+          <div class="image-uploader-inner">
+            <div class="icon">🖼️</div>
+            <div class="text" id="lblPickImg">اضغط لاختيار صورة</div>
+            <div class="hint" id="lblPickImgHint">يفضل طولية (3:4)</div>
+          </div>
+        </div>
+        <input type="file" id="coverInput" accept="image/*" style="display:none;" onchange="window._handleCover(event)">
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label id="lblTitleAr">العنوان (عربي) *</label>
+          <input type="text" id="quizTitle" class="input" maxlength="60">
+        </div>
+        <div class="field">
+          <label id="lblTitleEn">العنوان (English)</label>
+          <input type="text" id="quizTitleEn" class="input" maxlength="60">
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="lblDesc">وصف قصير (اختياري)</label>
+        <textarea id="quizDesc" class="input" maxlength="200"></textarea>
+      </div>
+
+      <div class="field">
+        <label id="lblCat">التصنيف *</label>
+        <div class="category-picker" id="categoryPicker"></div>
+      </div>
+
+      <div class="field">
+        <label id="lblIcon">الأيقونة *</label>
+        <div class="icon-picker" id="iconPicker"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span><span id="lblQuestions">❓ الأسئلة</span> <span style="font-size:12px;color:var(--text-2);font-weight:normal;" id="qCount"></span></span>
+        <span style="font-size:11px;color:var(--text-2);font-weight:normal;" id="lblDragHint">اسحب من ✅ لتغيير الترتيب</span>
+      </div>
+      <div id="questionsContainer"></div>
+      <button class="add-question-btn" id="btnAddQuestion" onclick="window._addQuestion()">➕ إضافة سؤال جديد</button>
+    </div>
+
+    <div class="error-list" id="errorList">
+      <div id="errHeader">⚠️ في مشاكل محتاجة تتظبط:</div>
+      <ul id="errorItems"></ul>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btnSaveDraft" onclick="window._saveQuiz('draft')" style="flex:1;justify-content:center;">💾 حفظ كمسودة</button>
+        <button class="btn btn-success" id="btnPublish" onclick="window._saveQuiz('published')" style="flex:1;justify-content:center;">🚀 نشر الكويز</button>
+        <button class="btn" id="btnPreview" onclick="window._previewQuiz()" style="background:var(--blue);color:#fff;border-color:var(--blue);flex:1;justify-content:center;">👁️ معاينة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Quizzes Tab -->
+  <div id="tab-mine" style="display:none;">
+    <div id="creatorStats" class="creator-stats"></div>
+    <div class="card">
+      <div class="card-title"><span id="myQuizzesTitle">📋 كويزاتي</span></div>
+      <div id="myQuizzesList"><div class="empty">جاري التحميل...</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">تأكيد</div>
+    <p id="confirmMsg" style="color:var(--text-2);font-size:14px;margin-bottom:16px;"></p>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancelModal" onclick="window._closeModal()">إلغاء</button>
+      <button class="btn btn-danger" id="confirmOkBtn">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal" id="previewModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="window._closePreview()">✖</button>
+    <div class="modal-title" id="lblPreviewTitle">👁️ معاينة الكويز</div>
+    <div id="previewContent"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnClosePreview" onclick="window._closePreview()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import './features/quiz-builder.js';
+
+const NF = window.NFQuizBuilder;
+const CU = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
+const isAdmin = CU === 'ahmed';
+
+let currentLang = localStorage.getItem('lang') || 'ar';
+
+const T = {
+  ar: {
+    home: '⬅ الرئيسية', community: '🌐 كويزات المجتمع', title: '🛠️ صانع الكويزات', sub: 'اعمل كويزك، ضيف صور، انشر، وخلي الكل يلعبه',
+    tabCreate: '➕ إنشاء كويز', tabMine: '📋 كويزاتي', quizData: '🎨 بيانات الكويز',
+    cover: 'صورة الغلاف (Portrait - اختياري)', pickImg: 'اضغط لاختيار صورة', pickImgHint: 'يفضل طولية (3:4)',
+    titleAr: 'العنوان (عربي) *', titleEn: 'العنوان (English)', desc: 'وصف قصير (اختياري)', cat: 'التصنيف *', icon: 'الأيقونة *',
+    questions: '❓ الأسئلة', dragHint: 'اسحب من ✅ لتغيير الترتيب', addQ: '➕ إضافة سؤال جديد',
+    errHeader: '⚠️ في مشاكل محتاجة تتظبط:', saveDraft: '💾 حفظ كمسودة', publish: '🚀 نشر الكويز', preview: '👁️ معاينة',
+    cancel: 'إلغاء', confirm: 'تأكيد', previewTitle: '👁️ معاينة الكويز', close: 'إغلاق',
+    qCount: '(0 سؤال)', qText: 'السؤال *', qImg: 'صورة السؤال (اختياري)', options: 'الاختيارات (دوس على الدايرة عشان تحدد الصح) *',
+    opt: 'الاختيار', addOpt: '➕ اختيار إضافي', addQ2: '➕ إضافة سؤال جديد',
+    myTitle: '📋 كويزاتي', adminTitle: '📋 كل كويزات الموقع (أدمن)',
+    statQuizzes: '📋 كويزات', statPublished: '🌐 منشور', statPlays: '🎮 لعب', statAvg: '⭐ متوسط', statReviews: '💬 تقييمات',
+    draft: '📝 مسودة', published: '🌐 منشور', owner: 'صاحبها:', edit: '✏️ تعديل', pub: '🚀 نشر', play: '▶️ العب', copy: '📋', del: '🗑️',
+    noQuizzes: 'مفيش كويزات لسه', startFirst: '➕ اعمل أول كويز', editMode: '✏️ في وضع التعديل — أي تغيير بيتحفظ تلقائي',
+    saving: '💾 جاري الحفظ...', saved: '✅ اتحفظ تلقائياً', saveFail: '⚠️ فشل الحفظ التلقائي',
+    confirmDelQ: 'هتحذف السؤال ده؟', confirmDelQuiz: 'هيحذف نهائياً مع كل الأسئلة والتقييمات. متأكد؟',
+    delQTitle: 'حذف سؤال', delQuizTitle: 'حذف كويز', unpublishTitle: 'إلغاء النشر', unpublishMsg: 'هيتخفي من كويزات المجتمع. متأكد؟', unpublishSuccess: '📥 اتحول لمسودة',
+    loading: 'جاري التحميل...', notLogged: 'سجل دخول الأول', toCreate: 'عشان تقدر تعمل كويزات', homeBtn: '🏠 الرئيسية',
+    fixedErrors: '⚠️ ظبط المشاكل الأول', publishedOk: '🚀 تم النشر!', updatedOk: '✅ تم التحديث', draftSaved: '💾 تم حفظ المسودة',
+    copySuccess: '📋 اتنسخ كمسودة', delSuccess: '🗑️ اتحذف', imgUploaded: '✅ تم رفع الصورة', imgUploadedQ: '✅ تم رفع صورة السؤال', linkCopied: '🔗 اتنقل الرابط',
+    errInvalidImg: '❌ الملف مش صورة أو كبير أوي', errNoQuiz: 'مش موجود', errNotYours: 'مش كويزك ومش أدمن'
+  },
+  en: {
+    home: '⬅ Home', community: '🌐 Community Quizzes', title: '🛠️ Quiz Builder', sub: 'Create, add images, publish, and let everyone play!',
+    tabCreate: '➕ Create Quiz', tabMine: '📋 My Quizzes', quizData: '🎨 Quiz Data',
+    cover: 'Cover Image (Portrait - Optional)', pickImg: 'Click to choose image', pickImgHint: 'Portrait (3:4) recommended',
+    titleAr: 'Title (Arabic) *', titleEn: 'Title (English)', desc: 'Short Description (Optional)', cat: 'Category *', icon: 'Icon *',
+    questions: '❓ Questions', dragHint: 'Drag from ✅ to reorder', addQ: '➕ Add New Question',
+    errHeader: '⚠️ Please fix these errors:', saveDraft: '💾 Save Draft', publish: '🚀 Publish Quiz', preview: '👁️ Preview',
+    cancel: 'Cancel', confirm: 'Confirm', previewTitle: '👁️ Quiz Preview', close: 'Close',
+    qCount: '(0 questions)', qText: 'Question *', qImg: 'Question Image (Optional)', options: 'Options (Click radio for correct) *',
+    opt: 'Option', addOpt: '➕ Add Option', addQ2: '➕ Add New Question',
+    myTitle: '📋 My Quizzes', adminTitle: '📋 All Site Quizzes (Admin)',
+    statQuizzes: '📋 Quizzes', statPublished: '🌐 Published', statPlays: '🎮 Plays', statAvg: '⭐ Avg Rating', statReviews: '💬 Reviews',
+    draft: '📝 Draft', published: '🌐 Published', owner: 'Owner:', edit: '✏️ Edit', pub: '🚀 Publish', play: '▶️ Play', copy: '📋', del: '🗑️',
+    noQuizzes: 'No quizzes yet', startFirst: '➕ Create First Quiz', editMode: '✏️ Edit Mode — Auto-saving',
+    saving: '💾 Saving...', saved: '✅ Auto-saved', saveFail: '⚠️ Auto-save failed',
+    confirmDelQ: 'Delete this question?', confirmDelQuiz: 'Will be deleted permanently with all data. Sure?',
+    delQTitle: 'Delete Question', delQuizTitle: 'Delete Quiz', unpublishTitle: 'Unpublish', unpublishMsg: 'Will be hidden from community. Sure?', unpublishSuccess: '📥 Moved to draft',
+    loading: 'Loading...', notLogged: 'Login first', toCreate: 'to create quizzes', homeBtn: '🏠 Home',
+    fixedErrors: '⚠️ Fix errors first', publishedOk: '🚀 Published!', updatedOk: '✅ Updated', draftSaved: '💾 Draft Saved',
+    copySuccess: '📋 Duplicated as draft', delSuccess: '🗑️ Deleted', imgUploaded: '✅ Image uploaded', imgUploadedQ: '✅ Question image uploaded', linkCopied: '🔗 Link copied',
+    errInvalidImg: '❌ File is not an image or too large', errNoQuiz: 'Not found', errNotYours: 'Not your quiz or admin'
+  }
+};
+
+const t = () => T[currentLang];
+
+window.toggleLang = () => {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  localStorage.setItem('lang', currentLang);
+  applyLang();
+};
+
+function applyLang() {
+  const tr = t();
+  document.documentElement.lang = currentLang;
+  document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+  document.getElementById('btnHome').innerText = tr.home;
+  document.getElementById('btnCommunity').innerText = tr.community;
+  document.getElementById('btnLang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  document.getElementById('pageTitle').innerText = tr.title;
+  document.getElementById('pageSub').innerText = tr.sub;
+  document.getElementById('tabCreateBtn').innerText = tr.tabCreate;
+  document.getElementById('tabMineBtn').innerText = tr.tabMine;
+  document.getElementById('lblQuizData').innerText = tr.quizData;
+  document.getElementById('lblCover').innerText = tr.cover;
+  document.getElementById('lblPickImg').innerText = tr.pickImg;
+  document.getElementById('lblPickImgHint').innerText = tr.pickImgHint;
+  document.getElementById('lblTitleAr').innerText = tr.titleAr;
+  document.getElementById('lblTitleEn').innerText = tr.titleEn;
+  document.getElementById('lblDesc').innerText = tr.desc;
+  document.getElementById('lblCat').innerText = tr.cat;
+  document.getElementById('lblIcon').innerText = tr.icon;
+  document.getElementById('lblQuestions').innerText = tr.questions;
+  document.getElementById('lblDragHint').innerText = tr.dragHint;
+  document.getElementById('btnAddQuestion').innerText = tr.addQ;
+  document.getElementById('errHeader').innerText = tr.errHeader;
+  document.getElementById('btnSaveDraft').innerText = tr.saveDraft;
+  document.getElementById('btnPublish').innerText = tr.publish;
+  document.getElementById('btnPreview').innerText = tr.preview;
+  document.getElementById('btnCancelModal').innerText = tr.cancel;
+  document.getElementById('confirmOkBtn').innerText = tr.confirm;
+  document.getElementById('lblPreviewTitle').innerText = tr.previewTitle;
+  document.getElementById('btnClosePreview').innerText = tr.close;
+  
+  document.getElementById('quizTitle').placeholder = currentLang === 'ar' ? 'مثال: كويز الأصدقاء' : 'e.g., Friends Quiz';
+  document.getElementById('quizTitleEn').placeholder = 'e.g., Friends Quiz';
+  document.getElementById('quizDesc').placeholder = currentLang === 'ar' ? 'عن إيه الكويز؟' : 'What is it about?';
+
+  renderCategoryPicker();
+  renderQuestions();
+  if (document.getElementById('tab-mine').style.display !== 'none') renderMyQuizzes();
+}
+
+/* ─── Confirm ─── */
+window._closeModal = () => document.getElementById('confirmModal').classList.remove('active');
+function confirmDialog(title, msg, onOk, btnLabel = null, btnClass = 'btn-danger') {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  const okBtn = document.getElementById('confirmOkBtn');
+  okBtn.textContent = btnLabel || t().confirm;
+  okBtn.className = 'btn ' + btnClass;
+  okBtn.onclick = () => { window._closeModal(); onOk(); };
+  document.getElementById('confirmModal').classList.add('active');
+}
+
+/* ─── Tabs ─── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-create').style.display = btn.dataset.tab === 'create' ? 'block' : 'none';
+    document.getElementById('tab-mine').style.display = btn.dataset.tab === 'mine' ? 'block' : 'none';
+    if (btn.dataset.tab === 'mine') renderMyQuizzes();
+  });
+});
+
+/* ─── Cover Image ─── */
+window._pickCover = () => document.getElementById('coverInput').click();
+
+window._handleCover = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const uploader = document.getElementById('coverUploader');
+  uploader.innerHTML = `<div class="image-loading">⏳ ${t().loading}</div>`;
+  uploader.classList.add('has-image');
+  uploader.onclick = null;
+
+  const result = await NF.uploadImage(file);
+  if (result.error) {
+    toast('❌ ' + result.error, 'error');
+    resetCoverUploader();
+    event.target.value = '';
+    return;
+  }
+
+  state.coverImage = result.url;
+  renderCover();
+  scheduleAutosave();
+  toast(t().imgUploaded, 'success');
+};
+
+function renderCover() {
+  const uploader = document.getElementById('coverUploader');
+  if (state.coverImage) {
+    uploader.classList.add('has-image');
+    uploader.innerHTML = `
+      <div class="image-wrap">
+        <button class="image-remove-btn" onclick="event.stopPropagation(); window._removeCover();">✖</button>
+        <img class="image-preview" src="${state.coverImage}" alt="Cover">
+      </div>
+    `;
+    uploader.onclick = null;
+  } else {
+    resetCoverUploader();
+  }
+}
+
+function resetCoverUploader() {
+  const uploader = document.getElementById('coverUploader');
+  uploader.classList.remove('has-image');
+  uploader.innerHTML = `
+    <div class="image-uploader-inner">
+      <div class="icon">🖼️</div>
+      <div class="text" id="lblPickImg">${t().pickImg}</div>
+      <div class="hint" id="lblPickImgHint">${t().pickImgHint}</div>
+    </div>
+  `;
+  uploader.onclick = window._pickCover;
+}
+
+window._removeCover = () => {
+  state.coverImage = null;
+  renderCover();
+  scheduleAutosave();
+};
+
+/* ─── Pickers ─── */
+function renderCategoryPicker() {
+  const picker = document.getElementById('categoryPicker');
+  picker.innerHTML = Object.entries(NF.QUIZ_CATEGORIES).map(([key, cat]) => `
+    <button class="cat-btn ${state.selectedCategory === key ? 'selected' : ''}" data-cat="${key}">
+      ${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name}
+    </button>
+  `).join('');
+  picker.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.onclick = () => {
+      state.selectedCategory = btn.dataset.cat;
+      renderCategoryPicker();
+      scheduleAutosave();
+    };
+  });
+}
+
+function renderIconPicker() {
+  const picker = document.getElementById('iconPicker');
+  picker.innerHTML = NF.QUIZ_ICONS.map(icon => `
+    <button class="icon-btn ${state.selectedIcon === icon ? 'selected' : ''}" data-icon="${icon}">${icon}</button>
+  `).join('');
+  picker.querySelectorAll('.icon-btn').forEach(btn => {
+    btn.onclick = () => {
+      state.selectedIcon = btn.dataset.icon;
+      renderIconPicker();
+      scheduleAutosave();
+    };
+  });
+}
+
+/* ─── Questions ─── */
+function renderQuestions() {
+  const container = document.getElementById('questionsContainer');
+  const count = document.getElementById('qCount');
+
+  if (state.questions.length === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">❓</div>${t().noQuizzes}</div>`;
+    count.textContent = t().qCount;
+    return;
+  }
+
+  count.textContent = currentLang === 'ar' ? `(${state.questions.length} سؤال)` : `(${state.questions.length} questions)`;
+
+  container.innerHTML = state.questions.map((q, qIdx) => `
+    <div class="question-block" data-qidx="${qIdx}" draggable="true">
+      <div class="q-header">
+        <div class="q-num">
+          <span class="grip" title="Drag">☰</span>
+          ${currentLang === 'ar' ? 'سؤال' : 'Question'} ${qIdx + 1}
+        </div>
+        <div class="q-actions">
+          ${qIdx > 0 ? `<button class="btn btn-sm" onclick="window._moveQuestion(${qIdx}, -1)">⬆️</button>` : ''}
+          ${qIdx < state.questions.length - 1 ? `<button class="btn btn-sm" onclick="window._moveQuestion(${qIdx}, 1)">⬇️</button>` : ''}
+          <button class="btn btn-sm btn-danger" onclick="window._deleteQuestion(${qIdx})">🗑️</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>${t().qText}</label>
+        <textarea class="input q-text" data-qidx="${qIdx}" maxlength="300">${escapeHtml(q.q_ar || '')}</textarea>
+      </div>
+
+      <div class="field">
+        <label>${t().qImg}</label>
+        <div id="qImageUploader_${qIdx}">
+          ${renderQuestionImage(qIdx, q.image)}
+        </div>
+        <input type="file" id="qImageInput_${qIdx}" accept="image/*" style="display:none;" onchange="window._handleQImage(${qIdx}, event)">
+      </div>
+
+      <div class="field">
+        <label>${t().options}</label>
+        ${(q.options_ar || []).map((opt, oIdx) => `
+          <div class="option-row ${q.answer === oIdx ? 'correct' : ''}">
+            <input type="radio" name="correct_${qIdx}" class="correct-radio" ${q.answer === oIdx ? 'checked' : ''} onchange="window._setAnswer(${qIdx}, ${oIdx})">
+            <div class="option-letter" onclick="window._setAnswer(${qIdx}, ${oIdx})">${['أ','ب','ج','د','هـ','و'][oIdx]}</div>
+            <input type="text" class="input option-input" data-qidx="${qIdx}" data-oidx="${oIdx}" placeholder="${t().opt} ${oIdx + 1}" value="${escapeHtml(opt || '')}" maxlength="150">
+            ${q.options_ar.length > 2 ? `<button class="btn btn-sm btn-danger" onclick="window._deleteOption(${qIdx}, ${oIdx})">✖</button>` : ''}
+          </div>
+        `).join('')}
+        ${q.options_ar.length < 6 ? `<button class="btn btn-sm" onclick="window._addOption(${qIdx})" style="margin-top:6px;">${t().addOpt}</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.q-text').forEach(el => {
+    el.oninput = (e) => {
+      const idx = Number(e.target.dataset.qidx);
+      state.questions[idx].q_ar = e.target.value;
+      scheduleAutosave();
+    };
+  });
+  container.querySelectorAll('.option-input').forEach(el => {
+    el.oninput = (e) => {
+      const qIdx = Number(e.target.dataset.qidx);
+      const oIdx = Number(e.target.dataset.oidx);
+      state.questions[qIdx].options_ar[oIdx] = e.target.value;
+      scheduleAutosave();
+    };
+  });
+
+  setupDragDrop();
+}
+
+function renderQuestionImage(qIdx, imageUrl) {
+  if (imageUrl) {
+    return `
+      <div class="image-wrap" style="width:120px; height:120px; margin:0 auto; border-radius:10px;">
+        <button class="image-remove-btn" onclick="window._removeQImage(${qIdx})">✖</button>
+        <img class="image-preview" src="${imageUrl}" alt="Question image">
+      </div>
+    `;
+  }
+  return `
+    <div class="image-uploader" style="max-width:120px; height:120px; aspect-ratio:1/1; margin:0 auto;" onclick="document.getElementById('qImageInput_${qIdx}').click()">
+      <div class="image-uploader-inner">
+        <div class="icon" style="font-size:24px;">🖼️</div>
+        <div class="text" style="font-size:11px;">${currentLang === 'ar' ? 'ضيف صورة' : 'Add Image'}</div>
+      </div>
+    </div>
+  `;
+}
+
+window._handleQImage = async (qIdx, event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const uploader = document.getElementById(`qImageUploader_${qIdx}`);
+  uploader.innerHTML = `<div class="image-loading" style="padding:15px;">⏳ ${t().loading}</div>`;
+
+  const result = await NF.uploadImage(file, 800);
+  if (result.error) {
+    toast('❌ ' + result.error, 'error');
+    uploader.innerHTML = renderQuestionImage(qIdx, state.questions[qIdx].image);
+    event.target.value = '';
+    return;
+  }
+  state.questions[qIdx].image = result.url;
+  uploader.innerHTML = renderQuestionImage(qIdx, result.url);
+  scheduleAutosave();
+  toast(t().imgUploadedQ, 'success');
+};
+
+window._removeQImage = (qIdx) => {
+  state.questions[qIdx].image = null;
+  document.getElementById(`qImageUploader_${qIdx}`).innerHTML = renderQuestionImage(qIdx, null);
+  scheduleAutosave();
+};
+
+function setupDragDrop() {
+  const container = document.getElementById('questionsContainer');
+  let draggedIdx = null;
+  container.querySelectorAll('.question-block').forEach(block => {
+    block.ondragstart = (e) => {
+      draggedIdx = Number(block.dataset.qidx);
+      block.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    };
+    block.ondragend = () => {
+      block.classList.remove('dragging');
+      container.querySelectorAll('.question-block').forEach(b => b.classList.remove('drag-over'));
+    };
+    block.ondragover = (e) => { e.preventDefault(); block.classList.add('drag-over'); };
+    block.ondragleave = () => { block.classList.remove('drag-over'); };
+    block.ondrop = (e) => {
+      e.preventDefault();
+      block.classList.remove('drag-over');
+      const targetIdx = Number(block.dataset.qidx);
+      if (draggedIdx === null || draggedIdx === targetIdx) return;
+      const [moved] = state.questions.splice(draggedIdx, 1);
+      state.questions.splice(targetIdx, 0, moved);
+      renderQuestions();
+      scheduleAutosave();
+    };
+  });
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+let state = { editingId: null, selectedIcon: '🎬', selectedCategory: 'general', coverImage: null, questions: [], autosaveTimer: null };
+
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t_el = document.createElement('div');
+  t_el.className = 'toast ' + (type !== 'success' ? type : '');
+  t_el.textContent = msg;
+  c.appendChild(t_el);
+  setTimeout(() => t_el.remove(), 3500);
+}
+
+window._addQuestion = () => {
+  if (state.questions.length >= 50) return toast('Max 50 questions', 'error');
+  state.questions.push({ q_ar: '', q_en: '', image: null, options_ar: ['', '', '', ''], options_en: [], answer: 0, type: 'multiple_choice' });
+  renderQuestions();
+  setTimeout(() => {
+    const blocks = document.querySelectorAll('.question-block');
+    blocks[blocks.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+};
+
+window._deleteQuestion = (idx) => {
+  confirmDialog(t().delQTitle, t().confirmDelQ, () => {
+    state.questions.splice(idx, 1);
+    renderQuestions();
+    scheduleAutosave();
+  });
+};
+
+window._moveQuestion = (idx, dir) => {
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= state.questions.length) return;
+  [state.questions[idx], state.questions[newIdx]] = [state.questions[newIdx], state.questions[idx]];
+  renderQuestions();
+  scheduleAutosave();
+};
+
+window._setAnswer = (qIdx, oIdx) => {
+  state.questions[qIdx].answer = oIdx;
+  renderQuestions();
+  scheduleAutosave();
+};
+
+window._addOption = (qIdx) => {
+  if (state.questions[qIdx].options_ar.length >= 6) return;
+  state.questions[qIdx].options_ar.push('');
+  renderQuestions();
+  scheduleAutosave();
+};
+
+window._deleteOption = (qIdx, oIdx) => {
+  const q = state.questions[qIdx];
+  if (q.options_ar.length <= 2) return;
+  q.options_ar.splice(oIdx, 1);
+  if (q.answer >= q.options_ar.length) q.answer = 0;
+  else if (q.answer === oIdx) q.answer = 0;
+  else if (q.answer > oIdx) q.answer--;
+  renderQuestions();
+  scheduleAutosave();
+};
+
+/* ─── Autosave ─── */
+function scheduleAutosave() {
+  if (!state.editingId) return;
+  clearTimeout(state.autosaveTimer);
+  state.autosaveTimer = setTimeout(async () => {
+    const badge = document.getElementById('autosaveBadge');
+    badge.className = 'autosave-badge saving show';
+    badge.textContent = t().saving;
+
+    const data = {
+      title: document.getElementById('quizTitle').value.trim(),
+      titleEn: document.getElementById('quizTitleEn').value.trim(),
+      description: document.getElementById('quizDesc').value.trim(),
+      icon: state.selectedIcon, category: state.selectedCategory, coverImage: state.coverImage, questions: state.questions
+    };
+
+    const r = await NF.updateQuiz(state.editingId, data, currentLang);
+    if (r.error) {
+      badge.className = 'autosave-badge show';
+      badge.textContent = t().saveFail;
+      badge.style.borderColor = 'var(--red)';
+      badge.style.color = 'var(--red)';
+    } else {
+      badge.className = 'autosave-badge saved show';
+      badge.textContent = t().saved;
+      badge.style.borderColor = '';
+      badge.style.color = '';
+    }
+    setTimeout(() => { badge.classList.remove('show'); }, 2500);
+  }, 3000);
+}
+
+/* ─── Save / Publish ─── */
+window._saveQuiz = async (status) => {
+  if (!CU) return toast(t().notLogged, 'error');
+
+  const data = {
+    title: document.getElementById('quizTitle').value.trim(),
+    titleEn: document.getElementById('quizTitleEn').value.trim(),
+    description: document.getElementById('quizDesc').value.trim(),
+    icon: state.selectedIcon, category: state.selectedCategory, coverImage: state.coverImage, questions: state.questions, status
+  };
+
+  const errors = NF.validateQuiz(data, status === 'published', currentLang);
+  const errorList = document.getElementById('errorList');
+  const errorItems = document.getElementById('errorItems');
+
+  if (errors.length > 0) {
+    errorItems.innerHTML = errors.map(e => `<li>${escapeHtml(e)}</li>`).join('');
+    errorList.classList.add('show');
+    errorList.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast(t().fixedErrors, 'error');
+    return;
+  } else { errorList.classList.remove('show'); }
+
+  if (state.editingId) {
+    const result = await NF.updateQuiz(state.editingId, data, currentLang);
+    if (result.error) return toast(result.error, 'error');
+    toast(status === 'published' ? t().publishedOk : t().updatedOk);
+    state.editingId = null;
+  } else {
+    const result = await NF.createQuiz(data, currentLang);
+    if (result.error) return toast(result.error, 'error');
+    toast(status === 'published' ? t().publishedOk : t().draftSaved);
+  }
+
+  resetForm();
+  document.querySelector('.tab-btn[data-tab="mine"]').click();
+};
+
+function resetForm() {
+  state = { editingId: null, selectedIcon: '🎬', selectedCategory: 'general', coverImage: null, questions: [] };
+  document.getElementById('quizTitle').value = '';
+  document.getElementById('quizTitleEn').value = '';
+  document.getElementById('quizDesc').value = '';
+  document.getElementById('errorList').classList.remove('show');
+  renderCover(); renderCategoryPicker(); renderIconPicker(); renderQuestions();
+}
+
+/* ─── Preview ─── */
+window._previewQuiz = () => {
+  const title = document.getElementById('quizTitle').value.trim() || '...';
+  const cat = NF.QUIZ_CATEGORIES[state.selectedCategory];
+  const content = document.getElementById('previewContent');
+  
+  content.innerHTML = `
+    <div class="preview-quiz-header">
+      ${state.coverImage ? `<img class="preview-quiz-cover" src="${state.coverImage}" alt="">` : ''}
+      <div class="preview-quiz-icon">${state.selectedIcon}</div>
+      <div class="preview-quiz-title">${escapeHtml(title)}</div>
+      <div class="preview-quiz-creator">📁 ${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name} • ${state.questions.length} ${currentLang === 'ar' ? 'سؤال' : 'questions'}</div>
+    </div>
+    ${state.questions.map((q, i) => `
+      <div class="preview-question">
+        <div class="preview-q-text">${i + 1}. ${escapeHtml(q.q_ar || '...')}</div>
+        ${q.image ? `<img class="preview-q-image" src="${q.image}" alt="">` : ''}
+        ${(q.options_ar || []).map((opt, oi) => `
+          <div class="preview-opt ${q.answer === oi ? 'correct' : ''}">
+            <span class="preview-opt-letter">${['أ','ب','ج','د','هـ','و'][oi]}</span>
+            <span>${escapeHtml(opt || '...')}</span>
+            ${q.answer === oi ? '<span style="color:var(--green);margin-right:auto;">✅</span>' : ''}
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  `;
+  document.getElementById('previewModal').classList.add('active');
+};
+
+window._closePreview = () => document.getElementById('previewModal').classList.remove('active');
+
+/* ─── My Quizzes ─── */
+async function renderMyQuizzes() {
+  const box = document.getElementById('myQuizzesList');
+  const statsBox = document.getElementById('creatorStats');
+  const titleBox = document.getElementById('myQuizzesTitle');
+  
+  titleBox.textContent = isAdmin ? t().adminTitle : t().myTitle;
+  box.innerHTML = `<div class="empty">${t().loading}</div>`;
+
+  const quizzes = await NF.getUserQuizzes(null, isAdmin);
+
+  if (quizzes.length === 0) {
+    statsBox.innerHTML = '';
+    box.innerHTML = `<div class="empty"><div class="empty-icon">📝</div>${t().noQuizzes}<br><br><button class="btn btn-primary" onclick="document.querySelector('.tab-btn[data-tab=create]').click()">${t().startFirst}</button></div>`;
+    return;
+  }
+
+  const stats = NF.getCreatorStats(quizzes);
+  statsBox.innerHTML = `
+    <div class="stat-box"><div class="v">${stats.total}</div><div class="l">${t().statQuizzes}</div></div>
+    <div class="stat-box"><div class="v">${stats.published}</div><div class="l">${t().statPublished}</div></div>
+    <div class="stat-box"><div class="v">${stats.totalPlays}</div><div class="l">${t().statPlays}</div></div>
+    <div class="stat-box"><div class="v">${stats.avgRating || '—'}</div><div class="l">${t().statAvg}</div></div>
+    <div class="stat-box"><div class="v">${stats.totalReviews}</div><div class="l">${t().statReviews}</div></div>
+  `;
+
+  box.innerHTML = quizzes.map(q => {
+    const cat = NF.QUIZ_CATEGORIES[q.category] || NF.QUIZ_CATEGORIES.general;
+    const isDraft = q.status === 'draft';
+    const thumb = q.coverImage ? `<img src="${q.coverImage}" alt="">` : q.icon;
+
+    return `
+      <div class="my-quiz-item">
+        <div class="my-quiz-thumb">${thumb}</div>
+        <div class="my-quiz-info">
+          <div class="my-quiz-title">
+            <span>${escapeHtml(q.title)}</span>
+            <span class="status-badge ${isDraft ? 'status-draft' : 'status-published'}">${isDraft ? t().draft : t().published}</span>
+            ${isAdmin && q.creator !== CU ? `<span style="color:#a855f7; font-size:10px; font-weight:900; background:rgba(168,85,247,0.15); padding:2px 6px; border-radius:4px;">${t().owner} ${q.creator}</span>` : ''}
+          </div>
+          <div class="my-quiz-meta">
+            ${cat.icon} ${currentLang === 'ar' ? cat.nameAr : cat.name} • ${q.questions?.length || 0} ${currentLang === 'ar' ? 'سؤال' : 'Q'} • 🎮 ${q.plays || 0} • ${q.avgRating ? `⭐ ${q.avgRating} (${q.ratingCount})` : ''}
+          </div>
+        </div>
+        <div class="my-quiz-actions">
+          <button class="btn btn-sm btn-primary" onclick="window._editQuiz('${q.id}')">${t().edit}</button>
+          ${isDraft ? `<button class="btn btn-sm btn-success" onclick="window._publishQuiz('${q.id}')">${t().pub}</button>` : `<button class="btn btn-sm" onclick="window._playQuiz('${q.id}')">${t().play}</button>`}
+          <button class="btn btn-sm" onclick="window._shareQuiz('${q.id}')">🔗</button>
+          <button class="btn btn-sm" onclick="window._duplicateQuiz('${q.id}')">${t().copy}</button>
+          <button class="btn btn-sm btn-danger" onclick="window._deleteQuiz('${q.id}')">${t().del}</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window._editQuiz = async (id) => {
+  toast('⏳ ' + t().loading, 'info');
+  const quiz = await NF.getQuiz(id);
+  if (!quiz) return toast(t().errNoQuiz, 'error');
+  if (quiz.creator !== CU && !isAdmin) return toast(t().errNotYours, 'error');
+
+  state.editingId = id;
+  state.selectedIcon = quiz.icon || '🎬';
+  state.selectedCategory = quiz.category || 'general';
+  state.coverImage = quiz.coverImage || null;
+  state.questions = (quiz.questions || []).map(q => ({
+    q_ar: q.q_ar || '', q_en: q.q_en || '', image: q.image || null,
+    options_ar: [...(q.options_ar || ['', '', '', ''])], options_en: q.options_en || [],
+    answer: Number(q.answer) || 0, type: 'multiple_choice'
+  }));
+
+  document.getElementById('quizTitle').value = quiz.title || '';
+  document.getElementById('quizTitleEn').value = quiz.titleEn || '';
+  document.getElementById('quizDesc').value = quiz.description || '';
+
+  renderCover(); renderCategoryPicker(); renderIconPicker(); renderQuestions();
+  document.querySelector('.tab-btn[data-tab="create"]').click();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast(t().editMode, 'info');
+};
+
+window._publishQuiz = async (id) => {
+  const r = await NF.publishQuiz(id, currentLang);
+  if (r.error) return toast(r.error, 'error');
+  toast(t().publishedOk, 'success');
+  renderMyQuizzes();
+};
+
+window._deleteQuiz = (id) => {
+  confirmDialog(t().delQuizTitle, t().confirmDelQuiz, async () => {
+    const r = await NF.deleteQuiz(id, currentLang);
+    if (r.error) return toast(r.error, 'error');
+    toast(t().delSuccess, 'success');
+    renderMyQuizzes();
+  });
+};
+
+window._duplicateQuiz = async (id) => {
+  const r = await NF.duplicateQuiz(id, currentLang);
+  if (r.error) return toast(r.error, 'error');
+  toast(t().copySuccess, 'success');
+  renderMyQuizzes();
+};
+
+window._playQuiz = (id) => { window.location.href = `play-community-quiz.html?id=${id}`; };
+
+window._shareQuiz = (id) => {
+  const url = `${location.origin}${location.pathname.replace('quiz-builder.html', '')}play-community-quiz.html?id=${id}`;
+  if (navigator.share) navigator.share({ title: 'Plot Twist', url }).catch(() => {});
+  else navigator.clipboard.writeText(url).then(() => toast(t().linkCopied, 'success'));
+};
+
+/* ─── Init ─── */
+function init() {
+  if (!CU) {
+    document.querySelector('.container').innerHTML = `
+      <div style="text-align:center;padding:80px 20px;">
+        <div style="font-size:60px;margin-bottom:20px;">🔒</div>
+        <h2 style="color:var(--gold);margin-bottom:12px;">${t().notLogged}</h2>
+        <p style="color:var(--text-2);margin-bottom:24px;">${t().toCreate}</p>
+        <a href="index.html" class="btn btn-primary">${t().homeBtn}</a>
+      </div>
+    `;
+    return;
+  }
+
+  renderCover(); renderCategoryPicker(); renderIconPicker(); renderQuestions();
+  applyLang();
+
+  if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+
+  const urlParams = new URLSearchParams(location.search);
+  const editId = urlParams.get('edit');
+  if (editId) setTimeout(() => window._editQuiz(editId), 500);
+}
+
+init();
+</script>
+
+<script type="module" src="notifications.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
