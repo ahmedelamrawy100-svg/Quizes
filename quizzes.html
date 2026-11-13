@@ -6,7 +6,6 @@
 <title>🏗️ Quiz Builder - Plot Twist</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<!-- PWA Meta Tags -->
 <meta name="theme-color" content="#ff0000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,8 +16,6 @@
 <meta name="msapplication-tap-highlight" content="no">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="pic/Logo.png">
-<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
-<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
 <link rel="stylesheet" href="pwa-native.css">
 <style>
   :root {
@@ -34,7 +31,7 @@
     --primary-light: #052e16;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; }
+  body { background: var(--bg); color: var(--text); font-family: 'Cairo', sans-serif; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; transition: 0.3s; min-height: 100vh; }
   
   #builderContent { display: none; width: 100%; max-width: 900px; animation: fadeUp 0.4s ease; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -285,8 +282,10 @@
 
   document.addEventListener('DOMContentLoaded', () => {
       window.get(window.ref(window.db, 'roles/users/' + currentUser)).then(snap => {
-          const role = snap.exists() ? snap.val() : 'Player';
-          if (role === 'Admin' || role === 'Manager' || currentUser.toLowerCase() === 'ahmed') {
+          const role = snap.exists() ? snap.val().toLowerCase() : 'player';
+          
+          // ✅ مسموح للأونر (ahmed) وللبيلدرز (builder) فقط
+          if (role === 'builder' || currentUser.toLowerCase() === 'ahmed') {
               document.getElementById('builderContent').style.display = 'block';
               
               window.onValue(window.ref(window.db, 'messages/' + currentUser), msgSnap => {
@@ -302,8 +301,13 @@
                   });
               });
           } else {
-              document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">⛔ وصول مرفوض. الأداة دي للمديرين والأدمنز فقط.</h1>';
+              // ❌ رسالة الرفض لباقي الرتب
+              document.getElementById('builderContent').style.display = 'none';
+              document.body.innerHTML = '<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:Cairo;"><h1 style="color:#ef4444; font-size:50px; margin-bottom:10px;">⛔</h1><h2 style="color:#ef4444; font-size:28px; margin-bottom:10px;">وصول مرفوض</h2><p style="color:#666; font-size:18px;">أداة صانع الكويزات مخصصة للبيلدرز والأونر فقط.</p><a href="index.html" style="margin-top:20px; background:#10b981; color:#fff; padding:10px 25px; border-radius:8px; text-decoration:none; font-weight:bold;">⬅ العودة للرئيسية</a></div>';
           }
+      }).catch(e => {
+          console.error(e);
+          document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%; font-family:Cairo;">حدث خطأ في التحقق من الصلاحيات.</h1>';
       });
   });
 
@@ -409,7 +413,15 @@
       showToastMessage('تم نسخ الكود! الصقه في الملف الجديد.');
   }
 
-  addQuestion();
+  // إضافة أول سؤال تلقائياً بعد التحقق من الصلاحيات
+  window.addEventListener('load', () => {
+      setTimeout(() => {
+          const container = document.getElementById('questionsContainer');
+          if(container && container.children.length === 0) {
+              addQuestion();
+          }
+      }, 1000);
+  });
 </script>
 </body>
 <script type="module" src="notifications.js"></script>
