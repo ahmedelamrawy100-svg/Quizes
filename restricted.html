@@ -6,255 +6,60 @@
 <title>🚫 المناطق المحظورة - Plot Twist</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-<!-- PWA Meta Tags -->
 <meta name="theme-color" content="#ff0000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Plot Twist">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Plot Twist">
-<meta name="msapplication-TileColor" content="#ff0000">
-<meta name="msapplication-tap-highlight" content="no">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="pic/Logo.png">
 <link rel="stylesheet" href="pwa-native.css">
 <style>
   :root {
     --bg-1: #0a0014; --bg-2: #140022; --bg-3: #000000;
-    --primary: #00d9ff; --secondary: #a855f7;
-    --text: #fff; --text-2: #aaa;
+    --primary: #00d9ff; --text: #fff; --text-2: #aaa;
     --red: #ff3333; --blue: #00bcd4; --orange: #ff9800; --teal: #009688; --green: #4caf50; --pink: #e91e63; --yellow: #ffd700; --purple: #9c27b0;
   }
   
   * { box-sizing: border-box; margin: 0; padding: 0; }
   
   body {
-    font-family: 'Cairo', sans-serif;
-    color: var(--text);
+    font-family: 'Cairo', sans-serif; color: var(--text);
     background: radial-gradient(circle at 50% 0%, var(--bg-2) 0%, var(--bg-1) 50%, var(--bg-3) 100%);
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
+    min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
   }
 
-  /* نجوم الخلفية */
-  .stars {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px);
-    background-size: 150px 150px;
-    opacity: 0.3;
-  }
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px); background-size: 150px 150px; opacity: 0.3; }
 
-  .top-bar {
-    width: 100%; max-width: 1100px;
-    display: flex; justify-content: flex-start; align-items: center;
-    margin-bottom: 20px; position: relative; z-index: 1;
-  }
-  .back-btn {
-    background: #222; color: #fff; border: 1px solid #444;
-    padding: 10px 20px; border-radius: 8px; text-decoration: none;
-    font-weight: bold; transition: 0.3s; font-size: 14px;
-  }
+  .top-bar { width: 100%; max-width: 1100px; display: flex; justify-content: flex-start; align-items: center; margin-bottom: 20px; position: relative; z-index: 1; }
+  .back-btn { background: #222; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; transition: 0.3s; font-size: 14px; }
   .back-btn:hover { background: var(--red); border-color: var(--red); }
 
-  .page-title {
-    font-size: 36px; font-weight: 900; margin-bottom: 30px;
-    color: var(--red); text-align: right; width: 100%; max-width: 1100px;
-    position: relative; z-index: 1;
-    border-bottom: 2px dashed var(--red);
-    padding-bottom: 15px; display: flex; align-items: center; gap: 10px;
-  }
+  .page-title { font-size: 36px; font-weight: 900; margin-bottom: 30px; color: var(--red); text-align: right; width: 100%; max-width: 1100px; position: relative; z-index: 1; border-bottom: 2px dashed var(--red); padding-bottom: 15px; }
 
-  /* شبكة الكروت */
-  .cards-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px; width: 100%; max-width: 1100px; position: relative; z-index: 1;
-  }
-
-  .card {
-    background: rgba(15, 15, 20, 0.85);
-    border: 1px solid #333;
-    border-radius: 16px;
-    padding: 40px 20px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--text);
-    transition: 0.3s;
-    backdrop-filter: blur(10px);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  }
-  
-  .card:hover {
-    transform: translateY(-5px);
-    background: rgba(25, 25, 35, 0.95);
-  }
-
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1100px; position: relative; z-index: 1; }
+  .card { background: rgba(15, 15, 20, 0.85); border: 1px solid #333; border-radius: 16px; padding: 40px 20px; text-align: center; text-decoration: none; color: var(--text); transition: 0.3s; backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; }
+  .card:hover { transform: translateY(-5px); background: rgba(25, 25, 35, 0.95); }
   .card-icon { font-size: 32px; margin-bottom: 15px; }
   .card-title { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
   .card-desc { font-size: 14px; color: var(--text-2); line-height: 1.6; }
 
-  /* ألوان الكروت */
-  .c-manager { border-color: rgba(255, 152, 0, 0.3); }
-  .c-manager:hover { border-color: var(--orange); box-shadow: 0 0 20px rgba(255, 152, 0, 0.2); }
-  .c-manager .card-title, .c-manager .card-icon { color: var(--orange); }
-
-  .c-admin { border-color: rgba(0, 188, 212, 0.3); }
-  .c-admin:hover { border-color: var(--blue); box-shadow: 0 0 20px rgba(0, 188, 212, 0.2); }
-  .c-admin .card-title, .c-admin .card-icon { color: var(--blue); }
-
-  .c-owner { border-color: rgba(255, 51, 51, 0.3); }
-  .c-owner:hover { border-color: var(--red); box-shadow: 0 0 20px rgba(255, 51, 51, 0.2); }
-  .c-owner .card-title, .c-owner .card-icon { color: var(--red); }
-
-  .c-builder { border-color: rgba(0, 150, 136, 0.3); }
-  .c-builder:hover { border-color: var(--teal); box-shadow: 0 0 20px rgba(0, 150, 136, 0.2); }
-  .c-builder .card-title, .c-builder .card-icon { color: var(--teal); }
-
-  .c-hackers { border-color: rgba(76, 175, 80, 0.3); }
-  .c-hackers:hover { border-color: var(--green); box-shadow: 0 0 20px rgba(76, 175, 80, 0.2); }
-  .c-hackers .card-title, .c-hackers .card-icon { color: var(--green); }
-
-  .c-partners { border-color: rgba(233, 30, 99, 0.3); }
-  .c-partners:hover { border-color: var(--pink); box-shadow: 0 0 20px rgba(233, 30, 99, 0.2); }
-  .c-partners .card-title, .c-partners .card-icon { color: var(--pink); }
-
-  .c-season { border-color: rgba(255, 215, 0, 0.3); }
-  .c-season:hover { border-color: var(--yellow); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
-  .c-season .card-title, .c-season .card-icon { color: var(--yellow); }
-
-  .c-gift { border-color: rgba(156, 39, 176, 0.3); }
-  .c-gift:hover { border-color: var(--purple); box-shadow: 0 0 20px rgba(156, 39, 176, 0.2); }
-  .c-gift .card-title, .c-gift .card-icon { color: var(--purple); }
-
-  .c-dev { border-color: rgba(0, 217, 255, 0.5); background: rgba(0, 217, 255, 0.05); cursor: pointer; }
+  .c-manager { border-color: rgba(255, 152, 0, 0.3); } .c-manager:hover { border-color: var(--orange); box-shadow: 0 0 20px rgba(255, 152, 0, 0.2); } .c-manager .card-title, .c-manager .card-icon { color: var(--orange); }
+  .c-admin { border-color: rgba(0, 188, 212, 0.3); } .c-admin:hover { border-color: var(--blue); box-shadow: 0 0 20px rgba(0, 188, 212, 0.2); } .c-admin .card-title, .c-admin .card-icon { color: var(--blue); }
+  .c-owner { border-color: rgba(255, 51, 51, 0.3); } .c-owner:hover { border-color: var(--red); box-shadow: 0 0 20px rgba(255, 51, 51, 0.2); } .c-owner .card-title, .c-owner .card-icon { color: var(--red); }
+  .c-builder { border-color: rgba(0, 150, 136, 0.3); } .c-builder:hover { border-color: var(--teal); box-shadow: 0 0 20px rgba(0, 150, 136, 0.2); } .c-builder .card-title, .c-builder .card-icon { color: var(--teal); }
+  .c-hackers { border-color: rgba(76, 175, 80, 0.3); } .c-hackers:hover { border-color: var(--green); box-shadow: 0 0 20px rgba(76, 175, 80, 0.2); } .c-hackers .card-title, .c-hackers .card-icon { color: var(--green); }
+  .c-partners { border-color: rgba(233, 30, 99, 0.3); } .c-partners:hover { border-color: var(--pink); box-shadow: 0 0 20px rgba(233, 30, 99, 0.2); } .c-partners .card-title, .c-partners .card-icon { color: var(--pink); }
+  .c-season { border-color: rgba(255, 215, 0, 0.3); } .c-season:hover { border-color: var(--yellow); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); } .c-season .card-title, .c-season .card-icon { color: var(--yellow); }
+  .c-gift { border-color: rgba(156, 39, 176, 0.3); } .c-gift:hover { border-color: var(--purple); box-shadow: 0 0 20px rgba(156, 39, 176, 0.2); } .c-gift .card-title, .c-gift .card-icon { color: var(--purple); }
+  
+  /* كارت لوحة المطور */
+  .c-dev { border-color: rgba(0, 217, 255, 0.5); background: rgba(0, 217, 255, 0.05); }
   .c-dev:hover { border-color: var(--primary); box-shadow: 0 0 20px rgba(0, 217, 255, 0.3); }
   .c-dev .card-title, .c-dev .card-icon { color: var(--primary); }
 
-  /* ==========================================
-     DEV DASHBOARD OVERLAY
-  ========================================== */
-  #devOverlay {
-    display: none; position: fixed; inset: 0; background: rgba(5, 5, 15, 0.98);
-    z-index: 999999; flex-direction: column; padding: 20px; backdrop-filter: blur(10px);
-  }
-  
-  .dev-header {
-    display: flex; justify-content: space-between; align-items: center; 
-    margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;
-  }
-  .dev-header h2 { color: var(--primary); margin: 0; font-family: monospace; font-size: 24px; }
-  .dev-close-btn {
-    background: var(--red); color: #fff; border: none; padding: 8px 15px; 
-    border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; transition: 0.2s;
-  }
-  .dev-close-btn:hover { background: #cc0000; }
-
-  .dev-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-  .dev-tab {
-    background: #111; color: #888; border: 1px solid #333; padding: 10px 15px;
-    border-radius: 8px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; transition: 0.2s;
-    white-space: nowrap;
-  }
-  .dev-tab:hover { background: #222; color: #fff; }
-  .dev-tab.active { background: var(--primary); color: #000; border-color: var(--primary); }
-
-  .dev-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-  .dev-panel { height: 100%; }
-  
-  /* Explorer */
-  #devtab-explorer { display: flex; gap: 15px; }
-  .dev-sidebar {
-    width: 280px; background: #111; border: 1px solid #333; 
-    border-radius: 10px; padding: 10px; overflow-y: auto;
-  }
-  .dev-sidebar-title { color: #888; font-size: 12px; font-weight: bold; margin-bottom: 10px; font-family: monospace; }
-  .dev-main {
-    flex: 1; background: #111; border: 1px solid #333; border-radius: 10px; 
-    padding: 15px; display: flex; flex-direction: column; overflow: hidden;
-  }
-  .dev-breadcrumb { color: #888; margin-bottom: 10px; font-family: monospace; font-size: 14px; }
-  .dev-actions { display: flex; gap: 10px; margin-bottom: 10px; }
-  .dev-btn {
-    background: #222; color: #fff; border: 1px solid #444; padding: 8px 12px;
-    border-radius: 6px; cursor: pointer; font-family: 'Cairo'; font-size: 12px; transition: 0.2s;
-  }
-  .dev-btn:hover { background: #333; }
-  .dev-btn.danger { border-color: var(--red); color: var(--red); }
-  .dev-btn.danger:hover { background: var(--red); color: #fff; }
-  
-  .dev-json-view {
-    flex: 1; overflow: auto; background: #000; border-radius: 8px; padding: 10px;
-    font-family: monospace; font-size: 13px; color: #a5d6ff; direction: ltr; text-align: left;
-  }
-  
-  .dev-node-item {
-    padding: 8px; border-radius: 6px; cursor: pointer; color: #aaa;
-    font-family: monospace; font-size: 13px; transition: 0.2s;
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
-  }
-  .dev-node-item:hover { background: #222; color: #fff; }
-  .dev-node-item.active { background: rgba(0, 217, 255, 0.2); color: var(--primary); border: 1px solid var(--primary); }
-  .dev-node-badge { background: #222; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
-
-  /* Bulk & Settings */
-  .dev-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; overflow-y: auto; }
-  .dev-card-box { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; }
-  .dev-card-box h3 { color: var(--primary); margin-top: 0; margin-bottom: 15px; font-size: 16px; }
-  .dev-input {
-    width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 8px;
-    border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; outline: none;
-  }
-  .dev-input:focus { border-color: var(--primary); }
-  .dev-btn-full {
-    width: 100%; padding: 10px; background: var(--primary); color: #000;
-    border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Cairo';
-  }
-
-  /* Monitor */
-  .dev-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-  .dev-stat-box {
-    background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; text-align: center;
-  }
-  .dev-stat-box .icon { font-size: 24px; margin-bottom: 5px; }
-  .dev-stat-box .val { font-size: 24px; font-weight: bold; color: var(--primary); font-family: monospace; }
-  .dev-stat-box .lbl { color: #888; font-size: 12px; margin-top: 5px; }
-
-  /* Logs */
-  .dev-list-item {
-    padding: 10px; border-bottom: 1px solid #222; display: flex;
-    justify-content: space-between; align-items: center; font-size: 13px;
-  }
-  .dev-list-item:last-child { border-bottom: none; }
-  .dev-list-item .action { color: var(--primary); font-weight: bold; font-family: monospace; }
-
-  /* Modals for Custom UI */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 20px; }
-  .modal-overlay.active { display: flex; }
-  .modal-box { background: var(--surface); border: 1px solid var(--primary); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,217,255,0.2); color: #fff; }
-  .modal-title { font-size: 18px; font-weight: 900; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-
-  /* Access Denied */
-  .access-denied {
-    display: none; position: fixed; inset: 0; background: #000; z-index: 999999;
-    flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 20px;
-  }
+  .access-denied { display: none; position: fixed; inset: 0; background: #000; z-index: 999999; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 20px; }
   .access-denied h1 { color: var(--red); font-size: 80px; }
   .access-denied p { color: #aaa; font-size: 18px; }
   .access-denied a { color: var(--primary); text-decoration: none; font-weight: bold; }
 
-  @media (max-width: 768px) {
-    .cards-grid { grid-template-columns: 1fr; }
-    .page-title { font-size: 26px; }
-    .dev-grid-2 { grid-template-columns: 1fr; }
-    #devtab-explorer { flex-direction: column; }
-    .dev-sidebar { width: 100%; max-height: 200px; }
-    .dev-stats-grid { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 768px) { .cards-grid { grid-template-columns: 1fr; } .page-title { font-size: 26px; } }
 </style>
 </head>
 <body>
@@ -269,7 +74,7 @@
   <a href="index.html">⬅ العودة للرئيسية</a>
 </div>
 
-<!-- المحتوى الرئيسي (يظهر لصلاحيات معينة) -->
+<!-- المحتوى الرئيسي -->
 <div id="mainContent" style="display: none; width: 100%; flex-direction: column; align-items: center;">
   
   <div class="top-bar">
@@ -279,214 +84,27 @@
   <h1 class="page-title">⚠️ المناطق المحظورة</h1>
 
   <div class="cards-grid">
-    <!-- 1. لوحة المدير -->
-    <a href="manager.html" class="card c-manager">
-      <div class="card-icon">📋</div>
-      <div class="card-title">لوحة المدير</div>
-      <div class="card-desc">تخطيط الفعاليات وإدارة المجتمع.</div>
-    </a>
-
-    <!-- 2. لوحة الإدارة -->
-    <a href="admin.html" class="card c-admin">
-      <div class="card-icon">🛡️</div>
-      <div class="card-title">لوحة الإدارة</div>
-      <div class="card-desc">إدارة اللاعبين، المحتوى، والغرف.</div>
-    </a>
-
-    <!-- 3. لوحة الأونر -->
-    <a href="owner.html" class="card c-owner">
-      <div class="card-icon">👑</div>
-      <div class="card-title">لوحة الأونر</div>
-      <div class="card-desc">التحكم الكامل في الموقع، اللاعبين، والنظام.</div>
-    </a>
-
-    <!-- 4. كويز بيلدر -->
-    <a href="quiz-builder.html" class="card c-builder">
-      <div class="card-icon">🏗️</div>
-      <div class="card-title">كويز بيلدر</div>
-      <div class="card-desc">صناعة كويزات جديدة وإضافتها للموقع.</div>
-    </a>
-
-    <!-- 5. لوحة المخترقين -->
-    <a href="hackers.html" class="card c-hackers">
-      <div class="card-icon">🔍</div>
-      <div class="card-title">لوحة المخترقين</div>
-      <div class="card-desc">فحص الموقع، اكتشاف الأخطاء، وتجربة الميزات الجديدة.</div>
-    </a>
-
-    <!-- 6. لوحة الشركاء -->
-    <a href="partners.html" class="card c-partners">
-      <div class="card-icon">💎</div>
-      <div class="card-title">لوحة الشركاء</div>
-      <div class="card-desc">إدارة التسويق، الإعلانات، والشراكات.</div>
-    </a>
-
-    <!-- 7. صندوق الموسم -->
-    <a href="season-pass.html" class="card c-season">
-      <div class="card-icon">🎟️</div>
-      <div class="card-title">صندوق الموسم</div>
-      <div class="card-desc">توليد Season Pass جديد للاعبين.</div>
-    </a>
-
-    <!-- 8. صندوق الهدايا -->
-    <a href="promo-generator.html" class="card c-gift">
-      <div class="card-icon">🎁</div>
-      <div class="card-title">صندوق الهدايا</div>
-      <div class="card-desc">إنشاء أكواد خصم وهدايا مخصصة (Promo Codes).</div>
-    </a>
-
-    <!-- 9. لوحة المطور (مخفية عن غير الأونر) -->
-    <div class="card c-dev" id="devCard" onclick="openDevDashboard()" style="display: none;">
+    <a href="manager.html" class="card c-manager"><div class="card-icon">📋</div><div class="card-title">لوحة المدير</div><div class="card-desc">تخطيط الفعاليات وإدارة المجتمع.</div></a>
+    <a href="admin.html" class="card c-admin"><div class="card-icon">🛡️</div><div class="card-title">لوحة الإدارة</div><div class="card-desc">إدارة اللاعبين، المحتوى، والغرف.</div></a>
+    <a href="owner.html" class="card c-owner"><div class="card-icon">👑</div><div class="card-title">لوحة الأونر</div><div class="card-desc">التحكم الكامل في الموقع، اللاعبين، والنظام.</div></a>
+    <a href="quizzes.html" class="card c-builder"><div class="card-icon">🏗️</div><div class="card-title">كويز بيلدر</div><div class="card-desc">صناعة كويزات جديدة وإضافتها للموقع.</div></a>
+    <a href="tester.html" class="card c-hackers"><div class="card-icon">🔍</div><div class="card-title">لوحة المخترقين</div><div class="card-desc">فحص الموقع، اكتشاف الأخطاء، وتجربة الميزات الجديدة.</div></a>
+    <a href="partner.html" class="card c-partners"><div class="card-icon">💎</div><div class="card-title">لوحة الشركاء</div><div class="card-desc">إدارة التسويق، الإعلانات، والشراكات.</div></a>
+    <a href="owner-season.html" class="card c-season"><div class="card-icon">🎟️</div><div class="card-title">صندوق الموسم</div><div class="card-desc">توليد Season Pass جديد للاعبين.</div></a>
+    <a href="promo-generator.html" class="card c-gift"><div class="card-icon">🎁</div><div class="card-title">صندوق الهدايا</div><div class="card-desc">إنشاء أكواد خصم وهدايا مخصصة (Promo Codes).</div></a>
+    
+    <!-- كارت لوحة المطور (بيفتح الصفحة الجديدة اللي أنت عملتها) -->
+    <a href="dev-dashboard.html" class="card c-dev" id="devCard" style="display: none;">
       <div class="card-icon">🛠️</div>
       <div class="card-title">لوحة المطور</div>
-      <div class="card-desc">أدوات متقدمة (Explorer / Bulk / Logs).</div>
-    </div>
-  </div>
-</div>
-
-<!-- ==========================================
-     DEV DASHBOARD OVERLAY
-========================================== -->
-<div id="devOverlay">
-  <div class="dev-header">
-    <h2>🛠️ DEV DASHBOARD</h2>
-    <button class="dev-close-btn" onclick="document.getElementById('devOverlay').style.display='none'">✖ إغلاق</button>
-  </div>
-  
-  <div class="dev-tabs">
-    <button class="dev-tab active" onclick="window.devSwitchTab('explorer', this)">🔍 Explorer</button>
-    <button class="dev-tab" onclick="window.devSwitchTab('bulk', this)">⚡ Bulk Actions</button>
-    <button class="dev-tab" onclick="window.devSwitchTab('settings', this)">🎛️ Settings</button>
-    <button class="dev-tab" onclick="window.devSwitchTab('monitor', this)">📊 Monitor</button>
-    <button class="dev-tab" onclick="window.devSwitchTab('logs', this)">📝 Logs</button>
-    <button class="dev-tab" onclick="window.devSwitchTab('user', this)">👤 Lookup</button>
-  </div>
-
-  <div class="dev-content">
-    <!-- تاب 1: Explorer -->
-    <div id="devtab-explorer" class="dev-panel active">
-      <div class="dev-sidebar">
-        <div class="dev-sidebar-title">ROOT NODES</div>
-        <div id="devRootNodes">جاري التحميل...</div>
-      </div>
-      <div class="dev-main">
-        <div class="dev-breadcrumb" id="devBreadcrumb">اختر node ←</div>
-        <div class="dev-actions">
-          <button class="dev-btn" onclick="window.devEnterEdit()">✏️ تعديل</button>
-          <button class="dev-btn danger" onclick="window.devConfirmDelete()">🗑️ حذف</button>
-        </div>
-        <div id="devNodeContent" class="dev-json-view">اختر node من القائمة</div>
-      </div>
-    </div>
-
-    <!-- تاب 2: Bulk -->
-    <div id="devtab-bulk" class="dev-panel" style="display: none;">
-      <div class="dev-grid-2">
-        <div class="dev-card-box">
-          <h3>🪙 توزيع كوينز</h3>
-          <input type="number" id="devBulkCoins" class="dev-input" value="500">
-          <button class="dev-btn-full" onclick="window.devBulkCoins()">✅ توزيع</button>
-        </div>
-        <div class="dev-card-box">
-          <h3>✨ توزيع XP</h3>
-          <input type="number" id="devBulkXp" class="dev-input" value="100">
-          <button class="dev-btn-full" onclick="window.devBulkXp()">✅ توزيع</button>
-        </div>
-        <div class="dev-card-box">
-          <h3 style="color: var(--red);">🎯 Reset لاعب</h3>
-          <input type="text" id="devResetUser" class="dev-input" placeholder="اسم اللاعب...">
-          <select id="devResetScope" class="dev-input">
-            <option value="scores">مسح النتائج فقط</option>
-            <option value="stats">مسح XP + Coins + Streak</option>
-            <option value="full">مسح كل حاجة</option>
-          </select>
-          <button class="dev-btn-full" style="background: var(--red); color: #fff;" onclick="window.devResetPlayer()">⚠️ Reset</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- تاب 3: Settings -->
-    <div id="devtab-settings" class="dev-panel" style="display: none; background: #111; border: 1px solid #333; border-radius: 10px; padding: 20px; overflow-y: auto;">
-      <h3 style="color: var(--primary); margin-top: 0;">🎛️ إعدادات الموقع (site_settings)</h3>
-      <div id="devSettingsForm">جاري التحميل...</div>
-      <button class="dev-btn-full" style="margin-top: 20px;" onclick="window.devSaveSettings()">💾 حفظ التغييرات</button>
-    </div>
-
-    <!-- تاب 4: Monitor -->
-    <div id="devtab-monitor" class="dev-panel" style="display: none; overflow-y: auto;">
-      <div class="dev-stats-grid">
-        <div class="dev-stat-box">
-          <div class="icon">👥</div>
-          <div class="val" id="devMonUsers">-</div>
-          <div class="lbl">إجمالي اللاعبين</div>
-        </div>
-        <div class="dev-stat-box">
-          <div class="icon">🎮</div>
-          <div class="val" id="devMonAttempts">-</div>
-          <div class="lbl">محاولات</div>
-        </div>
-        <div class="dev-stat-box">
-          <div class="icon">🟢</div>
-          <div class="val" id="devMonOnline">-</div>
-          <div class="lbl">متصل الآن</div>
-        </div>
-      </div>
-      <div class="dev-card-box">
-        <h3>🏆 أعلى 5 لاعبين</h3>
-        <div id="devTopPlayers">جاري التحميل...</div>
-      </div>
-    </div>
-
-    <!-- تاب 5: Logs -->
-    <div id="devtab-logs" class="dev-panel" style="display: none; background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; overflow-y: auto;">
-      <h3 style="color: var(--primary); margin-top: 0;">📝 كل الإجراءات</h3>
-      <div id="devLogsBox">جاري التحميل...</div>
-    </div>
-
-    <!-- تاب 6: Lookup -->
-    <div id="devtab-user" class="dev-panel" style="display: none; background: #111; border: 1px solid #333; border-radius: 10px; padding: 20px; overflow-y: auto;">
-      <h3 style="color: var(--primary); margin-top: 0;">👤 البحث عن لاعب</h3>
-      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <input type="text" id="devUserSearch" class="dev-input" placeholder="اسم اللاعب..." style="margin: 0;">
-        <button class="dev-btn-full" style="width: auto; padding: 0 20px;" onclick="window.devLookupUser()">بحث</button>
-      </div>
-      <div id="devUserResult"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Custom Delete Modal -->
-<div class="modal-overlay" id="deleteModal">
-  <div class="modal-box">
-    <div class="modal-title">⚠️ تأكيد الحذف</div>
-    <p style="font-size:14px; margin-bottom:15px;">أنت على وشك حذف العنصر ده نهائياً. اكتب اسم العنصر بالظبط لتأكيد الحذف:</p>
-    <div style="background:var(--bg); padding:10px; border-radius:8px; border:1px solid var(--border); font-family:var(--mono); text-align:center; margin-bottom:15px;" id="deleteTargetName"></div>
-    <input type="text" class="field field-mono" id="deleteConfirmInput" placeholder="اكتب اسم العنصر هنا...">
-    <div class="modal-actions">
-      <button class="dev-btn" onclick="window.closeDeleteModal()">إلغاء</button>
-      <button class="dev-btn danger" onclick="window.executeDelete()">🗑️ حذف نهائي</button>
-    </div>
-  </div>
-</div>
-
-<!-- Custom Add Modal -->
-<div class="modal-overlay" id="addModal">
-  <div class="modal-box">
-    <div class="modal-title">➕ إضافة عنصر جديد</div>
-    <label style="font-size:12px;color:var(--primary);">اسم المفتاح (Key):</label>
-    <input type="text" class="field field-mono" id="addKeyInput" placeholder="مثلاً: newUser" style="margin-bottom:15px;">
-    <label style="font-size:12px;color:var(--primary);">القيمة (Value):</label>
-    <input type="text" class="field field-mono" id="addValueInput" placeholder="مثلاً: true أو 100 أو نص" style="margin-bottom:15px;">
-    <div class="modal-actions">
-      <button class="dev-btn" onclick="window.closeAddModal()">إلغاء</button>
-      <button class="dev-btn" style="background: var(--primary); color: #000;" onclick="window.executeAddChild()">➕ إضافة</button>
-    </div>
+      <div class="card-desc">أدوات متقدمة للتحكم في قاعدة البيانات (Danger Zone).</div>
+    </a>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 // إعدادات الفايربيز
 const firebaseConfig = { 
@@ -501,23 +119,19 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ==========================================
-// 1. نظام الصلاحيات (Access Control)
-// ==========================================
 const currentUser = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
-let isOwner = false;
 
 async function checkAccess() {
     if (!currentUser) { window.location.href = 'index.html'; return; }
 
-    // الأونر (أحمد) ليه صلاحية مطلقة
+    // لوحة المطور تظهر للأونر (أحمد) فقط
     if (currentUser === 'ahmed') {
-        isOwner = true;
-        showContent();
+        document.getElementById('mainContent').style.display = 'flex';
+        document.getElementById('devCard').style.display = 'block';
         return;
     }
 
-    // فحص الرتب للباقي
+    // فحص الرتب للباقي عشان يدخلوا صفحة المناطق المحظورة
     try {
         const [roleSnap, adminSnap] = await Promise.all([
             get(ref(db, `roles/users/${currentUser}`)),
@@ -526,13 +140,13 @@ async function checkAccess() {
         
         let userRole = roleSnap.exists() ? roleSnap.val().toLowerCase() : '';
         let isAdmin = adminSnap.exists();
-
-        // الرتب المسموح لها بالدخول
+        
+        // الرتب المسموح لها بالدخول للمنطقة دي
         const allowedRoles = ['admin', 'partner', 'manager', 'tester', 'builder', 'owner'];
 
         if (isAdmin || allowedRoles.includes(userRole)) {
-            isOwner = false;
-            showContent();
+            document.getElementById('mainContent').style.display = 'flex';
+            // كارت لوحة المطور هيفضل مخفي عنهم
         } else {
             document.getElementById('accessDenied').style.display = 'flex';
         }
@@ -542,219 +156,7 @@ async function checkAccess() {
     }
 }
 
-function showContent() {
-    document.getElementById('mainContent').style.display = 'flex';
-    if (isOwner) {
-        // لوحة المطور تظهر للأونر فقط
-        document.getElementById('devCard').style.display = 'block';
-        // تهيئة لوحة المطور
-        window._devExplorerLoaded = false;
-    }
-}
-
-// تشغيل الفحص
 checkAccess();
-
-// ==========================================
-// 2. كود لوحة المطور (Dev Tools) - يعمل للأونر فقط
-// ==========================================
-window.openDevDashboard = () => {
-    if (!isOwner) return;
-    document.getElementById('devOverlay').style.display = 'flex';
-    if (!window._devExplorerLoaded) {
-        window.devLoadRootNodes();
-        window._devExplorerLoaded = true;
-    }
-};
-
-window.devSwitchTab = (tab, btn) => {
-    document.querySelectorAll('#devOverlay .dev-tab').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#devOverlay .dev-panel').forEach(p => p.style.display = 'none');
-    btn.classList.add('active');
-    document.getElementById('devtab-' + tab).style.display = tab === 'explorer' ? 'flex' : 'block';
-    
-    if (tab === 'settings' && !window._devSettingsLoaded) { window.devLoadSettings(); window._devSettingsLoaded = true; }
-    if (tab === 'monitor') window.devLoadMonitor();
-    if (tab === 'logs' && !window._devLogsLoaded) { window.devLoadLogs(); window._devLogsLoaded = true; }
-};
-
-let devCurrentPath = '';
-let devCurrentData = null;
-
-window.devLoadRootNodes = async () => {
-    const box = document.getElementById('devRootNodes');
-    box.innerHTML = '<div style="color:#888;">Loading...</div>';
-    try {
-        const snap = await get(ref(db, '/'));
-        if (!snap.exists()) { box.innerHTML = '<div style="color:#888;">DB Empty</div>'; return; }
-        const data = snap.val();
-        box.innerHTML = Object.keys(data).sort().map(k => {
-            const cnt = data[k] && typeof data[k] === 'object' ? Object.keys(data[k]).length : '•';
-            return `<div class="dev-node-item" data-path="${k}" onclick="window.devLoadNode('${k}')"><span>📁 ${k}</span><span class="dev-node-badge">${cnt}</span></div>`;
-        }).join('');
-    } catch (e) { box.innerHTML = `<div style="color:#ff3333;">${e.message}</div>`; }
-};
-
-window.devLoadNode = async (path) => {
-    devCurrentPath = path;
-    document.querySelectorAll('.dev-node-item').forEach(n => n.classList.toggle('active', n.dataset.path === path));
-    const content = document.getElementById('devNodeContent');
-    content.innerHTML = 'Loading...';
-    try {
-        const snap = await get(ref(db, path));
-        if (!snap.exists()) { content.innerHTML = '<span style="color:#888;">Empty Node</span>'; return; }
-        devCurrentData = snap.val();
-        document.getElementById('devBreadcrumb').innerHTML = `<span style="color:var(--primary);">ROOT</span> / ${path}`;
-        content.innerHTML = `<pre style="margin:0;">${JSON.stringify(devCurrentData, null, 2)}</pre>`;
-    } catch (e) { content.innerHTML = `<span style="color:#ff3333;">${e.message}</span>`; }
-};
-
-window.devEnterEdit = () => {
-    if (!devCurrentPath) return;
-    const content = document.getElementById('devNodeContent');
-    const json = JSON.stringify(devCurrentData, null, 2);
-    content.innerHTML = `<textarea id="devJsonEditor" style="width:100%;height:100%;background:#000;color:#fff;border:1px solid var(--primary);font-family:monospace;padding:10px;">${json}</textarea>
-    <div style="margin-top:10px;"><button class="dev-btn" onclick="window.devSaveEdit()" style="background:var(--primary);color:#000;">💾 حفظ</button></div>`;
-};
-
-window.devSaveEdit = async () => {
-    const editor = document.getElementById('devJsonEditor');
-    try {
-        const parsed = JSON.parse(editor.value);
-        await set(ref(db, devCurrentPath), parsed);
-        window.devLoadNode(devCurrentPath);
-        alert('✅ تم الحفظ');
-    } catch (e) { alert('JSON Error: ' + e.message); }
-};
-
-window.devConfirmDelete = async () => {
-    if (!devCurrentPath) return;
-    if (prompt(`اكتب "${devCurrentPath}" للحذف:`) !== devCurrentPath) return;
-    await remove(ref(db, devCurrentPath));
-    window.devLoadRootNodes();
-    document.getElementById('devNodeContent').innerHTML = 'تم الحذف';
-};
-
-window.devBulkCoins = async () => {
-    const amt = parseInt(document.getElementById('devBulkCoins').value);
-    if (!amt) return;
-    if (!confirm(`توزيع ${amt} كوين على الكل؟`)) return;
-    const snap = await get(ref(db, 'users_data'));
-    const d = snap.val() || {};
-    const upd = {};
-    for (const u in d) upd[`users_data/${u}/coins`] = (d[u].coins || 0) + amt;
-    await update(ref(db), upd);
-    alert('✅ تم التوزيع');
-};
-
-window.devBulkXp = async () => {
-    const amt = parseInt(document.getElementById('devBulkXp').value);
-    if (!amt) return;
-    if (!confirm(`توزيع ${amt} XP على الكل؟`)) return;
-    const snap = await get(ref(db, 'users_data'));
-    const d = snap.val() || {};
-    const upd = {};
-    for (const u in d) upd[`users_data/${u}/xp`] = (d[u].xp || 0) + amt;
-    await update(ref(db), upd);
-    alert('✅ تم التوزيع');
-};
-
-window.devResetPlayer = async () => {
-    const user = document.getElementById('devResetUser').value.trim().toLowerCase();
-    const scope = document.getElementById('devResetScope').value;
-    if (!user || !confirm(`Reset ${user}؟`)) return;
-    if (scope === 'scores') { await remove(ref(db, `scores/${user}`)); }
-    else if (scope === 'stats') { await update(ref(db, `users_data/${user}`), { xp:0, coins:0, streak:0 }); }
-    else if (scope === 'full') { 
-        await remove(ref(db, `scores/${user}`));
-        await remove(ref(db, `users_data/${user}`));
-    }
-    alert('✅ تم');
-};
-
-window.devLoadSettings = async () => {
-    const form = document.getElementById('devSettingsForm');
-    form.innerHTML = 'Loading...';
-    const s = await get(ref(db, 'site_settings'));
-    const d = s.val() || {};
-    window._devSettingsCache = d;
-    form.innerHTML = Object.keys(d).map(k => {
-        let v = d[k];
-        let inp = typeof v === 'boolean' 
-            ? `<select data-k="${k}" class="dev-input"><option value="true" ${v?'selected':''}>true</option><option value="false" ${!v?'selected':''}>false</option></select>`
-            : `<input type="${typeof v === 'number' ? 'number' : 'text'}" data-k="${k}" value="${v}" class="dev-input">`;
-        return `<div style="margin-bottom:10px;"><label style="color:var(--primary);font-size:12px;display:block;margin-bottom:4px;">${k}</label>${inp}</div>`;
-    }).join('');
-};
-
-window.devSaveSettings = async () => {
-    const upd = {};
-    document.querySelectorAll('[data-k]').forEach(inp => {
-        let v = inp.value;
-        if (v === 'true') v = true; else if (v === 'false') v = false; else if (!isNaN(v)) v = Number(v);
-        upd[`site_settings/${inp.dataset.k}`] = v;
-    });
-    await update(ref(db), upd);
-    alert('✅ تم الحفظ');
-};
-
-window.devLoadMonitor = async () => {
-    const s = await get(ref(db, 'users_data'));
-    const d = s.val() || {};
-    document.getElementById('devMonUsers').innerText = Object.keys(d).length;
-    
-    const top = Object.entries(d).map(([u, x]) => [u, x.xp || 0]).sort((a,b)=>b[1]-a[1]).slice(0,5);
-    document.getElementById('devTopPlayers').innerHTML = top.map(([u,x]) => `<div class="dev-list-item"><span>👤 ${u}</span><b style="color:var(--yellow);">${x} XP</b></div>`).join('');
-};
-
-window.devLoadLogs = async () => {
-    const s = await get(ref(db, 'admin_logs'));
-    const d = s.val() || {};
-    const arr = Object.entries(d).map(([id,l]) => ({id,...l})).sort((a,b)=>b.time-a.time).slice(0, 50);
-    document.getElementById('devLogsBox').innerHTML = arr.map(l => `
-        <div class="dev-list-item">
-            <div><span class="action">${l.action}</span> ${l.target ? '→ ' + l.target : ''}</div>
-            <div style="font-size:11px;color:#888;">👤 ${l.admin} · ${new Date(l.time).toLocaleString('ar-EG')}</div>
-        </div>
-    `).join('');
-};
-
-window.devLookupUser = async () => {
-    const user = document.getElementById('devUserSearch').value.trim().toLowerCase();
-    const box = document.getElementById('devUserResult');
-    box.innerHTML = 'Loading...';
-    const [dS, scS] = await Promise.all([get(ref(db, `users_data/${user}`)), get(ref(db, `scores/${user}`))]);
-    if (!dS.exists()) { box.innerHTML = '<span style="color:#ff3333;">❌ غير موجود</span>'; return; }
-    const d = dS.val();
-    const sc = scS.val() || {};
-    let att = 0; for(let q in sc) att += Object.keys(sc[q]||{}).length;
-    
-    box.innerHTML = `
-        <div style="background:#000;border:1px solid #333;padding:15px;border-radius:8px;">
-            <h4 style="margin:0 0 10px 0;color:var(--primary);">👤 ${user}</h4>
-            <div style="display:flex;gap:15px;margin-bottom:15px;font-size:13px;">
-                <span>✨ ${d.xp||0} XP</span>
-                <span>🪙 ${d.coins||0}</span>
-                <span>🎮 ${att} محاولة</span>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button onclick="window.devQuickGive('${user}','coins',500)" style="padding:6px 10px;background:#222;border:1px solid #444;color:#fff;border-radius:4px;cursor:pointer;">+500 🪙</button>
-                <button onclick="window.devQuickGive('${user}','xp',500)" style="padding:6px 10px;background:#222;border:1px solid #444;color:#fff;border-radius:4px;cursor:pointer;">+500 ✨</button>
-            </div>
-        </div>`;
-};
-
-window.devQuickGive = async (user, field, amt) => {
-    const s = await get(ref(db, `users_data/${user}/${field}`));
-    const nv = Math.max(0, (s.val() || 0) + amt);
-    await set(ref(db, `users_data/${user}/${field}`), nv);
-    window.devLookupUser();
-    alert('✅');
-};
-
-// دالة مودال الحذف والإضافة (لو حبيت تستخدمها في التطوير)
-window.closeDeleteModal = () => document.getElementById('deleteModal').classList.remove('active');
-window.closeAddModal = () => document.getElementById('addModal').classList.remove('active');
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
