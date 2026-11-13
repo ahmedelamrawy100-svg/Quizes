@@ -6,7 +6,6 @@
 <title>🧪 Tester Dashboard — Plot Twist</title>
 <link rel="icon" type="image/png" href="pic/Logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-<!-- PWA Meta Tags -->
 <meta name="theme-color" content="#ff0000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,8 +16,6 @@
 <meta name="msapplication-tap-highlight" content="no">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="pic/Logo.png">
-<link rel="apple-touch-icon" sizes="192x192" href="pic/Logo.png">
-<link rel="apple-touch-icon" sizes="512x512" href="pic/Logo.png">
 <link rel="stylesheet" href="pwa-native.css">
 <style>
   :root {
@@ -33,6 +30,17 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center;transition:.3s}
+  
+  /* شاشة الوصول المرفوض */
+  #accessDenied { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 20px; padding: 20px; }
+  #accessDenied h1 { color: var(--danger); font-size: 80px; }
+  #accessDenied h2 { font-size: 28px; color: var(--danger); }
+  #accessDenied p { color: var(--text-2); font-size: 18px; }
+  #accessDenied a { margin-top: 10px; padding: 12px 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; text-decoration: none; font-weight: bold; }
+  #accessDenied a:hover { border-color: var(--primary); color: var(--primary); }
+
+  #testerDashboard { display: none; width: 100%; flex-direction: column; align-items: center; }
+
   .top-header{display:flex;justify-content:space-between;align-items:center;background:var(--surface);padding:14px 22px;border-radius:14px;margin-bottom:14px;width:100%;max-width:1400px;flex-wrap:wrap;gap:10px;border:1px solid var(--border)}
   .brand{display:flex;align-items:center;gap:12px}
   .brand-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--primary),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(6,214,160,.3)}
@@ -127,135 +135,133 @@
 </head>
 <body>
 
-<div id="toast-container"></div>
+<!-- شاشة الرفض -->
+<div id="accessDenied">
+  <h1>⛔</h1>
+  <h2>وصول مرفوض</h2>
+  <p>لوحة الاختبارات (Tester Dashboard) مخصصة للأونر ورتبة التسترز فقط.</p>
+  <a href="index.html">⬅ العودة للرئيسية</a>
+</div>
 
-<!-- HEADER -->
-<div class="top-header">
-  <div class="brand">
-    <div class="brand-icon">🧪</div>
-    <div class="brand-text">
-      <h1>Tester Dashboard</h1>
-      <p>اختبار حقيقي لكل الموقع — Auto Tests v4</p>
+<!-- لوحة التحكم -->
+<div id="testerDashboard">
+  <div id="toast-container"></div>
+
+  <!-- HEADER -->
+  <div class="top-header">
+    <div class="brand">
+      <div class="brand-icon">🧪</div>
+      <div class="brand-text">
+        <h1>Tester Dashboard</h1>
+        <p>اختبار حقيقي لكل الموقع — Auto Tests v4</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="h-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="h-btn" onclick="location.href='restricted.html'">🚫 المناطق المحظورة</button>
+      <button class="h-btn" onclick="location.href='dev-dashboard.html'">🛠️ لوحة المطور</button>
+      <button class="h-btn" onclick="location.href='index.html'">🏠 الرئيسية</button>
+      <button class="h-btn danger" onclick="resetProgress()">🔄 تصفير</button>
     </div>
   </div>
-  <div class="header-actions">
-    <button class="h-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button class="h-btn" onclick="location.href='index.html'">🏠 الرئيسية</button>
-    <button class="h-btn danger" onclick="resetProgress()">🔄 تصفير</button>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-icon">🧪</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">إجمالي</div></div>
+    <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-value pass" id="statPassed">0</div><div class="stat-label">نجح</div></div>
+    <div class="stat-box"><div class="stat-icon">❌</div><div class="stat-value fail" id="statFailed">0</div><div class="stat-label">فشل حقيقي</div></div>
+    <div class="stat-box"><div class="stat-icon">⚠️</div><div class="stat-value warn" id="statWarned">0</div><div class="stat-label">تحذير</div></div>
+    <div class="stat-box"><div class="stat-icon">⏳</div><div class="stat-value" id="statPending">0</div><div class="stat-label">معلق</div></div>
+    <div class="stat-box"><div class="stat-icon">📊</div><div class="stat-value" id="statProgress">0%</div><div class="stat-label">التقدم</div></div>
+    <div class="stat-box"><div class="stat-icon">🔥</div><div class="stat-value" id="statRate">0%</div><div class="stat-label">نسبة النجاح</div></div>
   </div>
-</div>
 
-<!-- STATS -->
-<div class="stats-row">
-  <div class="stat-box"><div class="stat-icon">🧪</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">إجمالي</div></div>
-  <div class="stat-box"><div class="stat-icon">✅</div><div class="stat-value pass" id="statPassed">0</div><div class="stat-label">نجح</div></div>
-  <div class="stat-box"><div class="stat-icon">❌</div><div class="stat-value fail" id="statFailed">0</div><div class="stat-label">فشل حقيقي</div></div>
-  <div class="stat-box"><div class="stat-icon">⚠️</div><div class="stat-value warn" id="statWarned">0</div><div class="stat-label">تحذير</div></div>
-  <div class="stat-box"><div class="stat-icon">⏳</div><div class="stat-value" id="statPending">0</div><div class="stat-label">معلق</div></div>
-  <div class="stat-box"><div class="stat-icon">📊</div><div class="stat-value" id="statProgress">0%</div><div class="stat-label">التقدم</div></div>
-  <div class="stat-box"><div class="stat-icon">🔥</div><div class="stat-value" id="statRate">0%</div><div class="stat-label">نسبة النجاح</div></div>
-</div>
+  <!-- TABS -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('autotests', this)">🤖 Auto Tests</button>
+    <button class="tab-btn" onclick="switchTab('infra', this)">⚡ البنية التحتية</button>
+    <button class="tab-btn" onclick="switchTab('data', this)">🔍 البيانات</button>
+    <button class="tab-btn" onclick="switchTab('pages', this)">📄 الصفحات</button>
+    <button class="tab-btn" onclick="switchTab('images', this)">🖼️ الصور</button>
+    <button class="tab-btn" onclick="switchTab('quizdata', this)">🎮 بيانات الكويزات</button>
+    <button class="tab-btn" onclick="switchTab('render', this)">🎨 Rendering</button>
+    <button class="tab-btn" onclick="switchTab('nodes', this)">🗄️ Nodes</button>
+    <button class="tab-btn" onclick="switchTab('panels', this)">🛡️ اللوحات</button>
+    <button class="tab-btn" onclick="switchTab('fixes', this)">🔧 الإصلاحات</button>
+    <button class="tab-btn" onclick="switchTab('manual', this)">✋ يدوي</button>
+    <button class="tab-btn" onclick="switchTab('results', this)">📝 النتائج</button>
+  </div>
 
-<!-- TABS -->
-<div class="tabs-bar">
-  <button class="tab-btn active" onclick="switchTab('autotests', this)">🤖 Auto Tests</button>
-  <button class="tab-btn" onclick="switchTab('infra', this)">⚡ البنية التحتية</button>
-  <button class="tab-btn" onclick="switchTab('data', this)">🔍 البيانات</button>
-  <button class="tab-btn" onclick="switchTab('pages', this)">📄 الصفحات</button>
-  <button class="tab-btn" onclick="switchTab('images', this)">🖼️ الصور</button>
-  <button class="tab-btn" onclick="switchTab('quizdata', this)">🎮 بيانات الكويزات</button>
-  <button class="tab-btn" onclick="switchTab('render', this)">🎨 Rendering</button>
-  <button class="tab-btn" onclick="switchTab('nodes', this)">🗄️ Nodes</button>
-  <button class="tab-btn" onclick="switchTab('panels', this)">🛡️ اللوحات</button>
-  <button class="tab-btn" onclick="switchTab('fixes', this)">🔧 الإصلاحات</button>
-  <button class="tab-btn" onclick="switchTab('manual', this)">✋ يدوي</button>
-  <button class="tab-btn" onclick="switchTab('results', this)">📝 النتائج</button>
-</div>
-
-<!-- ===== AUTO TESTS ===== -->
-<div id="tab-autotests" class="tab-content active">
-  <div class="section">
-    <div class="section-title">🚀 تشغيل الاختبارات</div>
-    <div class="action-bar">
-      <button class="action-btn" onclick="runAllTests()" id="runAllBtn">▶️ شغّل كل الاختبارات</button>
-      <button class="action-btn blue" onclick="runCategory('Infrastructure')">⚡ البنية</button>
-      <button class="action-btn blue" onclick="runCategory('Data Integrity')">🔍 البيانات</button>
-      <button class="action-btn blue" onclick="runCategory('Quiz Data')">🎮 الكويزات</button>
-      <button class="action-btn blue" onclick="runCategory('Pages Fetch')">📄 الصفحات</button>
-      <button class="action-btn blue" onclick="runCategory('Images')">🖼️ الصور</button>
-      <button class="action-btn blue" onclick="runCategory('Pages Render')">🎨 Rendering</button>
-      <button class="action-btn blue" onclick="runCategory('Nodes')">🗄️ Nodes</button>
-      <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
+  <!-- ===== AUTO TESTS ===== -->
+  <div id="tab-autotests" class="tab-content active">
+    <div class="section">
+      <div class="section-title">🚀 تشغيل الاختبارات</div>
+      <div class="action-bar">
+        <button class="action-btn" onclick="runAllTests()" id="runAllBtn">▶️ شغّل كل الاختبارات</button>
+        <button class="action-btn blue" onclick="runCategory('Infrastructure')">⚡ البنية</button>
+        <button class="action-btn blue" onclick="runCategory('Data Integrity')">🔍 البيانات</button>
+        <button class="action-btn blue" onclick="runCategory('Quiz Data')">🎮 الكويزات</button>
+        <button class="action-btn blue" onclick="runCategory('Pages Fetch')">📄 الصفحات</button>
+        <button class="action-btn blue" onclick="runCategory('Images')">🖼️ الصور</button>
+        <button class="action-btn blue" onclick="runCategory('Pages Render')">🎨 Rendering</button>
+        <button class="action-btn blue" onclick="runCategory('Nodes')">🗄️ Nodes</button>
+        <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="mainProgress"></div></div>
+      <p style="font-size:12px;color:var(--text-2);margin-top:8px">
+        💡 <b>3 حالات:</b> ✅ نجح | ⚠️ تحذير (مش فشل حقيقي، مثل node فاضي) | ❌ فشل حقيقي
+      </p>
     </div>
-    <div class="progress-bar-bg"><div class="progress-bar-fill" id="mainProgress"></div></div>
-    <p style="font-size:12px;color:var(--text-2);margin-top:8px">
-      💡 <b>3 حالات:</b> ✅ نجح | ⚠️ تحذير (مش فشل حقيقي، مثل node فاضي) | ❌ فشل حقيقي
-    </p>
+    <div id="autotestsContainer"></div>
   </div>
-  <div id="autotestsContainer"></div>
-</div>
 
-<!-- ===== INFRA ===== -->
-<div id="tab-infra" class="tab-content"><div class="section"><div class="section-title">⚡ البنية التحتية</div><div id="infraList"></div></div></div>
-
-<!-- ===== DATA ===== -->
-<div id="tab-data" class="tab-content"><div class="section"><div class="section-title">🔍 فحص البيانات</div><div id="dataList"></div></div></div>
-
-<!-- ===== PAGES ===== -->
-<div id="tab-pages" class="tab-content"><div class="section"><div class="section-title">📄 الصفحات والملفات</div><div id="pagesList"></div></div></div>
-
-<!-- ===== IMAGES ===== -->
-<div id="tab-images" class="tab-content"><div class="section"><div class="section-title">🖼️ الصور</div><div id="imagesList"></div></div></div>
-
-<!-- ===== QUIZDATA ===== -->
-<div id="tab-quizdata" class="tab-content"><div class="section"><div class="section-title">🎮 بيانات الكويزات</div><div id="quizdataList"></div></div></div>
-
-<!-- ===== RENDER ===== -->
-<div id="tab-render" class="tab-content"><div class="section"><div class="section-title">🎨 Rendering (iframe)</div><div id="renderList"></div></div></div>
-
-<!-- ===== NODES ===== -->
-<div id="tab-nodes" class="tab-content">
-  <div class="section">
-    <div class="section-title">🗄️ Firebase Nodes <span class="count" id="nodesCount">0</span></div>
-    <div class="action-bar"><button class="action-btn" onclick="runCategory('Nodes')">🔄 فحص الكل</button></div>
-    <div id="nodesList"></div>
-  </div>
-</div>
-
-<!-- ===== PANELS ===== -->
-<div id="tab-panels" class="tab-content">
-  <div class="section">
-    <div class="section-title">🛡️ اللوحات</div>
-    <div class="action-bar"><button class="action-btn" onclick="openAllPanels()">🔗 فتح كل اللوحات</button></div>
-    <div id="panelsList"></div>
-  </div>
-</div>
-
-<!-- ===== FIXES ===== -->
-<div id="tab-fixes" class="tab-content">
-  <div class="section">
-    <div class="section-title">🔧 إصلاحات سريعة</div>
-    <div id="fixesList"></div>
-  </div>
-</div>
-
-<!-- ===== MANUAL ===== -->
-<div id="tab-manual" class="tab-content">
-  <div class="section">
-    <div class="section-title">✋ اختبارات يدوية</div>
-    <div id="manualList"></div>
-  </div>
-</div>
-
-<!-- ===== RESULTS ===== -->
-<div id="tab-results" class="tab-content">
-  <div class="section">
-    <div class="section-title">📝 سجل النتائج</div>
-    <div class="action-bar">
-      <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
-      <button class="action-btn" onclick="exportResults()">📤 تصدير JSON</button>
+  <!-- ===== OTHER TABS ===== -->
+  <div id="tab-infra" class="tab-content"><div class="section"><div class="section-title">⚡ البنية التحتية</div><div id="infraList"></div></div></div>
+  <div id="tab-data" class="tab-content"><div class="section"><div class="section-title">🔍 فحص البيانات</div><div id="dataList"></div></div></div>
+  <div id="tab-pages" class="tab-content"><div class="section"><div class="section-title">📄 الصفحات والملفات</div><div id="pagesList"></div></div></div>
+  <div id="tab-images" class="tab-content"><div class="section"><div class="section-title">🖼️ الصور</div><div id="imagesList"></div></div></div>
+  <div id="tab-quizdata" class="tab-content"><div class="section"><div class="section-title">🎮 بيانات الكويزات</div><div id="quizdataList"></div></div></div>
+  <div id="tab-render" class="tab-content"><div class="section"><div class="section-title">🎨 Rendering (iframe)</div><div id="renderList"></div></div></div>
+  
+  <div id="tab-nodes" class="tab-content">
+    <div class="section">
+      <div class="section-title">🗄️ Firebase Nodes <span class="count" id="nodesCount">0</span></div>
+      <div class="action-bar"><button class="action-btn" onclick="runCategory('Nodes')">🔄 فحص الكل</button></div>
+      <div id="nodesList"></div>
     </div>
-    <div id="resultsLog"></div>
+  </div>
+
+  <div id="tab-panels" class="tab-content">
+    <div class="section">
+      <div class="section-title">🛡️ اللوحات</div>
+      <div class="action-bar"><button class="action-btn" onclick="openAllPanels()">🔗 فتح كل اللوحات</button></div>
+      <div id="panelsList"></div>
+    </div>
+  </div>
+
+  <div id="tab-fixes" class="tab-content">
+    <div class="section">
+      <div class="section-title">🔧 إصلاحات سريعة</div>
+      <div id="fixesList"></div>
+    </div>
+  </div>
+
+  <div id="tab-manual" class="tab-content">
+    <div class="section">
+      <div class="section-title">✋ اختبارات يدوية</div>
+      <div id="manualList"></div>
+    </div>
+  </div>
+
+  <div id="tab-results" class="tab-content">
+    <div class="section">
+      <div class="section-title">📝 سجل النتائج</div>
+      <div class="action-bar">
+        <button class="action-btn danger" onclick="resetProgress()">🗑️ تصفير</button>
+        <button class="action-btn" onclick="exportResults()">📤 تصدير JSON</button>
+      </div>
+      <div id="resultsLog"></div>
+    </div>
   </div>
 </div>
 
@@ -278,9 +284,38 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-const CURRENT_USER = localStorage.getItem('loggedInUser') || '';
+const CURRENT_USER = (localStorage.getItem('loggedInUser') || '').trim().toLowerCase();
 const STORAGE_KEY = 'tester_results_v4';
 let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+/* ===== ACCESS CONTROL ===== */
+async function checkAccess() {
+    if (!CURRENT_USER) { window.location.href = 'index.html'; return; }
+    
+    // الأونر ليه صلاحية مطلقة
+    if (CURRENT_USER === 'ahmed') {
+        document.getElementById('testerDashboard').style.display = 'flex';
+        initDashboard();
+        return;
+    }
+
+    try {
+        const roleSnap = await get(ref(db, `roles/users/${CURRENT_USER}`));
+        const role = roleSnap.exists() ? roleSnap.val().toLowerCase() : '';
+
+        // التسترز مسموح لهم
+        if (role === 'tester') {
+            document.getElementById('testerDashboard').style.display = 'flex';
+            initDashboard();
+        } else {
+            document.getElementById('accessDenied').style.display = 'flex';
+        }
+    } catch (e) {
+        console.error(e);
+        document.getElementById('accessDenied').style.display = 'flex';
+    }
+}
+checkAccess();
 
 /* ===== HELPERS ===== */
 function toast(msg, type='success'){
@@ -300,7 +335,6 @@ function saveResults(){
 }
 function getResult(id){ return results[id] || null; }
 function setResult(id, status, msg){
-  // status: 'pass' | 'fail' | 'warn'
   results[id] = { status, msg, time: Date.now() };
   saveResults();
 }
@@ -323,7 +357,6 @@ const PAGES = [
   { id:'page_restricted', file:'restricted.html', marker:'المناطق المحظورة' },
   { id:'page_banned', file:'banned.html', marker:'محظور' },
   { id:'page_bot', file:'bot.html', marker:'بوت الاختبار' },
-  { id:'page_test', file:'test.html', marker:'اختبار الصوت' },
   { id:'page_owner', file:'owner.html', marker:'لوحة الأونر' },
   { id:'page_admin', file:'admin.html', marker:'لوحة الأدمن' },
   { id:'page_manager', file:'manager.html', marker:'لوحة المدير' },
@@ -350,7 +383,6 @@ const QUIZ_FILES = [
   { id:'q_wednesday', file:'Wednesday Quiz.html', marker:'وينزداي' }
 ];
 
-/* ✅ تم إصلاح الـ marker لـ owner-core.js من initQuiz إلى _runFeature */
 const OTHER_FILES = [
   { id:'f_questions', file:'questions.js', marker:'allQuizzesData' },
   { id:'f_quizcore', file:'quiz-core.js', marker:'initQuiz' },
@@ -397,7 +429,6 @@ const IFRAME_PAGES = [
   { id:'ifr_notifications', file:'notifications.html', selectors:['#notificationsList'] },
   { id:'ifr_assistant', file:'assistant.html', selectors:['#chatMessages','#chatKeyboard','#chatInput'] },
   { id:'ifr_banned', file:'banned.html', selectors:['.box'] },
-  { id:'ifr_test', file:'test.html', selectors:['h1','button'] },
   { id:'ifr_bot', file:'bot.html', selectors:['#console1','#startBtn'] }
 ];
 
@@ -478,7 +509,7 @@ AUTO_TESTS.push(
       const data = d.val() || {};
       const missing = users.filter(x => !data[x]);
       return missing.length
-        ? { status:'fail', msg:`❌ ${missing.length} مفقود: ${missing.slice(0,5).join(', ')} — استخدم زرار الإصلاح` }
+        ? { status:'fail', msg:`❌ ${missing.length} مفقود: ${missing.slice(0,5).join(', ')}` }
         : { status:'pass', msg:`✅ كل ${users.length} مستخدم عندهم بيانات` };
     }
   },
@@ -519,17 +550,6 @@ AUTO_TESTS.push(
         : { status:'pass', msg:'✅ كل الصداقات متبادلة' };
     }
   },
-  { id:'int_verified', cat:'Data Integrity', name:'الموثقين لهم verified flag', desc:'verified_users ⇒ users_data.verified',
-    run: async () => {
-      const [v,u] = await Promise.all([get(ref(db,'verified_users')), get(ref(db,'users_data'))]);
-      const verified = Object.keys(v.val() || {});
-      const users = u.val() || {};
-      const missing = verified.filter(x => users[x]?.verified !== 1 && users[x]?.verified !== true);
-      return missing.length
-        ? { status:'fail', msg:`❌ ${missing.length} بلا flag: ${missing.join(', ')}` }
-        : { status:'pass', msg:`✅ ${verified.length} موثق متسق` };
-    }
-  },
   { id:'int_scores', cat:'Data Integrity', name:'Scores لها score و total صحيحين', desc:'بنية النتائج',
     run: async () => {
       const s = await get(ref(db,'scores'));
@@ -547,16 +567,6 @@ AUTO_TESTS.push(
       return issues.length
         ? { status:'fail', msg:`❌ ${issues.length} نتيجة بلا score/total` }
         : { status:'pass', msg:'✅ كل النتائج سليمة' };
-    }
-  },
-  { id:'int_leaderboard', cat:'Data Integrity', name:'Leaderboard مطابق لـ scores', desc:'تحقق من وجود نفس المستخدمين',
-    run: async () => {
-      const [s,l] = await Promise.all([get(ref(db,'scores')), get(ref(db,'leaderboard'))]);
-      const sUsers = new Set(Object.keys(s.val() || {}));
-      const lUsers = new Set(Object.keys(l.val() || {}));
-      const onlyInS = [...sUsers].filter(x => !lUsers.has(x));
-      if(onlyInS.length === 0) return { status:'pass', msg:'✅ كل لاعب في scores موجود في leaderboard' };
-      return { status:'warn', msg:`⚠️ ${onlyInS.length} لاعب مش في leaderboard (غالباً ghost_mode)` };
     }
   }
 );
@@ -596,22 +606,6 @@ AUTO_TESTS.push(
         return issues.length
           ? { status:'fail', msg:`❌ ${issues.length} مشكلة: ${issues.slice(0,5).join(', ')}` }
           : { status:'pass', msg:'✅ كل الأسئلة سليمة' };
-      } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
-    }
-  },
-  /* ✅ تم إزالة spiderman2026 من القائمة — عشان الكارت يشتغل لازم تضيف questions له */
-  { id:'quiz_count', cat:'Quiz Data', name:'16 كويز أساسي موجود', desc:'بدون spiderman2026 (اختياري)',
-    run: async () => {
-      try {
-        const res = await fetch('questions.js?' + Date.now());
-        const text = await res.text();
-        const data = new Function(text + '\nreturn allQuizzesData;')();
-        const expected = ['annabelle','conjuring','TheNun','FNAF','SquidGame','spiderman','avengers','avatar','venom','birdsofprey','fall','Wednesday','knivesout','scream','TrainToBusan','elharifa'];
-        const found = Object.keys(data);
-        const missing = expected.filter(x => !found.includes(x));
-        if(missing.length > 0) return { status:'fail', msg:`❌ مفقود: ${missing.join(', ')}` };
-        const has2026 = found.includes('spiderman2026') ? ' + 2026 ✅' : ' (spiderman2026 لسه مش مضاف)';
-        return { status:'pass', msg:`✅ كل ${expected.length} كويز موجود${has2026}` };
       } catch(e) { return { status:'fail', msg:'❌ ' + e.message }; }
     }
   }
@@ -1152,24 +1146,26 @@ if(localStorage.getItem('testerTheme') === 'light'){
 }
 
 /* ===== INIT ===== */
-renderAutoTests();
-renderPanels();
-renderFixes();
-renderManual();
-renderResults();
-updateStats();
+function initDashboard() {
+    renderAutoTests();
+    renderPanels();
+    renderFixes();
+    renderManual();
+    renderResults();
+    updateStats();
 
-// Distribute specific lists
-document.getElementById('infraList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Infrastructure').map(t => renderTestRow(t)).join('');
-document.getElementById('dataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Data Integrity').map(t => renderTestRow(t)).join('');
-document.getElementById('pagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Fetch').map(t => renderTestRow(t)).join('');
-document.getElementById('imagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Images').map(t => renderTestRow(t)).join('');
-document.getElementById('quizdataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Quiz Data').map(t => renderTestRow(t)).join('');
-document.getElementById('renderList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Render').map(t => renderTestRow(t)).join('');
-document.getElementById('nodesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Nodes').map(t => renderTestRow(t)).join('');
-document.getElementById('nodesCount').textContent = AUTO_TESTS.filter(t => t.cat === 'Nodes').length;
+    // Distribute specific lists
+    document.getElementById('infraList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Infrastructure').map(t => renderTestRow(t)).join('');
+    document.getElementById('dataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Data Integrity').map(t => renderTestRow(t)).join('');
+    document.getElementById('pagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Fetch').map(t => renderTestRow(t)).join('');
+    document.getElementById('imagesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Images').map(t => renderTestRow(t)).join('');
+    document.getElementById('quizdataList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Quiz Data').map(t => renderTestRow(t)).join('');
+    document.getElementById('renderList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Pages Render').map(t => renderTestRow(t)).join('');
+    document.getElementById('nodesList').innerHTML = AUTO_TESTS.filter(t => t.cat === 'Nodes').map(t => renderTestRow(t)).join('');
+    document.getElementById('nodesCount').textContent = AUTO_TESTS.filter(t => t.cat === 'Nodes').length;
 
-console.log('🧪 Tester v4 loaded — ' + AUTO_TESTS.length + ' tests');
+    console.log('🧪 Tester v4 loaded — ' + AUTO_TESTS.length + ' tests');
+}
 </script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
