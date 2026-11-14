@@ -706,6 +706,7 @@
   let activeChatRoom = null;
   let chatUnsubscribe = null;
   const roomListeners = {};
+  const roomSeenCounts = {}; // 🔔 لتتبع الرسايل الجديدة
 
   function renderChatRooms() {
     const box = document.getElementById('chatRoomsList');
@@ -723,6 +724,12 @@
         roomListeners[r.key] = window.onValue(window.ref(window.db, 'admin_chat/' + r.key), (snap) => {
           const data = snap.val() || {};
           const count = Object.keys(data).length;
+          // 🔔 إشعار عند وصول رسالة جديدة في غرفة مش مفتوحة
+          const prevCount = roomSeenCounts[r.key];
+          roomSeenCounts[r.key] = count;
+          if (prevCount !== undefined && count > prevCount && activeChatRoom !== r.key) {
+            window.toast('💬 رسالة جديدة في شات ' + r.name, 'info');
+          }
           const badge = document.getElementById('badge-' + r.key);
           if (badge) {
             if (count > 0 && activeChatRoom !== r.key) {
