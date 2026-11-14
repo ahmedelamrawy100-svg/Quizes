@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 قارئ الأفلام (Movie Genie) - Plot Twist</title>
+    <link rel="icon" type="image/png" href="pic/Logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="features/movie-genie.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    
+    <div class="top-bar">
+        <a href="index.html" class="back-btn" id="backBtn">⬅ رجوع</a>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <button onclick="window.toggleGenieLang()" id="langBtn" style="background:#333; color:#fff; border:1px solid #555; padding:6px 12px; border-radius:8px; cursor:pointer; font-family:'Cairo';">EN</button>
+            <div class="coins-badge">🪙 <span id="userCoins">0</span> <span id="lblCoins">عملة</span></div>
+        </div>
+    </div>
+
+    <!-- الشاشة الأولى: البداية -->
+    <div class="genie-container screen active" id="screen-start">
+        <div class="crystal-ball-container">
+            <div class="crystal-ball">🔮</div>
+        </div>
+        <h1 class="title" id="txtTitle">قارئ الأفلام</h1>
+        <p class="subtitle" id="txtSubtitle">فكر في فيلم أو مسلسل من القائمة اللي تحت، وأنا هحاول أقرأ أفكارك!</p>
+        
+        <div class="movies-cloud" id="moviesCloud"></div>
+        
+        <button class="action-btn start-btn" id="btnStart" onclick="window._startGenie()">✨ ابدأ التحدي</button>
+        <div class="stats-row">
+            <span id="lblSuccess">🏆 قرأها بنجاح: <b id="statSuccess">0</b></span>
+            <span id="lblFail">😈 هزمها اللاعبين: <b id="statFail">0</b></span>
+        </div>
+    </div>
+
+    <!-- الشاشة الثانية: الأسئلة -->
+    <div class="genie-container screen" id="screen-questions">
+        <div class="progress-container">
+            <div class="confidence-bar" id="confidenceBar" style="width: 0%;"></div>
+            <span class="confidence-text" id="confidenceText">0%</span>
+        </div>
+        
+        <div class="crystal-ball-container small">
+            <div class="crystal-ball thinking">🔮</div>
+        </div>
+        
+        <h2 class="question-text" id="questionText">جاري التفكير...</h2>
+        
+        <div class="answers-grid">
+            <button class="answer-btn" id="btnYes" onclick="window._answerGenie(1.0)">نعم</button>
+            <button class="answer-btn" id="btnProb" onclick="window._answerGenie(0.7)">على الأرجح</button>
+            <button class="answer-btn" id="btnNo" onclick="window._answerGenie(0.0)">لا</button>
+            <button class="answer-btn" id="btnDont" onclick="window._answerGenie(0.5)">لا أعلم</button>
+        </div>
+    </div>
+
+    <!-- الشاشة الثالثة: الكشف -->
+    <div class="genie-container screen" id="screen-reveal">
+        <h2 class="title" style="font-size:24px;" id="txtRevealTitle">🕵️ أنا شايف إنك بتفكر في...</h2>
+        
+        <div class="reveal-card">
+            <img id="revealPoster" src="" alt="Movie Poster" class="reveal-poster">
+            <h3 id="revealTitle" class="reveal-title">اسم الفيلم</h3>
+            <p style="color:#aaa;" id="txtIsItThis">هل ده الفيلم اللي كان في دماغك؟</p>
+        </div>
+        
+        <div class="reveal-actions">
+            <button class="action-btn success" id="btnCorrect" onclick="window._genieResult(true)">نعم، أصبت! 🎯</button>
+            <button class="action-btn danger" id="btnWrong" onclick="window._genieResult(false)">لا، أخطأت! 😈</button>
+        </div>
+    </div>
+
+    <!-- الشاشة الرابعة: النتيجة -->
+    <div class="genie-container screen" id="screen-result">
+        <div class="result-box" id="resultBox"></div>
+    </div>
+
+    <script type="module" src="features/movie-genie.js"></script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
+  <script src="pwa-manager.js" defer></script>
+</body>
+</html>
