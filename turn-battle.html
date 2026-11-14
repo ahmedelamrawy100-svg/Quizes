@@ -325,5 +325,8 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 </script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
+  <script src="pwa-manager.js" defer></script>
 </body>
 </html>
