@@ -41,44 +41,110 @@
   .create-box { background:var(--card); border:2px dashed var(--gold); border-radius:12px; padding:20px; margin-bottom:20px; }
   .create-box input, .create-box select { padding:10px; border-radius:8px; border:1px solid var(--border); background:#000; color:#fff; font-family:Cairo; margin:5px; width:150px; }
   .empty { text-align:center; padding:40px; color:#aaa; }
+  /* ═══ تبادل البطاقات والأصول — ستايل زي الألعاب ═══ */
+  #tradesContainer { display:none; }
+  .trade-cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width: 700px) { .trade-cols { grid-template-columns:1fr; } }
+  .trade-panel { background:linear-gradient(180deg,#16233f,#0d1626); border:3px solid #3b82f6; border-radius:18px; padding:14px; box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+  .trade-panel-title { font-size:20px; font-weight:900; color:#fff; text-align:center; margin-bottom:12px; text-shadow:0 2px 0 #000; }
+  .trade-tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; max-height:340px; overflow-y:auto; padding:2px; }
+  .trade-tile { position:relative; background:linear-gradient(180deg,#243356,#16223d); border:3px solid #4a6fa5; border-radius:14px; cursor:pointer; overflow:hidden; transition:0.15s; min-height:92px; display:flex; flex-direction:column; }
+  .trade-tile img { width:100%; height:62px; object-fit:cover; display:block; }
+  .trade-tile .tq { position:absolute; top:4px; left:7px; font-weight:900; font-size:15px; color:#fff; text-shadow:0 2px 2px #000, 0 0 4px #000; z-index:2; }
+  .trade-tile .tname { font-size:11px; font-weight:bold; text-align:center; padding:4px 3px; color:#dbeafe; background:#000a; flex:1; display:flex; align-items:center; justify-content:center; }
+  .trade-tile .tq-sel { position:absolute; top:4px; right:7px; background:#a855f7; color:#fff; font-weight:900; font-size:12px; padding:1px 8px; border-radius:10px; z-index:2; }
+  .trade-tile.selected { border-color:#a855f7; box-shadow:0 0 12px rgba(168,85,247,0.7); }
+  .trade-tile.plus { align-items:center; justify-content:center; font-size:44px; color:#ffd700; background:linear-gradient(180deg,#6d5200,#3d2d00); border-color:#ffd700; font-weight:900; }
+  .trade-tile.plus:hover { transform:scale(1.05); }
+  .trade-status { text-align:center; font-weight:900; font-size:15px; padding:12px; border-radius:14px; margin-top:12px; font-family:Cairo; }
+  .trade-status.wait { background:rgba(59,130,246,0.15); color:#93c5fd; border:2px solid #3b82f6; }
+  .trade-status.ready { background:rgba(34,197,94,0.15); color:#86efac; border:2px solid #22c55e; }
+  .trade-status.fire { background:rgba(249,115,22,0.2); color:#fdba74; border:2px solid #f97316; font-size:18px; }
+  .trade-status.done { background:rgba(250,204,21,0.15); color:#fde047; border:2px solid #eab308; }
+  .trade-status.dead { background:rgba(239,68,68,0.15); color:#fca5a5; border:2px solid #ef4444; }
+  .trade-sec-label { display:block; font-size:14px; font-weight:900; color:var(--gold); margin:6px 0; }
+  .trade-stamp { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-12deg); background:rgba(6,78,59,0.85); color:#4ade80; border:4px solid #22c55e; border-radius:16px; font-weight:900; font-size:26px; padding:10px 26px; pointer-events:none; box-shadow:0 0 30px rgba(34,197,94,0.6); z-index:5; animation:stampPop 0.4s ease; }
+  @keyframes stampPop { 0% { transform:translate(-50%,-50%) rotate(-12deg) scale(2); opacity:0; } 100% { transform:translate(-50%,-50%) rotate(-12deg) scale(1); opacity:1; } }
+  .trade-tile .tq-req { position:absolute; bottom:24px; right:5px; background:#22c55e; color:#fff; font-weight:900; font-size:10px; padding:1px 7px; border-radius:10px; z-index:2; box-shadow:0 1px 4px #000a; }
+  .trade-ask-list { display:flex; flex-wrap:wrap; gap:6px; }
+  .trade-ask-item { background:rgba(168,85,247,0.15); border:1px solid #a855f7; color:#e9d5ff; font-size:12px; font-weight:bold; padding:4px 10px; border-radius:14px; }
+  .trade-tile.asset { align-items:center; justify-content:center; font-size:14px; font-weight:900; color:#fff; text-align:center; padding:8px 4px; gap:4px; }
+  .trade-tile.asset .ticon { font-size:26px; }
+  .trade-coins-bar { display:flex; align-items:center; gap:8px; background:#0a1120; border:3px solid #4a6fa5; border-radius:14px; padding:8px 12px; margin-top:10px; }
+  .trade-coins-bar .cicon { font-size:22px; }
+  .trade-coins-bar input { flex:1; background:transparent; border:none; outline:none; color:#fff; font-family:Cairo; font-weight:900; font-size:16px; min-width:60px; }
+  .trade-actions { display:flex; gap:12px; justify-content:center; margin-top:18px; flex-wrap:wrap; }
+  .btn-accept { padding:14px 40px; background:linear-gradient(180deg,#22c55e,#15803d); color:#fff; border:3px solid #064e3b; border-radius:14px; font-family:Cairo; font-weight:900; font-size:18px; cursor:pointer; box-shadow:0 4px 0 #064e3b; }
+  .btn-accept:hover { transform:translateY(-2px); }
+  .btn-accept.gold { background:linear-gradient(180deg,#facc15,#b45309); border-color:#713f12; box-shadow:0 4px 0 #713f12; color:#000; }
+  .btn-deny { padding:14px 40px; background:linear-gradient(180deg,#ef4444,#991b1b); color:#fff; border:3px solid #7f1d1d; border-radius:14px; font-family:Cairo; font-weight:900; font-size:18px; cursor:pointer; box-shadow:0 4px 0 #7f1d1d; }
+  .btn-deny:hover { transform:translateY(-2px); }
+  .trade-qty-row { display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0; }
+  .trade-qty-row button { width:44px; height:44px; border-radius:10px; border:2px solid #555; background:#222; color:#fff; font-size:22px; font-weight:900; cursor:pointer; }
+  .trade-qty-row input { width:90px; padding:10px; text-align:center; border-radius:10px; border:2px solid var(--gold); background:#000; color:#fff; font-family:Cairo; font-size:18px; font-weight:900; }
+
 </style>
 </head>
 <body>
 <div class="container">
   <div class="top-bar">
-    <a href="index.html" class="back-btn">⬅ رجوع</a>
+    <a href="index.html" class="back-btn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
     <div style="color:var(--gold);font-weight:bold;">🪙 <span id="myCoins">0</span></div>
   </div>
-  <h1>💼 سوق المبادلة</h1>
+  <h1 data-ar="💼 سوق المبادلة" data-en="💼 Trading Market">💼 سوق المبادلة</h1>
   
   <div class="create-box">
-    <h3 style="color:var(--gold);margin-bottom:10px;">➕ اعرض حاجة للبيع</h3>
+    <h3 style="color:var(--gold);margin-bottom:10px;" data-ar="➕ اعرض حاجة للبيع" data-en="➕ List an item for sale">➕ اعرض حاجة للبيع</h3>
     <select id="listItemId"></select>
-    <input type="number" id="listQty" placeholder="الكمية" value="1" min="1">
-    <input type="number" id="listPrice" placeholder="السعر" value="100" min="10">
-    <button class="btn-buy" onclick="window._createListing()">📤 اعرض</button>
-    <div style="font-size:12px;color:#aaa;margin-top:10px;">⚠️ 5% عمولة للمنصة</div>
+    <input type="number" id="listQty" placeholder="الكمية" value="1" min="1" data-ar="الكمية" data-en="Qty">
+    <input type="number" id="listPrice" placeholder="السعر" value="100" min="10" data-ar="السعر" data-en="Price">
+    <button class="btn-buy" onclick="window._createListing()" data-ar="📤 اعرض" data-en="📤 List">📤 اعرض</button>
+    <div style="font-size:12px;color:#aaa;margin-top:10px;" data-ar="⚠️ 5% عمولة للمنصة" data-en="⚠️ 5% platform commission">⚠️ 5% عمولة للمنصة</div>
   </div>
   
-  <div class="tabs">
-    <button class="tab active" onclick="window._switchMarketTab('all',this)">🌐 الكل</button>
-    <button class="tab" onclick="window._switchMarketTab('mine',this)">📦 إعلاناتي</button>
+  <div class="tabs" id="marketTabs">
+    <button class="tab active" onclick="window._switchMarketTab('all',this)" data-ar="🌐 الكل" data-en="🌐 All">🌐 الكل</button>
+    <button class="tab" onclick="window._switchMarketTab('mine',this)" data-ar="📦 إعلاناتي" data-en="📦 My listings">📦 إعلاناتي</button>
+    <button class="tab" onclick="window._switchTradesTab(this)" data-ar="🔄 تبادل مع الأصدقاء" data-en="🔄 Trade with friends">🔄 تبادل مع الأصدقاء</button>
   </div>
   
   <div id="listingsContainer"></div>
+
+  <!-- 🔄 تبادل البطاقات/الأصول -->
+  <div id="tradesContainer">
+    <div class="create-box">
+      <h3 style="color:var(--gold);margin-bottom:10px;" data-ar="🔄 ابدأ تبادل مع صاحبك" data-en="🔄 Start a trade with a friend">🔄 ابدأ تبادل مع صاحبك</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="text" id="tradeFriendInput" placeholder="مثال: ahmed1" data-ar="مثال: ahmed1" data-en="e.g. ahmed1" style="flex:1; min-width:180px; padding:10px; border-radius:8px; border:1px solid var(--border); background:#000; color:#fff; font-family:Cairo;">
+        <button class="btn-buy" onclick="window._startTrade()" data-ar="🚀 ابدأ" data-en="🚀 Start">🚀 ابدأ</button>
+      </div>
+    </div>
+    <div id="tradeBuilder"></div>
+    <div id="tradesList" style="margin-top:15px;"></div>
+  </div>
 </div>
 
 <script type="module">
 import './features/trading-market.js';
+import './features/card-trading.js';
 import { db, ref, get, onValue, currentUser, showToast } from './firebase-shared.js';
 
 let currentFilter = 'all';
 let allListings = [];
+
+/* 🌐 اللغة + نصوص مترجمة */
+const L = () => localStorage.getItem('lang') || 'ar';
 const SHOP_ITEMS = [
-  { id: 'fifty', name: '50/50' }, { id: 'shield', name: 'درع' },
-  { id: 'freeze10', name: 'تجميد 10ث' }, { id: 'add30', name: '+30ث' },
-  { id: 'box_gold', name: 'صندوق ذهبي' }, { id: 'box_legendary', name: 'صندوق أسطوري' }
+  { id: 'fifty', ar: '50/50', en: '50/50' }, { id: 'shield', ar: 'درع', en: 'Shield' },
+  { id: 'freeze10', ar: 'تجميد 10ث', en: 'Freeze 10s' }, { id: 'add30', ar: '+30ث', en: '+30s' },
+  { id: 'box_gold', ar: 'صندوق ذهبي', en: 'Gold Box' }, { id: 'box_legendary', ar: 'صندوق أسطوري', en: 'Legendary Box' }
 ];
+const itemName = (id) => { const i = SHOP_ITEMS.find(x => x.id === id); return i ? i[L()] : id; };
+const S = {
+  ar: { noItems: 'مفيش أدوات', noListings: 'مفيش إعلانات', seller: 'البائع:', cancel: '❌ إلغاء', buy: '🛒 شراء', pickItem: 'اختار أداة', listed: '✅ الإعلان اتعمل', bought: '🎉 اشتريت!', cancelled: '✅ اتلغى' },
+  en: { noItems: 'No items', noListings: 'No listings', seller: 'Seller:', cancel: '❌ Cancel', buy: '🛒 Buy', pickItem: 'Pick an item', listed: '✅ Listing created', bought: '🎉 Purchased!', cancelled: '✅ Cancelled' }
+};
+const s = () => S[L()] || S.ar;
 
 // جلب الكوينز
 onValue(ref(db, `users_data/${currentUser}/coins`), snap => {
@@ -91,9 +157,9 @@ onValue(ref(db, `users_data/${currentUser}/inventory`), snap => {
   const sel = document.getElementById('listItemId');
   sel.innerHTML = SHOP_ITEMS
     .filter(i => (inv[i.id] || 0) > 0)
-    .map(i => `<option value="${i.id}">${i.name} (x${inv[i.id]})</option>`)
+    .map(i => `<option value="${i.id}">${i[L()]} (x${inv[i.id]})</option>`)
     .join('');
-  if (!sel.innerHTML) sel.innerHTML = '<option value="">مفيش أدوات</option>';
+  if (!sel.innerHTML) sel.innerHTML = `<option value="">${s().noItems}</option>`;
 });
 
 // الـ listings
@@ -109,55 +175,77 @@ function renderMarket() {
     : allListings;
   
   if (filtered.length === 0) {
-    container.innerHTML = '<div class="empty">مفيش إعلانات</div>';
+    container.innerHTML = `<div class="empty">${s().noListings}</div>`;
     return;
   }
   
   container.innerHTML = filtered.map(([id, l]) => {
-    const item = SHOP_ITEMS.find(i => i.id === l.itemId) || { name: l.itemId };
+    const item = itemName(l.itemId);
     const isMine = l.seller === currentUser;
     return `
       <div class="listing">
         <div class="listing-info">
-          <div class="listing-title">${item.name} ×${l.qty}</div>
-          <div class="listing-seller">البائع: ${l.seller}</div>
+          <div class="listing-title">${item} ×${l.qty}</div>
+          <div class="listing-seller">${s().seller} ${l.seller}</div>
         </div>
         <div class="listing-price">🪙 ${l.price}</div>
         ${isMine 
-          ? `<button class="btn-cancel" onclick="window._cancelListing('${id}')">❌ إلغاء</button>`
-          : `<button class="btn-buy" onclick="window._buyListing('${id}')">🛒 شراء</button>`}
+          ? `<button class="btn-cancel" onclick="window._cancelListing('${id}')">${s().cancel}</button>`
+          : `<button class="btn-buy" onclick="window._buyListing('${id}')">${s().buy}</button>`}
       </div>
     `;
   }).join('');
 }
 
+/* 🌐 الترجمة (data-ar/data-en) — زي باقي الصفحات */
+function applyMarketLang() {
+  const L = localStorage.getItem('lang') || 'ar';
+  document.querySelectorAll('[data-ar]').forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = L === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+    else el.innerText = L === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+  });
+  document.body.dir = L === 'en' ? 'ltr' : 'rtl';
+}
+applyMarketLang();
+
 window._switchMarketTab = (filter, btn) => {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   currentFilter = filter;
+  document.getElementById('listingsContainer').style.display = 'block';
+  document.getElementById('tradesContainer').style.display = 'none';
   renderMarket();
+};
+
+/* 🔄 تاب التبادل */
+window._switchTradesTab = (btn) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('listingsContainer').style.display = 'none';
+  document.getElementById('tradesContainer').style.display = 'block';
+  window._openTradesTab();
 };
 
 window._createListing = async () => {
   const itemId = document.getElementById('listItemId').value;
   const qty = parseInt(document.getElementById('listQty').value);
   const price = parseInt(document.getElementById('listPrice').value);
-  if (!itemId) return showToast('اختار أداة', 'error');
+  if (!itemId) return showToast(s().pickItem, 'error');
   const r = await window.NFMarket.createListing(itemId, qty, price);
   if (r.error) return showToast(r.error, 'error');
-  showToast('✅ الإعلان اتعمل', 'success');
+  showToast(s().listed, 'success');
 };
 
 window._buyListing = async (id) => {
   const r = await window.NFMarket.buyListing(id);
   if (r.error) return showToast(r.error, 'error');
-  showToast('🎉 اشتريت!', 'gold');
+  showToast(s().bought, 'gold');
 };
 
 window._cancelListing = async (id) => {
   const r = await window.NFMarket.cancelListing(id);
   if (r.error) return showToast(r.error, 'error');
-  showToast('✅ اتلغى', 'info');
+  showToast(s().cancelled, 'info');
 };
 </script>
 <script type="module" src="notifications.js"></script>
