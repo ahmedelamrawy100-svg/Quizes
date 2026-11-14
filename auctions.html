@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔨 المزاد الحي - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="stylesheet" href="features/new-features.css">
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --green:#4caf50; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
+  .container { max-width:1100px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); font-size:32px; margin-bottom:20px; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-family:Cairo; }
+  .coins-badge { color:var(--gold); font-weight:bold; font-size:18px; }
+  .lang-btn { background:#333; color:#fff; border:1px solid #555; padding:6px 12px; border-radius:8px; cursor:pointer; font-family:'Cairo'; }
+
+  .tabs { display:flex; gap:10px; margin-bottom:20px; justify-content:center; flex-wrap:wrap; }
+  .tab { padding:12px 25px; background:var(--card); border:2px solid var(--border); border-radius:10px; cursor:pointer; font-family:Cairo; font-weight:bold; color:#fff; font-size:15px; transition:0.2s; }
+  .tab.active { background:var(--gold); color:#000; border-color:var(--gold); }
+
+  #auctionsContainer, #myCardsContainer {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:18px;
+  }
+
+  /* ═══ كارت المزاد ═══ */
+  .auction-card { background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; transition:0.25s; display:flex; flex-direction:column; }
+  .auction-card:hover { transform:translateY(-4px); border-color:#555; }
+  .auction-card.mine { border-color:var(--gold); }
+  .poster-wrap { position:relative; height:300px; }
+  .poster { width:100%; height:100%; object-fit:cover; display:block; }
+  .rarity-badge { position:absolute; top:10px; right:10px; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:900; color:#000; font-family:Cairo; box-shadow:0 2px 8px rgba(0,0,0,0.6); }
+  .qty-badge { position:absolute; top:10px; left:10px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:900; background:#000c; color:#fff; border:1px solid #fff5; }
+  .r-common    { background:#9e9e9e; }
+  .r-rare      { background:#2196f3; color:#fff !important; }
+  .r-epic      { background:#a855f7; color:#fff !important; }
+  .r-legendary { background:var(--gold); animation:legendGlow 1.6s ease-in-out infinite; }
+  .r-mythic    { background:#ff2d95; color:#fff !important; }
+  .r-exotic    { background:#00e5ff; }
+  .r-immortal  { background:#76ff03; }
+  .r-divine    { background:#fff; color:#000 !important; }
+  .r-secret    { background:#212121; color:#fff !important; box-shadow:0 0 12px 2px rgba(255,255,255,0.35); }
+  .r-godly     { background:#ff1744; color:#fff !important; }
+  .r-transcendent { background:linear-gradient(90deg,#ff1744,#ff9100,#ffd700,#76ff03,#00e5ff,#a855f7); background-size:300% 100%; animation:rainbowShift 3s linear infinite; }
+  @keyframes rainbowShift { to { background-position:300% 0; } }
+  @keyframes legendGlow {
+    0%,100% { box-shadow:0 0 8px 2px rgba(255,215,0,0.7); }
+    50%     { box-shadow:0 0 20px 6px rgba(255,215,0,0.95); }
+  }
+  .auction-info { padding:14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .card-title { font-weight:900; font-size:17px; color:var(--gold); }
+  .seller-line, .bidder-line { font-size:12.5px; color:#aaa; }
+  .seller-line b, .bidder-line b { color:#fff; }
+  .bidder-line .dim { color:#666; }
+  .price-line { font-size:16px; color:#ccc; }
+  .price-line .price { color:var(--green); font-size:19px; }
+  .countdown { font-size:13px; font-weight:700; color:#4dd0e1; margin-top:2px; }
+  .countdown.urgent { color:#ff4444; animation:blink 0.8s infinite; }
+  .countdown.expired { color:#777; animation:none; }
+  @keyframes blink { 50% { opacity:0.4; } }
+
+  .btn-bid { padding:10px; background:linear-gradient(135deg,#ffd700,#ff8f00); color:#000; border:none; border-radius:9px; font-family:Cairo; font-weight:900; cursor:pointer; font-size:15px; margin-top:auto; transition:0.2s; }
+  .btn-bid:hover { transform:scale(1.03); box-shadow:0 0 15px rgba(255,215,0,0.5); }
+  .btn-mine { padding:10px; background:#2a2a2a; color:var(--gold); border:1px solid var(--gold); border-radius:9px; font-family:Cairo; font-weight:bold; cursor:default; font-size:14px; margin-top:auto; }
+  .buy-box { grid-column:1/-1; border:2px dashed var(--gold); background:rgba(255,215,0,0.03); }
+
+  .empty { grid-column:1/-1; text-align:center; padding:50px 20px; color:#aaa; font-size:16px; }
+
+  /* ═══ شاشة عدم تسجيل الدخول ═══ */
+  #loginGate { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:50vh; gap:15px; }
+  #loginGate .icon { font-size:60px; }
+
+  @media (max-width:500px) {
+    .poster-wrap { height:240px; }
+    h1 { font-size:24px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="back-btn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <a href="card-battle.html" class="back-btn" style="background:linear-gradient(135deg,#ff5722,#ff8f00); color:#fff; border:none; box-shadow:0 0 12px rgba(255,87,34,0.4);" data-ar="⚔️ روح الساحة" data-en="⚔️ Go to Arena">⚔️ روح الساحة</a>
+      <button onclick="window.toggleAuctionLang()" id="langBtn" class="lang-btn">EN</button>
+      <div class="coins-badge">🪙 <span id="myCoins">0</span> <span data-ar="عملة" data-en="Coins">عملة</span></div>
+    </div>
+  </div>
+
+  <h1 data-ar="🔨 المزاد الحي للبطاقات النادرة" data-en="🔨 Live Card Auctions">🔨 المزاد الحي للبطاقات النادرة</h1>
+
+  <!-- شاشة عدم تسجيل الدخول -->
+  <div id="loginGate">
+    <div class="icon">🔒</div>
+    <p data-ar="سجل دخول الأول عشان تلعب المزاد 🪙" data-en="Please log in to play the auction 🪙">سجل دخول الأول عشان تلعب المزاد 🪙</p>
+    <a href="index.html" class="btn-bid" style="display:inline-block; width:auto; padding:10px 30px; text-decoration:none;" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
+  </div>
+
+  <!-- تطبيق المزاد -->
+  <div id="auctionsApp">
+    <div class="tabs">
+      <button class="tab active" onclick="window._switchAuctionTab('auctions',this)" data-ar="🔨 المزادات النشطة" data-en="🔨 Active Auctions">🔨 المزادات النشطة</button>
+      <button class="tab" onclick="window._switchAuctionTab('inventory',this)" data-ar="🎴 مخزون بطاقاتي" data-en="🎴 My Cards">🎴 مخزون بطاقاتي</button>
+    </div>
+
+    <div id="auctionsContainer"></div>
+    <div id="myCardsContainer" style="display:none;"></div>
+  </div>
+</div>
+
+<script type="module" src="features/live-auctions.js"></script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
+  <script src="pwa-manager.js" defer></script>
+</body>
+</html>
