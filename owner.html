@@ -169,6 +169,118 @@
   .text-center { text-align: center; }
   .empty-state { text-align: center; color: var(--text-3); padding: 20px; }
 
+  /* ===== 💬 شات الإدارة + 📬 رسايل الشغل ===== */
+  .chat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; height: calc(100vh - 190px); min-height: 520px; }
+  .chat-sidebar {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto;
+  }
+  .chat-sidebar-title {
+    font-size: 13px; font-weight: 900; color: var(--gold);
+    padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+  }
+  .chat-room-item {
+    display: flex; align-items: center; gap: 10px; padding: 11px 12px; width: 100%;
+    border-radius: 10px; background: transparent; color: var(--text-2);
+    border: 1px solid transparent; cursor: pointer; font-family: 'Cairo';
+    font-weight: 700; font-size: 13px; transition: 0.2s; text-align: right;
+  }
+  .chat-room-item:hover { background: var(--surface-hover); border-color: var(--border); color: var(--text); }
+  .chat-room-item.active {
+    background: linear-gradient(90deg, rgba(255,215,0,0.15), transparent);
+    color: var(--gold); border-color: var(--gold);
+  }
+  .chat-room-emoji { font-size: 20px; }
+  .chat-room-name { flex: 1; }
+  .chat-room-badge {
+    background: var(--danger); color: #fff; font-size: 10px; font-weight: 900;
+    padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+  }
+  .chat-main {
+    display: flex; flex-direction: column; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  }
+  .chat-main-header {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, rgba(168,85,247,0.12), rgba(255,215,0,0.03));
+    font-weight: 900; font-size: 15px; color: var(--gold);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .chat-search {
+    padding: 7px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--bg-1); color: var(--text); font-family: 'Cairo';
+    font-size: 12px; outline: none; width: 180px; transition: 0.2s;
+  }
+  .chat-search:focus { border-color: var(--gold); width: 230px; }
+  .chat-stats-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 6px 12px; cursor: pointer; font-family: 'Cairo'; font-size: 12px;
+    color: var(--text); transition: 0.2s;
+  }
+  .chat-stats-btn:hover { background: var(--gold); color: #000; border-color: var(--gold); }
+  .chat-main-messages {
+    flex: 1; padding: 18px; overflow-y: auto; display: flex;
+    flex-direction: column; gap: 12px;
+  }
+  .chat-empty {
+    text-align: center; color: var(--text-3); margin-top: 40px;
+    font-size: 14px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .chat-empty-icon { font-size: 50px; opacity: 0.4; }
+  .chat-msg {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px;
+    font-size: 14px; line-height: 1.6; word-wrap: break-word; animation: msgIn 0.3s ease;
+    position: relative;
+  }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-msg.mine {
+    align-self: flex-start;
+    background: linear-gradient(135deg, var(--gold), #d9a400);
+    color: #000; border-bottom-right-radius: 4px; font-weight: 700;
+  }
+  .chat-msg.theirs {
+    align-self: flex-end; background: rgba(255,255,255,0.05); color: var(--text);
+    border: 1px solid var(--border); border-bottom-left-radius: 4px;
+  }
+  body.light-mode .chat-msg.theirs { background: #fff; }
+  .chat-msg-sender { font-size: 11px; font-weight: 900; opacity: 0.9; margin-bottom: 4px; }
+  .chat-msg-time { font-size: 10px; opacity: 0.65; margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+  .msg-delete {
+    background: rgba(0,0,0,0.25); border: none; cursor: pointer;
+    padding: 2px 6px; border-radius: 4px; font-size: 10px; color: inherit;
+    opacity: 0; transition: 0.2s; font-family: 'Cairo';
+  }
+  .chat-msg:hover .msg-delete { opacity: 0.85; }
+  .msg-delete:hover { opacity: 1 !important; background: rgba(0,0,0,0.45); }
+  .chat-main-input {
+    padding: 12px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; background: rgba(0,0,0,0.25);
+  }
+  body.light-mode .chat-main-input { background: rgba(0,0,0,0.04); }
+  .chat-main-input input {
+    flex: 1; padding: 12px 16px; border-radius: 25px; border: 1px solid var(--border);
+    background: var(--bg-1); color: var(--text); font-family: 'Cairo'; font-size: 14px; outline: none;
+  }
+  .chat-main-input input:focus { border-color: var(--gold); }
+  .chat-main-input button {
+    padding: 0 22px; border-radius: 25px; border: none;
+    background: linear-gradient(135deg, var(--gold), var(--purple));
+    color: #000; font-family: 'Cairo'; font-weight: 900; font-size: 14px; cursor: pointer;
+  }
+  .chat-main-input button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .work-tag {
+    background: rgba(168,85,247,0.25); color: #e9d5ff; font-size: 9px; font-weight: 900;
+    padding: 1px 7px; border-radius: 8px; vertical-align: middle;
+  }
+  .work-tag.done { background: rgba(16,185,129,0.25); color: #a7f3d0; }
+  /* بادج على عناصر القائمة الجانبية */
+  .nav-item .nav-badge {
+    background: var(--danger); color: #fff; font-size: 10px; font-weight: 900;
+    padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+    margin-right: auto; flex-shrink: 0;
+  }
+
   @media (max-width: 900px) {
     .admin-layout { flex-direction: column-reverse; }
     .sidebar { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); flex-direction: row; overflow-x: auto; }
@@ -265,6 +377,7 @@
 <!-- Scripts -->
 <script type="module" src="owner-core.js"></script>
 <script type="module" src="owner-advanced.js"></script>
+<script type="module" src="features/owner-work.js"></script>
 <script type="module" src="notifications.js"></script>
 <script type="module" src="theme-engine.js"></script>
 <script src="pwa-manager.js" defer></script>
