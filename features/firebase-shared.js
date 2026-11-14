@@ -78,4 +78,4 @@ export function openModal(title, htmlContent, maxWidth = '600px') {
 export function closeModal() {
   const modal = document.getElementById('nf-shared-modal');
   if (modal) modal.classList.remove('active');
-}x  
+}
