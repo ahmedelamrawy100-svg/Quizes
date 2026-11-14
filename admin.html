@@ -1129,9 +1129,28 @@
       <button class="chat-room-item ${activeChatRoom === r.key ? 'active' : ''}" onclick="window.openAdminRoom('${r.key}', '${r.name}', '${r.emoji}')">
         <span class="chat-room-emoji">${r.emoji}</span>
         <span class="chat-room-name">${r.name}</span>
+        <span class="chat-room-badge" id="badge-${r.key}" style="display:none;">0</span>
       </button>
     `).join('');
   };
+
+  /* 🔔 إشعارات الرسايل الجديدة في كل الغرف */
+  const roomSeenCounts = {};
+  ADMIN_ROLES.forEach(r => {
+    onValue(ref(db, 'admin_chat/' + r.key), (snap) => {
+      const count = Object.keys(snap.val() || {}).length;
+      const prevCount = roomSeenCounts[r.key];
+      roomSeenCounts[r.key] = count;
+      const badge = document.getElementById('badge-' + r.key);
+      if (badge) {
+        if (count > 0 && activeChatRoom !== r.key) { badge.style.display = 'inline-block'; badge.textContent = count; }
+        else badge.style.display = 'none';
+      }
+      if (prevCount !== undefined && count > prevCount && activeChatRoom !== r.key) {
+        window.toast('💬 رسالة جديدة في شات ' + r.name, 'info');
+      }
+    });
+  });
 
   window.openAdminRoom = (key, name, emoji) => {
     activeChatRoom = key;
