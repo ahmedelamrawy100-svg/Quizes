@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🕵️ لعبة الجاسوس (Movie Imposter) - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --imposter-red: #ff0000; --imposter-dark: #8b0000; --imposter-bg: #0a0a0a; --imposter-card: #111; --imposter-gold: #ffd700; }
+  body { background: var(--imposter-bg); color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+  
+  .top-buttons-container { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .top-buttons-container .back-btn { position: static !important; padding: 8px 15px; background: #333; color: #fff; border: 2px solid #555; border-radius: 8px; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Cairo'; transition: 0.3s; }
+  .top-buttons-container .back-btn:hover { background: #ff0000; border-color: #ff0000; }
+  
+  .container { max-width: 800px; width: 100%; background: #111; border: 2px solid #8b0000; border-radius: 15px; padding: 25px; margin: 20px 0; box-sizing: border-box; }
+  h1 { color: #ff0000; text-align: center; margin-bottom: 20px; font-size: 32px; text-shadow: 0 0 15px rgba(255,0,0,0.4); }
+  h2 { color: #fff; text-align: center; margin-bottom: 20px; font-size: 24px; }
+  p { color: #aaa; text-align: center; margin-bottom: 25px; font-size: 16px; }
+  
+  .btn { padding: 14px; width: 100%; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; font-size: 17px; cursor: pointer; margin-bottom: 12px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { background: #ff0000; color: #fff; }
+  .btn-primary:hover { background: #cc0000; transform: scale(1.02); }
+  .btn-info { background: #0088cc; color: #fff; }
+  .btn-info:hover { background: #006ba3; transform: scale(1.02); }
+  .btn-danger { background: #8b0000; color: #fff; }
+  .btn-danger:hover { background: #a00000; transform: scale(1.02); }
+  .btn-secondary { background: #333; color: #fff; border: 1px solid #555; }
+  .btn-secondary:hover { background: #444; transform: scale(1.02); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  
+  .code-display { font-size: 48px; text-align: center; padding: 25px; background: #000; border: 3px dashed #ff0000; border-radius: 12px; letter-spacing: 8px; font-family: monospace; color: #fff; margin: 20px 0; }
+  .players-list { background: #000; border-radius: 10px; padding: 15px; margin-bottom: 20px; max-height: 200px; overflow-y: auto; border: 1px solid #333; }
+  .player-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #222; color: #eee; }
+  .player-item:last-child { border-bottom: none; }
+  .player-role { font-size: 12px; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+  .role-imposter { background: #ff0000; color: #fff; }
+  .role-player { background: #0088cc; color: #fff; }
+  
+  .input-group { margin-bottom: 15px; }
+  .input-group label { display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; }
+  .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #444; background: #000; color: #fff; font-family: 'Cairo'; font-size: 16px; text-align: center; outline: none; box-sizing: border-box; }
+  .input-group input:focus { border-color: #ff0000; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+  
+  .screen { display: none; }
+  .screen.active { display: block; }
+  
+  .movie-reveal { text-align: center; padding: 40px 20px; background: #000; border-radius: 15px; border: 2px solid #ff0000; margin-bottom: 20px; }
+  .movie-poster { width: 100%; max-width: 300px; height: 400px; object-fit: cover; border-radius: 12px; margin: 0 auto 15px; display: block; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
+  .movie-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 10px; }
+  
+  .imposter-card { background: #8b0000; color: #fff; padding: 30px; border-radius: 15px; text-align: center; border: 3px dashed #ff0000; box-shadow: 0 0 40px rgba(139,0,0,0.6); animation: pulseRed 2s infinite alternate; }
+  @keyframes pulseRed { from { box-shadow: 0 0 20px rgba(139,0,0,0.4); } to { box-shadow: 0 0 50px rgba(255,0,0,0.8); } }
+  .imposter-card h2 { color: #fff; font-size: 24px; margin-bottom: 15px; }
+  .imposter-card p { color: #ffe6e6; font-size: 18px; line-height: 1.6; }
+  
+  .qna-container { background: #000; border-radius: 12px; padding: 25px; border: 1px solid #333; margin-bottom: 20px; }
+  .round-badge { display: inline-block; background: #ff0000; color: #fff; padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 16px; margin-bottom: 15px; }
+  .question-text { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 20px; line-height: 1.5; text-align: center; }
+  
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .option { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.25s; font-size: 16px; text-align: center; color: #eee; }
+  .option:hover:not(.disabled) { background: #2d1a1a; border-color: #ff0000; }
+  .option.disabled { cursor: not-allowed; opacity: 0.7; }
+  
+  .chat-box { background: #000; border: 1px solid #333; border-radius: 12px; padding: 15px; height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+  .chat-msg { padding: 8px 12px; border-radius: 8px; font-size: 14px; max-width: 80%; }
+  .chat-msg.me { background: #ff0000; color: #fff; align-self: flex-end; margin-left: auto; }
+  .chat-msg.them { background: #1a1a1a; color: #eee; align-self: flex-start; }
+  .chat-input-group { display: flex; gap: 8px; }
+  .chat-input-group input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; font-family: 'Cairo'; }
+  .chat-input-group button { padding: 10px 20px; background: #ff0000; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  
+  .voting-container { background: #000; border-radius: 12px; padding: 25px; border: 2px solid #ff0000; margin-bottom: 20px; }
+  .vote-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+  .vote-option { background: #1a1a1a; border: 2px solid #333; padding: 20px; border-radius: 12px; cursor: pointer; transition: 0.3s; text-align: center; color: #eee; }
+  .vote-option:hover { border-color: #ff0000; background: #2d1a1a; transform: translateY(-3px); }
+  .vote-option.selected { border-color: #ffd700; background: #1a2a1a; color: #ffd700; }
+  
+  .result-screen { text-align: center; padding: 40px 20px; background: #000; border-radius: 15px; border: 2px solid #ffd700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+  .result-title { font-size: 36px; font-weight: 900; margin-bottom: 10px; color: #fff; }
+  .winner-badge { display: inline-block; background: #ffd700; color: #000; padding: 15px 30px; border-radius: 12px; font-weight: 900; font-size: 24px; margin: 10px 0; box-shadow: 0 0 30px rgba(255,215,0,0.5); }
+  .coins-reward { font-size: 28px; color: #ffd700; font-weight: 900; margin: 10px 0; }
+  .final-movie { margin-top: 15px; padding: 20px; background: #111; border-radius: 10px; border: 1px solid #333; width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .final-movie-poster { width: 150px; height: 200px; object-fit: cover; border-radius: 8px; margin-top: 15px; display: none; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+  
+  .status-text { color: #aaa; font-size: 15px; margin-bottom: 15px; font-weight: bold; text-align: center; }
+  .room-code-display { font-size: 36px; font-weight: bold; color: #fff; background: #000; padding: 15px; border-radius: 10px; border: 2px dashed #ff0000; margin-bottom: 15px; letter-spacing: 5px; text-align: center; box-shadow: inset 0 0 15px rgba(255,0,0,0.1); }
+  .coins-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.1); border: 2px solid #ffd700; color: #ffd700; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
+  
+  #stars-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+  @keyframes twinkle { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+</style>
+</head>
+<body>
+<div id="stars-bg"></div>
+
+<div class="top-buttons-container">
+  <a href="index.html" class="back-btn">⬅ رجوع</a>
+</div>
+
+<div class="coins-badge">🪙 <span id="headerCoins">0</span> عملة</div>
+
+<!-- شاشة الإعداد -->
+<div id="setupScreen" class="container screen active">
+  <h1>🕵️ لعبة الجاسوس (Movie Imposter)</h1>
+  <p>أنشئ غرفة جماعية (4 إلى 8 لاعبين) وابدأ جولة تشويق حول فيلم عشوائي!</p>
+  <div class="input-group">
+    <label>اسمك:</label>
+    <input type="text" id="playerName" value="" placeholder="أدخل اسمك">
+  </div>
+  <button class="btn btn-primary" onclick="window._createImposterRoom()">🎮 إنشاء غرفة</button>
+  <div style="text-align:center;color:#aaa;margin:10px 0;">— أو —</div>
+  <input type="text" id="joinCode" placeholder="XXXXXX" maxlength="6" style="width:100%;padding:12px;border-radius:8px;border:1px solid #555;background:#000;color:#fff;font-family:Cairo;text-align:center;font-size:18px;letter-spacing:3px;margin-bottom:10px;">
+  <button class="btn btn-info" onclick="window._joinImposterRoom()">🚪 انضمام بكود</button>
+</div>
+
+<!-- شاشة الانتظار -->
+<div id="waitingScreen" class="container screen">
+  <h2>⏳ انتظار اللاعبين...</h2>
+  <div class="status-text">كود الغرفة: <span id="roomCodeDisplay" style="color:#ffd700;"></span></div>
+  <div class="room-code-display" id="roomCodeBig">------</div>
+  <div class="status-text">اللاعبون:</div>
+  <div class="players-list" id="playersList"></div>
+  <button class="btn btn-secondary" onclick="window._refreshImposterRoom()">🔄 تحديث</button>
+  <button class="btn btn-info" id="addBotBtn" onclick="window._addBotToRoom()" style="display:none;">🤖 إضافة بوت (Add Bot)</button>
+  <button class="btn btn-danger" id="startGameBtn" onclick="window._startImposterGame()" style="display:none;">🎬 بدء اللعبة (المضيف فقط)</button>
+  <p style="color:#666;text-align:center;font-size:14px;">يحتاج اللعبة من 4 إلى 8 لاعبين للبدء</p>
+</div>
+
+<!-- شاشة كشف الفيلم -->
+<div id="revealScreen" class="container screen">
+  <h2>🎬 بدأت الجولة!</h2>
+  <div id="revealContent"></div>
+  <button class="btn btn-primary" onclick="window._proceedToQNA()" style="display:none;" id="revealReadyBtn">أنا جاهز للجولات</button>
+</div>
+
+<!-- شاشة الأسئلة السريعة -->
+<div id="qnaScreen" class="container screen">
+  <!-- ⏱️ عداد الوقت -->
+  <div id="roundTimer" style="font-size:26px; color:#ffd700; text-align:center; font-weight:900; margin-bottom:15px; text-shadow:0 0 10px #ffd700;">⏱️ 30</div>
+  
+  <div style="text-align:center;">
+    <div class="round-badge" id="roundBadge">الجولة 1 / 3</div>
+  </div>
+  
+  <div class="qna-container">
+    <div class="question-text" id="questionText">جاري تحميل السؤال...</div>
+    <div id="optionsArea"></div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input-group">
+      <input type="text" id="chatInput" placeholder="اكتب إجابتك أو دردش...">
+      <button onclick="window._sendImposterChat()">إرسال</button>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="nextRoundBtn" onclick="window._nextImposterRound(false)" style="display:none;">الجولة التالية ➡️</button>
+</div>
+
+<!-- شاشة التصويت -->
+<div id="votingScreen" class="container screen">
+  <h2>🗳️ من هو الجاسوس؟</h2>
+  <p style="text-align:center;color:#aaa;margin-bottom:20px;">صوّت على اللاعب الذي تشتبه بأنه الجاسوس</p>
+  <div class="voting-container">
+    <div class="vote-options" id="voteOptions"></div>
+  </div>
+  <button class="btn btn-danger" id="submitVoteBtn" onclick="window._submitImposterVote()" style="display:none;">إرسال التصويت</button>
+  <button class="btn btn-secondary" id="endGameBtn" onclick="window._endImposterGame()" style="display:none;">🏁 إنهاء اللعبة وعرض النتيجة (المضيف)</button>
+</div>
+
+<!-- شاشة النتيجة -->
+<div id="resultScreen" class="container screen" style="padding-top: 40px;">
+  <div class="result-screen">
+    <div class="result-title" id="resultTitle">انتهت اللعبة!</div>
+    <div class="winner-badge" id="winnerBadge">—</div>
+    <div class="coins-reward" id="coinsReward">جائزة: 0 🪙</div>
+    
+    <div class="final-movie">
+      <div style="color:#aaa;font-size:14px;margin-bottom:8px;">الفيلم كان:</div>
+      <div id="finalMovieTitle" style="font-size:24px;font-weight:bold;color:#fff;">—</div>
+      <img id="finalMoviePoster" class="final-movie-poster" src="" alt="Movie poster">
+    </div>
+    
+    <div style="color:#aaa;font-size:14px;margin-top:15px;">الجاسوس كان: <span id="finalImposterName" style="color:#ff0000;font-weight:bold;">—</span></div>
+    
+    <!-- 📊 سجل التصويت -->
+    <div id="votingLogContainer" style="width:100%;margin-top:15px;"></div>
+
+    <button class="btn btn-primary" onclick="window.location.href='index.html'" style="margin-top:15px;">العودة للرئيسية</button>
+  </div>
+</div>
+
+<!-- تحميل الأسئلة -->
+<script src="questions.js"></script>
+<script type="module" src="features/imposter-game.js"></script>
+<script type="module" src="theme-engine.js"></script>
+  <script type="module" src="notifications.js"></script>
+  <script src="pwa-manager.js" defer></script>
+</body>
+</html>
