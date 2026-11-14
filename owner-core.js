@@ -396,14 +396,16 @@ DB_NODES.forEach(n => {
 });
 FEATURES.database = { title: '🗄️ قاعدة البيانات', sub: '105 خاصية — 35 node × 3 عمليات', sections: [{ title: '🗄️ كل الـ Nodes (35)', items: dbItems }] };
 
-/* TAB 12: Chat */
+/* TAB 12: Chat — شات إدارة حي (الواجهة في features/owner-work.js) */
 FEATURES.chat = {
-  title: '💬 الشات', sub: '16 خاصية — الشات العام + شات الشركاء',
-  sections: [
-    { title: '💬 الشات العام (6)', items: [FQ(cid++,'👁️','عرض الرسائل','viewGlobalChat'),FQ(cid++,'🗑️','مسح كل الرسائل','clearGlobalChat','danger'),F(0,'📤','تصدير الرسائل',['export','global_chat','global_chat']),F(0,'🔢','عدد الرسائل',['count','global_chat','global_chat']),FQ(cid++,'📨','إرسال رسالة رسمية','sendOfficialMessage'),FQ(cid++,'🔔','إرسال تنبيه','sendAlertMessage')] },
-    { title: '🤝 شات الشركاء (3)', items: [FQ(cid++,'👁️','عرض رسائل الشركاء','viewPartnerChat'),FQ(cid++,'🗑️','مسح الشات','clearPartnerChat','danger'),FQ(cid++,'📤','تصدير الشات','exportPartnerChat')] },
-    { title: '💬 الشات (7)', items: [FQ(cid++,'📨','إرسال في شات الشركاء','sendToPartnerChat'),FQ(cid++,'🚫','إيقاف الشات العام','disableChat','danger'),FQ(cid++,'✅','تشغيل الشات العام','enableChat'),FQ(cid++,'👁️','عرض رسائل النظام','viewSystemMessages'),FQ(cid++,'📊','إحصائيات النشاط','chatActivityStats'),FQ(cid++,'🗑️','مسح activity_feed','clearActivityFeed','danger'),FQ(cid++,'🗑️','مسح كل الشاتات','clearAllChats','danger')] }
-  ]
+  title: '💬 شات الإدارة', sub: 'شات حي مع كل الإدارة — 7 غرف + بحث + إحصائيات + حذف',
+  sections: []
+};
+
+/* TAB 12.5: Work Inbox — صندوق رسايل الشغل الحي */
+FEATURES.work_inbox = {
+  title: '📬 رسايل الشغل', sub: 'صندوق حي: رسايل الشركاء والمديرين + الملاحظات والاجتماعات والتقارير + رد فوري',
+  sections: []
 };
 
 /* TAB 13: Broadcast */
@@ -568,13 +570,13 @@ FEATURES.i18n = {
 const TAB_GROUPS = [
   { name: 'Core', tabs: ['overview','players','content'] },
   { name: 'Customization', tabs: ['roles','badges','settings'] },
-  { name: 'Communication', tabs: ['messages','chat','broadcast','admin_messages'] },
+  { name: 'Communication', tabs: ['messages','chat','work_inbox','broadcast','admin_messages'] },
   { name: 'Engagement', tabs: ['events','requests'] },
   { name: 'Security', tabs: ['security','reports','adv_security'] },
   { name: 'System', tabs: ['database','backup','automation'] },
   { name: 'Advanced', tabs: ['analytics','marketing','economy','teams','themes','audit','cms','i18n'] }
 ];
-const TAB_ICONS = { overview:'📊', players:'👥', content:'🎮', roles:'🎖️', badges:'🏅', settings:'⚙️', messages:'📩', chat:'💬', broadcast:'📢', admin_messages:'💬', events:'🎉', requests:'📥', security:'🚫', reports:'📈', adv_security:'🛡️', database:'🗄️', backup:'💾', automation:'⚙️', analytics:'📊', marketing:'📣', economy:'💰', teams:'👥', themes:'🎨', audit:'📝', cms:'📚', i18n:'🌐' };
+const TAB_ICONS = { overview:'📊', players:'👥', content:'🎮', roles:'🎖️', badges:'🏅', settings:'⚙️', messages:'📩', chat:'💬', work_inbox:'📬', broadcast:'📢', admin_messages:'💬', events:'🎉', requests:'📥', security:'🚫', reports:'📈', adv_security:'🛡️', database:'🗄️', backup:'💾', automation:'⚙️', analytics:'📊', marketing:'📣', economy:'💰', teams:'👥', themes:'🎨', audit:'📝', cms:'📚', i18n:'🌐' };
 
 /* ═══════════════════════════════════════════════════════════════════
    RENDER
@@ -606,6 +608,18 @@ async function renderTab(tabKey) {
   }
   const tab = FEATURES[tabKey];
   if (!tab) { pane.innerHTML = '<div class="empty-state">التاب غير موجود</div>'; return; }
+
+  /* 🆕 واجهات حية: شات الإدارة + صندوق رسايل الشغل (من features/owner-work.js) */
+  if (tabKey === 'chat' && window._ownerWorkChatHTML) {
+    pane.innerHTML = window._ownerWorkChatHTML();
+    if (window._ownerChatInit) window._ownerChatInit();
+    return;
+  }
+  if (tabKey === 'work_inbox' && window._ownerWorkInboxHTML) {
+    pane.innerHTML = window._ownerWorkInboxHTML();
+    if (window._ownerInboxInit) window._ownerInboxInit();
+    return;
+  }
 
   pane.innerHTML = `
     <div class="page-title">${tab.title}</div>
