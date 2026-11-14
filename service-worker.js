@@ -2,7 +2,7 @@
    QUIZ HUB — SERVICE WORKER (PWA)
    ═══════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v4.0.2'; // تم تحديث الإصدار عشان يجبر المتصفح يمسح الكاش القديم
+const CACHE_VERSION = 'v4.1.5'; // شات الإدارة + صندوق رسايل الشغل في لوحة الأونر + إشعارات
 const STATIC_CACHE = `quizhub-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `quizhub-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `quizhub-images-${CACHE_VERSION}`;
