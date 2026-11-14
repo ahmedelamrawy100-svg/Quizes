@@ -54,15 +54,15 @@
 <body>
 
 <div class="top-bar">
-  <a href="profile.html" class="back-btn">⬅ رجوع للبروفايل</a>
+  <a href="profile.html" class="back-btn" data-ar="⬅ رجوع للبروفايل" data-en="⬅ Back to Profile">⬅ رجوع للبروفايل</a>
 </div>
 
 <div class="dna-container">
-  <div id="loadingScreen" class="loading">⏳ جاري تحليل الحمض النووي الخاص بك...</div>
+  <div id="loadingScreen" class="loading" data-ar="⏳ جاري تحليل الحمض النووي الخاص بك..." data-en="⏳ Analyzing your Player DNA...">⏳ جاري تحليل الحمض النووي الخاص بك...</div>
   
   <div id="dnaContent" style="display: none;">
     <div class="dna-header">
-      <h1>🧬 الحمض النووي للاعب</h1>
+      <h1 data-ar="🧬 الحمض النووي للاعب" data-en="🧬 Player DNA">🧬 الحمض النووي للاعب</h1>
       <p id="userNameText">جاري التحميل...</p>
     </div>
 
@@ -76,11 +76,11 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-box"><h3>السرعة</h3><p id="statSpeed">0%</p></div>
-      <div class="stat-box"><h3>الدقة</h3><p id="statAccuracy">0%</p></div>
-      <div class="stat-box"><h3>الاستمرارية</h3><p id="statStreak">0</p></div>
-      <div class="stat-box"><h3>المعرفة</h3><p id="statKnowledge">0</p></div>
-      <div class="stat-box"><h3>الثروة</h3><p id="statWealth">0</p></div>
+      <div class="stat-box"><h3 data-ar="السرعة" data-en="Speed">السرعة</h3><p id="statSpeed">0%</p></div>
+      <div class="stat-box"><h3 data-ar="الدقة" data-en="Accuracy">الدقة</h3><p id="statAccuracy">0%</p></div>
+      <div class="stat-box"><h3 data-ar="الاستمرارية" data-en="Streak">الاستمرارية</h3><p id="statStreak">0</p></div>
+      <div class="stat-box"><h3 data-ar="المعرفة" data-en="Knowledge">المعرفة</h3><p id="statKnowledge">0</p></div>
+      <div class="stat-box"><h3 data-ar="الثروة" data-en="Wealth">الثروة</h3><p id="statWealth">0</p></div>
     </div>
   </div>
 </div>
@@ -94,9 +94,48 @@
     const db = getDatabase(app);
     const currentUser = (localStorage.getItem('loggedInUser') || '').toLowerCase();
 
+    /* 🌐 الترجمة */
+    let lang = localStorage.getItem('lang') || 'ar';
+    const T = {
+        ar: {
+            noLogin: "❌ لازم تسجل دخول الأول!", analysisOf: "تحليل شخصية: ", days: " يوم", correct: " صح",
+            personaDefault: "المبتدئ", personaDefaultDesc: "لسه في بداية طريقك، العب أكتر عشان نكتشف شخصيتك!",
+            sniper: "🎯 القناص", sniperDesc: "دقتك عالية جداً، بتجاوب صح مهما كان السؤال صعب.",
+            treasure: "💰 جامع الكنوز", treasureDesc: "الكوينز بتحبك، ومحفظتك دايمًا مليانة.",
+            consistent: "🔥 المستمر", consistentDesc: "إدمانك للعب وتحديك لنفسك كل يوم هو سر قوتك.",
+            fast: "⚡ السريع", fastDesc: "بتفكر بسرعة البرق وبتنهي الكويزات في لمح البصر.",
+            thinker: "🧠 المفكر الاستراتيجي", thinkerDesc: "معلوماتك واسعة جداً، ومفيش سؤال بيفوتك.",
+            chartLabels: ['السرعة ⚡', 'الدقة 🎯', 'الاستمرارية 🔥', 'المعرفة 🧠', 'الثروة 💰'],
+            chartLegend: 'مستوى اللاعب', analysisError: "❌ حصل خطأ في التحليل."
+        },
+        en: {
+            noLogin: "❌ Please log in first!", analysisOf: "Personality analysis: ", days: " days", correct: " correct",
+            personaDefault: "The Rookie", personaDefaultDesc: "You're just starting — play more so we can discover your personality!",
+            sniper: "🎯 The Sniper", sniperDesc: "Your accuracy is insane — you answer right no matter how hard the question is.",
+            treasure: "💰 Treasure Hunter", treasureDesc: "Coins love you, and your wallet is always full.",
+            consistent: "🔥 The Consistent", consistentDesc: "Your daily grind and self-challenge are the secret of your power.",
+            fast: "⚡ The Fast", fastDesc: "You think at lightning speed and finish quizzes in a blink.",
+            thinker: "🧠 The Strategic Thinker", thinkerDesc: "Your knowledge is vast — no question slips past you.",
+            chartLabels: ['Speed ⚡', 'Accuracy 🎯', 'Streak 🔥', 'Knowledge 🧠', 'Wealth 💰'],
+            chartLegend: 'Player Level', analysisError: "❌ Analysis failed."
+        }
+    };
+    const t = () => T[lang] || T.ar;
+
+    /* تطبيق الترجمة على العناصر الثابتة + الاتجاه + العنوان */
+    function applyLang() {
+        document.body.dir = lang === 'en' ? 'ltr' : 'rtl';
+        document.querySelectorAll('[data-ar]').forEach(el => {
+            const v = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = v; else el.innerText = v;
+        });
+        document.title = lang === 'en' ? '🧬 Player DNA - Plot Twist' : '🧬 الحمض النووي للاعب - Plot Twist';
+    }
+    applyLang();
+
     async function analyzeDNA() {
         if (!currentUser) {
-            document.getElementById('loadingScreen').innerText = "❌ لازم تسجل دخول الأول!";
+            document.getElementById('loadingScreen').innerText = t().noLogin;
             return;
         }
 
@@ -132,22 +171,22 @@
             const wealth = data.coins || 0;
 
             // إظهار البيانات مع تنسيق الأرقام
-            document.getElementById('userNameText').innerText = `تحليل شخصية: ${currentUser}`;
+            document.getElementById('userNameText').innerText = `${t().analysisOf}${currentUser}`;
             document.getElementById('statSpeed').innerText = speed + '%';
             document.getElementById('statAccuracy').innerText = accuracy + '%';
-            document.getElementById('statStreak').innerText = streak + ' يوم';
-            document.getElementById('statKnowledge').innerText = knowledge.toLocaleString() + ' صح';
+            document.getElementById('statStreak').innerText = streak + t().days;
+            document.getElementById('statKnowledge').innerText = knowledge.toLocaleString() + t().correct;
             document.getElementById('statWealth').innerText = wealth.toLocaleString() + ' 🪙';
 
             // تحديد اللقب
-            let persona = "المبتدئ", desc = "لسه في بداية طريقك، العب أكتر عشان نكتشف شخصيتك!";
+            let persona = t().personaDefault, desc = t().personaDefaultDesc;
             const maxStat = Math.max(speed, accuracy, streak, knowledge, wealth);
             
-            if (maxStat === accuracy && accuracy > 50) { persona = "🎯 القناص"; desc = "دقتك عالية جداً، بتجاوب صح مهما كان السؤال صعب."; }
-            else if (maxStat === wealth && wealth > 1000) { persona = "💰 جامع الكنوز"; desc = "الكوينز بتحبك، ومحفظتك دايمًا مليانة."; }
-            else if (maxStat === streak && streak > 3) { persona = "🔥 المستمر"; desc = "إدمانك للعب وتحديك لنفسك كل يوم هو سر قوتك."; }
-            else if (maxStat === speed && speed > 70) { persona = "⚡ السريع"; desc = "بتفكر بسرعة البرق وبتنهي الكويزات في لمح البصر."; }
-            else if (maxStat === knowledge && knowledge > 100) { persona = "🧠 المفكر الاستراتيجي"; desc = "معلوماتك واسعة جداً، ومفيش سؤال بيفوتك."; }
+            if (maxStat === accuracy && accuracy > 50) { persona = t().sniper; desc = t().sniperDesc; }
+            else if (maxStat === wealth && wealth > 1000) { persona = t().treasure; desc = t().treasureDesc; }
+            else if (maxStat === streak && streak > 3) { persona = t().consistent; desc = t().consistentDesc; }
+            else if (maxStat === speed && speed > 70) { persona = t().fast; desc = t().fastDesc; }
+            else if (maxStat === knowledge && knowledge > 100) { persona = t().thinker; desc = t().thinkerDesc; }
 
             document.getElementById('personaTitle').innerText = persona;
             document.getElementById('personaDesc').innerText = desc;
@@ -166,7 +205,7 @@
 
         } catch (e) {
             console.error(e);
-            document.getElementById('loadingScreen').innerText = "❌ حصل خطأ في التحليل.";
+            document.getElementById('loadingScreen').innerText = t().analysisError;
         }
     }
 
@@ -175,9 +214,9 @@
         new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['السرعة ⚡', 'الدقة 🎯', 'الاستمرارية 🔥', 'المعرفة 🧠', 'الثروة 💰'],
+                labels: t().chartLabels,
                 datasets: [{
-                    label: 'مستوى اللاعب',
+                    label: t().chartLegend,
                     data: [speed, accuracy, streak, knowledge, wealth],
                     backgroundColor: 'rgba(0, 188, 212, 0.3)',
                     borderColor: 'rgba(0, 188, 212, 1)',
@@ -207,5 +246,7 @@
     setTimeout(analyzeDNA, 500);
 </script>
 <script src="pwa-manager.js" defer></script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
 </body>
 </html>
