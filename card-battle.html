@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ معركة البطاقات - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#ff0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plot Twist">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Plot Twist">
+<meta name="msapplication-TileColor" content="#ff0000">
+<meta name="msapplication-tap-highlight" content="no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="pic/Logo.png">
+<link rel="stylesheet" href="features/new-features.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bg:#080808; --text:#fff; --card:#111; --border:#333; --gold:#ffd700; --green:#4caf50; --red:#ff4444; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:var(--bg); color:var(--text); font-family:'Cairo',sans-serif; padding:20px; min-height:100vh; }
+  .container { max-width:1000px; margin:0 auto; }
+  h1 { text-align:center; color:var(--gold); font-size:30px; margin-bottom:15px; text-shadow:0 0 20px rgba(255,215,0,0.3); }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
+  .back-btn { background:#222; color:#fff; border:2px solid #555; padding:8px 15px; border-radius:8px; text-decoration:none; font-weight:bold; font-family:Cairo; }
+  .coins-badge { color:var(--gold); font-weight:bold; font-size:18px; }
+  .lang-btn { background:#333; color:#fff; border:1px solid #555; padding:6px 12px; border-radius:8px; cursor:pointer; font-family:'Cairo'; }
+
+  .screen { display:none; }
+  .screen.active { display:block; animation:fadeIn 0.4s; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; } }
+
+  /* ═══ شاشة اختيار الفريق ═══ */
+  .desc { text-align:center; color:#aaa; margin-bottom:20px; font-size:15px; }
+  #selectGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:15px; }
+  .battle-card { background:var(--card); border:2px solid var(--border); border-radius:14px; overflow:hidden; cursor:pointer; transition:0.2s; position:relative; }
+  .battle-card:hover { transform:translateY(-4px); border-color:#666; }
+  .battle-card.selected { border-color:var(--gold); box-shadow:0 0 18px rgba(255,215,0,0.4); }
+  .poster-wrap { position:relative; height:210px; }
+  .poster { width:100%; height:100%; object-fit:cover; display:block; }
+  .rarity-badge { position:absolute; top:8px; right:8px; padding:3px 10px; border-radius:16px; font-size:11px; font-weight:900; color:#000; font-family:Cairo; box-shadow:0 2px 6px rgba(0,0,0,0.6); }
+  .qty-badge { position:absolute; top:8px; left:8px; padding:3px 9px; border-radius:16px; font-size:11px; font-weight:900; background:#000c; color:#fff; border:1px solid #fff5; }
+  .bc-info { padding:10px; text-align:center; }
+  .bc-name { font-weight:900; font-size:14px; color:var(--gold); margin-bottom:4px; }
+  .bc-power { font-size:13px; color:#ccc; }
+  .check-mark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:60px; color:var(--gold); text-shadow:0 0 20px #000; opacity:0; pointer-events:none; transition:0.2s; }
+  .battle-card.selected .check-mark { opacity:1; }
+
+  /* ✨ التوهج الذهبي للبطاقات الأسطورية ✨ */
+  .leg-glow { animation:legendGlow 1.6s ease-in-out infinite; border-radius:14px; }
+  @keyframes legendGlow {
+    0%,100% { box-shadow:0 0 10px 3px rgba(255,215,0,0.55); }
+    50%     { box-shadow:0 0 28px 9px rgba(255,215,0,0.95); }
+  }
+
+  #teamBar { display:flex; align-items:center; justify-content:center; gap:15px; margin-top:25px; flex-wrap:wrap; }
+  .team-slots { display:flex; gap:10px; }
+  .team-slot { width:80px; height:110px; border:2px dashed #555; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; color:#555; overflow:hidden; background:#0d0d0d; }
+  .team-slot.filled { border:2px solid var(--gold); flex-direction:column; font-size:10px; color:#fff; font-weight:700; text-align:center; }
+  .team-slot.filled img { width:100%; height:75px; object-fit:cover; }
+  .btn-start { padding:14px 35px; background:linear-gradient(135deg,#ffd700,#ff8f00); color:#000; border:none; border-radius:10px; font-family:Cairo; font-weight:900; cursor:pointer; font-size:17px; transition:0.2s; }
+  .btn-start:hover:not(:disabled) { transform:scale(1.05); box-shadow:0 0 20px rgba(255,215,0,0.5); }
+  .btn-start:disabled { opacity:0.4; cursor:not-allowed; }
+  .hint { width:100%; text-align:center; color:#ff9800; font-size:13px; }
+
+  /* ═══ ساحة المعركة ═══ */
+  .battle-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
+  .round-indicator { background:var(--card); border:2px solid var(--gold); border-radius:10px; padding:8px 20px; font-weight:900; color:var(--gold); }
+  .scoreboard { display:flex; gap:20px; align-items:center; font-weight:900; }
+  .scoreboard .name { font-size:15px; }
+  .scoreboard .stars { font-size:20px; letter-spacing:3px; min-width:70px; text-align:center; }
+
+  #arena { display:flex; align-items:center; justify-content:center; gap:15px; min-height:340px; position:relative; padding:20px 0; }
+  .arena-side { flex:1; display:flex; justify-content:center; }
+  .slot-card { width:200px; height:290px; border-radius:14px; position:relative; overflow:hidden; background:#0d0d0d; border:2px solid #444; transition:0.4s; }
+  .slot-card img { width:100%; height:100%; object-fit:cover; }
+  .slot-card.mystery { display:flex; align-items:center; justify-content:center; font-size:70px; background:repeating-linear-gradient(45deg,#151515,#151515 12px,#1c1c1c 12px,#1c1c1c 24px); border-style:dashed; color:#555; }
+  .slot-card.empty-slot { display:flex; align-items:center; justify-content:center; font-size:14px; color:#555; border-style:dashed; text-align:center; padding:10px; }
+  .slot-card.fly-in { animation:flyIn 0.5s cubic-bezier(0.2, 1.6, 0.4, 1); }
+  @keyframes flyIn { from { opacity:0; transform:translateY(-60px) scale(0.4) rotate(-8deg); } to { opacity:1; } }
+  .power-pop { position:absolute; bottom:8px; left:0; right:0; text-align:center; font-size:24px; font-weight:900; text-shadow:0 2px 8px #000, 0 0 15px currentColor; }
+  .slot-card.winner { border-color:var(--green); animation:winPulse 0.6s ease-in-out infinite; }
+  @keyframes winPulse { 50% { box-shadow:0 0 25px 8px rgba(76,175,80,0.7); } }
+  .slot-card.loser { filter:grayscale(0.9) brightness(0.5); transform:rotate(9deg) translateY(14px); border-color:var(--red); }
+
+  /* 💥 تأثير الارطدام */
+  #impactFx { width:90px; height:90px; position:relative; flex-shrink:0; }
+  #impactFx::before { content:''; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle, #fff 0%, #ffd700 35%, transparent 70%); opacity:0; }
+  #impactFx.boom::before { animation:boomRing 0.55s ease-out; }
+  @keyframes boomRing {
+    0%   { opacity:1; transform:scale(0.2); }
+    60%  { opacity:1; transform:scale(1.8); }
+    100% { opacity:0; transform:scale(2.6); }
+  }
+  #arena.clashing { animation:arenaShake 0.55s ease-in-out; }
+  #arena.clashing .slot-card { transform:scale(1.12); }
+  @keyframes arenaShake {
+    0%,100% { transform:translate(0,0); }
+    20% { transform:translate(-8px,4px) rotate(-1deg); }
+    40% { transform:translate(8px,-4px) rotate(1deg); }
+    60% { transform:translate(-6px,-3px); }
+    80% { transform:translate(6px,3px); }
+  }
+
+  .round-banner { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(0.5); padding:18px 45px; border-radius:14px; font-size:22px; font-weight:900; font-family:Cairo; opacity:0; pointer-events:none; z-index:50; transition:0.35s cubic-bezier(0.2,1.6,0.4,1); box-shadow:0 10px 40px rgba(0,0,0,0.8); }
+  .round-banner.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  .round-banner.win { background:linear-gradient(135deg,#1a5c2a,#2e7d32); color:#fff; border:2px solid var(--green); }
+  .round-banner.lose { background:linear-gradient(135deg,#5c1a1a,#b71c1c); color:#fff; border:2px solid var(--red); }
+
+  /* ═══ يد اللاعب ═══ */
+  .hand-label { text-align:center; color:#aaa; font-size:14px; margin:15px 0 10px; }
+  #playerHand { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
+  .hand-card { width:130px; background:var(--card); border:2px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; transition:0.2s; text-align:center; }
+  .hand-card:hover { transform:translateY(-8px) scale(1.04); border-color:var(--gold); box-shadow:0 0 18px rgba(255,215,0,0.35); }
+  .hand-card img { width:100%; height:150px; object-fit:cover; display:block; }
+  .hc-name { font-size:12px; font-weight:900; color:var(--gold); padding:5px 4px 2px; }
+  .hc-power { font-size:15px; font-weight:900; padding-bottom:6px; }
+
+  /* ═══ شاشة النتيجة ═══ */
+  #resultBox { text-align:center; padding:40px 20px; }
+  .result-icon { font-size:80px; margin-bottom:15px; }
+  .result-title { font-size:32px; font-weight:900; margin-bottom:10px; }
+  .result-title.win { color:var(--green); text-shadow:0 0 20px rgba(76,175,80,0.5); }
+  .result-title.lose { color:var(--red); }
+  .result-desc { color:#aaa; margin-bottom:20px; font-size:15px; }
+  .reward-line { font-size:22px; font-weight:900; color:var(--gold); margin-bottom:25px; }
+  .reward-line.dim { color:#888; font-size:16px; }
+
+  .empty-box { text-align:center; padding:40px; color:#aaa; }
+  #promptText { text-align:center; color:#4dd0e1; font-weight:700; margin-bottom:5px; min-height:24px; }
+  .hand-label { margin-top:25px; }
+
+  /* ═══ زر التطوير وشارات المستوى ═══ */
+  .lv-tag { background:rgba(255,255,255,0.08); border:1px solid #555; border-radius:10px; padding:1px 8px; font-size:10px; color:#aaa; margin-inline-start:5px; direction:ltr; display:inline-block; }
+  .up-btn { margin-top:9px; padding:7px 18px; background:linear-gradient(135deg,#2196f3,#9c27b0); color:#fff; border:none; border-radius:20px; font-family:'Cairo',sans-serif; font-weight:900; font-size:12px; cursor:pointer; transition:0.2s; box-shadow:0 3px 12px rgba(156,39,176,0.45); }
+  .up-btn:hover { transform:translateY(-2px) scale(1.06); box-shadow:0 5px 18px rgba(156,39,176,0.7); filter:brightness(1.12); }
+  .up-btn:active { transform:scale(0.95); }
+  .lv-max { margin-top:9px; display:inline-block; padding:5px 18px; border-radius:20px; background:linear-gradient(135deg,#ffd700,#ff8f00); color:#000; font-family:'Cairo',sans-serif; font-weight:900; font-size:11px; box-shadow:0 0 12px rgba(255,215,0,0.5); }
+
+  /* ═══ أزرار الأوضاع (بوت / أونلاين) ═══ */
+  .mode-btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+  .btn-pvp { padding:14px 28px; background:linear-gradient(135deg,#2196f3,#0d47a1); color:#fff; border:none; border-radius:10px; font-family:'Cairo',sans-serif; font-weight:900; cursor:pointer; font-size:16px; transition:0.2s; }
+  .btn-pvp:hover:not(:disabled) { transform:scale(1.05); box-shadow:0 0 20px rgba(33,150,243,0.55); }
+  .btn-pvp:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* ═══ شاشة انتظار الخصم (الأونلاين) ═══ */
+  .wait-box { text-align:center; padding:80px 20px; }
+  .spinner { width:60px; height:60px; margin:0 auto 25px; border:5px solid #333; border-top-color:var(--gold); border-radius:50%; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #waitText { font-size:18px; font-weight:900; color:var(--gold); margin-bottom:8px; }
+  #waitHint { font-size:12px; color:#777; margin-bottom:25px; }
+  .btn-cancel { padding:10px 25px; background:linear-gradient(135deg,#dc3545,#7f1d1d); color:#fff; border:none; border-radius:10px; font-family:'Cairo',sans-serif; font-weight:bold; cursor:pointer; transition:0.2s; }
+  .btn-cancel:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(220,53,69,0.5); }
+
+  /* ═══ زر الاستسلام + سطور سرقة البطاقات ═══ */
+  .btn-forfeit { padding:8px 18px; background:linear-gradient(135deg,#dc3545,#7f1d1d); color:#fff; border:none; border-radius:10px; font-family:'Cairo',sans-serif; font-weight:900; cursor:pointer; font-size:13px; transition:0.2s; }
+  .btn-forfeit:hover { transform:scale(1.05); box-shadow:0 0 15px rgba(220,53,69,0.6); }
+  .steal-line { color:var(--green); font-weight:900; margin-bottom:15px; font-size:15px; }
+  .steal-line.lose-line { color:var(--red); }
+
+  @media (max-width:600px) {
+    .slot-card { width:140px; height:210px; }
+    #impactFx { width:50px; height:50px; }
+    .hand-card { width:105px; }
+    .hand-card img { height:120px; }
+    h1 { font-size:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="top-bar">
+    <a href="index.html" class="back-btn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <a href="auctions.html" class="back-btn" style="background:linear-gradient(135deg,#ffd700,#ff8f00); color:#000; border:none; box-shadow:0 0 12px rgba(255,215,0,0.4);" data-ar="🎰 روح المزاد" data-en="🎰 Go to Auction">🎰 روح المزاد</a>
+      <button onclick="window.toggleBattleLang()" id="langBtn" class="lang-btn">EN</button>
+      <div class="coins-badge">🪙 <span id="myCoins">0</span> <span data-ar="عملة" data-en="Coins">عملة</span></div>
+    </div>
+  </div>
+
+  <h1 data-ar="⚔️ ساحة معارك البطاقات" data-en="⚔️ Card Battle Arena">⚔️ ساحة معارك البطاقات</h1>
+
+  <!-- شاشة عدم تسجيل الدخول -->
+  <div id="loginGate" style="display:none; text-align:center; padding:60px 20px;">
+    <div style="font-size:60px;">🔒</div>
+    <p style="color:#aaa; margin:15px 0;" data-ar="سجل دخول الأول عشان تقاتل 🪙" data-en="Please log in to battle 🪙">سجل دخول الأول عشان تقاتل 🪙</p>
+    <a href="index.html" class="btn-start" style="display:inline-block; text-decoration:none;" data-ar="🏠 الرئيسية" data-en="🏠 Home">🏠 الرئيسية</a>
+  </div>
+
+  <!-- تطبيق المعارك -->
+  <div id="battleApp">
+
+    <!-- الشاشة 1: اختيار الفريق -->
+    <div class="screen active" id="screen-select">
+      <p class="desc" data-ar="🎮 كوّن فريقك: اختار 3 بطاقات من مخزونك — الفائز بجولتين من 3 ياخد 300 عملة + 100 XP!" data-en="🎮 Build Your Team: Pick 3 cards — win 2 of 3 rounds for 300 coins + 100 XP!">🎮 كوّن فريقك: اختار 3 بطاقات من مخزونك — الفائز بجولتين من 3 ياخد 300 عملة + 100 XP!</p>
+      <div id="selectGrid"></div>
+      <div id="teamBar" style="display:none;"></div>
+    </div>
+
+    <!-- الشاشة 2: الساحة -->
+    <div class="screen" id="screen-battle">
+      <div class="battle-header">
+        <div class="scoreboard">
+          <span class="name" id="pName">أنت</span>
+          <span class="stars" id="pScore">—</span>
+        </div>
+        <div class="round-indicator" id="roundNum">جولة 1/3</div>
+        <div class="scoreboard">
+          <span class="stars" id="bScore">—</span>
+          <span class="name" id="oppName">🤖 بوت الساحة الخارق</span>
+        </div>
+        <button class="btn-forfeit" id="forfeitBtn" style="display:none;" onclick="window._forfeitPvp()">🏳️ استسلام</button>
+      </div>
+
+      <div id="arena">
+        <div class="arena-side"><div id="botSlot"></div></div>
+        <div id="impactFx"></div>
+        <div class="arena-side"><div id="playerSlot"></div></div>
+      </div>
+
+      <p id="promptText">اختار بطاقة تلعب بيها...</p>
+      <div class="hand-label" data-ar="🃏 يدك — اختار بطاقة للجولة" data-en="🃏 Your Hand — pick a card for this round">🃏 يدك — اختار بطاقة للجولة</div>
+      <div id="playerHand"></div>
+    </div>
+
+    <!-- الشاشة 2.5: انتظار الخصم (الأونلاين) -->
+    <div class="screen" id="screen-wait">
+      <div class="wait-box">
+        <div class="spinner"></div>
+        <p id="waitText">⏳ في انتظار لاعب حقيقي يقبل التحدي...</p>
+        <p id="waitHint">التحدي بيتلغى تلقائياً بعد 10 دقايق</p>
+        <button class="btn-cancel" onclick="window._cancelChallenge()">🗑️ إلغاء التحدي</button>
+      </div>
+    </div>
+
+    <!-- الشاشة 3: النتيجة -->
+    <div class="screen" id="screen-result">
+      <div id="resultBox"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="round-banner" id="roundBanner"></div>
+
+<script type="module" src="features/card-battle.js"></script>
+  <script type="module" src="notifications.js"></script>
+  <script type="module" src="theme-engine.js"></script>
+  <script src="pwa-manager.js" defer></script>
+</body>
+</html>
