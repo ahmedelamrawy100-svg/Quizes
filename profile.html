@@ -69,8 +69,31 @@
   
   .avatar { width: 130px; height: 130px; background: linear-gradient(135deg, var(--accent), #ff8a80); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 60px; color: #fff; font-weight: bold; border: 4px solid rgba(255,255,255,0.2); background-size: cover; background-position: center; transition: 0.3s; box-shadow: 0 0 30px rgba(255,0,0,0.4); z-index: 1; margin-bottom: 15px; position: relative; }
   .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .avatar.fire-frame { border-color: #ff5722; box-shadow: 0 0 40px #ff5722, 0 0 80px #ff9800; animation: firePulse 1.5s infinite alternate; }
-  @keyframes firePulse { from { box-shadow: 0 0 20px #ff5722, 0 0 40px #ff9800; } to { box-shadow: 0 0 40px #ff5722, 0 0 80px #ff9800; } }
+  .avatar.fire-frame { border-color: transparent; box-shadow: 0 0 35px rgba(255,87,34,0.8), 0 0 70px rgba(255,152,0,0.5); animation: firePulse 1.4s infinite alternate; }
+  /* حلقة النار — قوس متدرج بيلف حوالين الصورة */
+  .avatar.fire-frame::before {
+      content: '';
+      position: absolute;
+      inset: -7px;
+      border-radius: 50%;
+      z-index: -1;
+      background: conic-gradient(#ff1744, #ff5722, #ffc107, #ff9800, #ff1744);
+      filter: blur(5px);
+      animation: fireSpin 2.8s linear infinite;
+  }
+  .avatar.fire-frame::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      z-index: -1;
+      background: conic-gradient(from 180deg, #ff9800, #ff1744, #ffc107, #ff9800);
+      filter: blur(2px);
+      opacity: 0.85;
+      animation: fireSpin 2s linear infinite reverse;
+  }
+  @keyframes fireSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes firePulse { from { box-shadow: 0 0 20px rgba(255,87,34,0.6), 0 0 45px rgba(255,152,0,0.35); } to { box-shadow: 0 0 40px rgba(255,87,34,0.95), 0 0 85px rgba(255,152,0,0.65); } }
 
   .username { font-size: 34px; color: var(--text-color); font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 1; margin-bottom: 10px; }
   .verified-badge { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #1DA1F2; color: #fff; border-radius: 50%; font-size: 13px; font-weight: bold; box-shadow: 0 0 10px rgba(29,161,242,0.5); }
@@ -183,8 +206,8 @@
 
 <div class="top-controls">
   <a href="index.html" class="ctrl-btn" id="backBtn">⬅ رجوع</a>
-  <a href="player-dna.html" class="ctrl-btn" style="background: linear-gradient(135deg, #00bcd4, #9c27b0); color: #fff; border: none; font-weight: 900; box-shadow: 0 0 10px rgba(0,188,212,0.5);">🧬 الحمض النووي</a>
-  <a href="achievements.html" class="ctrl-btn" style="background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; border: none; font-weight: 900;">🎖️ الإنجازات والمخزون</a>
+  <a href="player-dna.html" class="ctrl-btn" id="dnaBtn" style="background: linear-gradient(135deg, #00bcd4, #9c27b0); color: #fff; border: none; font-weight: 900; box-shadow: 0 0 10px rgba(0,188,212,0.5);">🧬 الحمض النووي</a>
+  <a href="achievements.html" class="ctrl-btn" id="achCtrlBtn" style="background: linear-gradient(135deg, #a855f7, #ec4899); color: #fff; border: none; font-weight: 900;">🎖️ الإنجازات والمخزون</a>
   <button class="ctrl-btn" onclick="toggleLanguage()" id="langBtn">EN</button>
 </div>
 
@@ -331,36 +354,118 @@
     'phoenix': '🔥', 'mystery_rare': '💎'
   };
 
+  /* 🌐 خرايط الأسماء — عربي/إنجليزي حسب اللغة */
   const titlesMap = {
-    'title_beginner': '🌱 المبتدئ', 'title_pro': '💼 المحترف', 'title_expert': '🎓 الخبير', 
-    'title_genius': '🧠 العبقري', 'title_legend': '👑 الأسطورة', 'title_coin_king': '💰 ملك الكوينز',
-    'title_millionaire': '💎 المليونير', 'title_theme_king': '🎨 ملك الثيمات', 'title_collector': '🖼️ الجامع',
-    'title_legendary_lover': '🌟 محب الأسطورية', 'title_night_star': '🌙 نجم الليل', 'title_everyone_friend': '🤝 صديق الجميع',
-    'title_team_leader': '⚔️ قائد التيم', 'title_comp_champ': '🏆 بطل المسابقات', 'title_always_first': '🥇 الأول دايماً',
-    'title_fast': '⚡ السريع', 'title_precise': '🎯 الدقيق', 'title_persistent': '💪 المثابر', 'title_constant': '📈 المستمر',
-    'title_loyal': '❤️ المخلص', 'title_box_king': '📦 ملك الصناديق', 'title_smart': '🧠 الذكي', 'title_creator': '✨ المبدع',
-    'title_designer': '🎨 المصمم', 'title_adventurer': '🗺️ المغامر', 'title_conqueror': '🏰 الفاتح', 'title_legendary': '👑 الأسطوري',
-    'title_trophy_hunter': '🏅 صائد الجوائز', 'title_lb_star': '⭐ نجم الليدر', 'title_living_legend': '🔥 الأسطورة الحية'
+    ar: {
+      'title_beginner': '🌱 المبتدئ', 'title_pro': '💼 المحترف', 'title_expert': '🎓 الخبير', 
+      'title_genius': '🧠 العبقري', 'title_legend': '👑 الأسطورة', 'title_coin_king': '💰 ملك الكوينز',
+      'title_millionaire': '💎 المليونير', 'title_theme_king': '🎨 ملك الثيمات', 'title_collector': '🖼️ الجامع',
+      'title_legendary_lover': '🌟 محب الأسطورية', 'title_night_star': '🌙 نجم الليل', 'title_everyone_friend': '🤝 صديق الجميع',
+      'title_team_leader': '⚔️ قائد التيم', 'title_comp_champ': '🏆 بطل المسابقات', 'title_always_first': '🥇 الأول دايماً',
+      'title_fast': '⚡ السريع', 'title_precise': '🎯 الدقيق', 'title_persistent': '💪 المثابر', 'title_constant': '📈 المستمر',
+      'title_loyal': '❤️ المخلص', 'title_box_king': '📦 ملك الصناديق', 'title_smart': '🧠 الذكي', 'title_creator': '✨ المبدع',
+      'title_designer': '🎨 المصمم', 'title_adventurer': '🗺️ المغامر', 'title_conqueror': '🏰 الفاتح', 'title_legendary': '👑 الأسطوري',
+      'title_trophy_hunter': '🏅 صائد الجوائز', 'title_lb_star': '⭐ نجم الليدر', 'title_living_legend': '🔥 الأسطورة الحية'
+    },
+    en: {
+      'title_beginner': '🌱 Beginner', 'title_pro': '💼 Pro', 'title_expert': '🎓 Expert',
+      'title_genius': '🧠 Genius', 'title_legend': '👑 Legend', 'title_coin_king': '💰 Coin King',
+      'title_millionaire': '💎 Millionaire', 'title_theme_king': '🎨 Theme King', 'title_collector': '🖼️ Collector',
+      'title_legendary_lover': '🌟 Legendary Lover', 'title_night_star': '🌙 Night Star', 'title_everyone_friend': "🤝 Everyone's Friend",
+      'title_team_leader': '⚔️ Team Leader', 'title_comp_champ': '🏆 Contest Champion', 'title_always_first': '🥇 Always First',
+      'title_fast': '⚡ Speedy', 'title_precise': '🎯 Precise', 'title_persistent': '💪 Persistent', 'title_constant': '📈 Consistent',
+      'title_loyal': '❤️ Loyal', 'title_box_king': '📦 Box King', 'title_smart': '🧠 Smart', 'title_creator': '✨ Creator',
+      'title_designer': '🎨 Designer', 'title_adventurer': '🗺️ Adventurer', 'title_conqueror': '🏰 Conqueror', 'title_legendary': '👑 Legendary',
+      'title_trophy_hunter': '🏅 Trophy Hunter', 'title_lb_star': '⭐ Leaderboard Star', 'title_living_legend': '🔥 Living Legend'
+    }
   };
+  const titleName = (id) => (titlesMap[currentLang] || titlesMap.ar)[id] || id;
 
   const achievementsMap = {
-    'first_quiz': '🎯 أول اختبار', 'quiz_10': '📝 10 اختبارات', 'quiz_50': '📋 50 اختبار', 'quiz_100': '📚 100 اختبار',
-    'quiz_500': '📖 500 اختبار', 'quiz_1000': '🎓 1000 اختبار', 'correct_10': '✅ 10 صح', 'correct_50': '👍 50 صح',
-    'correct_100': '💯 100 صح', 'correct_500': '🔥 500 صح', 'correct_1000': '⭐ 1000 صح', 'perfect_quiz': '🎯 اختبار كامل',
-    'streak_3': '🔥 3 أيام', 'streak_7': '🔥 أسبوع', 'streak_30': '💥 شهر', 'coins_1000': '🪙 1000 كوين',
-    'first_theme': '🎨 أول ثيم', 'themes_5': '🎨 5 ثيمات', 'first_friend': '👥 أول صديق', 'first_team': '⚔️ أول تيم',
-    'comp_first': '🏁 أول مسابقة', 'box_first': '📦 أول صندوق', 'level_10': '📈 مستوى 10', 'level_50': '📊 مستوى 50',
-    'night_owl': '🦉 بومة الليل', 'speedster': '⚡ سريع', 'completionist': '👑 كامل'
+    ar: {
+      'first_quiz': '🎯 أول اختبار', 'quiz_10': '📝 10 اختبارات', 'quiz_50': '📋 50 اختبار', 'quiz_100': '📚 100 اختبار',
+      'quiz_500': '📖 500 اختبار', 'quiz_1000': '🎓 1000 اختبار', 'correct_10': '✅ 10 صح', 'correct_50': '👍 50 صح',
+      'correct_100': '💯 100 صح', 'correct_500': '🔥 500 صح', 'correct_1000': '⭐ 1000 صح', 'perfect_quiz': '🎯 اختبار كامل',
+      'streak_3': '🔥 3 أيام', 'streak_7': '🔥 أسبوع', 'streak_30': '💥 شهر', 'coins_1000': '🪙 1000 كوين',
+      'first_theme': '🎨 أول ثيم', 'themes_5': '🎨 5 ثيمات', 'first_friend': '👥 أول صديق', 'first_team': '⚔️ أول تيم',
+      'comp_first': '🏁 أول مسابقة', 'box_first': '📦 أول صندوق', 'level_10': '📈 مستوى 10', 'level_50': '📊 مستوى 50',
+      'night_owl': '🦉 بومة الليل', 'speedster': '⚡ سريع', 'completionist': '👑 كامل',
+      'avatar_first': '🖼️ أول أفاتار', 'avatars_5': '🎭 5 أفاتارات', 'birthday': '🎂 عيد ميلاد',
+      'box_10': '📦 10 صناديق', 'box_50': '📦 50 صندوق', 'box_100': '📦 100 صندوق', 'box_legendary': '📦 صندوق أسطوري',
+      'coins_100': '🪙 100 كوين', 'coins_10000': '🪙 10K كوين', 'coins_100000': '🪙 100K كوين', 'coins_1000000': '🪙 مليون كوين',
+      'coins_5000': '🪙 5000 كوين', 'coins_50000': '🪙 50K كوين', 'coins_500000': '🪙 500K كوين',
+      'coins_spend_10000': '💸 صرفت 10K', 'coins_spend_100000': '💸 صرفت 100K',
+      'comp_10': '🏁 10 مسابقات', 'comp_50': '🏁 50 مسابقة', 'comp_champion': '🏆 بطل', 'comp_finalist': '🥈 في النهائي',
+      'comp_top1_10': '🥇 الأول 10 مرات', 'comp_top3': '🥉 توب 3', 'comp_win': '🏅 فوز مسابقة',
+      'correct_5000': '⭐ 5000 صح', 'correct_10000': '💫 10000 صح', 'custom_theme': '🎨 ثيم مخصص',
+      'early_bird': '🌅 بكري', 'first_1000_xp': '✨ أول 1000 XP', 'first_legendary': '💎 أول أسطورية', 'first_match': '🎮 أول ماتش',
+      'friends_5': '👥 5 أصدقاء', 'friends_10': '👥 10 أصدقاء', 'friends_25': '👥 25 صديق', 'friends_50': '👥 50 صديق',
+      'item_first': '🧰 أول أداة', 'items_50': '🧰 50 أداة', 'items_100': '🧰 100 أداة',
+      'leaderboard_top1': '🏆 توب 1 ليدر', 'legendary_5': '💎 5 أسطوريات', 'legendary_all': '💎 كل الأسطوريات',
+      'level_25': '📈 مستوى 25', 'level_100': '📈 مستوى 100', 'login_100': '📅 100 يوم دخول', 'login_365': '📅 سنة دخول',
+      'lucky_7': '🍀 حظ 7', 'matches_50': '🎮 50 ماتش', 'perfect_10': '🎯 10 اختبارات كاملة',
+      'play_30days': '📅 30 يوم لعب', 'play_100days': '📅 100 يوم لعب', 'ramadan': '🌙 رمضان', 'sniper': '🎯 قناص',
+      'social_5': '🤝 اجتماعي', 'streak_14': '🔥 أسبوعين', 'streak_50': '🔥 50 يوم', 'streak_60': '🔥 60 يوم',
+      'streak_100': '🔥 100 يوم', 'streak_365': '🔥 سنة', 'streak_break_1': '💔 كسرت ستريك', 'streak_save': '🛟 نجات ستريك',
+      'team_leader': '⚔️ قائد تيم', 'team_top1': '🏅 تيم توب 1', 'themes_10': '🎨 10 ثيمات', 'themes_20': '🎨 20 ثيم',
+      'themes_30': '🎨 30 ثيم', 'themes_all': '🎨 كل الثيمات', 'xp_1000': '🚀 1000 XP', 'xp_10000': '🚀 10000 XP',
+      '✨ مبتدئ XP': '✨ مبتدئ XP', '🎯 قناص': '🎯 قناص', '👑 امبراطور': '👑 امبراطور', '👑 غني': '👑 غني',
+      '👶 أول خطوة': '👶 أول خطوة', '😈 عصيّ على القراءة': '😈 عصيّ على القراءة', '🚀 جامع XP': '🚀 جامع XP',
+      '🤵 مبتدئ': '🤵 مبتدئ', '🥷 أول خطوة': '🥷 أول خطوة', '🦋 اجتماعي': '🦋 اجتماعي'
+    },
+    en: {
+      'first_quiz': '🎯 First Quiz', 'quiz_10': '📝 10 Quizzes', 'quiz_50': '📋 50 Quizzes', 'quiz_100': '📚 100 Quizzes',
+      'quiz_500': '📖 500 Quizzes', 'quiz_1000': '🎓 1000 Quizzes', 'correct_10': '✅ 10 Correct', 'correct_50': '👍 50 Correct',
+      'correct_100': '💯 100 Correct', 'correct_500': '🔥 500 Correct', 'correct_1000': '⭐ 1000 Correct', 'perfect_quiz': '🎯 Perfect Quiz',
+      'streak_3': '🔥 3 Days', 'streak_7': '🔥 A Week', 'streak_30': '💥 A Month', 'coins_1000': '🪙 1000 Coins',
+      'first_theme': '🎨 First Theme', 'themes_5': '🎨 5 Themes', 'first_friend': '👥 First Friend', 'first_team': '⚔️ First Team',
+      'comp_first': '🏁 First Contest', 'box_first': '📦 First Box', 'level_10': '📈 Level 10', 'level_50': '📊 Level 50',
+      'night_owl': '🦉 Night Owl', 'speedster': '⚡ Speedy', 'completionist': '👑 Completionist',
+      'avatar_first': '🖼️ First Avatar', 'avatars_5': '🎭 5 Avatars', 'birthday': '🎂 Birthday',
+      'box_10': '📦 10 Boxes', 'box_50': '📦 50 Boxes', 'box_100': '📦 100 Boxes', 'box_legendary': '📦 Legendary Box',
+      'coins_100': '🪙 100 Coins', 'coins_10000': '🪙 10K Coins', 'coins_100000': '🪙 100K Coins', 'coins_1000000': '🪙 1M Coins',
+      'coins_5000': '🪙 5000 Coins', 'coins_50000': '🪙 50K Coins', 'coins_500000': '🪙 500K Coins',
+      'coins_spend_10000': '💸 Spent 10K', 'coins_spend_100000': '💸 Spent 100K',
+      'comp_10': '🏁 10 Contests', 'comp_50': '🏁 50 Contests', 'comp_champion': '🏆 Champion', 'comp_finalist': '🥈 Finalist',
+      'comp_top1_10': '🥇 Top 1 × 10', 'comp_top3': '🥉 Top 3', 'comp_win': '🏅 Contest Win',
+      'correct_5000': '⭐ 5000 Correct', 'correct_10000': '💫 10000 Correct', 'custom_theme': '🎨 Custom Theme',
+      'early_bird': '🌅 Early Bird', 'first_1000_xp': '✨ First 1000 XP', 'first_legendary': '💎 First Legendary', 'first_match': '🎮 First Match',
+      'friends_5': '👥 5 Friends', 'friends_10': '👥 10 Friends', 'friends_25': '👥 25 Friends', 'friends_50': '👥 50 Friends',
+      'item_first': '🧰 First Power-up', 'items_50': '🧰 50 Power-ups', 'items_100': '🧰 100 Power-ups',
+      'leaderboard_top1': '🏆 Leaderboard #1', 'legendary_5': '💎 5 Legendaries', 'legendary_all': '💎 All Legendaries',
+      'level_25': '📈 Level 25', 'level_100': '📈 Level 100', 'login_100': '📅 100 Logins', 'login_365': '📅 A Year of Logins',
+      'lucky_7': '🍀 Lucky 7', 'matches_50': '🎮 50 Matches', 'perfect_10': '🎯 10 Perfect Quizzes',
+      'play_30days': '📅 30 Days Played', 'play_100days': '📅 100 Days Played', 'ramadan': '🌙 Ramadan', 'sniper': '🎯 Sniper',
+      'social_5': '🤝 Social', 'streak_14': '🔥 2 Weeks', 'streak_50': '🔥 50 Days', 'streak_60': '🔥 60 Days',
+      'streak_100': '🔥 100 Days', 'streak_365': '🔥 A Year', 'streak_break_1': '💔 Streak Broken', 'streak_save': '🛟 Streak Saved',
+      'team_leader': '⚔️ Team Leader', 'team_top1': '🏅 Team #1', 'themes_10': '🎨 10 Themes', 'themes_20': '🎨 20 Themes',
+      'themes_30': '🎨 30 Themes', 'themes_all': '🎨 All Themes', 'xp_1000': '🚀 1000 XP', 'xp_10000': '🚀 10000 XP',
+      '✨ مبتدئ XP': '✨ XP Rookie', '🎯 قناص': '🎯 Sniper', '👑 امبراطور': '👑 Emperor', '👑 غني': '👑 Rich',
+      '👶 أول خطوة': '👶 First Step', '😈 عصيّ على القراءة': '😈 Rebel', '🚀 جامع XP': '🚀 XP Collector',
+      '🤵 مبتدئ': '🤵 Rookie', '🥷 أول خطوة': '🥷 First Step', '🦋 اجتماعي': '🦋 Social'
+    }
   };
+  const achName = (id) => (achievementsMap[currentLang] || achievementsMap.ar)[id] || id;
 
   const themeNames = {
-    'vibrant_synth': 'موجة اصطناعية', 'vibrant_aurora': 'شفق قطبي', 'vibrant_cosmic': 'ألوان كونية',
-    'space_nebula': 'سديم أزرق', 'nature_sunset': 'غروب دافئ', 'nature_forest': 'غابة خضراء',
-    'cyber_neon': 'مدينة النيون', 'cyber_tokyo': 'شوارع طوكيو', 'tech_neon': 'إضاءة نيون',
-    'fan_magic': 'غابة سحرية', 'abs_liquid': 'ألوان سائلة', 'vibrant_retro': 'ريترو 80s',
-    'pastel_dream': 'حلم مبهج', 'golden_hour': 'الساعة الذهبية', 'ocean_blue': 'أعماق زرقاء',
-    'default': 'الافتراضي'
+    ar: {
+      'vibrant_synth': 'موجة اصطناعية', 'vibrant_aurora': 'شفق قطبي', 'vibrant_cosmic': 'ألوان كونية',
+      'space_nebula': 'سديم أزرق', 'nature_sunset': 'غروب دافئ', 'nature_forest': 'غابة خضراء',
+      'cyber_neon': 'مدينة النيون', 'cyber_tokyo': 'شوارع طوكيو', 'tech_neon': 'إضاءة نيون',
+      'fan_magic': 'غابة سحرية', 'abs_liquid': 'ألوان سائلة', 'vibrant_retro': 'ريترو 80s',
+      'pastel_dream': 'حلم مبهج', 'golden_hour': 'الساعة الذهبية', 'ocean_blue': 'أعماق زرقاء',
+      'default': 'الافتراضي'
+    },
+    en: {
+      'vibrant_synth': 'Synthwave', 'vibrant_aurora': 'Aurora', 'vibrant_cosmic': 'Cosmic Colors',
+      'space_nebula': 'Blue Nebula', 'nature_sunset': 'Warm Sunset', 'nature_forest': 'Green Forest',
+      'cyber_neon': 'Neon City', 'cyber_tokyo': 'Tokyo Streets', 'tech_neon': 'Neon Lights',
+      'fan_magic': 'Magic Forest', 'abs_liquid': 'Liquid Colors', 'vibrant_retro': 'Retro 80s',
+      'pastel_dream': 'Pastel Dream', 'golden_hour': 'Golden Hour', 'ocean_blue': 'Deep Blue',
+      'default': 'Default'
+    }
   };
+  const themeDisplayName = (id) => (themeNames[currentLang] || themeNames.ar)[id] || id || ((currentLang === 'en') ? 'Custom' : 'مخصص');
 
   window.showAlert = function(title, message) {
       document.getElementById('alertTitle').innerText = title;
@@ -376,11 +481,19 @@
   const translations = {
     ar: { 
       back: "⬅ رجوع", rank: "الرتبة:", points: "نقطة", level: "⭐ المستوى:", coins: "كوينز", uploadLabel: "📷 اختر صورة", saveImg: "حفظ الصورة", removeImg: "🗑️ مسح", friends: "👥 أصدقاء", noFriends: "لسه مفيش أصدقاء.", loading: "جاري التحميل...", visitProfile: "زيارة البروفايل", warnPrefix: "⚠️ تحذير: ", confirmRemove: "هل أنت متأكد من مسح صورتك؟", removedImg: "تم مسح الصورة بنجاح! 🗑️", uploadedImg: "تم رفع الصورة بنجاح! 🎉", errorImg: "فشل رفع الصورة، حاول تاني.", rankPlayer: "👤 لاعب عادي", rankOwner: "👑 الأونر", rankAdmin: "🛡️ أدمن", accuracy: "🎯 دقة التصويب", bestStreak: "🔥 أفضل ستريك", completed: "🎮 كويزات مكتملة", errTitle: "خطأ", successTitle: "تم بنجاح", okBtn: "حسناً", timeline: "📜 أرشيفك الزمني", noEvents: "لا يوجد أحداث بعد. ابدأ اللعب!", achTitle: "🏆 صفحة الإنجازات الكاملة", achDesc: "عشان تشوف الإنجازات المقفولة، تفتح صناديق، أو تستلم ألقاب جديدة.. ادخل هنا.", achBtn: "🎖️ فتح صفحة الإنجازات والمخزون", badgesTitle: "🏅 أوسمة وإنجازات",
-      lootBoxBtn: "🎁 افتح صندوقك اليومي", lootBoxLocked: "⏳ الصندوق مقفول", lootBoxTimerPrefix: "متاح بعد: ", lootBoxOpening: "جاري الفتح... 🎁", lootBoxCongrats: "🎉 مبروك!", lootBoxResult: "لقد فتحت الصندوق وحصلت على:\n", rewardCoins50: "🪙 50 كوينز!", rewardCoins100: "🪙 100 كوينز!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 إطار ناري أسطوري!", lootBoxError: "حدث خطأ أثناء فتح الصندوق.", h: "س", m: "د", s: "ث"
+      lootBoxBtn: "🎁 افتح صندوقك اليومي", lootBoxLocked: "⏳ الصندوق مقفول", lootBoxTimerPrefix: "متاح بعد: ", lootBoxOpening: "جاري الفتح... 🎁", lootBoxCongrats: "🎉 مبروك!", lootBoxResult: "لقد فتحت الصندوق وحصلت على:\n", rewardCoins50: "🪙 50 كوينز!", rewardCoins100: "🪙 100 كوينز!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 إطار ناري أسطوري!", lootBoxError: "حدث خطأ أثناء فتح الصندوق.", h: "س", m: "د", s: "ث",
+      dnaBtn: "🧬 الحمض النووي", achCtrlBtn: "🎖️ الإنجازات والمخزون",
+      alertTitle: "تنبيه", verified: "حساب موثّق",
+      notifPicTitle: "🖼️ صورة جديدة", notifPicBody: "تم تغيير صورة البروفايل بنجاح.",
+      notifBoxTitle: "🎁 صندوق يومي", notifBoxBody: (r) => `لقد فتحت صندوقك اليومي وحصلت على: ${r}`
     },
     en: { 
       back: "⬅ Back", rank: "Rank:", points: "Points", level: "⭐ Level:", coins: "Coins", uploadLabel: "📷 Choose Image", saveImg: "Save Image", removeImg: "🗑️ Remove", friends: "👥 Friends of", noFriends: "No friends yet.", loading: "Loading...", visitProfile: "Visit Profile", warnPrefix: "⚠️ Warning: ", confirmRemove: "Are you sure you want to remove your picture?", removedImg: "Image removed successfully! 🗑️", uploadedImg: "Image uploaded successfully! 🎉", errorImg: "Failed to upload image, try again.", rankPlayer: "👤 Normal Player", rankOwner: "👑 Owner", rankAdmin: "🛡️ Admin", accuracy: "🎯 Accuracy", bestStreak: "🔥 Best Streak", completed: "🎮 Quizzes Completed", errTitle: "Error", successTitle: "Success", okBtn: "OK", timeline: "📜 Your Timeline", noEvents: "No events yet. Start playing!", achTitle: "🏆 Full Achievements Page", achDesc: "To see locked achievements, open boxes, or claim new titles.. go here.", achBtn: "🎖️ Open Achievements & Inventory", badgesTitle: "🏅 Badges & Achievements",
-      lootBoxBtn: "🎁 Open Daily Box", lootBoxLocked: "⏳ Box Locked", lootBoxTimerPrefix: "Available after: ", lootBoxOpening: "Opening... 🎁", lootBoxCongrats: "🎉 Congratulations!", lootBoxResult: "You opened the box and got:\n", rewardCoins50: "🪙 50 Coins!", rewardCoins100: "🪙 100 Coins!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 Legendary Fire Frame!", lootBoxError: "An error occurred while opening the box.", h: "h", m: "m", s: "s"
+      lootBoxBtn: "🎁 Open Daily Box", lootBoxLocked: "⏳ Box Locked", lootBoxTimerPrefix: "Available after: ", lootBoxOpening: "Opening... 🎁", lootBoxCongrats: "🎉 Congratulations!", lootBoxResult: "You opened the box and got:\n", rewardCoins50: "🪙 50 Coins!", rewardCoins100: "🪙 100 Coins!", rewardXp100: "✨ 100 XP!", rewardXp200: "✨ 200 XP!", rewardFrame: "🔥 Legendary Fire Frame!", lootBoxError: "An error occurred while opening the box.", h: "h", m: "m", s: "s",
+      dnaBtn: "🧬 Player DNA", achCtrlBtn: "🎖️ Achievements & Inventory",
+      alertTitle: "Alert", verified: "Verified Account",
+      notifPicTitle: "🖼️ New Picture", notifPicBody: "Profile picture changed successfully.",
+      notifBoxTitle: "🎁 Daily Box", notifBoxBody: (r) => `You opened your daily box and got: ${r}`
     }
   };
 
@@ -406,11 +519,20 @@
       document.getElementById('streakLabel').innerText = t.bestStreak;
       document.getElementById('compLabel').innerText = t.completed;
       document.getElementById('alertOkBtn').innerText = t.okBtn;
+      document.getElementById('alertTitle').innerText = t.alertTitle;
       
       document.getElementById('achTitleTxt').innerText = t.achTitle;
       document.getElementById('achDescTxt').innerText = t.achDesc;
       document.getElementById('achBtnTxt').innerText = t.achBtn;
       document.getElementById('badgesTitle').innerText = t.badgesTitle;
+      
+      // زراير الشريط العلوي + نصوص التحميل
+      document.getElementById('dnaBtn').innerText = t.dnaBtn;
+      document.getElementById('achCtrlBtn').innerText = t.achCtrlBtn;
+      const loadingFriends = document.getElementById('loadingFriendsTxt');
+      if (loadingFriends) loadingFriends.innerText = t.loading;
+      const loadingTimeline = document.getElementById('loadingTimelineTxt');
+      if (loadingTimeline) loadingTimeline.innerText = t.loading;
       
       if (profileUser.toLowerCase() === loggedInUser.toLowerCase() && document.getElementById('lootBoxContainer').style.display !== 'none') {
           checkLootBoxTimer(currentUserData);
@@ -426,13 +548,15 @@
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
       localStorage.setItem('lang', currentLang);
       applyLanguage();
+      // نعيد رسم اللي بيتجمع وقت التحميل (أوسمة/ثيم/لقب) باللغة الجديدة
+      if (Object.keys(currentUserData).length) loadProfileData().catch(() => {});
   }
 
   function bootstrapProfile() {
       const displayName = profileUser.charAt(0).toUpperCase() + profileUser.slice(1);
       
       window.get(window.ref(window.db, 'verified_users/' + profileUser.toLowerCase())).then(vSnap => {
-          const badge = vSnap.exists() ? ' <span class="verified-badge" title="Verified Account">✓</span>' : '';
+          const badge = vSnap.exists() ? ` <span class="verified-badge" title="${translations[currentLang].verified}">✓</span>` : '';
           document.getElementById('userNameText').innerHTML = displayName + badge;
           document.getElementById('friendsNameDisplay').innerText = displayName;
       }).catch(() => {
@@ -498,13 +622,13 @@
           if (userData.currentTitle) {
               document.getElementById('equippedTitleBox').style.display = 'inline-flex';
               const titleId = userData.currentTitle;
-              document.getElementById('equippedTitleName').innerText = titlesMap[titleId] || titleId;
+              document.getElementById('equippedTitleName').innerText = titleName(titleId);
           }
 
           const activeThemeSnap = getUser(9);
           if (activeThemeSnap && activeThemeSnap.exists()) {
               const themeData = activeThemeSnap.val();
-              const themeName = themeNames[themeData.presetId] || themeData.presetId || 'مخصص';
+              const themeName = themeDisplayName(themeData.presetId);
               document.getElementById('themeBox').style.display = 'inline-flex';
               document.getElementById('equippedThemeName').innerText = themeName;
           }
@@ -516,7 +640,7 @@
           const badgesSection = document.getElementById('badgesSection');
           
           let allTags = new Set();
-          if (oldAchData) Object.keys(oldAchData).forEach(id => { if (oldAchData[id]) allTags.add(achievementsMap[id] || id); });
+          if (oldAchData) Object.keys(oldAchData).forEach(id => { if (oldAchData[id]) allTags.add(id); });
           if (badgesData) Object.keys(badgesData).forEach(name => allTags.add(name));
 
           if (allTags.size > 0) {
@@ -529,9 +653,10 @@
               const remainingCount = tagsArray.length - MAX_DISPLAY;
 
               displayedTags.forEach(tag => {
-                  const parts = tag.split(' ');
+                  const full = achName(tag); // مترجم حسب اللغة الحالية
+                  const parts = full.split(' ');
                   const icon = parts.length > 1 ? parts[0] : '🏅';
-                  const text = parts.length > 1 ? parts.slice(1).join(' ') : tag;
+                  const text = parts.length > 1 ? parts.slice(1).join(' ') : full;
                   gridHtml += `<div class="ach-item"><span class="ach-icon">${icon}</span><span>${text}</span></div>`;
               });
 
@@ -761,7 +886,7 @@
       if (data.success) {
           await window.set(window.ref(window.db, 'users_data/' + profileUser.toLowerCase() + '/profilePic'), data.data.url);
           if (window.triggerNotification) {
-              window.triggerNotification(profileUser, "🖼️ صورة جديدة", "تم تغيير صورة البروفايل بنجاح.", "success");
+              window.triggerNotification(profileUser, t.notifPicTitle, t.notifPicBody, "success");
           }
           showAlert(t.successTitle, t.uploadedImg);
           btn.style.display = 'none';
@@ -863,12 +988,14 @@
               updates[`users_data/${user}/xp`] = (xpSnap.exists() ? xpSnap.val() : 0) + randomReward.amount;
           } else if (randomReward.type === 'frame') {
               updates[`users_data/${user}/profileFrame`] = 'fire'; 
+              // طبّق الفريم فوراً على الصورة — من غير ما تعمل refresh
+              document.getElementById('userAvatar').classList.add('fire-frame');
           }
 
           await window.update(window.ref(window.db), updates);
           
           if (window.triggerNotification) {
-              window.triggerNotification(user, "🎁 صندوق يومي", `لقد فتحت صندوقك اليومي وحصلت على: ${randomReward.text}`, "warning");
+              window.triggerNotification(user, t.notifBoxTitle, t.notifBoxBody(randomReward.text), "warning");
           }
 
           confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
