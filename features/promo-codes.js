@@ -8,22 +8,25 @@ import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/fire
 const FB = { apiKey: "AIzaSyBmyW4tZGJfcHJ4jKSD3_6hebZK58Y3jXo", authDomain: "quiz-hub-app-f4cd0.firebaseapp.com", databaseURL: "https://quiz-hub-app-f4cd0-default-rtdb.firebaseio.com", projectId: "quiz-hub-app-f4cd0", storageBucket: "quiz-hub-app-f4cd0.firebasestorage.app", messagingSenderId: "282772179392", appId: "1:282772179392:web:64646d757592b29ff3a025" };
 const db = getDatabase(getApps().length ? getApps()[0] : initializeApp(FB));
 const CU = (localStorage.getItem('loggedInUser') || '').toLowerCase();
+/* ترجمة حسب لغة الموقع (data-ar/data-en system) */
+const SITE_LANG = () => localStorage.getItem('lang') || 'ar';
+const L = (ar, en) => SITE_LANG() === 'en' ? en : ar;
 
 export async function redeemCode(code) {
-  if (!CU) return { error: 'سجل دخول الأول' };
+  if (!CU) return { error: L('سجل دخول الأول', 'Log in first') };
   code = code.trim().toUpperCase();
-  if (!code) return { error: 'اكتب الكود' };
+  if (!code) return { error: L('اكتب الكود', 'Enter a code') };
 
   const codeSnap = await get(ref(db, `promo_codes/${code}`));
-  if (!codeSnap.exists()) return { error: '❌ الكود غير صحيح' };
+  if (!codeSnap.exists()) return { error: L('❌ الكود غير صحيح', '❌ Invalid code') };
   const promo = codeSnap.val();
 
-  if (!promo.active) return { error: '❌ الكود متوقف' };
-  if (promo.expiresAt && Date.now() > promo.expiresAt) return { error: '❌ الكود انتهت صلاحيته' };
-  if (promo.usedCount >= promo.maxUses) return { error: '❌ الكود استُنفد' };
+  if (!promo.active) return { error: L('❌ الكود متوقف', '❌ Code is disabled') };
+  if (promo.expiresAt && Date.now() > promo.expiresAt) return { error: L('❌ الكود انتهت صلاحيته', '❌ Code expired') };
+  if (promo.usedCount >= promo.maxUses) return { error: L('❌ الكود استُنفد', '❌ Code fully used') };
 
   const myRedemptions = await get(ref(db, `redeemed_codes/${CU}/${code}`));
-  if (myRedemptions.exists()) return { error: '❌ استخدمت الكود ده قبل كده' };
+  if (myRedemptions.exists()) return { error: L('❌ استخدمت الكود ده قبل كده', '❌ You already used this code') };
 
   // تطبيق المكافأة
   const updates = {};
@@ -58,7 +61,7 @@ export function renderPromoSection(container) {
     <div class="promo-section" style="background:transparent; border:none; padding:0; margin:0;">
       <div class="promo-input-row">
         <input type="text" class="promo-input" id="promo-code-input" placeholder="PROMO2026" maxlength="30">
-        <button class="promo-btn" onclick="window._redeemPromo()">🎁 استخدم</button>
+        <button class="promo-btn" onclick="window._redeemPromo()" data-ar="🎁 استخدم" data-en="🎁 Use">🎁 ${L('استخدم', 'Use')}</button>
       </div>
     </div>
   `;
@@ -67,11 +70,11 @@ export function renderPromoSection(container) {
 window._redeemPromo = async () => {
   const input = document.getElementById('promo-code-input');
   const code = input.value.trim();
-  if (!code) return showToast('اكتب الكود', 'error');
+  if (!code) return showToast(L('اكتب الكود', 'Enter a code'), 'error');
   const r = await redeemCode(code);
   if (r.error) return showToast(r.error, 'error');
   input.value = '';
-  showToast(`🎉 مبروك! تم استلام الهدية بنجاح`, 'gold');
+  showToast(L('🎉 مبروك! تم استلام الهدية بنجاح', '🎉 Congrats! Gift received successfully'), 'gold');
 };
 
 function showToast(msg, type = 'success') {
