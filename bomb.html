@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💣 القنبلة الموقوتة - Plot Twist</title>
+<link rel="icon" type="image/png" href="pic/Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pwa-native.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root { --bomb-orange: #ff6600; --bomb-red: #ff0000; --bomb-bg: #0a0a0a; --bomb-card: #111; --bomb-gold: #ffd700; }
+  body { background: radial-gradient(circle at center, #1a0a00 0%, #0a0a0a 70%); color: #eee; font-family: 'Cairo', sans-serif; min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
+
+  .top-buttons-container { position: fixed; top: 20px; left: 20px; display: flex; gap: 10px; z-index: 999; }
+  .top-buttons-container .back-btn { position: static !important; padding: 8px 15px; background: #333; color: #fff; border: 2px solid #555; border-radius: 8px; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'Cairo'; transition: 0.3s; }
+  .top-buttons-container .back-btn:hover { background: var(--bomb-orange); border-color: var(--bomb-orange); }
+
+  .container { max-width: 800px; width: 100%; background: #111; border: 2px solid #5a3200; border-radius: 15px; padding: 25px; margin: 20px 0; box-sizing: border-box; }
+  h1 { color: var(--bomb-orange); text-align: center; margin-bottom: 15px; font-size: 32px; text-shadow: 0 0 15px rgba(255,102,0,0.5); }
+  h2 { color: #fff; text-align: center; margin-bottom: 20px; font-size: 24px; }
+  p { color: #aaa; text-align: center; margin-bottom: 20px; font-size: 15px; }
+
+  .btn { padding: 14px; width: 100%; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; font-size: 17px; cursor: pointer; margin-bottom: 12px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .btn-primary { background: linear-gradient(135deg, #ff6600, #cc3300); color: #fff; }
+  .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,102,0,0.5); }
+  .btn-info { background: #0088cc; color: #fff; }
+  .btn-info:hover { background: #006ba3; }
+  .btn-danger { background: #8b0000; color: #fff; }
+  .btn-secondary { background: #333; color: #fff; border: 1px solid #555; }
+  .btn-secondary:hover { background: #444; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .code-display { font-size: 42px; text-align: center; padding: 20px; background: #000; border: 3px dashed var(--bomb-orange); border-radius: 12px; letter-spacing: 8px; font-family: monospace; color: #fff; margin: 15px 0; }
+  .players-list { background: #000; border-radius: 10px; padding: 12px; margin-bottom: 15px; max-height: 200px; overflow-y: auto; border: 1px solid #333; }
+  .player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-bottom: 1px solid #222; color: #eee; font-size: 15px; }
+  .player-item:last-child { border-bottom: none; }
+
+  .input-group { margin-bottom: 15px; }
+  .input-group label { display: block; margin-bottom: 6px; color: #aaa; font-size: 14px; }
+  .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #444; background: #000; color: #fff; font-family: 'Cairo'; font-size: 16px; text-align: center; outline: none; box-sizing: border-box; }
+  .input-group input:focus { border-color: var(--bomb-orange); box-shadow: 0 0 10px rgba(255,102,0,0.3); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .status-text { color: #aaa; font-size: 14px; margin-bottom: 12px; font-weight: bold; text-align: center; }
+  .coins-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,215,0,0.1); border: 2px solid var(--bomb-gold); color: var(--bomb-gold); padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 16px; margin-bottom: 15px; }
+
+  /* ═══ حلبة القنبلة ═══ */
+  .bomb-arena { position: relative; width: 100%; max-width: 520px; height: 400px; margin: 10px auto 15px; }
+  .bomb-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 92px; line-height: 1; filter: drop-shadow(0 0 25px rgba(255,102,0,0.7)); z-index: 2; animation: bombPulse 1s infinite alternate; transition: filter 0.4s; }
+  .bomb-center.danger { animation-duration: 0.35s; filter: drop-shadow(0 0 35px rgba(255,0,0,0.95)); }
+  .bomb-center.critical { animation-duration: 0.15s; filter: drop-shadow(0 0 45px #ff0000) brightness(1.3); }
+  @keyframes bombPulse { from { transform: translate(-50%,-50%) scale(1); } to { transform: translate(-50%,-50%) scale(1.12); } }
+
+  .seat { position: absolute; transform: translate(-50%,-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 3; transition: 0.3s; }
+  .seat-avatar { width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(135deg, #2a2a2a, #111); border: 3px solid #444; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: #fff; transition: 0.3s; }
+  .seat-name { font-size: 12px; font-weight: bold; color: #ccc; white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+  .seat.active .seat-avatar { border-color: var(--bomb-orange); box-shadow: 0 0 18px rgba(255,102,0,0.8), 0 0 40px rgba(255,102,0,0.4); transform: scale(1.12); }
+  .seat.active .seat-name { color: var(--bomb-orange); }
+  .seat.frozen .seat-avatar { border-color: #00bcd4; box-shadow: 0 0 18px rgba(0,188,212,0.7); }
+  .seat.frozen .seat-name::after { content: ' ❄️'; }
+  .seat.dead .seat-avatar { opacity: 0.25; filter: grayscale(1); border-color: #333; }
+  .seat.dead { opacity: 0.4; }
+  .seat.dead .seat-name::after { content: ' 💀'; }
+  .seat.me .seat-avatar { border-style: dashed; }
+
+  /* لوحة السؤال لصاحب القنبلة */
+  .q-panel { background: #000; border: 2px solid var(--bomb-orange); border-radius: 14px; padding: 20px; margin-bottom: 15px; box-shadow: 0 0 25px rgba(255,102,0,0.2); }
+  .q-panel.frozen { border-color: #00bcd4; box-shadow: 0 0 25px rgba(0,188,212,0.3); }
+  .q-title { font-size: 20px; font-weight: 900; color: #fff; text-align: center; margin-bottom: 15px; line-height: 1.5; }
+  .q-hint { text-align: center; color: var(--bomb-gold); font-size: 13px; margin-bottom: 12px; font-weight: bold; }
+  .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+  .option { background: #1a1a1a; border: 1px solid #333; padding: 13px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 15px; text-align: center; color: #eee; }
+  .option:hover { background: #2d1a0a; border-color: var(--bomb-orange); }
+  .option:active { transform: scale(0.97); }
+
+  .spectate-box { text-align: center; background: #000; border: 1px solid #333; border-radius: 12px; padding: 18px; margin-bottom: 15px; }
+  .spectate-box .big { font-size: 18px; font-weight: 900; color: var(--bomb-gold); }
+
+  /* سجل الأحداث */
+  .log-box { background: #000; border: 1px solid #333; border-radius: 10px; padding: 10px 14px; max-height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .log-line { color: #bbb; }
+  .log-line b { color: var(--bomb-gold); }
+
+  /* 💥 الانفجار */
+  .explosion-overlay { position: fixed; inset: 0; z-index: 99999; display: none; align-items: center; justify-content: center; pointer-events: none; }
+  .explosion-overlay.active { display: flex; }
+  .explosion-flash { position: absolute; inset: 0; background: radial-gradient(circle, rgba(255,200,50,0.95) 0%, rgba(255,80,0,0.6) 40%, rgba(0,0,0,0) 75%); animation: flashFade 1s forwards; }
+  .explosion-emoji { font-size: 130px; animation: boomPop 1s forwards; z-index: 2; }
+  @keyframes flashFade { 0% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes boomPop { 0% { transform: scale(0.2); opacity: 0; } 25% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+  body.shake { animation: screenShake 0.6s; }
+  @keyframes screenShake { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-12px, 6px); } 30% { transform: translate(10px, -8px); } 45% { transform: translate(-8px, -6px); } 60% { transform: translate(8px, 6px); } 75% { transform: translate(-5px, 3px); } }
+
+  .result-screen { text-align: center; padding: 40px 20px; background: #000; border-radius: 15px; border: 2px solid var(--bomb-gold); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .result-title { font-size: 34px; font-weight: 900; color: #fff; }
+  .winner-badge { display: inline-block; background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; padding: 15px 30px; border-radius: 12px; font-weight: 900; font-size: 24px; box-shadow: 0 0 30px rgba(255,215,0,0.5); }
+  .reward-badge { font-size: 22px; color: var(--bomb-gold); font-weight: 900; }
+  .eliminated-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 6px; }
+  .elim-row { background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #ccc; }
+</style>
+</head>
+<body>
+<div id="stars-bg"></div>
+<div class="explosion-overlay" id="explosionOverlay"><div class="explosion-flash"></div><div class="explosion-emoji">💥</div></div>
+
+<div class="top-buttons-container">
+  <a href="index.html" id="bombBackBtn" class="back-btn" data-ar="⬅ رجوع" data-en="⬅ Back">⬅ رجوع</a>
+</div>
+
+<div class="coins-badge">🪙 <span id="headerCoins">0</span> <span data-ar="عملة" data-en="coins">عملة</span></div>
+
+<!-- شاشة الإعداد -->
+<div id="setupScreen" class="container screen active">
+  <h1 data-ar="💣 القنبلة الموقوتة" data-en="💣 Pass the Bomb">💣 القنبلة الموقوتة</h1>
+  <p data-ar="مرر القنبلة قبل ما تنفجر في إيدك! من 4 لـ 6 لاعبين — آخر واحد يصمد يكسب 400 🪙 + 100 XP!" data-en="Pass the bomb before it blows up in your hands! 4 to 6 players — last one standing wins 400 🪙 + 100 XP!">مرر القنبلة قبل ما تنفجر في إيدك! من 4 لـ 6 لاعبين — آخر واحد يصمد يكسب 400 🪙 + 100 XP!</p>
+  <div class="input-group">
+    <label data-ar="اسمك:" data-en="Your name:">اسمك:</label>
+    <input type="text" id="playerName" value="" data-ar-placeholder="أدخل اسمك" data-en-placeholder="Enter your name">
+  </div>
+  <button class="btn btn-primary" onclick="window._createBombRoom()" data-ar="🎮 إنشاء غرفة" data-en="🎮 Create Room">🎮 إنشاء غرفة</button>
+  <div style="text-align:center;color:#aaa;margin:8px 0;" data-ar="— أو —" data-en="— or —">— أو —</div>
+  <input type="text" id="joinCode" maxlength="6" data-ar-placeholder="XXXXXX" data-en-placeholder="XXXXXX" style="width:100%;padding:12px;border-radius:8px;border:1px solid #555;background:#000;color:#fff;font-family:Cairo;text-align:center;font-size:18px;letter-spacing:3px;margin-bottom:10px;">
+  <button class="btn btn-info" onclick="window._joinBombRoom()" data-ar="🚪 انضمام بكود" data-en="🚪 Join by Code">🚪 انضمام بكود</button>
+  <button class="btn btn-secondary" id="soundBtn" onclick="window._toggleBombSound()">🔊</button>
+</div>
+
+<!-- شاشة الانتظار -->
+<div id="waitingScreen" class="container screen">
+  <h2 data-ar="⏳ انتظار اللاعبين..." data-en="⏳ Waiting for players...">⏳ انتظار اللاعبين...</h2>
+  <div class="status-text"><span data-ar="كود الغرفة:" data-en="Room code:">كود الغرفة:</span> <span id="roomCodeDisplay" style="color:var(--bomb-gold);"></span></div>
+  <div class="code-display" id="roomCodeBig">------</div>
+  <div class="status-text" data-ar="اللاعبون:" data-en="Players:">اللاعبون:</div>
+  <div class="players-list" id="playersList"></div>
+  <button class="btn btn-secondary" id="addBotBtn" onclick="window._addBombBot()" style="display:none;" data-ar="🤖 إضافة بوت" data-en="🤖 Add Bot">🤖 إضافة بوت</button>
+  <button class="btn btn-danger" id="startGameBtn" onclick="window._startBombGame()" style="display:none;" data-ar="🔥 أشعل الفتيلة (المضيف)" data-en="🔥 Light the Fuse (Host)">🔥 أشعل الفتيلة (المضيف)</button>
+  <p style="color:#666;font-size:13px;" data-ar="محتاجين 4 لاعبين على الأقل — لو لوحدك ضيف بوتات وهتشعل فورًا!" data-en="Need at least 4 players — alone? Add bots and light it up instantly!">محتاجين 4 لاعبين على الأقل — لو لوحدك ضيف بوتات وهتشعل فورًا!</p>
+</div>
+
+<!-- شاشة اللعب -->
+<div id="gameScreen" class="container screen">
+  <div style="text-align:center;margin-bottom:5px;"><span class="status-text" id="roundBadge" style="display:inline-block;background:var(--bomb-orange);color:#fff;padding:5px 16px;border-radius:20px;"></span></div>
+  <div class="bomb-arena" id="bombArena">
+    <div class="bomb-center" id="bombCenter">💣</div>
+  </div>
+  <div id="holderPanel"></div>
+  <div class="log-box" id="bombLog"></div>
+</div>
+
+<!-- شاشة النتيجة -->
+<div id="resultScreen" class="container screen" style="padding-top: 30px;">
+  <div class="result-screen">
+    <div class="result-title" id="resultTitle" data-ar="انتهت اللعبة!" data-en="Game Over!">انتهت اللعبة!</div>
+    <div class="winner-badge" id="winnerBadge">—</div>
+    <div class="reward-badge" id="rewardBadge">+400 🪙 +100 XP</div>
+    <div class="eliminated-list" id="eliminatedList"></div>
+    <button class="btn btn-primary" id="newGameBtn" onclick="window._newBombGame()" style="display:none;max-width:300px;" data-ar="🔄 جولة جديدة" data-en="🔄 New Round">🔄 جولة جديدة</button>
+    <button class="btn btn-secondary" onclick="window.location.href='index.html'" style="max-width:300px;" data-ar="🏠 العودة للرئيسية" data-en="🏠 Back Home">🏠 العودة للرئيسية</button>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script type="module" src="features/bomb-game.js"></script>
+<script type="module" src="theme-engine.js"></script>
+<script type="module" src="notifications.js"></script>
+<script src="pwa-manager.js" defer></script>
+</body>
+</html>
