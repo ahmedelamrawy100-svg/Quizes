@@ -297,12 +297,17 @@
   
   <a href="story.html" class="menu-item" style="color: #a855f7;" data-ar="🏰 وضع القصة" data-en="🏰 Story Mode">🏰 وضع القصة</a>
   <a href="co-op.html" class="menu-item" style="color: #4caf50;" data-ar="🤝 كويز تعاوني" data-en="🤝 Co-op Quiz">🤝 كويز تعاوني</a>
+  <a href="imposter.html" class="menu-item" style="color: #ff0000;" data-ar="🕵️ لعبة الجاسوس" data-en="🕵️ Movie Imposter">🕵️ لعبة الجاسوس</a>
+  <a href="bomb.html" class="menu-item" style="color: #ff6600;" data-ar="💣 القنبلة الموقوتة" data-en="💣 Pass the Bomb">💣 القنبلة الموقوتة</a>
   <a href="avatars.html" class="menu-item" style="color: #e91e63;" data-ar="🎭 الشخصيات" data-en="🎭 Avatars">🎭 الشخصيات</a>
   <a href="market.html" class="menu-item" style="color: #00bcd4;" data-ar="💼 السوق" data-en="💼 Market">💼 السوق</a>
   <a href="season-pass.html" class="menu-item" style="color: #a855f7;" data-ar="🎟️ تذاكر الموسم" data-en="🎟️ Season Pass">🎟️ تذاكر الموسم</a>
   <a href="community-quizzes.html" class="menu-item" style="color: #a855f7;" data-ar="🌐 كويزات المجتمع" data-en="🌐 Community Quizzes">🌐 كويزات المجتمع</a>
   <a href="quiz-builder.html" class="menu-item" style="color: #10b981;" data-ar="🛠️ اعمل كويزك" data-en="🛠️ Create Quiz">🛠️ اعمل كويزك</a>
-  
+  <a href="movie-genie.html" class="menu-item" style="color: #a855f7;" data-ar="🔮 قارئ الأفلام" data-en="🔮 Movie Genie">🔮 قارئ الأفلام</a>
+  <a href="auctions.html" class="menu-item" style="color: #ffd700;" data-ar="🔨 المزاد الحي" data-en="🔨 Live Auctions">🔨 المزاد الحي</a>
+  <a href="card-battle.html" class="menu-item" style="color: #ff5722;" data-ar="⚔️ معركة البطاقات" data-en="⚔️ Card Battle">⚔️ معركة البطاقات</a>
+
   <a href="assistant.html" class="menu-item" data-ar="🤖 المساعد" data-en="🤖 Assistant">🤖 المساعد</a>
   <a href="profile.html" class="menu-item" data-ar="👤 بروفايلي" data-en="👤 Profile">👤 بروفايلي</a>
   <a href="shop.html" class="menu-item" style="color: #ff9800;" data-ar="🛒 المتجر" data-en="🛒 Shop">🛒 المتجر</a>
@@ -398,16 +403,16 @@
 
   <div class="events-dashboard" id="eventsDashboard">
       <div class="event-card glass poll" id="pollCard" style="display: none;">
-          <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #00bcd4; display: flex; align-items: center; gap: 8px;">🗳️ استفتاء مباشر</div>
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #00bcd4; display: flex; align-items: center; gap: 8px;" data-ar="🗳️ استفتاء مباشر" data-en="🗳️ Live Poll">🗳️ استفتاء مباشر</div>
           <h3 id="pollQuestion" style="margin-bottom: 15px; font-size: 16px;"></h3>
           <div class="poll-options" id="pollOptions"></div>
       </div>
 
       <div class="event-card glass contest" id="contestCard" style="display: none;">
-          <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--gold); display: flex; align-items: center; gap: 8px;">🎯 مسابقة نشطة</div>
+          <div style="font-size: 18px; font-weight: bold; margin-bottom: 15px; color: var(--gold); display: flex; align-items: center; gap: 8px;" data-ar="🎯 مسابقة نشطة" data-en="🎯 Active Contest">🎯 مسابقة نشطة</div>
           <div class="contest-details">
               <h3 id="contestName" style="font-size: 18px;"></h3>
-              <p style="color: var(--subtitle-color); font-size: 14px; margin-top: 5px;">الجائزة المقدمة:</p>
+              <p style="color: var(--subtitle-color); font-size: 14px; margin-top: 5px;" data-ar="الجائزة المقدمة:" data-en="Prize:">الجائزة المقدمة:</p>
               <div class="contest-prize" id="contestPrize" style="font-size: 20px; font-weight: bold; color: var(--gold); background: rgba(255,215,0,0.1); padding: 10px; border-radius: 8px; text-align: center; margin-top: 10px; border: 1px dashed var(--gold);"></div>
           </div>
       </div>
@@ -426,7 +431,7 @@
   <!-- البحث الذكي -->
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="ابحث عن كويز، لاعب، أو مجتمع..." data-ar="ابحث عن كويز، لاعب، أو مجتمع..." data-en="Search quizzes, players, or community..." onkeypress="if(event.key==='Enter') window.goToGlobalSearch()">
-    <button onclick="window.goToGlobalSearch()" style="background:var(--gold); color:#000; border:none; border-radius:25px; padding:0 25px; font-family:'Cairo'; font-weight:900; cursor:pointer; font-size:14px; white-space:nowrap;">🔍 بحث ذكي</button>
+    <button onclick="window.goToGlobalSearch()" style="background:var(--gold); color:#000; border:none; border-radius:25px; padding:0 25px; font-family:'Cairo'; font-weight:900; cursor:pointer; font-size:14px; white-space:nowrap;" data-ar="🔍 بحث" data-en="🔍 Search">🔍 بحث</button>
     <a href="assistant.html" class="ai-btn" data-ar="مساعد" data-en="Assistant">🤖</a>
   </div>
 
@@ -506,7 +511,7 @@
 <div id="settingsModal">
   <div class="settings-box">
     <button class="settings-close" onclick="closeSettingsModal()">✖</button>
-    <h2 class="settings-title">⚙️ إعداداتي</h2>
+    <h2 class="settings-title" data-ar="⚙️ إعداداتي" data-en="⚙️ Settings">⚙️ إعداداتي</h2>
 
     <!-- بيانات اللاعب -->
     <div class="settings-profile-box">
@@ -515,35 +520,35 @@
         <div id="settingsUsername" class="settings-username">Loading...</div>
         <div id="settingsStats" class="settings-stats">🪙 0 كوين • ✨ 0 XP</div>
       </div>
-      <a href="profile.html" style="background:var(--blue); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;">البروفايل</a>
+      <a href="profile.html" style="background:var(--blue); color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold;" data-ar="البروفايل" data-en="Profile">البروفايل</a>
     </div>
 
     <!-- كود الخصم -->
     <div style="margin-bottom:20px;">
-      <h3 class="settings-section-title">🎁 كود الخصم (Promo Code)</h3>
+      <h3 class="settings-section-title" data-ar="🎁 كود الخصم (Promo Code)" data-en="🎁 Promo Code">🎁 كود الخصم (Promo Code)</h3>
       <div id="settingsPromoContainer"></div>
     </div>
 
     <!-- التفضيلات (ثيم ولغة) -->
     <div style="margin-bottom:20px;">
-      <h3 class="settings-section-title">🎨 التفضيلات</h3>
+      <h3 class="settings-section-title" data-ar="🎨 التفضيلات" data-en="🎨 Preferences">🎨 التفضيلات</h3>
       <div class="settings-grid-2">
-        <button onclick="toggleTheme()" class="settings-btn">🌓 تغيير الثيم</button>
-        <button onclick="toggleLanguage()" class="settings-btn">🌐 اللغة</button>
+        <button onclick="toggleTheme()" class="settings-btn" data-ar="🌓 تغيير الثيم" data-en="🌓 Change Theme">🌓 تغيير الثيم</button>
+        <button onclick="toggleLanguage()" class="settings-btn" data-ar="🌐 اللغة" data-en="🌐 Language">🌐 اللغة</button>
       </div>
     </div>
 
     <!-- اختصارات سريعة -->
     <div style="margin-bottom:20px;">
-      <h3 class="settings-section-title">🚀 اختصارات سريعة</h3>
+      <h3 class="settings-section-title" data-ar="🚀 اختصارات سريعة" data-en="🚀 Quick Links">🚀 اختصارات سريعة</h3>
       <div class="settings-grid-3">
-        <a href="achievements.html" class="settings-btn">🎖️ إنجازاتي</a>
-        <a href="shop.html" class="settings-btn">🛒 المتجر</a>
-        <a href="daily-quests.html" class="settings-btn">🎯 المهام</a>
+        <a href="achievements.html" class="settings-btn" data-ar="🎖️ إنجازاتي" data-en="🎖️ Achievements">🎖️ إنجازاتي</a>
+        <a href="shop.html" class="settings-btn" data-ar="🛒 المتجر" data-en="🛒 Shop">🛒 المتجر</a>
+        <a href="daily-quests.html" class="settings-btn" data-ar="🎯 المهام" data-en="🎯 Quests">🎯 المهام</a>
       </div>
     </div>
 
-    <button onclick="logoutUser()" class="settings-logout">
+    <button onclick="logoutUser()" class="settings-logout" data-ar="🚪 تسجيل الخروج" data-en="🚪 Logout">
       🚪 تسجيل الخروج
     </button>
   </div>
@@ -649,7 +654,8 @@
           const pollCard = document.getElementById('pollCard');
           if (snap.exists()) {
               currentPoll = snap.val();
-              document.getElementById('pollQuestion').innerText = currentPoll.question;
+              // ترجمة الاستفتاء: question_en/option1_en/option2_en لو موجودة في الداتابيز
+              document.getElementById('pollQuestion').innerText = pollText(currentPoll.question, currentPoll.question_en);
               pollCard.style.display = 'block';
               window.get(window.ref(window.db, 'site_events/active_poll/votes/' + username)).then(voteSnap => {
                   currentUserVote = voteSnap.exists() ? voteSnap.val() : null;
@@ -717,6 +723,11 @@
       });
   }
 
+  /* ترجمة نص الاستفتاء: النسخة الإنجليزية اختيارية (لو مكتوبة في الداتابيز) */
+  function pollText(ar, en) {
+      return (localStorage.getItem('lang') === 'en' && en) ? en : ar;
+  }
+
   function renderPollOptions() {
       if (!currentPoll) return;
       const optionsEl = document.getElementById('pollOptions');
@@ -732,12 +743,12 @@
 
       const btn1 = document.createElement('button');
       btn1.className = 'poll-btn' + (currentUserVote === '1' ? ' voted' : '');
-      btn1.innerHTML = `<span>${currentPoll.option1}</span> <span class="poll-percentage">${p1}% (${votes1})</span>`;
+      btn1.innerHTML = `<span>${pollText(currentPoll.option1, currentPoll.option1_en)}</span> <span class="poll-percentage">${p1}% (${votes1})</span>`;
       btn1.onclick = () => votePoll(1, username);
 
       const btn2 = document.createElement('button');
       btn2.className = 'poll-btn' + (currentUserVote === '2' ? ' voted' : '');
-      btn2.innerHTML = `<span>${currentPoll.option2}</span> <span class="poll-percentage">${p2}% (${votes2})</span>`;
+      btn2.innerHTML = `<span>${pollText(currentPoll.option2, currentPoll.option2_en)}</span> <span class="poll-percentage">${p2}% (${votes2})</span>`;
       btn2.onclick = () => votePoll(2, username);
 
       optionsEl.appendChild(btn1);
@@ -745,7 +756,8 @@
   }
 
   async function votePoll(option, username) {
-      if (currentUserVote) return window.showToast('لقد قمت بالتصويت بالفعل!', 'error');
+      const isEn = localStorage.getItem('lang') === 'en';
+      if (currentUserVote) return window.showToast(isEn ? 'You already voted!' : 'لقد قمت بالتصويت بالفعل!', 'error');
       
       const updates = {};
       updates[`site_events/active_poll/votes1`] = (currentPoll.votes1 || 0) + (option === 1 ? 1 : 0);
@@ -753,7 +765,7 @@
       updates[`site_events/active_poll/votes/${username}`] = String(option);
 
       await window.update(window.ref(window.db), updates);
-      window.showToast('تم تسجيل صوتك بنجاح!');
+      window.showToast(isEn ? 'Your vote was recorded!' : 'تم تسجيل صوتك بنجاح!');
   }
 
   setTimeout(() => { document.getElementById('loadingScreen').style.display = 'none'; }, 100);
@@ -772,7 +784,10 @@
       const data = snap.exists() ? snap.val() : {};
 
       document.getElementById('settingsUsername').innerText = user;
-      document.getElementById('settingsStats').innerText = `🪙 ${data.coins || 0} كوين • ✨ ${data.xp || 0} XP`;
+      const L = localStorage.getItem('lang') || 'ar';
+      document.getElementById('settingsStats').innerText = L === 'en'
+          ? `🪙 ${Number(data.coins) || 0} Coins • ✨ ${Number(data.xp) || 0} XP`
+          : `🪙 ${Number(data.coins) || 0} كوين • ✨ ${Number(data.xp) || 0} XP`;
 
       const avatar = document.getElementById('settingsAvatar');
       if (data.profilePic && data.profilePic.startsWith('http')) {
